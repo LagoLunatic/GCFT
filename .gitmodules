@@ -1,0 +1,4 @@
+[submodule "wwrando"]
+	path = wwrando
+	url = https://github.com/LagoLunatic/wwrando.git
+	branch = master
