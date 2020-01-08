@@ -25,6 +25,7 @@ yaml.Dumper.add_representer(
 from gcft_ui.ui_main import Ui_MainWindow
 
 from wwlib.rarc import RARC
+from wwlib.yaz0 import Yaz0
 from fs_helpers import *
 
 class GCFTWindow(QMainWindow):
@@ -44,6 +45,9 @@ class GCFTWindow(QMainWindow):
     self.ui.actionExtractRARCFile.triggered.connect(self.extract_file_from_rarc)
     self.ui.actionReplaceRARCFile.triggered.connect(self.replace_file_in_rarc)
     
+    self.ui.decompress_yaz0.clicked.connect(self.decompress_yaz0)
+    self.ui.compress_yaz0.clicked.connect(self.compress_yaz0)
+    
     self.load_settings()
     
     self.show()
@@ -62,12 +66,13 @@ class GCFTWindow(QMainWindow):
     with open(self.settings_path, "w") as f:
       yaml.dump(self.settings, f, default_flow_style=False, Dumper=yaml.Dumper)
   
+  
   def import_rarc(self):
     default_dir = None
     if "last_used_folder_for_rarcs" in self.settings:
       default_dir = self.settings["last_used_folder_for_rarcs"]
     
-    rarc_path, selected_filter = QFileDialog.getOpenFileName(self, "Open RARC", default_dir, "RARC Files (*.arc)")
+    rarc_path, selected_filter = QFileDialog.getOpenFileName(self, "Open RARC", default_dir, "RARC files (*.arc)")
     if not rarc_path:
       return
     
@@ -78,7 +83,7 @@ class GCFTWindow(QMainWindow):
     if "last_used_folder_for_rarcs" in self.settings:
       default_dir = self.settings["last_used_folder_for_rarcs"]
     
-    rarc_path, selected_filter = QFileDialog.getSaveFileName(self, "Save RARC", default_dir, "RARC Files (*.arc)")
+    rarc_path, selected_filter = QFileDialog.getSaveFileName(self, "Save RARC", default_dir, "RARC files (*.arc)")
     if not rarc_path:
       return
     
@@ -200,6 +205,67 @@ class GCFTWindow(QMainWindow):
     
     item = self.get_tree_item_by_file(file)
     item.setText(2, "0x%X" % data_len(file.data))
+  
+  
+  def decompress_yaz0(self):
+    default_dir = None
+    if "last_used_folder_for_yaz0" in self.settings:
+      default_dir = self.settings["last_used_folder_for_yaz0"]
+    
+    comp_path, selected_filter = QFileDialog.getOpenFileName(self, "Choose file to decompress", default_dir, "All files (*.arc)")
+    if not comp_path:
+      return
+    
+    with open(comp_path, "rb") as f:
+      comp_data = BytesIO(f.read())
+    if try_read_str(comp_data, 0, 4) != "Yaz0":
+      QMessageBox.warning(self, "Not Yaz0 compressed", "The selected file is not Yaz0 compressed. Cannot decompress.")
+      return
+    
+    decomp_path, selected_filter = QFileDialog.getSaveFileName(self, "Choose where to save decompressed file", default_dir, "All files (*.arc)")
+    if not decomp_path:
+      return
+    
+    decomp_data = Yaz0.decompress(comp_data)
+    
+    with open(decomp_path, "wb") as f:
+      decomp_data.seek(0)
+      f.write(decomp_data.read())
+    
+    self.settings["last_used_folder_for_yaz0"] = os.path.dirname(decomp_path)
+    
+    QMessageBox.information(self, "Decompressed file saved", "Successfully decompressed and saved file.")
+  
+  def compress_yaz0(self):
+    default_dir = None
+    if "last_used_folder_for_yaz0" in self.settings:
+      default_dir = self.settings["last_used_folder_for_yaz0"]
+    
+    decomp_path, selected_filter = QFileDialog.getOpenFileName(self, "Choose file to compress", default_dir, "All files (*.arc)")
+    if not decomp_path:
+      return
+    
+    with open(decomp_path, "rb") as f:
+      decomp_data = BytesIO(f.read())
+    if try_read_str(decomp_data, 0, 4) == "Yaz0":
+      QMessageBox.warning(self, "Already Yaz0 compressed", "The selected file is already Yaz0 compressed. Cannot compress.")
+      return
+    
+    comp_path, selected_filter = QFileDialog.getSaveFileName(self, "Choose where to save compressed file", default_dir, "All files (*.arc)")
+    if not comp_path:
+      return
+    
+    # TODO: progress bar?
+    comp_data = Yaz0.compress(decomp_data)
+    
+    with open(comp_path, "wb") as f:
+      comp_data.seek(0)
+      f.write(comp_data.read())
+    
+    self.settings["last_used_folder_for_yaz0"] = os.path.dirname(comp_path)
+    
+    QMessageBox.information(self, "Compressed file saved", "Successfully compressed and saved file.")
+  
   
   def keyPressEvent(self, event):
     if event.matches(QKeySequence.Copy):

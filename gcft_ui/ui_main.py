@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'main.ui',
 # licensing of 'main.ui' applies.
 #
-# Created: Wed Jan  8 09:43:45 2020
+# Created: Wed Jan  8 09:46:12 2020
 #      by: pyside2-uic  running on PySide2 5.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -39,6 +39,19 @@ class Ui_MainWindow(object):
         self.tabWidget.addTab(self.tab, "")
         self.tab_2 = QtWidgets.QWidget()
         self.tab_2.setObjectName("tab_2")
+        self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.tab_2)
+        self.verticalLayout_3.setObjectName("verticalLayout_3")
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.decompress_yaz0 = QtWidgets.QPushButton(self.tab_2)
+        self.decompress_yaz0.setObjectName("decompress_yaz0")
+        self.horizontalLayout_2.addWidget(self.decompress_yaz0)
+        self.compress_yaz0 = QtWidgets.QPushButton(self.tab_2)
+        self.compress_yaz0.setObjectName("compress_yaz0")
+        self.horizontalLayout_2.addWidget(self.compress_yaz0)
+        self.verticalLayout_3.addLayout(self.horizontalLayout_2)
+        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayout_3.addItem(spacerItem)
         self.tabWidget.addTab(self.tab_2, "")
         self.tab_3 = QtWidgets.QWidget()
         self.tab_3.setObjectName("tab_3")
@@ -69,6 +82,8 @@ class Ui_MainWindow(object):
         self.rarc_files_tree.headerItem().setText(1, QtWidgets.QApplication.translate("MainWindow", "File ID", None, -1))
         self.rarc_files_tree.headerItem().setText(2, QtWidgets.QApplication.translate("MainWindow", "File Size", None, -1))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QtWidgets.QApplication.translate("MainWindow", "RARC Archives", None, -1))
+        self.decompress_yaz0.setText(QtWidgets.QApplication.translate("MainWindow", "Decompress File", None, -1))
+        self.compress_yaz0.setText(QtWidgets.QApplication.translate("MainWindow", "Compress File", None, -1))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QtWidgets.QApplication.translate("MainWindow", "Yaz0 Compression", None, -1))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), QtWidgets.QApplication.translate("MainWindow", "GCM ISOs", None, -1))
         self.actionReplaceRARCFile.setText(QtWidgets.QApplication.translate("MainWindow", "Replace File", None, -1))
