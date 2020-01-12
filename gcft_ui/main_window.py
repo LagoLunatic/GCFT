@@ -216,6 +216,9 @@ class GCFTWindow(QMainWindow):
     if not comp_path:
       return
     
+    self.settings["last_used_folder_for_yaz0"] = os.path.dirname(comp_path)
+    default_dir = self.settings["last_used_folder_for_yaz0"]
+    
     with open(comp_path, "rb") as f:
       comp_data = BytesIO(f.read())
     if try_read_str(comp_data, 0, 4) != "Yaz0":
