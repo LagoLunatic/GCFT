@@ -37,6 +37,8 @@ class GCFTWindow(QMainWindow):
     self.ui.rarc_files_tree.setColumnWidth(0, 300)
     self.ui.export_rarc.setDisabled(True)
     
+    self.ui.tabWidget.currentChanged.connect(self.save_last_used_tab)
+    
     self.ui.import_rarc.clicked.connect(self.import_rarc)
     self.ui.export_rarc.clicked.connect(self.export_rarc)
     
@@ -49,6 +51,9 @@ class GCFTWindow(QMainWindow):
     self.ui.compress_yaz0.clicked.connect(self.compress_yaz0)
     
     self.load_settings()
+    
+    if "last_used_tab_index" in self.settings:
+      self.ui.tabWidget.setCurrentIndex(self.settings["last_used_tab_index"])
     
     self.show()
   
@@ -65,6 +70,9 @@ class GCFTWindow(QMainWindow):
   def save_settings(self):
     with open(self.settings_path, "w") as f:
       yaml.dump(self.settings, f, default_flow_style=False, Dumper=yaml.Dumper)
+  
+  def save_last_used_tab(self, tab_index):
+    self.settings["last_used_tab_index"] = tab_index
   
   
   def import_rarc(self):
