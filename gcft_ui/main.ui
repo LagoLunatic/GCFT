@@ -106,6 +106,40 @@
        <attribute name="title">
         <string>GCM ISOs</string>
        </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QPushButton" name="import_gcm">
+            <property name="text">
+             <string>Import GCM</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="export_gcm">
+            <property name="text">
+             <string>Export GCM</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTreeWidget" name="gcm_files_tree">
+          <column>
+           <property name="text">
+            <string>File Name</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>File Size</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
@@ -128,6 +162,16 @@
    </property>
   </action>
   <action name="actionExtractRARCFile">
+   <property name="text">
+    <string>Extract File</string>
+   </property>
+  </action>
+  <action name="actionReplaceGCMFile">
+   <property name="text">
+    <string>Replace File</string>
+   </property>
+  </action>
+  <action name="actionExtractGCMFile">
    <property name="text">
     <string>Extract File</string>
    </property>

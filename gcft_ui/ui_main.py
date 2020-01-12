@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'main.ui',
 # licensing of 'main.ui' applies.
 #
-# Created: Wed Jan  8 09:46:12 2020
+# Created: Sun Jan 12 10:09:41 2020
 #      by: pyside2-uic  running on PySide2 5.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -55,6 +55,20 @@ class Ui_MainWindow(object):
         self.tabWidget.addTab(self.tab_2, "")
         self.tab_3 = QtWidgets.QWidget()
         self.tab_3.setObjectName("tab_3")
+        self.verticalLayout_4 = QtWidgets.QVBoxLayout(self.tab_3)
+        self.verticalLayout_4.setObjectName("verticalLayout_4")
+        self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+        self.import_gcm = QtWidgets.QPushButton(self.tab_3)
+        self.import_gcm.setObjectName("import_gcm")
+        self.horizontalLayout_3.addWidget(self.import_gcm)
+        self.export_gcm = QtWidgets.QPushButton(self.tab_3)
+        self.export_gcm.setObjectName("export_gcm")
+        self.horizontalLayout_3.addWidget(self.export_gcm)
+        self.verticalLayout_4.addLayout(self.horizontalLayout_3)
+        self.gcm_files_tree = QtWidgets.QTreeWidget(self.tab_3)
+        self.gcm_files_tree.setObjectName("gcm_files_tree")
+        self.verticalLayout_4.addWidget(self.gcm_files_tree)
         self.tabWidget.addTab(self.tab_3, "")
         self.verticalLayout.addWidget(self.tabWidget)
         MainWindow.setCentralWidget(self.centralwidget)
@@ -69,6 +83,10 @@ class Ui_MainWindow(object):
         self.actionReplaceRARCFile.setObjectName("actionReplaceRARCFile")
         self.actionExtractRARCFile = QtWidgets.QAction(MainWindow)
         self.actionExtractRARCFile.setObjectName("actionExtractRARCFile")
+        self.actionReplaceGCMFile = QtWidgets.QAction(MainWindow)
+        self.actionReplaceGCMFile.setObjectName("actionReplaceGCMFile")
+        self.actionExtractGCMFile = QtWidgets.QAction(MainWindow)
+        self.actionExtractGCMFile.setObjectName("actionExtractGCMFile")
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
@@ -85,7 +103,13 @@ class Ui_MainWindow(object):
         self.decompress_yaz0.setText(QtWidgets.QApplication.translate("MainWindow", "Decompress File", None, -1))
         self.compress_yaz0.setText(QtWidgets.QApplication.translate("MainWindow", "Compress File", None, -1))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QtWidgets.QApplication.translate("MainWindow", "Yaz0 Compression", None, -1))
+        self.import_gcm.setText(QtWidgets.QApplication.translate("MainWindow", "Import GCM", None, -1))
+        self.export_gcm.setText(QtWidgets.QApplication.translate("MainWindow", "Export GCM", None, -1))
+        self.gcm_files_tree.headerItem().setText(0, QtWidgets.QApplication.translate("MainWindow", "File Name", None, -1))
+        self.gcm_files_tree.headerItem().setText(1, QtWidgets.QApplication.translate("MainWindow", "File Size", None, -1))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), QtWidgets.QApplication.translate("MainWindow", "GCM ISOs", None, -1))
         self.actionReplaceRARCFile.setText(QtWidgets.QApplication.translate("MainWindow", "Replace File", None, -1))
         self.actionExtractRARCFile.setText(QtWidgets.QApplication.translate("MainWindow", "Extract File", None, -1))
+        self.actionReplaceGCMFile.setText(QtWidgets.QApplication.translate("MainWindow", "Replace File", None, -1))
+        self.actionExtractGCMFile.setText(QtWidgets.QApplication.translate("MainWindow", "Extract File", None, -1))
 

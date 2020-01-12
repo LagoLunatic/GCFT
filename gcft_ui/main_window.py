@@ -26,6 +26,7 @@ from gcft_ui.ui_main import Ui_MainWindow
 
 from wwlib.rarc import RARC
 from wwlib.yaz0 import Yaz0
+from wwlib.gcm import GCM
 from fs_helpers import *
 
 class GCFTWindow(QMainWindow):
@@ -35,7 +36,9 @@ class GCFTWindow(QMainWindow):
     self.ui.setupUi(self)
     
     self.ui.rarc_files_tree.setColumnWidth(0, 300)
+    self.ui.gcm_files_tree.setColumnWidth(0, 300)
     self.ui.export_rarc.setDisabled(True)
+    self.ui.export_gcm.setDisabled(True)
     
     self.ui.tabWidget.currentChanged.connect(self.save_last_used_tab)
     
@@ -49,6 +52,14 @@ class GCFTWindow(QMainWindow):
     
     self.ui.decompress_yaz0.clicked.connect(self.decompress_yaz0)
     self.ui.compress_yaz0.clicked.connect(self.compress_yaz0)
+    
+    self.ui.import_gcm.clicked.connect(self.import_gcm)
+    self.ui.export_gcm.clicked.connect(self.export_gcm)
+    
+    self.ui.gcm_files_tree.setContextMenuPolicy(Qt.CustomContextMenu)
+    self.ui.gcm_files_tree.customContextMenuRequested.connect(self.show_gcm_files_tree_context_menu)
+    self.ui.actionExtractGCMFile.triggered.connect(self.extract_file_from_gcm)
+    self.ui.actionReplaceGCMFile.triggered.connect(self.replace_file_in_gcm)
     
     self.load_settings()
     
@@ -212,7 +223,7 @@ class GCFTWindow(QMainWindow):
     self.settings["last_used_folder_for_files"] = os.path.dirname(file_path)
     
     item = self.get_tree_item_by_file(file)
-    item.setText(2, "0x%X" % data_len(file.data))
+    item.setText(2, "0x%X" % data_len(file.data)) # Update changed file size
   
   
   def decompress_yaz0(self):
@@ -278,12 +289,160 @@ class GCFTWindow(QMainWindow):
     QMessageBox.information(self, "Compressed file saved", "Successfully compressed and saved file.")
   
   
+  def import_gcm(self):
+    default_dir = None
+    if "last_used_folder_for_gcm" in self.settings:
+      default_dir = self.settings["last_used_folder_for_gcm"]
+    
+    gcm_path, selected_filter = QFileDialog.getOpenFileName(self, "Open GCM", default_dir, "GC ISO Files (*.iso *.gcm)")
+    if not gcm_path:
+      return
+    
+    self.open_gcm_by_path(gcm_path)
+  
+  def export_gcm(self):
+    default_dir = None
+    if "last_used_folder_for_gcm" in self.settings:
+      default_dir = self.settings["last_used_folder_for_gcm"]
+    
+    gcm_path, selected_filter = QFileDialog.getSaveFileName(self, "Save GCM", default_dir, "GC ISO Files (*.iso *.gcm)")
+    if not gcm_path:
+      return
+    
+    self.save_gcm_by_path(gcm_path)
+  
+  def open_gcm_by_path(self, gcm_path):
+    if not os.path.isfile(gcm_path):
+      raise Exception("GCM file not found: %s" % gcm_path)
+    
+    self.gcm = GCM(gcm_path)
+    
+    self.settings["last_used_folder_for_gcm"] = os.path.dirname(gcm_path)
+    
+    self.gcm.read_entire_disc()
+    self.gcm_changed_files = {}
+    
+    self.ui.gcm_files_tree.clear()
+    
+    root_entry = self.gcm.file_entries[0]
+    self.gcm_file_entry_to_tree_widget_item = {}
+    self.gcm_tree_widget_item_to_file_entry = {}
+    for file_entry in self.gcm.file_entries:
+      if file_entry.is_dir:
+        file_size_str = ""
+      else:
+        file_size_str = "0x%X" % file_entry.file_size
+      if file_entry.parent is None:
+        # Root entry. Don't add to the tree.
+        continue
+      elif file_entry.parent == root_entry:
+        item = QTreeWidgetItem([file_entry.name, file_size_str])
+        self.ui.gcm_files_tree.addTopLevelItem(item)
+        self.gcm_file_entry_to_tree_widget_item[file_entry] = item
+        self.gcm_tree_widget_item_to_file_entry[item] = file_entry
+      else:
+        parent_item = self.gcm_file_entry_to_tree_widget_item[file_entry.parent]
+        item = QTreeWidgetItem([file_entry.name, file_size_str])
+        parent_item.addChild(item)
+        self.gcm_file_entry_to_tree_widget_item[file_entry] = item
+        self.gcm_tree_widget_item_to_file_entry[item] = file_entry
+    
+    self.ui.export_gcm.setDisabled(False)
+  
+  def save_gcm_by_path(self, gcm_path):
+    # TODO: progress bar?
+    try:
+      self.gcm.export_disc_to_iso_with_changed_files(gcm_path, self.gcm_changed_files)
+    except FileNotFoundError:
+      QMessageBox.critical(self, "Could not save ISO", "Failed to save a new ISO. The original ISO \"%s\" has been moved or deleted." % self.gcm.iso_path)
+      return
+    
+    # Update the ISO path we read from in case the user tries to read another file after exporting the ISO.
+    self.gcm.iso_path = gcm_path
+    
+    QMessageBox.information(self, "GCM saved", "Successfully saved GCM.")
+  
+  def show_gcm_files_tree_context_menu(self, pos):
+    item = self.ui.gcm_files_tree.itemAt(pos)
+    if item is None:
+      return
+    
+    file = self.gcm_tree_widget_item_to_file_entry[item]
+    if file is None:
+      return
+    
+    menu = QMenu(self)
+    menu.addAction(self.ui.actionExtractGCMFile)
+    self.ui.actionExtractGCMFile.setData(file)
+    menu.addAction(self.ui.actionReplaceGCMFile)
+    self.ui.actionReplaceGCMFile.setData(file)
+    menu.exec_(self.ui.gcm_files_tree.mapToGlobal(pos))
+  
+  def extract_file_from_gcm(self):
+    file = self.ui.actionExtractGCMFile.data()
+    
+    default_dir = None
+    if "last_used_folder_for_files" in self.settings:
+      default_dir = self.settings["last_used_folder_for_files"]
+    if default_dir is None:
+      default_dir = file.name
+    else:
+      default_dir = os.path.join(default_dir, file.name)
+    
+    file_path, selected_filter = QFileDialog.getSaveFileName(self, "Save file", default_dir, "All files (*.*)")
+    if not file_path:
+      return
+    
+    if file.file_path in self.gcm_changed_files:
+      data = self.gcm_changed_files[file.file_path]
+      data.seek(0)
+      data = data
+    else:
+      try:
+        data = self.gcm.read_file_raw_data(file.file_path)
+      except FileNotFoundError:
+        QMessageBox.critical(self, "Could not read file", "Failed to read file. The ISO \"%s\" has been moved or deleted." % self.gcm.iso_path)
+        return
+    with open(file_path, "wb") as f:
+      f.write(data)
+    
+    self.settings["last_used_folder_for_files"] = os.path.dirname(file_path)
+  
+  def replace_file_in_gcm(self):
+    file = self.ui.actionReplaceGCMFile.data()
+    
+    default_dir = None
+    if "last_used_folder_for_files" in self.settings:
+      default_dir = self.settings["last_used_folder_for_files"]
+    
+    file_path, selected_filter = QFileDialog.getOpenFileName(self, "Choose File", default_dir, "All files (*.*)")
+    if not file_path:
+      return
+    
+    with open(file_path, "rb") as f:
+      data = BytesIO(f.read())
+    self.gcm_changed_files[file.file_path] = data
+    
+    self.settings["last_used_folder_for_files"] = os.path.dirname(file_path)
+    
+    item = self.gcm_file_entry_to_tree_widget_item[file]
+    item.setText(1, "0x%X" % data_len(data)) # Update changed file size
+  
+  
   def keyPressEvent(self, event):
-    if event.matches(QKeySequence.Copy):
-      if self.ui.rarc_files_tree.currentColumn() == 0:
-        # When copying the filename, override the default behavior so it instead copies the whole path.
+    if event.key() == Qt.Key_Escape:
+      self.close()
+    elif event.matches(QKeySequence.Copy):
+      curr_tab_text = self.ui.tabWidget.tabText(self.ui.tabWidget.currentIndex())
+      # When copying the filename in a RARC/GCM, override the default behavior so it instead copies the whole path.
+      if curr_tab_text == "RARC Archives" and self.ui.rarc_files_tree.currentColumn() == 0:
         item = self.ui.rarc_files_tree.currentItem()
         file_path = "%s/%s" % (item.parent().text(0), item.text(0))
+        QApplication.instance().clipboard().setText(file_path)
+      elif curr_tab_text == "GCM ISOs" and self.ui.gcm_files_tree.currentColumn() == 0:
+        item = self.ui.gcm_files_tree.currentItem()
+        file_entry = self.gcm_tree_widget_item_to_file_entry[item]
+        file_path = file_entry.file_path
         QApplication.instance().clipboard().setText(file_path)
   
   def closeEvent(self, event):
