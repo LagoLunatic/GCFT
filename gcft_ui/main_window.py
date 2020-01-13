@@ -23,6 +23,7 @@ yaml.Dumper.add_representer(
 )
 
 from gcft_ui.ui_main import Ui_MainWindow
+from version import VERSION
 
 from wwlib.rarc import RARC
 from wwlib.yaz0 import Yaz0
@@ -65,6 +66,8 @@ class GCFTWindow(QMainWindow):
     
     if "last_used_tab_index" in self.settings:
       self.ui.tabWidget.setCurrentIndex(self.settings["last_used_tab_index"])
+    
+    self.setWindowTitle("GameCube File Tools %s" % VERSION)
     
     self.show()
   
