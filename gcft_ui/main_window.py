@@ -259,7 +259,7 @@ class GCFTWindow(QMainWindow):
     if "last_used_folder_for_yaz0" in self.settings:
       default_dir = self.settings["last_used_folder_for_yaz0"]
     
-    comp_path, selected_filter = QFileDialog.getOpenFileName(self, "Choose file to decompress", default_dir, "All files (*.arc)")
+    comp_path, selected_filter = QFileDialog.getOpenFileName(self, "Choose file to decompress", default_dir, "All files (*.*)")
     if not comp_path:
       return
     
@@ -272,7 +272,7 @@ class GCFTWindow(QMainWindow):
       QMessageBox.warning(self, "Not Yaz0 compressed", "The selected file is not Yaz0 compressed. Cannot decompress.")
       return
     
-    decomp_path, selected_filter = QFileDialog.getSaveFileName(self, "Choose where to save decompressed file", default_dir, "All files (*.arc)")
+    decomp_path, selected_filter = QFileDialog.getSaveFileName(self, "Choose where to save decompressed file", default_dir, "All files (*.*)")
     if not decomp_path:
       return
     
@@ -291,7 +291,7 @@ class GCFTWindow(QMainWindow):
     if "last_used_folder_for_yaz0" in self.settings:
       default_dir = self.settings["last_used_folder_for_yaz0"]
     
-    decomp_path, selected_filter = QFileDialog.getOpenFileName(self, "Choose file to compress", default_dir, "All files (*.arc)")
+    decomp_path, selected_filter = QFileDialog.getOpenFileName(self, "Choose file to compress", default_dir, "All files (*.*)")
     if not decomp_path:
       return
     
@@ -301,7 +301,7 @@ class GCFTWindow(QMainWindow):
       QMessageBox.warning(self, "Already Yaz0 compressed", "The selected file is already Yaz0 compressed. Cannot compress.")
       return
     
-    comp_path, selected_filter = QFileDialog.getSaveFileName(self, "Choose where to save compressed file", default_dir, "All files (*.arc)")
+    comp_path, selected_filter = QFileDialog.getSaveFileName(self, "Choose where to save compressed file", default_dir, "All files (*.*)")
     if not comp_path:
       return
     
