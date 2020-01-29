@@ -41,6 +41,13 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QPushButton" name="export_rarc_folder">
+            <property name="text">
+             <string>Export Folder</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item>
@@ -120,6 +127,13 @@
            <widget class="QPushButton" name="export_gcm">
             <property name="text">
              <string>Export GCM</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="export_gcm_folder">
+            <property name="text">
+             <string>Export Folder</string>
             </property>
            </widget>
           </item>

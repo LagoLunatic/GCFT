@@ -39,12 +39,17 @@ class GCFTWindow(QMainWindow):
     self.ui.rarc_files_tree.setColumnWidth(0, 300)
     self.ui.gcm_files_tree.setColumnWidth(0, 300)
     self.ui.export_rarc.setDisabled(True)
+    #self.ui.import_rarc_folder.setDisabled(True)
+    self.ui.export_rarc_folder.setDisabled(True)
     self.ui.export_gcm.setDisabled(True)
+    #self.ui.import_gcm_folder.setDisabled(True)
+    self.ui.export_gcm_folder.setDisabled(True)
     
     self.ui.tabWidget.currentChanged.connect(self.save_last_used_tab)
     
     self.ui.import_rarc.clicked.connect(self.import_rarc)
     self.ui.export_rarc.clicked.connect(self.export_rarc)
+    self.ui.export_rarc_folder.clicked.connect(self.export_rarc_folder)
     
     self.ui.rarc_files_tree.setContextMenuPolicy(Qt.CustomContextMenu)
     self.ui.rarc_files_tree.customContextMenuRequested.connect(self.show_rarc_files_tree_context_menu)
@@ -56,6 +61,7 @@ class GCFTWindow(QMainWindow):
     
     self.ui.import_gcm.clicked.connect(self.import_gcm)
     self.ui.export_gcm.clicked.connect(self.export_gcm)
+    self.ui.export_gcm_folder.clicked.connect(self.export_gcm_folder)
     
     self.ui.gcm_files_tree.setContextMenuPolicy(Qt.CustomContextMenu)
     self.ui.gcm_files_tree.customContextMenuRequested.connect(self.show_gcm_files_tree_context_menu)
@@ -143,6 +149,8 @@ class GCFTWindow(QMainWindow):
         top_level_item.addChild(item)
     
     self.ui.export_rarc.setDisabled(False)
+    #self.ui.import_rarc_folder.setDisabled(False)
+    self.ui.export_rarc_folder.setDisabled(False)
   
   def save_rarc_by_path(self, rarc_path):
     self.rarc.save_changes()
@@ -151,7 +159,24 @@ class GCFTWindow(QMainWindow):
       self.rarc.data.seek(0)
       f.write(self.rarc.data.read())
     
+    self.settings["last_used_folder_for_rarcs"] = os.path.dirname(rarc_path)
+    
     QMessageBox.information(self, "RARC saved", "Successfully saved RARC.")
+  
+  def export_rarc_folder(self):
+    default_dir = None
+    if "last_used_folder_for_rarc_folders" in self.settings:
+      default_dir = self.settings["last_used_folder_for_rarc_folders"]
+    
+    folder_path = QFileDialog.getExistingDirectory(self, "Select folder to extract RARC contents to", default_dir)
+    if not folder_path:
+      return
+    
+    self.rarc.extract_all_files_to_disk(output_directory=folder_path)
+    
+    self.settings["last_used_folder_for_rarc_folders"] = os.path.dirname(folder_path)
+    
+    QMessageBox.information(self, "RARC extracted", "Successfully extracted RARC contents to \"%s\"." % folder_path)
   
   def get_file_by_tree_item(self, item):
     file_id = item.text(1)
@@ -351,6 +376,8 @@ class GCFTWindow(QMainWindow):
         self.gcm_tree_widget_item_to_file_entry[item] = file_entry
     
     self.ui.export_gcm.setDisabled(False)
+    #self.ui.import_gcm_folder.setDisabled(False)
+    self.ui.export_gcm_folder.setDisabled(False)
   
   def save_gcm_by_path(self, gcm_path):
     # TODO: progress bar?
@@ -363,7 +390,26 @@ class GCFTWindow(QMainWindow):
     # Update the ISO path we read from in case the user tries to read another file after exporting the ISO.
     self.gcm.iso_path = gcm_path
     
+    self.settings["last_used_folder_for_gcm"] = os.path.dirname(gcm_path)
+    
     QMessageBox.information(self, "GCM saved", "Successfully saved GCM.")
+  
+  def export_gcm_folder(self):
+    default_dir = None
+    if "last_used_folder_for_gcm_folders" in self.settings:
+      default_dir = self.settings["last_used_folder_for_gcm_folders"]
+    
+    folder_path = QFileDialog.getExistingDirectory(self, "Select folder to extract GCM contents to", default_dir)
+    if not folder_path:
+      return
+    
+    # TODO: this errors out when hitting a file over the size limit to read all at once
+    # need to refactor changed_files to not be a bytesio anymore, ideally
+    self.gcm.export_disc_to_folder_with_changed_files(folder_path, self.gcm_changed_files)
+    
+    self.settings["last_used_folder_for_gcm_folders"] = os.path.dirname(folder_path)
+    
+    QMessageBox.information(self, "GCM extracted", "Successfully extracted GCM contents to \"%s\"." % folder_path)
   
   def show_gcm_files_tree_context_menu(self, pos):
     item = self.ui.gcm_files_tree.itemAt(pos)

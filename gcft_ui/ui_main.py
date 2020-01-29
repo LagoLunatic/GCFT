@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'main.ui',
 # licensing of 'main.ui' applies.
 #
-# Created: Sun Jan 12 10:09:41 2020
+# Created: Tue Jan 14 12:46:05 2020
 #      by: pyside2-uic  running on PySide2 5.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -32,6 +32,9 @@ class Ui_MainWindow(object):
         self.export_rarc = QtWidgets.QPushButton(self.tab)
         self.export_rarc.setObjectName("export_rarc")
         self.horizontalLayout.addWidget(self.export_rarc)
+        self.export_rarc_folder = QtWidgets.QPushButton(self.tab)
+        self.export_rarc_folder.setObjectName("export_rarc_folder")
+        self.horizontalLayout.addWidget(self.export_rarc_folder)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
         self.rarc_files_tree = QtWidgets.QTreeWidget(self.tab)
         self.rarc_files_tree.setObjectName("rarc_files_tree")
@@ -65,6 +68,9 @@ class Ui_MainWindow(object):
         self.export_gcm = QtWidgets.QPushButton(self.tab_3)
         self.export_gcm.setObjectName("export_gcm")
         self.horizontalLayout_3.addWidget(self.export_gcm)
+        self.export_gcm_folder = QtWidgets.QPushButton(self.tab_3)
+        self.export_gcm_folder.setObjectName("export_gcm_folder")
+        self.horizontalLayout_3.addWidget(self.export_gcm_folder)
         self.verticalLayout_4.addLayout(self.horizontalLayout_3)
         self.gcm_files_tree = QtWidgets.QTreeWidget(self.tab_3)
         self.gcm_files_tree.setObjectName("gcm_files_tree")
@@ -96,6 +102,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(QtWidgets.QApplication.translate("MainWindow", "GameCube File Tools", None, -1))
         self.import_rarc.setText(QtWidgets.QApplication.translate("MainWindow", "Import RARC", None, -1))
         self.export_rarc.setText(QtWidgets.QApplication.translate("MainWindow", "Export RARC", None, -1))
+        self.export_rarc_folder.setText(QtWidgets.QApplication.translate("MainWindow", "Export Folder", None, -1))
         self.rarc_files_tree.headerItem().setText(0, QtWidgets.QApplication.translate("MainWindow", "File Name", None, -1))
         self.rarc_files_tree.headerItem().setText(1, QtWidgets.QApplication.translate("MainWindow", "File ID", None, -1))
         self.rarc_files_tree.headerItem().setText(2, QtWidgets.QApplication.translate("MainWindow", "File Size", None, -1))
@@ -105,6 +112,7 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QtWidgets.QApplication.translate("MainWindow", "Yaz0 Compression", None, -1))
         self.import_gcm.setText(QtWidgets.QApplication.translate("MainWindow", "Import GCM", None, -1))
         self.export_gcm.setText(QtWidgets.QApplication.translate("MainWindow", "Export GCM", None, -1))
+        self.export_gcm_folder.setText(QtWidgets.QApplication.translate("MainWindow", "Export Folder", None, -1))
         self.gcm_files_tree.headerItem().setText(0, QtWidgets.QApplication.translate("MainWindow", "File Name", None, -1))
         self.gcm_files_tree.headerItem().setText(1, QtWidgets.QApplication.translate("MainWindow", "File Size", None, -1))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), QtWidgets.QApplication.translate("MainWindow", "GCM ISOs", None, -1))
