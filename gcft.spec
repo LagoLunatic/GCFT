@@ -29,7 +29,7 @@ def build_datas_recursive(paths):
   return datas
 
 a = Analysis(['gcft.py'],
-             pathex=[],
+             pathex=["./wwrando"],
              binaries=[],
              datas=build_datas_recursive([]),
              hiddenimports=[],
