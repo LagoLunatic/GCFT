@@ -43,15 +43,15 @@ class GCFTWindow(QMainWindow):
     self.ui.import_folder_over_rarc.setDisabled(True)
     self.ui.export_rarc_folder.setDisabled(True)
     self.ui.export_gcm.setDisabled(True)
-    #self.ui.import_gcm_folder.setDisabled(True)
+    self.ui.import_folder_over_gcm.setDisabled(True)
     self.ui.export_gcm_folder.setDisabled(True)
     
     self.ui.tabWidget.currentChanged.connect(self.save_last_used_tab)
     
     self.ui.import_rarc.clicked.connect(self.import_rarc)
     self.ui.export_rarc.clicked.connect(self.export_rarc)
-    self.ui.export_rarc_folder.clicked.connect(self.export_rarc_folder)
     self.ui.import_folder_over_rarc.clicked.connect(self.import_folder_over_rarc)
+    self.ui.export_rarc_folder.clicked.connect(self.export_rarc_folder)
     
     self.ui.rarc_files_tree.setContextMenuPolicy(Qt.CustomContextMenu)
     self.ui.rarc_files_tree.customContextMenuRequested.connect(self.show_rarc_files_tree_context_menu)
@@ -63,6 +63,7 @@ class GCFTWindow(QMainWindow):
     
     self.ui.import_gcm.clicked.connect(self.import_gcm)
     self.ui.export_gcm.clicked.connect(self.export_gcm)
+    self.ui.import_folder_over_gcm.clicked.connect(self.import_folder_over_gcm)
     self.ui.export_gcm_folder.clicked.connect(self.export_gcm_folder)
     
     self.ui.gcm_files_tree.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -178,6 +179,8 @@ class GCFTWindow(QMainWindow):
     if num_files_overwritten == 0:
       QMessageBox.warning(self, "No matching files found", "The selected folder does not contain any files matching the name and directory structure of files in the currently loaded RARC. No files imported.")
       return
+    
+    self.settings["last_used_folder_for_rarc_folders"] = os.path.dirname(folder_path)
     
     QMessageBox.information(self, "Folder imported", "Successfully overwrote %d files in the RARC from \"%s\"." % (num_files_overwritten, folder_path))
   
@@ -366,7 +369,6 @@ class GCFTWindow(QMainWindow):
     self.settings["last_used_folder_for_gcm"] = os.path.dirname(gcm_path)
     
     self.gcm.read_entire_disc()
-    self.gcm_changed_files = {}
     
     self.ui.gcm_files_tree.clear()
     
@@ -394,13 +396,13 @@ class GCFTWindow(QMainWindow):
         self.gcm_tree_widget_item_to_file_entry[item] = file_entry
     
     self.ui.export_gcm.setDisabled(False)
-    #self.ui.import_gcm_folder.setDisabled(False)
+    self.ui.import_folder_over_gcm.setDisabled(False)
     self.ui.export_gcm_folder.setDisabled(False)
   
   def save_gcm_by_path(self, gcm_path):
     # TODO: progress bar?
     try:
-      self.gcm.export_disc_to_iso_with_changed_files(gcm_path, self.gcm_changed_files)
+      self.gcm.export_disc_to_iso_with_changed_files(gcm_path)
     except FileNotFoundError:
       QMessageBox.critical(self, "Could not save ISO", "Failed to save a new ISO. The original ISO \"%s\" has been moved or deleted." % self.gcm.iso_path)
       return
@@ -412,6 +414,24 @@ class GCFTWindow(QMainWindow):
     
     QMessageBox.information(self, "GCM saved", "Successfully saved GCM.")
   
+  def import_folder_over_gcm(self):
+    default_dir = None
+    if "last_used_folder_for_gcm_folders" in self.settings:
+      default_dir = self.settings["last_used_folder_for_gcm_folders"]
+    
+    folder_path = QFileDialog.getExistingDirectory(self, "Select folder to import GCM contents from", default_dir)
+    if not folder_path:
+      return
+    
+    num_files_overwritten = self.gcm.import_all_files_from_disk(folder_path)
+    if num_files_overwritten == 0:
+      QMessageBox.warning(self, "No matching files found", "The selected folder does not contain any files matching the name and directory structure of files in the currently loaded GCM. No files imported.")
+      return
+    
+    self.settings["last_used_folder_for_gcm_folders"] = os.path.dirname(folder_path)
+    
+    QMessageBox.information(self, "Folder imported", "Successfully overwrote %d files in the GCM from \"%s\"." % (num_files_overwritten, folder_path))
+  
   def export_gcm_folder(self):
     default_dir = None
     if "last_used_folder_for_gcm_folders" in self.settings:
@@ -421,7 +441,7 @@ class GCFTWindow(QMainWindow):
     if not folder_path:
       return
     
-    self.gcm.export_disc_to_folder_with_changed_files(folder_path, self.gcm_changed_files)
+    self.gcm.export_disc_to_folder_with_changed_files(folder_path)
     
     self.settings["last_used_folder_for_gcm_folders"] = os.path.dirname(folder_path)
     
@@ -458,8 +478,8 @@ class GCFTWindow(QMainWindow):
     if not file_path:
       return
     
-    if file.file_path in self.gcm_changed_files:
-      data = self.gcm_changed_files[file.file_path]
+    if file.file_path in self.gcm.changed_files:
+      data = self.gcm.changed_files[file.file_path]
       data.seek(0)
       data = data
     else:
@@ -487,7 +507,7 @@ class GCFTWindow(QMainWindow):
     
     with open(file_path, "rb") as f:
       data = BytesIO(f.read())
-    self.gcm_changed_files[file.file_path] = data
+    self.gcm.changed_files[file.file_path] = data
     
     self.settings["last_used_folder_for_files"] = os.path.dirname(file_path)
     

@@ -6,9 +6,14 @@ GameCube File Tools (GCFT) is a GUI tool for editing the following common file f
 * RARC (archives)
 * Yaz0 compression
 
-Currently it can open GCMs and RARCs, and view, extract, and replace the individual files in them (including viewing the file IDs inside RARCs). It can also compress and decompress Yaz0 files.  
-It cannot yet extract all of the files from a GCM or RARC to a folder, nor import them all back at once. But this is a planned feature.  
-It has only been tested on Wind Waker so far but should work with other games.
+Currently, it can:
+* Open and view GCMs and RARCs (including file IDs inside RARCs)
+* Extract and replace individual files in GCMs and RARCs
+* Extract all files in a GCM or RARC at once to a folder
+* Import a folder of files onto an existing GCM or RARC, overwriting the existing files (this preserves the original file IDs in RARCs)
+* Compress and decompress Yaz0 files
+It currently cannot add or remove files from GCMs or RARCs. It also cannot create brand new GCMs or RARCs from scratch.  
+It has only been tested on Wind Waker so far but should work with other games.  
 
 ### Running from source
 
