@@ -20,6 +20,59 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
+      <widget class="QWidget" name="tab_3">
+       <attribute name="title">
+        <string>GCM ISOs</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QPushButton" name="import_gcm">
+            <property name="text">
+             <string>Import GCM</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="export_gcm">
+            <property name="text">
+             <string>Export GCM</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="import_folder_over_gcm">
+            <property name="text">
+             <string>Import Folder Over GCM</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="export_gcm_folder">
+            <property name="text">
+             <string>Export Folder</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTreeWidget" name="gcm_files_tree">
+          <column>
+           <property name="text">
+            <string>File Name</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>File Size</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="tab">
        <attribute name="title">
         <string>RARC Archives</string>
@@ -113,59 +166,6 @@
            </size>
           </property>
          </spacer>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tab_3">
-       <attribute name="title">
-        <string>GCM ISOs</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_4">
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <item>
-           <widget class="QPushButton" name="import_gcm">
-            <property name="text">
-             <string>Import GCM</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="export_gcm">
-            <property name="text">
-             <string>Export GCM</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="import_folder_over_gcm">
-            <property name="text">
-             <string>Import Folder Over GCM</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="export_gcm_folder">
-            <property name="text">
-             <string>Export Folder</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="QTreeWidget" name="gcm_files_tree">
-          <column>
-           <property name="text">
-            <string>File Name</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>File Size</string>
-           </property>
-          </column>
-         </widget>
         </item>
        </layout>
       </widget>
