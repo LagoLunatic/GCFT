@@ -38,8 +38,9 @@ class GCFTWindow(QMainWindow):
     
     self.ui.rarc_files_tree.setColumnWidth(0, 300)
     self.ui.gcm_files_tree.setColumnWidth(0, 300)
+    
     self.ui.export_rarc.setDisabled(True)
-    #self.ui.import_rarc_folder.setDisabled(True)
+    self.ui.import_folder_over_rarc.setDisabled(True)
     self.ui.export_rarc_folder.setDisabled(True)
     self.ui.export_gcm.setDisabled(True)
     #self.ui.import_gcm_folder.setDisabled(True)
@@ -50,6 +51,7 @@ class GCFTWindow(QMainWindow):
     self.ui.import_rarc.clicked.connect(self.import_rarc)
     self.ui.export_rarc.clicked.connect(self.export_rarc)
     self.ui.export_rarc_folder.clicked.connect(self.export_rarc_folder)
+    self.ui.import_folder_over_rarc.clicked.connect(self.import_folder_over_rarc)
     
     self.ui.rarc_files_tree.setContextMenuPolicy(Qt.CustomContextMenu)
     self.ui.rarc_files_tree.customContextMenuRequested.connect(self.show_rarc_files_tree_context_menu)
@@ -149,7 +151,7 @@ class GCFTWindow(QMainWindow):
         top_level_item.addChild(item)
     
     self.ui.export_rarc.setDisabled(False)
-    #self.ui.import_rarc_folder.setDisabled(False)
+    self.ui.import_folder_over_rarc.setDisabled(False)
     self.ui.export_rarc_folder.setDisabled(False)
   
   def save_rarc_by_path(self, rarc_path):
@@ -162,6 +164,22 @@ class GCFTWindow(QMainWindow):
     self.settings["last_used_folder_for_rarcs"] = os.path.dirname(rarc_path)
     
     QMessageBox.information(self, "RARC saved", "Successfully saved RARC.")
+  
+  def import_folder_over_rarc(self):
+    default_dir = None
+    if "last_used_folder_for_rarc_folders" in self.settings:
+      default_dir = self.settings["last_used_folder_for_rarc_folders"]
+    
+    folder_path = QFileDialog.getExistingDirectory(self, "Select folder to import RARC contents from", default_dir)
+    if not folder_path:
+      return
+    
+    num_files_overwritten = self.rarc.import_all_files_from_disk(folder_path)
+    if num_files_overwritten == 0:
+      QMessageBox.warning(self, "No matching files found", "The selected folder does not contain any files matching the name and directory structure of files in the currently loaded RARC. No files imported.")
+      return
+    
+    QMessageBox.information(self, "Folder imported", "Successfully overwrote %d files in the RARC from \"%s\"." % (num_files_overwritten, folder_path))
   
   def export_rarc_folder(self):
     default_dir = None

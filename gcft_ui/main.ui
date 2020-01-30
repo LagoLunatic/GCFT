@@ -42,6 +42,13 @@
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="import_folder_over_rarc">
+            <property name="text">
+             <string>Import Folder Over RARC</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="export_rarc_folder">
             <property name="text">
              <string>Export Folder</string>
@@ -127,6 +134,13 @@
            <widget class="QPushButton" name="export_gcm">
             <property name="text">
              <string>Export GCM</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="import_folder_over_gcm">
+            <property name="text">
+             <string>Import Folder Over GCM</string>
             </property>
            </widget>
           </item>
