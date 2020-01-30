@@ -421,8 +421,6 @@ class GCFTWindow(QMainWindow):
     if not folder_path:
       return
     
-    # TODO: this errors out when hitting a file over the size limit to read all at once
-    # need to refactor changed_files to not be a bytesio anymore, ideally
     self.gcm.export_disc_to_folder_with_changed_files(folder_path, self.gcm_changed_files)
     
     self.settings["last_used_folder_for_gcm_folders"] = os.path.dirname(folder_path)
@@ -465,6 +463,7 @@ class GCFTWindow(QMainWindow):
       data.seek(0)
       data = data
     else:
+      # TODO: for very large files, don't read all at once
       try:
         data = self.gcm.read_file_raw_data(file.file_path)
       except FileNotFoundError:
