@@ -12,6 +12,7 @@ Currently, it can:
 * Extract all files in a GCM or RARC at once to a folder
 * Import a folder of files onto an existing GCM or RARC, overwriting the existing files (this preserves the original file IDs in RARCs)
 * Compress and decompress Yaz0 files
+
 It currently cannot add or remove files from GCMs or RARCs. It also cannot create brand new GCMs or RARCs from scratch.  
 It has only been tested on Wind Waker so far but should work with other games.  
 
