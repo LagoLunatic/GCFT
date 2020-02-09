@@ -16,6 +16,11 @@ Currently, it can:
 It currently cannot add or remove files from GCMs or RARCs. It also cannot create brand new GCMs or RARCs from scratch.  
 It has only been tested on Wind Waker so far but should work with other games.  
 
+### Usage
+
+Importing and exporting entire GCMs and RARCs can be done via the buttons in the appropriate tabs.  
+Extracting or replacing a single file can be done by first importing the GCM/RARC the file is in, and then right-clicking on the file you want to edit.  
+
 ### Running from source
 
 Download and install git from here: https://git-scm.com/downloads  
