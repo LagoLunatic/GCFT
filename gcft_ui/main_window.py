@@ -6,6 +6,7 @@ from PySide2.QtWidgets import *
 import os
 from io import BytesIO
 from collections import OrderedDict
+import traceback
 
 import yaml
 try:
@@ -124,9 +125,15 @@ class GCFTWindow(QMainWindow):
     if not os.path.isfile(rarc_path):
       raise Exception("RARC file not found: %s" % rarc_path)
     
-    with open(rarc_path, "rb") as f:
-      data = BytesIO(f.read())
-    self.rarc = RARC(data)
+    try:
+      with open(rarc_path, "rb") as f:
+        data = BytesIO(f.read())
+      self.rarc = RARC(data)
+    except Exception as e:
+      stack_trace = traceback.format_exc()
+      error_message = "Failed to open RARC with error:\n" + str(e) + "\n\n" + stack_trace
+      QMessageBox.critical(self, "Failed to open RARC", error_message)
+      return
     
     self.settings["last_used_folder_for_rarcs"] = os.path.dirname(rarc_path)
     
@@ -158,9 +165,15 @@ class GCFTWindow(QMainWindow):
   def save_rarc_by_path(self, rarc_path):
     self.rarc.save_changes()
     
-    with open(rarc_path, "wb") as f:
-      self.rarc.data.seek(0)
-      f.write(self.rarc.data.read())
+    try:
+      with open(rarc_path, "wb") as f:
+        self.rarc.data.seek(0)
+        f.write(self.rarc.data.read())
+    except Exception as e:
+      stack_trace = traceback.format_exc()
+      error_message = "Failed to save RARC with error:\n" + str(e) + "\n\n" + stack_trace
+      QMessageBox.critical(self, "Failed to save RARC", error_message)
+      return
     
     self.settings["last_used_folder_for_rarcs"] = os.path.dirname(rarc_path)
     
@@ -175,7 +188,14 @@ class GCFTWindow(QMainWindow):
     if not folder_path:
       return
     
-    num_files_overwritten = self.rarc.import_all_files_from_disk(folder_path)
+    try:
+      num_files_overwritten = self.rarc.import_all_files_from_disk(folder_path)
+    except Exception as e:
+      stack_trace = traceback.format_exc()
+      error_message = "Failed to import folder over RARC with error:\n" + str(e) + "\n\n" + stack_trace
+      QMessageBox.critical(self, "Failed to import folder", error_message)
+      return
+    
     if num_files_overwritten == 0:
       QMessageBox.warning(self, "No matching files found", "The selected folder does not contain any files matching the name and directory structure of files in the currently loaded RARC. No files imported.")
       return
@@ -193,7 +213,13 @@ class GCFTWindow(QMainWindow):
     if not folder_path:
       return
     
-    self.rarc.extract_all_files_to_disk(output_directory=folder_path)
+    try:
+      self.rarc.extract_all_files_to_disk(output_directory=folder_path)
+    except Exception as e:
+      stack_trace = traceback.format_exc()
+      error_message = "Failed to extract RARC to folder with error:\n" + str(e) + "\n\n" + stack_trace
+      QMessageBox.critical(self, "Failed to extract RARC files", error_message)
+      return
     
     self.settings["last_used_folder_for_rarc_folders"] = os.path.dirname(folder_path)
     
@@ -248,9 +274,15 @@ class GCFTWindow(QMainWindow):
     if not file_path:
       return
     
-    with open(file_path, "wb") as f:
-      file.data.seek(0)
-      f.write(file.data.read())
+    try:
+      with open(file_path, "wb") as f:
+        file.data.seek(0)
+        f.write(file.data.read())
+    except Exception as e:
+      stack_trace = traceback.format_exc()
+      error_message = "Failed to extract file with error:\n" + str(e) + "\n\n" + stack_trace
+      QMessageBox.critical(self, "Failed to extract file", error_message)
+      return
     
     self.settings["last_used_folder_for_files"] = os.path.dirname(file_path)
   
@@ -265,9 +297,15 @@ class GCFTWindow(QMainWindow):
     if not file_path:
       return
     
-    with open(file_path, "rb") as f:
-      data = BytesIO(f.read())
-    file.data = data
+    try:
+      with open(file_path, "rb") as f:
+        data = BytesIO(f.read())
+      file.data = data
+    except Exception as e:
+      stack_trace = traceback.format_exc()
+      error_message = "Failed to replace file with error:\n" + str(e) + "\n\n" + stack_trace
+      QMessageBox.critical(self, "Failed to replace file", error_message)
+      return
     
     self.settings["last_used_folder_for_files"] = os.path.dirname(file_path)
     
@@ -287,21 +325,27 @@ class GCFTWindow(QMainWindow):
     self.settings["last_used_folder_for_yaz0"] = os.path.dirname(comp_path)
     default_dir = self.settings["last_used_folder_for_yaz0"]
     
-    with open(comp_path, "rb") as f:
-      comp_data = BytesIO(f.read())
-    if try_read_str(comp_data, 0, 4) != "Yaz0":
-      QMessageBox.warning(self, "Not Yaz0 compressed", "The selected file is not Yaz0 compressed. Cannot decompress.")
+    try:
+      with open(comp_path, "rb") as f:
+        comp_data = BytesIO(f.read())
+      if try_read_str(comp_data, 0, 4) != "Yaz0":
+        QMessageBox.warning(self, "Not Yaz0 compressed", "The selected file is not Yaz0 compressed. Cannot decompress.")
+        return
+      
+      decomp_path, selected_filter = QFileDialog.getSaveFileName(self, "Choose where to save decompressed file", default_dir, "All files (*.*)")
+      if not decomp_path:
+        return
+      
+      decomp_data = Yaz0.decompress(comp_data)
+      
+      with open(decomp_path, "wb") as f:
+        decomp_data.seek(0)
+        f.write(decomp_data.read())
+    except Exception as e:
+      stack_trace = traceback.format_exc()
+      error_message = "Failed to decompress file with error:\n" + str(e) + "\n\n" + stack_trace
+      QMessageBox.critical(self, "Failed to decompress file", error_message)
       return
-    
-    decomp_path, selected_filter = QFileDialog.getSaveFileName(self, "Choose where to save decompressed file", default_dir, "All files (*.*)")
-    if not decomp_path:
-      return
-    
-    decomp_data = Yaz0.decompress(comp_data)
-    
-    with open(decomp_path, "wb") as f:
-      decomp_data.seek(0)
-      f.write(decomp_data.read())
     
     self.settings["last_used_folder_for_yaz0"] = os.path.dirname(decomp_path)
     
@@ -316,22 +360,28 @@ class GCFTWindow(QMainWindow):
     if not decomp_path:
       return
     
-    with open(decomp_path, "rb") as f:
-      decomp_data = BytesIO(f.read())
-    if try_read_str(decomp_data, 0, 4) == "Yaz0":
-      QMessageBox.warning(self, "Already Yaz0 compressed", "The selected file is already Yaz0 compressed. Cannot compress.")
+    try:
+      with open(decomp_path, "rb") as f:
+        decomp_data = BytesIO(f.read())
+      if try_read_str(decomp_data, 0, 4) == "Yaz0":
+        QMessageBox.warning(self, "Already Yaz0 compressed", "The selected file is already Yaz0 compressed. Cannot compress.")
+        return
+      
+      comp_path, selected_filter = QFileDialog.getSaveFileName(self, "Choose where to save compressed file", default_dir, "All files (*.*)")
+      if not comp_path:
+        return
+      
+      # TODO: progress bar?
+      comp_data = Yaz0.compress(decomp_data)
+      
+      with open(comp_path, "wb") as f:
+        comp_data.seek(0)
+        f.write(comp_data.read())
+    except Exception as e:
+      stack_trace = traceback.format_exc()
+      error_message = "Failed to compress file with error:\n" + str(e) + "\n\n" + stack_trace
+      QMessageBox.critical(self, "Failed to compress file", error_message)
       return
-    
-    comp_path, selected_filter = QFileDialog.getSaveFileName(self, "Choose where to save compressed file", default_dir, "All files (*.*)")
-    if not comp_path:
-      return
-    
-    # TODO: progress bar?
-    comp_data = Yaz0.compress(decomp_data)
-    
-    with open(comp_path, "wb") as f:
-      comp_data.seek(0)
-      f.write(comp_data.read())
     
     self.settings["last_used_folder_for_yaz0"] = os.path.dirname(comp_path)
     
@@ -364,11 +414,17 @@ class GCFTWindow(QMainWindow):
     if not os.path.isfile(gcm_path):
       raise Exception("GCM file not found: %s" % gcm_path)
     
-    self.gcm = GCM(gcm_path)
-    
-    self.settings["last_used_folder_for_gcm"] = os.path.dirname(gcm_path)
-    
-    self.gcm.read_entire_disc()
+    try:
+      self.gcm = GCM(gcm_path)
+      
+      self.settings["last_used_folder_for_gcm"] = os.path.dirname(gcm_path)
+      
+      self.gcm.read_entire_disc()
+    except Exception as e:
+      stack_trace = traceback.format_exc()
+      error_message = "Failed to import GCM with error:\n" + str(e) + "\n\n" + stack_trace
+      QMessageBox.critical(self, "Failed to import GCM", error_message)
+      return
     
     self.ui.gcm_files_tree.clear()
     
@@ -406,6 +462,11 @@ class GCFTWindow(QMainWindow):
     except FileNotFoundError:
       QMessageBox.critical(self, "Could not save ISO", "Failed to save a new ISO. The original ISO \"%s\" has been moved or deleted." % self.gcm.iso_path)
       return
+    except Exception as e:
+      stack_trace = traceback.format_exc()
+      error_message = "Failed to save GCM with error:\n" + str(e) + "\n\n" + stack_trace
+      QMessageBox.critical(self, "Failed to save GCM", error_message)
+      return
     
     # Update the ISO path we read from in case the user tries to read another file after exporting the ISO.
     self.gcm.iso_path = gcm_path
@@ -423,7 +484,14 @@ class GCFTWindow(QMainWindow):
     if not folder_path:
       return
     
-    num_files_overwritten = self.gcm.import_all_files_from_disk(folder_path)
+    try:
+      num_files_overwritten = self.gcm.import_all_files_from_disk(folder_path)
+    except Exception as e:
+      stack_trace = traceback.format_exc()
+      error_message = "Failed to import folder over GCM with error:\n" + str(e) + "\n\n" + stack_trace
+      QMessageBox.critical(self, "Failed to import folder", error_message)
+      return
+    
     if num_files_overwritten == 0:
       QMessageBox.warning(self, "No matching files found", "The selected folder does not contain any files matching the name and directory structure of files in the currently loaded GCM. No files imported.")
       return
@@ -441,7 +509,13 @@ class GCFTWindow(QMainWindow):
     if not folder_path:
       return
     
-    self.gcm.export_disc_to_folder_with_changed_files(folder_path)
+    try:
+      self.gcm.export_disc_to_folder_with_changed_files(folder_path)
+    except Exception as e:
+      stack_trace = traceback.format_exc()
+      error_message = "Failed to save folder with error:\n" + str(e) + "\n\n" + stack_trace
+      QMessageBox.critical(self, "Failed to save GCM files", error_message)
+      return
     
     self.settings["last_used_folder_for_gcm_folders"] = os.path.dirname(folder_path)
     
@@ -478,19 +552,25 @@ class GCFTWindow(QMainWindow):
     if not file_path:
       return
     
-    if file.file_path in self.gcm.changed_files:
-      data = self.gcm.changed_files[file.file_path]
-      data.seek(0)
-      data = data
-    else:
-      # TODO: for very large files, don't read all at once
-      try:
-        data = self.gcm.read_file_raw_data(file.file_path)
-      except FileNotFoundError:
-        QMessageBox.critical(self, "Could not read file", "Failed to read file. The ISO \"%s\" has been moved or deleted." % self.gcm.iso_path)
-        return
-    with open(file_path, "wb") as f:
-      f.write(data)
+    try:
+      if file.file_path in self.gcm.changed_files:
+        data = self.gcm.changed_files[file.file_path]
+        data.seek(0)
+        data = data
+      else:
+        # TODO: for very large files, don't read all at once
+        try:
+          data = self.gcm.read_file_raw_data(file.file_path)
+        except FileNotFoundError:
+          QMessageBox.critical(self, "Could not read file", "Failed to read file. The ISO \"%s\" has been moved or deleted." % self.gcm.iso_path)
+          return
+      with open(file_path, "wb") as f:
+        f.write(data)
+    except Exception as e:
+      stack_trace = traceback.format_exc()
+      error_message = "Failed to extract file with error:\n" + str(e) + "\n\n" + stack_trace
+      QMessageBox.critical(self, "Failed to extract file", error_message)
+      return
     
     self.settings["last_used_folder_for_files"] = os.path.dirname(file_path)
   
@@ -505,9 +585,15 @@ class GCFTWindow(QMainWindow):
     if not file_path:
       return
     
-    with open(file_path, "rb") as f:
-      data = BytesIO(f.read())
-    self.gcm.changed_files[file.file_path] = data
+    try:
+      with open(file_path, "rb") as f:
+        data = BytesIO(f.read())
+      self.gcm.changed_files[file.file_path] = data
+    except Exception as e:
+      stack_trace = traceback.format_exc()
+      error_message = "Failed to replace file with error:\n" + str(e) + "\n\n" + stack_trace
+      QMessageBox.critical(self, "Failed to replace file", error_message)
+      return
     
     self.settings["last_used_folder_for_files"] = os.path.dirname(file_path)
     
