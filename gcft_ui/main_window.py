@@ -514,7 +514,7 @@ class GCFTWindow(QMainWindow):
       if file.file_path in self.gcm.changed_files:
         data = self.gcm.changed_files[file.file_path]
         data.seek(0)
-        data = data
+        data = data.read()
       else:
         # TODO: for very large files, don't read all at once
         try:
