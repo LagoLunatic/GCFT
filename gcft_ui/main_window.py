@@ -462,9 +462,6 @@ class GCFTWindow(QMainWindow):
     # TODO: progress bar?
     self.gcm.export_disc_to_iso_with_changed_files(gcm_path)
     
-    # Update the ISO path we read from in case the user tries to read another file after exporting the ISO.
-    self.gcm.iso_path = gcm_path
-    
     QMessageBox.information(self, "GCM saved", "Successfully saved GCM.")
   
   def import_folder_over_gcm_by_path(self, folder_path):
