@@ -257,24 +257,47 @@ class GCFTWindow(QMainWindow):
     
     self.ui.rarc_files_tree.clear()
     
-    assert len(self.rarc.nodes) == len(self.rarc.nodes[0].files) + 1 - 2
+    self.rarc_node_to_tree_widget_item = {}
+    self.rarc_tree_widget_item_to_node = {}
+    self.rarc_file_entry_to_tree_widget_item = {}
+    self.rarc_tree_widget_item_to_file_entry = {}
     
-    top_level_items = []
-    for dir in self.rarc.nodes[0].files:
-      if dir.name in [".", ".."]:
+    root_node = self.rarc.nodes[0]
+    root_item = QTreeWidgetItem([root_node.name, "", ""])
+    self.ui.rarc_files_tree.addTopLevelItem(root_item)
+    self.rarc_node_to_tree_widget_item[root_node] = root_item
+    self.rarc_tree_widget_item_to_node[root_item] = root_node
+    
+    for node in self.rarc.nodes[1:]:
+      item = QTreeWidgetItem([node.name, "", ""])
+      root_item.addChild(item)
+      
+      self.rarc_node_to_tree_widget_item[node] = item
+      self.rarc_tree_widget_item_to_node[item] = node
+      
+      dir_file_entry = next(fe for fe in self.rarc.file_entries if fe.is_dir and fe.name == node.name)
+      assert dir_file_entry.is_dir
+      
+      self.rarc_file_entry_to_tree_widget_item[dir_file_entry] = item
+      self.rarc_tree_widget_item_to_file_entry[item] = dir_file_entry
+    
+    for file_entry in self.rarc.file_entries:
+      if file_entry.is_dir:
+        if file_entry.name not in [".", ".."]:
+          assert file_entry in self.rarc_file_entry_to_tree_widget_item
         continue
-      item = QTreeWidgetItem([dir.name, "", ""])
-      top_level_items.append(item)
-      self.ui.rarc_files_tree.addTopLevelItem(item)
+      
+      file_size_str = "0x%X" % file_entry.data_size
+      file_id_str = "%d" % file_entry.id
+      
+      parent_item = self.rarc_node_to_tree_widget_item[file_entry.parent_node]
+      item = QTreeWidgetItem([file_entry.name, file_id_str, file_size_str])
+      parent_item.addChild(item)
+      self.rarc_file_entry_to_tree_widget_item[file_entry] = item
+      self.rarc_tree_widget_item_to_file_entry[item] = file_entry
     
-    for i in range(len(top_level_items)):
-      top_level_item = top_level_items[i]
-      node = self.rarc.nodes[i+1]
-      for file in node.files:
-        if file.name in [".", ".."]:
-          continue
-        item = QTreeWidgetItem([file.name, "%d" % file.id, "0x%X" % file.data_size])
-        top_level_item.addChild(item)
+    # Expand the root node by default.
+    self.ui.rarc_files_tree.topLevelItem(0).setExpanded(True)
     
     self.ui.export_rarc.setDisabled(False)
     self.ui.import_folder_over_rarc.setDisabled(False)
@@ -456,11 +479,10 @@ class GCFTWindow(QMainWindow):
         file_size_str = ""
       else:
         file_size_str = "0x%X" % file_entry.file_size
+      
       if file_entry.parent is None:
-        # Root entry. Don't add to the tree.
-        continue
-      elif file_entry.parent == root_entry:
-        item = QTreeWidgetItem([file_entry.name, file_size_str])
+        # Root entry. Add as a top-level item.
+        item = QTreeWidgetItem(["files", file_size_str])
         self.ui.gcm_files_tree.addTopLevelItem(item)
         self.gcm_file_entry_to_tree_widget_item[file_entry] = item
         self.gcm_tree_widget_item_to_file_entry[item] = file_entry
@@ -470,6 +492,9 @@ class GCFTWindow(QMainWindow):
         parent_item.addChild(item)
         self.gcm_file_entry_to_tree_widget_item[file_entry] = item
         self.gcm_tree_widget_item_to_file_entry[item] = file_entry
+    
+    # Expand the root entry by default.
+    self.ui.gcm_files_tree.topLevelItem(0).setExpanded(True)
     
     self.ui.export_gcm.setDisabled(False)
     self.ui.import_folder_over_gcm.setDisabled(False)
