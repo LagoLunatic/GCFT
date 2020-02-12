@@ -37,6 +37,9 @@ class GCFTWindow(QMainWindow):
     self.ui = Ui_MainWindow()
     self.ui.setupUi(self)
     
+    self.gcm = None
+    self.rarc = None
+    
     self.ui.rarc_files_tree.setColumnWidth(0, 300)
     self.ui.gcm_files_tree.setColumnWidth(0, 300)
     
@@ -71,6 +74,7 @@ class GCFTWindow(QMainWindow):
     self.ui.gcm_files_tree.customContextMenuRequested.connect(self.show_gcm_files_tree_context_menu)
     self.ui.actionExtractGCMFile.triggered.connect(self.extract_file_from_gcm)
     self.ui.actionReplaceGCMFile.triggered.connect(self.replace_file_in_gcm)
+    self.ui.actionAddGCMFile.triggered.connect(self.add_file_to_gcm)
     
     self.load_settings()
     
@@ -217,6 +221,13 @@ class GCFTWindow(QMainWindow):
       file_type="RARC"
     )
   
+  def add_file_to_gcm(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.add_file_to_gcm_by_path,
+      is_opening=True, is_saving=False, is_folder=False,
+      file_type="file"
+    )
+  
   def export_rarc_folder(self):
     self.generic_do_gui_file_operation(
       op_callback=self.export_rarc_folder_by_path,
@@ -322,6 +333,9 @@ class GCFTWindow(QMainWindow):
     return None
   
   def show_rarc_files_tree_context_menu(self, pos):
+    if self.rarc is None:
+      return
+    
     item = self.ui.rarc_files_tree.itemAt(pos)
     if item is None:
       return
@@ -483,6 +497,9 @@ class GCFTWindow(QMainWindow):
   
   
   def show_gcm_files_tree_context_menu(self, pos):
+    if self.gcm is None:
+      return
+    
     item = self.ui.gcm_files_tree.itemAt(pos)
     if item is None:
       return
@@ -490,16 +507,20 @@ class GCFTWindow(QMainWindow):
     file = self.gcm_tree_widget_item_to_file_entry[item]
     if file is None:
       return
+    
     if file.is_dir:
       # TODO: Implement extracting/replacing folders
-      return
-    
-    menu = QMenu(self)
-    menu.addAction(self.ui.actionExtractGCMFile)
-    self.ui.actionExtractGCMFile.setData(file)
-    menu.addAction(self.ui.actionReplaceGCMFile)
-    self.ui.actionReplaceGCMFile.setData(file)
-    menu.exec_(self.ui.gcm_files_tree.mapToGlobal(pos))
+      menu = QMenu(self)
+      menu.addAction(self.ui.actionAddGCMFile)
+      self.ui.actionAddGCMFile.setData(file)
+      menu.exec_(self.ui.gcm_files_tree.mapToGlobal(pos))
+    else:
+      menu = QMenu(self)
+      menu.addAction(self.ui.actionExtractGCMFile)
+      self.ui.actionExtractGCMFile.setData(file)
+      menu.addAction(self.ui.actionReplaceGCMFile)
+      self.ui.actionReplaceGCMFile.setData(file)
+      menu.exec_(self.ui.gcm_files_tree.mapToGlobal(pos))
   
   def extract_file_from_gcm(self):
     file = self.ui.actionExtractGCMFile.data()
@@ -563,6 +584,27 @@ class GCFTWindow(QMainWindow):
     
     item = self.gcm_file_entry_to_tree_widget_item[file]
     item.setText(1, "0x%X" % data_len(data)) # Update changed file size
+  
+  def add_file_to_gcm_by_path(self, file_path):
+    dir_entry = self.ui.actionAddGCMFile.data()
+    
+    file_name = os.path.basename(file_path)
+    with open(file_path, "rb") as f:
+      file_data = BytesIO(f.read())
+    file_size = data_len(file_data)
+    file_size_str = "0x%X" % file_size
+    
+    gcm_file_path = dir_entry.dir_path + "/" + file_name
+    if gcm_file_path.lower() in self.gcm.files_by_path_lowercase:
+      QMessageBox.warning(self, "File already exists", "Cannot add new file. The selected folder already contains a file named \"%s\".\n\nIf you wish to replace the existing file, right click on it in the files tree and select 'Replace File'." % file_name)
+      return
+    file_entry = self.gcm.add_new_file(gcm_file_path, file_data)
+    
+    dir_item = self.gcm_file_entry_to_tree_widget_item[dir_entry]
+    file_item = QTreeWidgetItem([file_name, file_size_str])
+    dir_item.addChild(file_item)
+    self.gcm_file_entry_to_tree_widget_item[file_entry] = file_item
+    self.gcm_tree_widget_item_to_file_entry[file_item] = file_entry
   
   
   def keyPressEvent(self, event):

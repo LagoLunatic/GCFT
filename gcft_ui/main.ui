@@ -204,6 +204,11 @@
     <string>Extract File</string>
    </property>
   </action>
+  <action name="actionAddGCMFile">
+   <property name="text">
+    <string>Add File</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

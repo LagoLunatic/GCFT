@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'main.ui',
 # licensing of 'main.ui' applies.
 #
-# Created: Thu Jan 30 12:51:32 2020
+# Created: Wed Feb 12 13:34:18 2020
 #      by: pyside2-uic  running on PySide2 5.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -99,6 +99,8 @@ class Ui_MainWindow(object):
         self.actionReplaceGCMFile.setObjectName("actionReplaceGCMFile")
         self.actionExtractGCMFile = QtWidgets.QAction(MainWindow)
         self.actionExtractGCMFile.setObjectName("actionExtractGCMFile")
+        self.actionAddGCMFile = QtWidgets.QAction(MainWindow)
+        self.actionAddGCMFile.setObjectName("actionAddGCMFile")
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
@@ -128,4 +130,5 @@ class Ui_MainWindow(object):
         self.actionExtractRARCFile.setText(QtWidgets.QApplication.translate("MainWindow", "Extract File", None, -1))
         self.actionReplaceGCMFile.setText(QtWidgets.QApplication.translate("MainWindow", "Replace File", None, -1))
         self.actionExtractGCMFile.setText(QtWidgets.QApplication.translate("MainWindow", "Extract File", None, -1))
+        self.actionAddGCMFile.setText(QtWidgets.QApplication.translate("MainWindow", "Add File", None, -1))
 
