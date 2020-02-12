@@ -348,7 +348,7 @@ class GCFTWindow(QMainWindow):
     else:
       default_dir = os.path.join(default_dir, file.name)
     
-    file_path, selected_filter = QFileDialog.getSaveFileName(self, "Save file", default_dir, "All files (*.*)")
+    file_path, selected_filter = QFileDialog.getSaveFileName(self, "Save file", default_dir, "")
     if not file_path:
       return
     
@@ -371,7 +371,7 @@ class GCFTWindow(QMainWindow):
     if "last_used_folder_for_files" in self.settings:
       default_dir = self.settings["last_used_folder_for_files"]
     
-    file_path, selected_filter = QFileDialog.getOpenFileName(self, "Choose File", default_dir, "All files (*.*)")
+    file_path, selected_filter = QFileDialog.getOpenFileName(self, "Choose File", default_dir, "")
     if not file_path:
       return
     
@@ -506,7 +506,7 @@ class GCFTWindow(QMainWindow):
     else:
       default_dir = os.path.join(default_dir, file.name)
     
-    file_path, selected_filter = QFileDialog.getSaveFileName(self, "Save file", default_dir, "All files (*.*)")
+    file_path, selected_filter = QFileDialog.getSaveFileName(self, "Save file", default_dir, "")
     if not file_path:
       return
     
@@ -539,7 +539,7 @@ class GCFTWindow(QMainWindow):
     if "last_used_folder_for_files" in self.settings:
       default_dir = self.settings["last_used_folder_for_files"]
     
-    file_path, selected_filter = QFileDialog.getOpenFileName(self, "Choose File", default_dir, "All files (*.*)")
+    file_path, selected_filter = QFileDialog.getOpenFileName(self, "Choose File", default_dir, "")
     if not file_path:
       return
     
