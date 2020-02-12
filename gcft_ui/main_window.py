@@ -99,43 +99,150 @@ class GCFTWindow(QMainWindow):
     self.settings["last_used_tab_index"] = tab_index
   
   
-  def import_rarc(self):
-    default_dir = None
-    if "last_used_folder_for_rarcs" in self.settings:
-      default_dir = self.settings["last_used_folder_for_rarcs"]
+  def generic_do_gui_file_operation(self, op_callback, is_opening, is_saving, is_folder, file_type, file_filter=""):
+    if not is_opening and not is_saving:
+      raise Exception("Tried to perform a file operation without opening or saving")
     
-    rarc_path, selected_filter = QFileDialog.getOpenFileName(self, "Open RARC", default_dir, "RARC files (*.arc)")
-    if not rarc_path:
-      return
+    if is_folder:
+      last_used_input_folder_key_name = "last_used_input_folder_for_%s_folders" % (file_type.lower())
+      last_used_output_folder_key_name = "last_used_output_folder_for_%s_folders" % (file_type.lower())
+    else:
+      last_used_input_folder_key_name = "last_used_input_folder_for_%s" % (file_type.lower())
+      last_used_output_folder_key_name = "last_used_output_folder_for_%s" % (file_type.lower())
     
-    self.open_rarc_by_path(rarc_path)
-  
-  def export_rarc(self):
-    default_dir = None
-    if "last_used_folder_for_rarcs" in self.settings:
-      default_dir = self.settings["last_used_folder_for_rarcs"]
+    if is_saving:
+      op_type = "save"
+    else:
+      op_type = "open"
     
-    rarc_path, selected_filter = QFileDialog.getSaveFileName(self, "Save RARC", default_dir, "RARC files (*.arc)")
-    if not rarc_path:
-      return
+    if is_opening:
+      default_dir = None
+      if last_used_input_folder_key_name in self.settings:
+        default_dir = self.settings[last_used_input_folder_key_name]
+      
+      if is_folder:
+        in_selected_path = QFileDialog.getExistingDirectory(self, "Select source folder to import from", default_dir)
+      else:
+        in_selected_path, selected_filter = QFileDialog.getOpenFileName(self, "Open %s" % file_type, default_dir, file_filter)
+      if not in_selected_path:
+        return
+      
+      if is_folder and not os.path.isdir(in_selected_path):
+        raise Exception("%s folder not found: %s" % (file_type, in_selected_path))
+      if not is_folder and not os.path.isfile(in_selected_path):
+        raise Exception("%s file not found: %s" % (file_type, in_selected_path))
     
-    self.save_rarc_by_path(rarc_path)
-  
-  def open_rarc_by_path(self, rarc_path):
-    if not os.path.isfile(rarc_path):
-      raise Exception("RARC file not found: %s" % rarc_path)
+    if is_saving:
+      default_dir = None
+      if last_used_output_folder_key_name in self.settings:
+        default_dir = self.settings[last_used_output_folder_key_name]
+      
+      if is_folder:
+        out_selected_path = QFileDialog.getExistingDirectory(self, "Select destination folder to export to", default_dir)
+      else:
+        out_selected_path, selected_filter = QFileDialog.getSaveFileName(self, "Save %s" % file_type, default_dir, file_filter)
+      if not out_selected_path:
+        return
     
     try:
-      with open(rarc_path, "rb") as f:
-        data = BytesIO(f.read())
-      self.rarc = RARC(data)
+      if is_opening and is_saving:
+        op_callback(in_selected_path, out_selected_path)
+      elif is_opening:
+        op_callback(in_selected_path)
+      else:
+        op_callback(out_selected_path)
+    # TODO: more specific exceptions, like read permission, FileNotFoundError, etc
     except Exception as e:
       stack_trace = traceback.format_exc()
-      error_message = "Failed to open RARC with error:\n" + str(e) + "\n\n" + stack_trace
-      QMessageBox.critical(self, "Failed to open RARC", error_message)
+      error_message_title = "Failed to %s %s" % (op_type, file_type)
+      if is_folder:
+        error_message_title += " folder"
+      error_message = "%s with error:\n%s\n\n%s" % (error_message_title, str(e), stack_trace)
+      QMessageBox.critical(self, error_message_title, error_message)
       return
     
-    self.settings["last_used_folder_for_rarcs"] = os.path.dirname(rarc_path)
+    if is_opening:
+      self.settings[last_used_input_folder_key_name] = os.path.dirname(in_selected_path)
+    if is_saving:
+      self.settings[last_used_output_folder_key_name] = os.path.dirname(out_selected_path)
+  
+  
+  
+  def import_gcm(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.import_gcm_by_path,
+      is_opening=True, is_saving=False, is_folder=False,
+      file_type="GCM", file_filter="GC ISO Files (*.iso *.gcm)"
+    )
+  
+  def export_gcm(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.export_gcm_by_path,
+      is_opening=False, is_saving=True, is_folder=False,
+      file_type="GCM", file_filter="GC ISO Files (*.iso *.gcm)"
+    )
+  
+  def import_folder_over_gcm(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.import_folder_over_gcm_by_path,
+      is_opening=True, is_saving=False, is_folder=True,
+      file_type="GCM"
+    )
+  
+  def export_gcm_folder(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.export_gcm_folder_by_path,
+      is_opening=False, is_saving=True, is_folder=True,
+      file_type="GCM"
+    )
+  
+  def import_rarc(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.import_rarc_by_path,
+      is_opening=True, is_saving=False, is_folder=False,
+      file_type="RARC", file_filter="RARC files (*.arc)"
+    )
+  
+  def export_rarc(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.export_rarc_by_path,
+      is_opening=False, is_saving=True, is_folder=False,
+      file_type="RARC", file_filter="RARC files (*.arc)"
+    )
+  
+  def import_folder_over_rarc(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.import_folder_over_rarc_by_path,
+      is_opening=True, is_saving=False, is_folder=True,
+      file_type="RARC"
+    )
+  
+  def export_rarc_folder(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.export_rarc_folder_by_path,
+      is_opening=False, is_saving=True, is_folder=True,
+      file_type="RARC"
+    )
+  
+  def decompress_yaz0(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.decompress_yaz0_by_paths,
+      is_opening=True, is_saving=True, is_folder=False,
+      file_type="Yaz0", file_filter=""
+    )
+  
+  def compress_yaz0(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.compress_yaz0_by_paths,
+      is_opening=True, is_saving=True, is_folder=False,
+      file_type="Yaz0", file_filter=""
+    )
+  
+  
+  def import_rarc_by_path(self, rarc_path):
+    with open(rarc_path, "rb") as f:
+      data = BytesIO(f.read())
+    self.rarc = RARC(data)
     
     self.ui.rarc_files_tree.clear()
     
@@ -162,7 +269,7 @@ class GCFTWindow(QMainWindow):
     self.ui.import_folder_over_rarc.setDisabled(False)
     self.ui.export_rarc_folder.setDisabled(False)
   
-  def save_rarc_by_path(self, rarc_path):
+  def export_rarc_by_path(self, rarc_path):
     self.rarc.save_changes()
     
     try:
@@ -179,22 +286,8 @@ class GCFTWindow(QMainWindow):
     
     QMessageBox.information(self, "RARC saved", "Successfully saved RARC.")
   
-  def import_folder_over_rarc(self):
-    default_dir = None
-    if "last_used_folder_for_rarc_folders" in self.settings:
-      default_dir = self.settings["last_used_folder_for_rarc_folders"]
-    
-    folder_path = QFileDialog.getExistingDirectory(self, "Select folder to import RARC contents from", default_dir)
-    if not folder_path:
-      return
-    
-    try:
-      num_files_overwritten = self.rarc.import_all_files_from_disk(folder_path)
-    except Exception as e:
-      stack_trace = traceback.format_exc()
-      error_message = "Failed to import folder over RARC with error:\n" + str(e) + "\n\n" + stack_trace
-      QMessageBox.critical(self, "Failed to import folder", error_message)
-      return
+  def import_folder_over_rarc_by_path(self, folder_path):
+    num_files_overwritten = self.rarc.import_all_files_from_disk(folder_path)
     
     if num_files_overwritten == 0:
       QMessageBox.warning(self, "No matching files found", "The selected folder does not contain any files matching the name and directory structure of files in the currently loaded RARC. No files imported.")
@@ -204,26 +297,11 @@ class GCFTWindow(QMainWindow):
     
     QMessageBox.information(self, "Folder imported", "Successfully overwrote %d files in the RARC from \"%s\"." % (num_files_overwritten, folder_path))
   
-  def export_rarc_folder(self):
-    default_dir = None
-    if "last_used_folder_for_rarc_folders" in self.settings:
-      default_dir = self.settings["last_used_folder_for_rarc_folders"]
-    
-    folder_path = QFileDialog.getExistingDirectory(self, "Select folder to extract RARC contents to", default_dir)
-    if not folder_path:
-      return
-    
-    try:
-      self.rarc.extract_all_files_to_disk(output_directory=folder_path)
-    except Exception as e:
-      stack_trace = traceback.format_exc()
-      error_message = "Failed to extract RARC to folder with error:\n" + str(e) + "\n\n" + stack_trace
-      QMessageBox.critical(self, "Failed to extract RARC files", error_message)
-      return
-    
-    self.settings["last_used_folder_for_rarc_folders"] = os.path.dirname(folder_path)
+  def export_rarc_folder_by_path(self, folder_path):
+    self.rarc.extract_all_files_to_disk(output_directory=folder_path)
     
     QMessageBox.information(self, "RARC extracted", "Successfully extracted RARC contents to \"%s\"." % folder_path)
+  
   
   def get_file_by_tree_item(self, item):
     file_id = item.text(1)
@@ -313,118 +391,43 @@ class GCFTWindow(QMainWindow):
     item.setText(2, "0x%X" % data_len(file.data)) # Update changed file size
   
   
-  def decompress_yaz0(self):
-    default_dir = None
-    if "last_used_folder_for_yaz0" in self.settings:
-      default_dir = self.settings["last_used_folder_for_yaz0"]
-    
-    comp_path, selected_filter = QFileDialog.getOpenFileName(self, "Choose file to decompress", default_dir, "All files (*.*)")
-    if not comp_path:
+  
+  def decompress_yaz0_by_paths(self, comp_path, decomp_path):
+    with open(comp_path, "rb") as f:
+      comp_data = BytesIO(f.read())
+    if try_read_str(comp_data, 0, 4) != "Yaz0":
+      QMessageBox.warning(self, "Not Yaz0 compressed", "The selected file is not Yaz0 compressed. Cannot decompress.")
       return
     
-    self.settings["last_used_folder_for_yaz0"] = os.path.dirname(comp_path)
-    default_dir = self.settings["last_used_folder_for_yaz0"]
+    decomp_data = Yaz0.decompress(comp_data)
     
-    try:
-      with open(comp_path, "rb") as f:
-        comp_data = BytesIO(f.read())
-      if try_read_str(comp_data, 0, 4) != "Yaz0":
-        QMessageBox.warning(self, "Not Yaz0 compressed", "The selected file is not Yaz0 compressed. Cannot decompress.")
-        return
-      
-      decomp_path, selected_filter = QFileDialog.getSaveFileName(self, "Choose where to save decompressed file", default_dir, "All files (*.*)")
-      if not decomp_path:
-        return
-      
-      decomp_data = Yaz0.decompress(comp_data)
-      
-      with open(decomp_path, "wb") as f:
-        decomp_data.seek(0)
-        f.write(decomp_data.read())
-    except Exception as e:
-      stack_trace = traceback.format_exc()
-      error_message = "Failed to decompress file with error:\n" + str(e) + "\n\n" + stack_trace
-      QMessageBox.critical(self, "Failed to decompress file", error_message)
-      return
-    
-    self.settings["last_used_folder_for_yaz0"] = os.path.dirname(decomp_path)
+    with open(decomp_path, "wb") as f:
+      decomp_data.seek(0)
+      f.write(decomp_data.read())
     
     QMessageBox.information(self, "Decompressed file saved", "Successfully decompressed and saved file.")
   
-  def compress_yaz0(self):
-    default_dir = None
-    if "last_used_folder_for_yaz0" in self.settings:
-      default_dir = self.settings["last_used_folder_for_yaz0"]
-    
-    decomp_path, selected_filter = QFileDialog.getOpenFileName(self, "Choose file to compress", default_dir, "All files (*.*)")
-    if not decomp_path:
+  def compress_yaz0_by_paths(self, decomp_path, comp_path):
+    with open(decomp_path, "rb") as f:
+      decomp_data = BytesIO(f.read())
+    if try_read_str(decomp_data, 0, 4) == "Yaz0":
+      QMessageBox.warning(self, "Already Yaz0 compressed", "The selected file is already Yaz0 compressed. Cannot compress.")
       return
     
-    try:
-      with open(decomp_path, "rb") as f:
-        decomp_data = BytesIO(f.read())
-      if try_read_str(decomp_data, 0, 4) == "Yaz0":
-        QMessageBox.warning(self, "Already Yaz0 compressed", "The selected file is already Yaz0 compressed. Cannot compress.")
-        return
-      
-      comp_path, selected_filter = QFileDialog.getSaveFileName(self, "Choose where to save compressed file", default_dir, "All files (*.*)")
-      if not comp_path:
-        return
-      
-      # TODO: progress bar?
-      comp_data = Yaz0.compress(decomp_data)
-      
-      with open(comp_path, "wb") as f:
-        comp_data.seek(0)
-        f.write(comp_data.read())
-    except Exception as e:
-      stack_trace = traceback.format_exc()
-      error_message = "Failed to compress file with error:\n" + str(e) + "\n\n" + stack_trace
-      QMessageBox.critical(self, "Failed to compress file", error_message)
-      return
+    # TODO: progress bar?
+    comp_data = Yaz0.compress(decomp_data)
     
-    self.settings["last_used_folder_for_yaz0"] = os.path.dirname(comp_path)
+    with open(comp_path, "wb") as f:
+      comp_data.seek(0)
+      f.write(comp_data.read())
     
     QMessageBox.information(self, "Compressed file saved", "Successfully compressed and saved file.")
   
   
-  def import_gcm(self):
-    default_dir = None
-    if "last_used_folder_for_gcm" in self.settings:
-      default_dir = self.settings["last_used_folder_for_gcm"]
+  def import_gcm_by_path(self, gcm_path):
+    self.gcm = GCM(gcm_path)
     
-    gcm_path, selected_filter = QFileDialog.getOpenFileName(self, "Open GCM", default_dir, "GC ISO Files (*.iso *.gcm)")
-    if not gcm_path:
-      return
-    
-    self.open_gcm_by_path(gcm_path)
-  
-  def export_gcm(self):
-    default_dir = None
-    if "last_used_folder_for_gcm" in self.settings:
-      default_dir = self.settings["last_used_folder_for_gcm"]
-    
-    gcm_path, selected_filter = QFileDialog.getSaveFileName(self, "Save GCM", default_dir, "GC ISO Files (*.iso *.gcm)")
-    if not gcm_path:
-      return
-    
-    self.save_gcm_by_path(gcm_path)
-  
-  def open_gcm_by_path(self, gcm_path):
-    if not os.path.isfile(gcm_path):
-      raise Exception("GCM file not found: %s" % gcm_path)
-    
-    try:
-      self.gcm = GCM(gcm_path)
-      
-      self.settings["last_used_folder_for_gcm"] = os.path.dirname(gcm_path)
-      
-      self.gcm.read_entire_disc()
-    except Exception as e:
-      stack_trace = traceback.format_exc()
-      error_message = "Failed to import GCM with error:\n" + str(e) + "\n\n" + stack_trace
-      QMessageBox.critical(self, "Failed to import GCM", error_message)
-      return
+    self.gcm.read_entire_disc()
     
     self.ui.gcm_files_tree.clear()
     
@@ -455,71 +458,29 @@ class GCFTWindow(QMainWindow):
     self.ui.import_folder_over_gcm.setDisabled(False)
     self.ui.export_gcm_folder.setDisabled(False)
   
-  def save_gcm_by_path(self, gcm_path):
+  def export_gcm_by_path(self, gcm_path):
     # TODO: progress bar?
-    try:
-      self.gcm.export_disc_to_iso_with_changed_files(gcm_path)
-    except FileNotFoundError:
-      QMessageBox.critical(self, "Could not save ISO", "Failed to save a new ISO. The original ISO \"%s\" has been moved or deleted." % self.gcm.iso_path)
-      return
-    except Exception as e:
-      stack_trace = traceback.format_exc()
-      error_message = "Failed to save GCM with error:\n" + str(e) + "\n\n" + stack_trace
-      QMessageBox.critical(self, "Failed to save GCM", error_message)
-      return
+    self.gcm.export_disc_to_iso_with_changed_files(gcm_path)
     
     # Update the ISO path we read from in case the user tries to read another file after exporting the ISO.
     self.gcm.iso_path = gcm_path
     
-    self.settings["last_used_folder_for_gcm"] = os.path.dirname(gcm_path)
-    
     QMessageBox.information(self, "GCM saved", "Successfully saved GCM.")
   
-  def import_folder_over_gcm(self):
-    default_dir = None
-    if "last_used_folder_for_gcm_folders" in self.settings:
-      default_dir = self.settings["last_used_folder_for_gcm_folders"]
-    
-    folder_path = QFileDialog.getExistingDirectory(self, "Select folder to import GCM contents from", default_dir)
-    if not folder_path:
-      return
-    
-    try:
-      num_files_overwritten = self.gcm.import_all_files_from_disk(folder_path)
-    except Exception as e:
-      stack_trace = traceback.format_exc()
-      error_message = "Failed to import folder over GCM with error:\n" + str(e) + "\n\n" + stack_trace
-      QMessageBox.critical(self, "Failed to import folder", error_message)
-      return
+  def import_folder_over_gcm_by_path(self, folder_path):
+    num_files_overwritten = self.gcm.import_all_files_from_disk(folder_path)
     
     if num_files_overwritten == 0:
       QMessageBox.warning(self, "No matching files found", "The selected folder does not contain any files matching the name and directory structure of files in the currently loaded GCM. No files imported.")
       return
     
-    self.settings["last_used_folder_for_gcm_folders"] = os.path.dirname(folder_path)
-    
     QMessageBox.information(self, "Folder imported", "Successfully overwrote %d files in the GCM from \"%s\"." % (num_files_overwritten, folder_path))
   
-  def export_gcm_folder(self):
-    default_dir = None
-    if "last_used_folder_for_gcm_folders" in self.settings:
-      default_dir = self.settings["last_used_folder_for_gcm_folders"]
-    
-    folder_path = QFileDialog.getExistingDirectory(self, "Select folder to extract GCM contents to", default_dir)
-    if not folder_path:
-      return
-    
-    try:
-      self.gcm.export_disc_to_folder_with_changed_files(folder_path)
-    except Exception as e:
-      stack_trace = traceback.format_exc()
-      error_message = "Failed to save folder with error:\n" + str(e) + "\n\n" + stack_trace
-      QMessageBox.critical(self, "Failed to save GCM files", error_message)
-      return
-    
-    self.settings["last_used_folder_for_gcm_folders"] = os.path.dirname(folder_path)
+  def export_gcm_folder_by_path(self, folder_path):
+    self.gcm.export_disc_to_folder_with_changed_files(folder_path)
     
     QMessageBox.information(self, "GCM extracted", "Successfully extracted GCM contents to \"%s\"." % folder_path)
+  
   
   def show_gcm_files_tree_context_menu(self, pos):
     item = self.ui.gcm_files_tree.itemAt(pos)
