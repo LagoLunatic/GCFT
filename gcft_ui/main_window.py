@@ -329,6 +329,9 @@ class GCFTWindow(QMainWindow):
     file = self.get_file_by_tree_item(item)
     if file is None:
       return
+    if file.is_dir:
+      # TODO: Implement extracting/replacing folders
+      return
     
     menu = QMenu(self)
     menu.addAction(self.ui.actionExtractRARCFile)
@@ -486,6 +489,9 @@ class GCFTWindow(QMainWindow):
     
     file = self.gcm_tree_widget_item_to_file_entry[item]
     if file is None:
+      return
+    if file.is_dir:
+      # TODO: Implement extracting/replacing folders
       return
     
     menu = QMenu(self)
