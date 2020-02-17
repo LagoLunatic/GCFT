@@ -338,22 +338,16 @@ class GCFTWindow(QMainWindow):
   
   
   def get_file_by_tree_item(self, item):
-    file_id = item.text(1)
-    if file_id == "":
+    if item not in self.rarc_tree_widget_item_to_file_entry:
       return None
-    file_id = int(file_id)
-    file = next((file for file in self.rarc.file_entries if file.id == file_id), None)
-    return file
+    
+    return self.rarc_tree_widget_item_to_file_entry[item]
   
   def get_tree_item_by_file(self, file):
-    file_id_string = "%d" % file.id
-    for i in range(self.ui.rarc_files_tree.topLevelItemCount()):
-      top_level_item = self.ui.rarc_files_tree.topLevelItem(i)
-      for j in range(top_level_item.childCount()):
-        item = top_level_item.child(j)
-        if item.text(1) == file_id_string:
-          return item
-    return None
+    if file not in self.rarc_file_entry_to_tree_widget_item:
+      return None
+    
+    return self.rarc_file_entry_to_tree_widget_item[file]
   
   def show_rarc_files_tree_context_menu(self, pos):
     if self.rarc is None:
