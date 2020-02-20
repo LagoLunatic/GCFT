@@ -495,6 +495,9 @@ class GCFTWindow(QMainWindow):
     self.ui.export_gcm_folder.setDisabled(False)
   
   def export_gcm_by_path(self, gcm_path):
+    if os.path.realpath(self.gcm.iso_path) == os.path.realpath(gcm_path):
+      raise Exception("Cannot export an ISO over the currently opened ISO. Please choose a different path.")
+    
     # TODO: progress bar?
     self.gcm.export_disc_to_iso_with_changed_files(gcm_path)
     
