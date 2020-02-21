@@ -61,6 +61,7 @@ class GCFTWindow(QMainWindow):
     self.ui.rarc_files_tree.customContextMenuRequested.connect(self.show_rarc_files_tree_context_menu)
     self.ui.actionExtractRARCFile.triggered.connect(self.extract_file_from_rarc)
     self.ui.actionReplaceRARCFile.triggered.connect(self.replace_file_in_rarc)
+    self.ui.actionDeleteRARCFile.triggered.connect(self.delete_file_in_rarc)
     self.ui.actionAddRARCFile.triggered.connect(self.add_file_to_rarc)
     
     self.ui.decompress_yaz0.clicked.connect(self.decompress_yaz0)
@@ -170,6 +171,18 @@ class GCFTWindow(QMainWindow):
       self.settings[last_used_input_folder_key_name] = os.path.dirname(in_selected_path)
     if is_saving:
       self.settings[last_used_output_folder_key_name] = os.path.dirname(out_selected_path)
+  
+  def confirm_delete_file(self, file_name):
+    response = QMessageBox.question(self, 
+      "Confirm delete",
+      "Are you sure you want to delete \"%s\"?" % file_name,
+      QMessageBox.Cancel | QMessageBox.Yes,
+      QMessageBox.Cancel
+    )
+    if response == QMessageBox.Yes:
+      return True
+    else:
+      return False
   
   
   
@@ -399,6 +412,8 @@ class GCFTWindow(QMainWindow):
         self.ui.actionExtractRARCFile.setData(file)
         menu.addAction(self.ui.actionReplaceRARCFile)
         self.ui.actionReplaceRARCFile.setData(file)
+        menu.addAction(self.ui.actionDeleteRARCFile)
+        self.ui.actionDeleteRARCFile.setData(file)
         menu.exec_(self.ui.rarc_files_tree.mapToGlobal(pos))
   
   def extract_file_from_rarc(self):
@@ -453,6 +468,20 @@ class GCFTWindow(QMainWindow):
     
     item = self.get_tree_item_by_file(file)
     item.setText(2, "0x%X" % data_len(file.data)) # Update changed file size
+  
+  def delete_file_in_rarc(self):
+    file_entry = self.ui.actionDeleteRARCFile.data()
+    
+    if not self.confirm_delete_file(file_entry.name):
+      return
+    
+    node = file_entry.parent_node
+    
+    self.rarc.delete_file(file_entry)
+    
+    item = self.get_tree_item_by_file(file_entry)
+    dir_item = self.get_tree_item_by_node(node)
+    dir_item.removeChild(item)
   
   def add_file_to_rarc_by_path(self, file_path):
     node = self.ui.actionAddRARCFile.data()
