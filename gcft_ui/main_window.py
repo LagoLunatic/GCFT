@@ -226,6 +226,24 @@ class GCFTWindow(QMainWindow):
       file_type="GCM"
     )
   
+  def extract_file_from_gcm(self):
+    file = self.ui.actionExtractGCMFile.data()
+    self.generic_do_gui_file_operation(
+      op_callback=self.extract_file_from_gcm_by_path,
+      is_opening=False, is_saving=True, is_folder=False,
+      file_type="file",
+      default_file_name=file.name
+    )
+  
+  def replace_file_in_gcm(self):
+    file = self.ui.actionReplaceGCMFile.data()
+    self.generic_do_gui_file_operation(
+      op_callback=self.replace_file_in_gcm_by_path,
+      is_opening=True, is_saving=False, is_folder=False,
+      file_type="file",
+      default_file_name=file.name
+    )
+  
   def add_file_to_gcm(self):
     self.generic_do_gui_file_operation(
       op_callback=self.add_file_to_gcm_by_path,
@@ -619,65 +637,29 @@ class GCFTWindow(QMainWindow):
       self.ui.actionReplaceGCMFile.setData(file)
       menu.exec_(self.ui.gcm_files_tree.mapToGlobal(pos))
   
-  def extract_file_from_gcm(self):
+  def extract_file_from_gcm_by_path(self, file_path):
     file = self.ui.actionExtractGCMFile.data()
     
-    default_dir = None
-    if "last_used_folder_for_files" in self.settings:
-      default_dir = self.settings["last_used_folder_for_files"]
-    if default_dir is None:
-      default_dir = file.name
+    if file.file_path in self.gcm.changed_files:
+      data = self.gcm.changed_files[file.file_path]
+      data.seek(0)
+      data = data.read()
     else:
-      default_dir = os.path.join(default_dir, file.name)
-    
-    file_path, selected_filter = QFileDialog.getSaveFileName(self, "Save file", default_dir, "")
-    if not file_path:
-      return
-    
-    try:
-      if file.file_path in self.gcm.changed_files:
-        data = self.gcm.changed_files[file.file_path]
-        data.seek(0)
-        data = data.read()
-      else:
-        # TODO: for very large files, don't read all at once
-        try:
-          data = self.gcm.read_file_raw_data(file.file_path)
-        except FileNotFoundError:
-          QMessageBox.critical(self, "Could not read file", "Failed to read file. The ISO \"%s\" has been moved or deleted." % self.gcm.iso_path)
-          return
-      with open(file_path, "wb") as f:
-        f.write(data)
-    except Exception as e:
-      stack_trace = traceback.format_exc()
-      error_message = "Failed to extract file with error:\n" + str(e) + "\n\n" + stack_trace
-      QMessageBox.critical(self, "Failed to extract file", error_message)
-      return
-    
-    self.settings["last_used_folder_for_files"] = os.path.dirname(file_path)
+      # TODO: for very large files, don't read all at once
+      try:
+        data = self.gcm.read_file_raw_data(file.file_path)
+      except FileNotFoundError:
+        QMessageBox.critical(self, "Could not read file", "Failed to read file. The ISO \"%s\" has been moved or deleted." % self.gcm.iso_path)
+        return
+    with open(file_path, "wb") as f:
+      f.write(data)
   
-  def replace_file_in_gcm(self):
+  def replace_file_in_gcm_by_path(self, file_path):
     file = self.ui.actionReplaceGCMFile.data()
     
-    default_dir = None
-    if "last_used_folder_for_files" in self.settings:
-      default_dir = self.settings["last_used_folder_for_files"]
-    
-    file_path, selected_filter = QFileDialog.getOpenFileName(self, "Choose File", default_dir, "")
-    if not file_path:
-      return
-    
-    try:
-      with open(file_path, "rb") as f:
-        data = BytesIO(f.read())
-      self.gcm.changed_files[file.file_path] = data
-    except Exception as e:
-      stack_trace = traceback.format_exc()
-      error_message = "Failed to replace file with error:\n" + str(e) + "\n\n" + stack_trace
-      QMessageBox.critical(self, "Failed to replace file", error_message)
-      return
-    
-    self.settings["last_used_folder_for_files"] = os.path.dirname(file_path)
+    with open(file_path, "rb") as f:
+      data = BytesIO(f.read())
+    self.gcm.changed_files[file.file_path] = data
     
     item = self.gcm_file_entry_to_tree_widget_item[file]
     item.setText(1, "0x%X" % data_len(data)) # Update changed file size
