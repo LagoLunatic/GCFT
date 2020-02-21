@@ -29,6 +29,7 @@ from version import VERSION
 from wwlib.rarc import RARC
 from wwlib.yaz0 import Yaz0
 from wwlib.gcm import GCM
+from wwlib.jpc import JPC
 from fs_helpers import *
 
 class GCFTWindow(QMainWindow):
@@ -42,6 +43,7 @@ class GCFTWindow(QMainWindow):
     
     self.ui.rarc_files_tree.setColumnWidth(0, 300)
     self.ui.gcm_files_tree.setColumnWidth(0, 300)
+    self.ui.jpc_particles_tree.setColumnWidth(0, 100)
     
     self.ui.export_rarc.setDisabled(True)
     self.ui.import_folder_over_rarc.setDisabled(True)
@@ -49,6 +51,7 @@ class GCFTWindow(QMainWindow):
     self.ui.export_gcm.setDisabled(True)
     self.ui.import_folder_over_gcm.setDisabled(True)
     self.ui.export_gcm_folder.setDisabled(True)
+    self.ui.export_jpc.setDisabled(True)
     
     self.ui.tabWidget.currentChanged.connect(self.save_last_used_tab)
     
@@ -78,6 +81,9 @@ class GCFTWindow(QMainWindow):
     self.ui.actionReplaceGCMFile.triggered.connect(self.replace_file_in_gcm)
     self.ui.actionDeleteGCMFile.triggered.connect(self.delete_file_in_gcm)
     self.ui.actionAddGCMFile.triggered.connect(self.add_file_to_gcm)
+    
+    self.ui.import_jpc.clicked.connect(self.import_jpc)
+    self.ui.export_jpc.clicked.connect(self.export_jpc)
     
     self.load_settings()
     
@@ -305,6 +311,20 @@ class GCFTWindow(QMainWindow):
       file_type="file"
     )
   
+  def import_jpc(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.import_jpc_by_path,
+      is_opening=True, is_saving=False, is_folder=False,
+      file_type="JPC", file_filter="JPC Files (*.jpc)"
+    )
+  
+  def export_jpc(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.export_jpc_by_path,
+      is_opening=False, is_saving=True, is_folder=False,
+      file_type="JPC", file_filter="JPC Files (*.jpc)"
+    )
+  
   def decompress_yaz0(self):
     self.generic_do_gui_file_operation(
       op_callback=self.decompress_yaz0_by_paths,
@@ -376,17 +396,9 @@ class GCFTWindow(QMainWindow):
   def export_rarc_by_path(self, rarc_path):
     self.rarc.save_changes()
     
-    try:
-      with open(rarc_path, "wb") as f:
-        self.rarc.data.seek(0)
-        f.write(self.rarc.data.read())
-    except Exception as e:
-      stack_trace = traceback.format_exc()
-      error_message = "Failed to save RARC with error:\n" + str(e) + "\n\n" + stack_trace
-      QMessageBox.critical(self, "Failed to save RARC", error_message)
-      return
-    
-    self.settings["last_used_folder_for_rarcs"] = os.path.dirname(rarc_path)
+    with open(rarc_path, "wb") as f:
+      self.rarc.data.seek(0)
+      f.write(self.rarc.data.read())
     
     QMessageBox.information(self, "RARC saved", "Successfully saved RARC.")
   
@@ -705,6 +717,40 @@ class GCFTWindow(QMainWindow):
     dir_item.addChild(file_item)
     self.gcm_file_entry_to_tree_widget_item[file_entry] = file_item
     self.gcm_tree_widget_item_to_file_entry[file_item] = file_entry
+  
+  
+  
+  def import_jpc_by_path(self, jpc_path):
+    with open(jpc_path, "rb") as f:
+      data = BytesIO(f.read())
+    self.jpc = JPC(data)
+    
+    self.ui.jpc_particles_tree.clear()
+    
+    self.jpc_particle_to_tree_widget_item = {}
+    self.jpc_tree_widget_item_to_particle = {}
+    
+    for particle in self.jpc.particles:
+      particle_id_str = "0x%04X" % particle.particle_id
+      
+      particle_item = QTreeWidgetItem([particle_id_str, ""])
+      self.ui.jpc_particles_tree.addTopLevelItem(particle_item)
+      
+      for texture_filename in particle.tdb1.texture_filenames:
+        texture_item = QTreeWidgetItem(["", texture_filename])
+        particle_item.addChild(texture_item)
+    
+    self.ui.export_jpc.setDisabled(False)
+  
+  def export_jpc_by_path(self, jpc_path):
+    self.jpc.save_changes()
+    
+    with open(jpc_path, "wb") as f:
+      self.jpc.data.seek(0)
+      f.write(self.jpc.data.read())
+    
+    QMessageBox.information(self, "JPC saved", "Successfully saved JPC.")
+  
   
   
   def keyPressEvent(self, event):

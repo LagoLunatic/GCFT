@@ -131,6 +131,45 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tab_4">
+       <attribute name="title">
+        <string>JPC Particle Archives</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QPushButton" name="import_jpc">
+            <property name="text">
+             <string>Import JPC</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="export_jpc">
+            <property name="text">
+             <string>Export JPC</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTreeWidget" name="jpc_particles_tree">
+          <column>
+           <property name="text">
+            <string>Particle ID</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Texture Name</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="tab_2">
        <attribute name="title">
         <string>Yaz0 Compression</string>

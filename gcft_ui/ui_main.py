@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'main.ui',
 # licensing of 'main.ui' applies.
 #
-# Created: Fri Feb 21 16:20:44 2020
+# Created: Fri Feb 21 17:25:15 2020
 #      by: pyside2-uic  running on PySide2 5.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -66,6 +66,23 @@ class Ui_MainWindow(object):
         self.rarc_files_tree.setObjectName("rarc_files_tree")
         self.verticalLayout_2.addWidget(self.rarc_files_tree)
         self.tabWidget.addTab(self.tab, "")
+        self.tab_4 = QtWidgets.QWidget()
+        self.tab_4.setObjectName("tab_4")
+        self.verticalLayout_5 = QtWidgets.QVBoxLayout(self.tab_4)
+        self.verticalLayout_5.setObjectName("verticalLayout_5")
+        self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_4.setObjectName("horizontalLayout_4")
+        self.import_jpc = QtWidgets.QPushButton(self.tab_4)
+        self.import_jpc.setObjectName("import_jpc")
+        self.horizontalLayout_4.addWidget(self.import_jpc)
+        self.export_jpc = QtWidgets.QPushButton(self.tab_4)
+        self.export_jpc.setObjectName("export_jpc")
+        self.horizontalLayout_4.addWidget(self.export_jpc)
+        self.verticalLayout_5.addLayout(self.horizontalLayout_4)
+        self.jpc_particles_tree = QtWidgets.QTreeWidget(self.tab_4)
+        self.jpc_particles_tree.setObjectName("jpc_particles_tree")
+        self.verticalLayout_5.addWidget(self.jpc_particles_tree)
+        self.tabWidget.addTab(self.tab_4, "")
         self.tab_2 = QtWidgets.QWidget()
         self.tab_2.setObjectName("tab_2")
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.tab_2)
@@ -129,6 +146,11 @@ class Ui_MainWindow(object):
         self.rarc_files_tree.headerItem().setText(1, QtWidgets.QApplication.translate("MainWindow", "File ID", None, -1))
         self.rarc_files_tree.headerItem().setText(2, QtWidgets.QApplication.translate("MainWindow", "File Size", None, -1))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QtWidgets.QApplication.translate("MainWindow", "RARC Archives", None, -1))
+        self.import_jpc.setText(QtWidgets.QApplication.translate("MainWindow", "Import JPC", None, -1))
+        self.export_jpc.setText(QtWidgets.QApplication.translate("MainWindow", "Export JPC", None, -1))
+        self.jpc_particles_tree.headerItem().setText(0, QtWidgets.QApplication.translate("MainWindow", "Particle ID", None, -1))
+        self.jpc_particles_tree.headerItem().setText(1, QtWidgets.QApplication.translate("MainWindow", "Texture Name", None, -1))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), QtWidgets.QApplication.translate("MainWindow", "JPC Particle Archives", None, -1))
         self.decompress_yaz0.setText(QtWidgets.QApplication.translate("MainWindow", "Decompress File", None, -1))
         self.compress_yaz0.setText(QtWidgets.QApplication.translate("MainWindow", "Compress File", None, -1))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QtWidgets.QApplication.translate("MainWindow", "Yaz0 Compression", None, -1))
