@@ -105,7 +105,7 @@ class GCFTWindow(QMainWindow):
     self.settings["last_used_tab_index"] = tab_index
   
   
-  def generic_do_gui_file_operation(self, op_callback, is_opening, is_saving, is_folder, file_type, file_filter=""):
+  def generic_do_gui_file_operation(self, op_callback, is_opening, is_saving, is_folder, file_type, file_filter="", default_file_name=None):
     if not is_opening and not is_saving:
       raise Exception("Tried to perform a file operation without opening or saving")
     
@@ -126,6 +126,12 @@ class GCFTWindow(QMainWindow):
       if last_used_input_folder_key_name in self.settings:
         default_dir = self.settings[last_used_input_folder_key_name]
       
+      if default_file_name is not None:
+        if default_dir is None:
+          default_dir = default_file_name
+        else:
+          default_dir = os.path.join(default_dir, default_file_name)
+      
       if is_folder:
         in_selected_path = QFileDialog.getExistingDirectory(self, "Select source folder to import from", default_dir)
       else:
@@ -142,6 +148,12 @@ class GCFTWindow(QMainWindow):
       default_dir = None
       if last_used_output_folder_key_name in self.settings:
         default_dir = self.settings[last_used_output_folder_key_name]
+      
+      if default_file_name is not None:
+        if default_dir is None:
+          default_dir = default_file_name
+        else:
+          default_dir = os.path.join(default_dir, default_file_name)
       
       if is_folder:
         out_selected_path = QFileDialog.getExistingDirectory(self, "Select destination folder to export to", default_dir)
@@ -247,6 +259,24 @@ class GCFTWindow(QMainWindow):
       op_callback=self.export_rarc_folder_by_path,
       is_opening=False, is_saving=True, is_folder=True,
       file_type="RARC"
+    )
+  
+  def extract_file_from_rarc(self):
+    file = self.ui.actionExtractRARCFile.data()
+    self.generic_do_gui_file_operation(
+      op_callback=self.extract_file_from_rarc_by_path,
+      is_opening=False, is_saving=True, is_folder=False,
+      file_type="file",
+      default_file_name=file.name
+    )
+  
+  def replace_file_in_rarc(self):
+    file = self.ui.actionReplaceRARCFile.data()
+    self.generic_do_gui_file_operation(
+      op_callback=self.replace_file_in_rarc_by_path,
+      is_opening=True, is_saving=False, is_folder=False,
+      file_type="file",
+      default_file_name=file.name
     )
   
   def add_file_to_rarc(self):
@@ -416,55 +446,19 @@ class GCFTWindow(QMainWindow):
         self.ui.actionDeleteRARCFile.setData(file)
         menu.exec_(self.ui.rarc_files_tree.mapToGlobal(pos))
   
-  def extract_file_from_rarc(self):
+  def extract_file_from_rarc_by_path(self, file_path):
     file = self.ui.actionExtractRARCFile.data()
     
-    default_dir = None
-    if "last_used_folder_for_files" in self.settings:
-      default_dir = self.settings["last_used_folder_for_files"]
-    if default_dir is None:
-      default_dir = file.name
-    else:
-      default_dir = os.path.join(default_dir, file.name)
-    
-    file_path, selected_filter = QFileDialog.getSaveFileName(self, "Save file", default_dir, "")
-    if not file_path:
-      return
-    
-    try:
-      with open(file_path, "wb") as f:
-        file.data.seek(0)
-        f.write(file.data.read())
-    except Exception as e:
-      stack_trace = traceback.format_exc()
-      error_message = "Failed to extract file with error:\n" + str(e) + "\n\n" + stack_trace
-      QMessageBox.critical(self, "Failed to extract file", error_message)
-      return
-    
-    self.settings["last_used_folder_for_files"] = os.path.dirname(file_path)
+    with open(file_path, "wb") as f:
+      file.data.seek(0)
+      f.write(file.data.read())
   
-  def replace_file_in_rarc(self):
+  def replace_file_in_rarc_by_path(self, file_path):
     file = self.ui.actionReplaceRARCFile.data()
     
-    default_dir = None
-    if "last_used_folder_for_files" in self.settings:
-      default_dir = self.settings["last_used_folder_for_files"]
-    
-    file_path, selected_filter = QFileDialog.getOpenFileName(self, "Choose File", default_dir, "")
-    if not file_path:
-      return
-    
-    try:
-      with open(file_path, "rb") as f:
-        data = BytesIO(f.read())
-      file.data = data
-    except Exception as e:
-      stack_trace = traceback.format_exc()
-      error_message = "Failed to replace file with error:\n" + str(e) + "\n\n" + stack_trace
-      QMessageBox.critical(self, "Failed to replace file", error_message)
-      return
-    
-    self.settings["last_used_folder_for_files"] = os.path.dirname(file_path)
+    with open(file_path, "rb") as f:
+      data = BytesIO(f.read())
+    file.data = data
     
     item = self.get_tree_item_by_file(file)
     item.setText(2, "0x%X" % data_len(file.data)) # Update changed file size
