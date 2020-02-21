@@ -11,10 +11,10 @@ Currently, it can:
 * Extract and replace individual files in GCMs and RARCs
 * Extract all files in a GCM or RARC at once to a folder
 * Import a folder of files onto an existing GCM or RARC, overwriting the existing files (this preserves the original file IDs in RARCs)
-* Add new files to GCMs
+* Add new files to GCMs and RARCs
 * Compress and decompress Yaz0 files
 
-It currently cannot add files or remove files from RARCs, or remove files from GCMs. It also cannot create brand new GCMs or RARCs from scratch.  
+It currently cannot remove files from GCMs or RARCs. It also cannot create brand new GCMs or RARCs from scratch.  
 
 ### Usage
 

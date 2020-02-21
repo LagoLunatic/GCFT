@@ -61,6 +61,7 @@ class GCFTWindow(QMainWindow):
     self.ui.rarc_files_tree.customContextMenuRequested.connect(self.show_rarc_files_tree_context_menu)
     self.ui.actionExtractRARCFile.triggered.connect(self.extract_file_from_rarc)
     self.ui.actionReplaceRARCFile.triggered.connect(self.replace_file_in_rarc)
+    self.ui.actionAddRARCFile.triggered.connect(self.add_file_to_rarc)
     
     self.ui.decompress_yaz0.clicked.connect(self.decompress_yaz0)
     self.ui.compress_yaz0.clicked.connect(self.compress_yaz0)
@@ -200,6 +201,13 @@ class GCFTWindow(QMainWindow):
       file_type="GCM"
     )
   
+  def add_file_to_gcm(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.add_file_to_gcm_by_path,
+      is_opening=True, is_saving=False, is_folder=False,
+      file_type="file"
+    )
+  
   def import_rarc(self):
     self.generic_do_gui_file_operation(
       op_callback=self.import_rarc_by_path,
@@ -221,18 +229,18 @@ class GCFTWindow(QMainWindow):
       file_type="RARC"
     )
   
-  def add_file_to_gcm(self):
-    self.generic_do_gui_file_operation(
-      op_callback=self.add_file_to_gcm_by_path,
-      is_opening=True, is_saving=False, is_folder=False,
-      file_type="file"
-    )
-  
   def export_rarc_folder(self):
     self.generic_do_gui_file_operation(
       op_callback=self.export_rarc_folder_by_path,
       is_opening=False, is_saving=True, is_folder=True,
       file_type="RARC"
+    )
+  
+  def add_file_to_rarc(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.add_file_to_rarc_by_path,
+      is_opening=True, is_saving=False, is_folder=False,
+      file_type="file"
     )
   
   def decompress_yaz0(self):
@@ -349,6 +357,18 @@ class GCFTWindow(QMainWindow):
     
     return self.rarc_file_entry_to_tree_widget_item[file]
   
+  def get_node_by_tree_item(self, item):
+    if item not in self.rarc_tree_widget_item_to_node:
+      return None
+    
+    return self.rarc_tree_widget_item_to_node[item]
+  
+  def get_tree_item_by_node(self, node):
+    if node not in self.rarc_node_to_tree_widget_item:
+      return None
+    
+    return self.rarc_node_to_tree_widget_item[node]
+  
   def show_rarc_files_tree_context_menu(self, pos):
     if self.rarc is None:
       return
@@ -357,19 +377,29 @@ class GCFTWindow(QMainWindow):
     if item is None:
       return
     
-    file = self.get_file_by_tree_item(item)
-    if file is None:
-      return
-    if file.is_dir:
+    node = self.get_node_by_tree_item(item)
+    if node:
       # TODO: Implement extracting/replacing folders
-      return
-    
-    menu = QMenu(self)
-    menu.addAction(self.ui.actionExtractRARCFile)
-    self.ui.actionExtractRARCFile.setData(file)
-    menu.addAction(self.ui.actionReplaceRARCFile)
-    self.ui.actionReplaceRARCFile.setData(file)
-    menu.exec_(self.ui.rarc_files_tree.mapToGlobal(pos))
+      menu = QMenu(self)
+      menu.addAction(self.ui.actionAddRARCFile)
+      self.ui.actionAddRARCFile.setData(node)
+      menu.exec_(self.ui.rarc_files_tree.mapToGlobal(pos))
+    else:
+      file = self.get_file_by_tree_item(item)
+      if file is None:
+        return
+      
+      if file.is_dir:
+        print(file.name)
+        # TODO: when is there a dir with no node?
+        pass
+      else:
+        menu = QMenu(self)
+        menu.addAction(self.ui.actionExtractRARCFile)
+        self.ui.actionExtractRARCFile.setData(file)
+        menu.addAction(self.ui.actionReplaceRARCFile)
+        self.ui.actionReplaceRARCFile.setData(file)
+        menu.exec_(self.ui.rarc_files_tree.mapToGlobal(pos))
   
   def extract_file_from_rarc(self):
     file = self.ui.actionExtractRARCFile.data()
@@ -423,6 +453,28 @@ class GCFTWindow(QMainWindow):
     
     item = self.get_tree_item_by_file(file)
     item.setText(2, "0x%X" % data_len(file.data)) # Update changed file size
+  
+  def add_file_to_rarc_by_path(self, file_path):
+    node = self.ui.actionAddRARCFile.data()
+    
+    file_name = os.path.basename(file_path)
+    with open(file_path, "rb") as f:
+      file_data = BytesIO(f.read())
+    file_size = data_len(file_data)
+    file_size_str = "0x%X" % file_size
+    
+    existing_file_names_in_node = [fe.name for fe in node.files]
+    if file_name in existing_file_names_in_node:
+      QMessageBox.warning(self, "File already exists", "Cannot add new file. The selected folder already contains a file named \"%s\".\n\nIf you wish to replace the existing file, right click on it in the files tree and select 'Replace File'." % file_name)
+      return
+    file_entry = self.rarc.add_new_file(file_name, file_data, node)
+    file_id_str = "%d" % file_entry.id
+    
+    dir_item = self.get_tree_item_by_node(node)
+    file_item = QTreeWidgetItem([file_entry.name, file_id_str, file_size_str])
+    dir_item.addChild(file_item)
+    self.rarc_file_entry_to_tree_widget_item[file_entry] = file_item
+    self.rarc_tree_widget_item_to_file_entry[file_item] = file_entry
   
   
   

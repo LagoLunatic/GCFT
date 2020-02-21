@@ -209,6 +209,11 @@
     <string>Add File</string>
    </property>
   </action>
+  <action name="actionAddRARCFile">
+   <property name="text">
+    <string>Add File</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
