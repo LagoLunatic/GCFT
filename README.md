@@ -12,15 +12,17 @@ Currently, it can:
 * Extract all files in a GCM or RARC at once to a folder
 * Import a folder of files onto an existing GCM or RARC, overwriting the existing files (this preserves the original file IDs in RARCs)
 * Add new files to GCMs and RARCs
+* Delete files from GCMs and RARCs
 * Compress and decompress Yaz0 files
 
-It currently cannot remove files from GCMs or RARCs. It also cannot create brand new GCMs or RARCs from scratch.  
+It currently cannot create brand new GCMs or RARCs from scratch.  
 
 ### Usage
 
 Importing and exporting entire GCMs and RARCs can be done via the buttons in the appropriate tabs.  
-Extracting or replacing a single file can be done by first importing the GCM/RARC the file is in, and then right-clicking on the file you want to edit.  
-Adding a new file can similarly be done by importing a GCM, and then right-clicking on the folder you want to add the file to.  
+Extracting, replacing, or deleting a single file can be done by first importing the GCM/RARC the file is in, and then right-clicking on the file you want to edit.  
+Adding a new file can similarly be done by importing a GCM or RARC, and then right-clicking on the folder you want to add the file to.  
+Note that GCFT currently has no progress bars, so certain slow operations like compressing Yaz0 or saving GCMs might look like the program is frozen, but it's actually working.  
 
 ### Running from source
 

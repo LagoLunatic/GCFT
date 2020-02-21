@@ -76,6 +76,7 @@ class GCFTWindow(QMainWindow):
     self.ui.gcm_files_tree.customContextMenuRequested.connect(self.show_gcm_files_tree_context_menu)
     self.ui.actionExtractGCMFile.triggered.connect(self.extract_file_from_gcm)
     self.ui.actionReplaceGCMFile.triggered.connect(self.replace_file_in_gcm)
+    self.ui.actionDeleteGCMFile.triggered.connect(self.delete_file_in_gcm)
     self.ui.actionAddGCMFile.triggered.connect(self.add_file_to_gcm)
     
     self.load_settings()
@@ -491,9 +492,11 @@ class GCFTWindow(QMainWindow):
     
     self.rarc.delete_file(file_entry)
     
-    item = self.get_tree_item_by_file(file_entry)
+    file_item = self.get_tree_item_by_file(file_entry)
     dir_item = self.get_tree_item_by_node(node)
     dir_item.removeChild(item)
+    del self.rarc_file_entry_to_tree_widget_item[file_entry]
+    del self.rarc_tree_widget_item_to_file_entry[file_item]
   
   def add_file_to_rarc_by_path(self, file_path):
     node = self.ui.actionAddRARCFile.data()
@@ -635,6 +638,8 @@ class GCFTWindow(QMainWindow):
       self.ui.actionExtractGCMFile.setData(file)
       menu.addAction(self.ui.actionReplaceGCMFile)
       self.ui.actionReplaceGCMFile.setData(file)
+      menu.addAction(self.ui.actionDeleteGCMFile)
+      self.ui.actionDeleteGCMFile.setData(file)
       menu.exec_(self.ui.gcm_files_tree.mapToGlobal(pos))
   
   def extract_file_from_gcm_by_path(self, file_path):
@@ -663,6 +668,22 @@ class GCFTWindow(QMainWindow):
     
     item = self.gcm_file_entry_to_tree_widget_item[file]
     item.setText(1, "0x%X" % data_len(data)) # Update changed file size
+  
+  def delete_file_in_gcm(self):
+    file_entry = self.ui.actionDeleteGCMFile.data()
+    
+    if not self.confirm_delete_file(file_entry.name):
+      return
+    
+    dir_entry = file_entry.parent
+    
+    self.gcm.delete_file(file_entry)
+    
+    dir_item = self.gcm_file_entry_to_tree_widget_item[dir_entry]
+    file_item = self.gcm_file_entry_to_tree_widget_item[file_entry]
+    dir_item.removeChild(file_item)
+    del self.gcm_file_entry_to_tree_widget_item[file_entry]
+    del self.gcm_tree_widget_item_to_file_entry[file_item]
   
   def add_file_to_gcm_by_path(self, file_path):
     dir_entry = self.ui.actionAddGCMFile.data()

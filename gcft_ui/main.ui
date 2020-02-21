@@ -219,6 +219,11 @@
     <string>Delete File</string>
    </property>
   </action>
+  <action name="actionDeleteGCMFile">
+   <property name="text">
+    <string>Delete File</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
