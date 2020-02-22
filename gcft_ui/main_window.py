@@ -786,7 +786,7 @@ class GCFTWindow(QMainWindow):
   def export_jpc_folder_by_path(self, folder_path):
     self.jpc.extract_all_particles_to_disk(output_directory=folder_path)
     
-    QMessageBox.information(self, "JPC extracted", "Successfully all JPA particles from the JPC to \"%s\"." % folder_path)
+    QMessageBox.information(self, "JPC extracted", "Successfully extracted all JPA particles from the JPC to \"%s\"." % folder_path)
   
   
   
