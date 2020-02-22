@@ -522,7 +522,7 @@ class GCFTWindow(QMainWindow):
     
     file_item = self.get_tree_item_by_file(file_entry)
     dir_item = self.get_tree_item_by_node(node)
-    dir_item.removeChild(item)
+    dir_item.removeChild(file_item)
     del self.rarc_file_entry_to_tree_widget_item[file_entry]
     del self.rarc_tree_widget_item_to_file_entry[file_item]
   
