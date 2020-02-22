@@ -152,6 +152,20 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QPushButton" name="add_particles_from_folder">
+            <property name="text">
+             <string>Add Particles From Folder</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="export_jpc_folder">
+            <property name="text">
+             <string>Export Folder</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item>

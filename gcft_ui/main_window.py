@@ -52,6 +52,8 @@ class GCFTWindow(QMainWindow):
     self.ui.import_folder_over_gcm.setDisabled(True)
     self.ui.export_gcm_folder.setDisabled(True)
     self.ui.export_jpc.setDisabled(True)
+    self.ui.add_particles_from_folder.setDisabled(True)
+    self.ui.export_jpc_folder.setDisabled(True)
     
     self.ui.tabWidget.currentChanged.connect(self.save_last_used_tab)
     
@@ -84,6 +86,8 @@ class GCFTWindow(QMainWindow):
     
     self.ui.import_jpc.clicked.connect(self.import_jpc)
     self.ui.export_jpc.clicked.connect(self.export_jpc)
+    self.ui.add_particles_from_folder.clicked.connect(self.add_particles_from_folder)
+    self.ui.export_jpc_folder.clicked.connect(self.export_jpc_folder)
     
     self.load_settings()
     
@@ -325,6 +329,20 @@ class GCFTWindow(QMainWindow):
       file_type="JPC", file_filter="JPC Files (*.jpc)"
     )
   
+  def add_particles_from_folder(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.add_particles_from_folder_by_path,
+      is_opening=True, is_saving=False, is_folder=True,
+      file_type="JPC"
+    )
+  
+  def export_jpc_folder(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.export_jpc_folder_by_path,
+      is_opening=False, is_saving=True, is_folder=True,
+      file_type="JPC"
+    )
+  
   def decompress_yaz0(self):
     self.generic_do_gui_file_operation(
       op_callback=self.decompress_yaz0_by_paths,
@@ -408,8 +426,6 @@ class GCFTWindow(QMainWindow):
     if num_files_overwritten == 0:
       QMessageBox.warning(self, "No matching files found", "The selected folder does not contain any files matching the name and directory structure of files in the currently loaded RARC. No files imported.")
       return
-    
-    self.settings["last_used_folder_for_rarc_folders"] = os.path.dirname(folder_path)
     
     QMessageBox.information(self, "Folder imported", "Successfully overwrote %d files in the RARC from \"%s\"." % (num_files_overwritten, folder_path))
   
@@ -725,6 +741,9 @@ class GCFTWindow(QMainWindow):
       data = BytesIO(f.read())
     self.jpc = JPC(data)
     
+    self.reload_jpc_particles_tree()
+  
+  def reload_jpc_particles_tree(self):
     self.ui.jpc_particles_tree.clear()
     
     self.jpc_particle_to_tree_widget_item = {}
@@ -741,6 +760,8 @@ class GCFTWindow(QMainWindow):
         particle_item.addChild(texture_item)
     
     self.ui.export_jpc.setDisabled(False)
+    self.ui.add_particles_from_folder.setDisabled(False)
+    self.ui.export_jpc_folder.setDisabled(False)
   
   def export_jpc_by_path(self, jpc_path):
     self.jpc.save_changes()
@@ -750,6 +771,22 @@ class GCFTWindow(QMainWindow):
       f.write(self.jpc.data.read())
     
     QMessageBox.information(self, "JPC saved", "Successfully saved JPC.")
+  
+  def add_particles_from_folder_by_path(self, folder_path):
+    num_particles_added, num_particles_overwritten, num_textures_added, num_textures_overwritten = self.jpc.import_particles_from_disk(folder_path)
+    
+    if num_particles_added == num_particles_overwritten == num_textures_added == num_textures_overwritten == 0:
+      QMessageBox.warning(self, "No matching files found", "The selected folder does not contain any files with the extension .jpa. No particles imported.")
+      return
+    
+    self.reload_jpc_particles_tree()
+    
+    QMessageBox.information(self, "Folder imported", "Successfully imported particles from \"%s\".\n\nStats:\nParticles added: %d\nParticles overwritten: %d\nTextures added: %d\nTextures overwritten: %d" % (folder_path, num_particles_added, num_particles_overwritten, num_textures_added, num_textures_overwritten))
+  
+  def export_jpc_folder_by_path(self, folder_path):
+    self.jpc.extract_all_particles_to_disk(output_directory=folder_path)
+    
+    QMessageBox.information(self, "JPC extracted", "Successfully all JPA particles from the JPC to \"%s\"." % folder_path)
   
   
   

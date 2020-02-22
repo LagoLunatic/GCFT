@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'main.ui',
 # licensing of 'main.ui' applies.
 #
-# Created: Fri Feb 21 17:25:15 2020
+# Created: Fri Feb 21 18:01:24 2020
 #      by: pyside2-uic  running on PySide2 5.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -78,6 +78,12 @@ class Ui_MainWindow(object):
         self.export_jpc = QtWidgets.QPushButton(self.tab_4)
         self.export_jpc.setObjectName("export_jpc")
         self.horizontalLayout_4.addWidget(self.export_jpc)
+        self.add_particles_from_folder = QtWidgets.QPushButton(self.tab_4)
+        self.add_particles_from_folder.setObjectName("add_particles_from_folder")
+        self.horizontalLayout_4.addWidget(self.add_particles_from_folder)
+        self.export_jpc_folder = QtWidgets.QPushButton(self.tab_4)
+        self.export_jpc_folder.setObjectName("export_jpc_folder")
+        self.horizontalLayout_4.addWidget(self.export_jpc_folder)
         self.verticalLayout_5.addLayout(self.horizontalLayout_4)
         self.jpc_particles_tree = QtWidgets.QTreeWidget(self.tab_4)
         self.jpc_particles_tree.setObjectName("jpc_particles_tree")
@@ -148,6 +154,8 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QtWidgets.QApplication.translate("MainWindow", "RARC Archives", None, -1))
         self.import_jpc.setText(QtWidgets.QApplication.translate("MainWindow", "Import JPC", None, -1))
         self.export_jpc.setText(QtWidgets.QApplication.translate("MainWindow", "Export JPC", None, -1))
+        self.add_particles_from_folder.setText(QtWidgets.QApplication.translate("MainWindow", "Add Particles From Folder", None, -1))
+        self.export_jpc_folder.setText(QtWidgets.QApplication.translate("MainWindow", "Export Folder", None, -1))
         self.jpc_particles_tree.headerItem().setText(0, QtWidgets.QApplication.translate("MainWindow", "Particle ID", None, -1))
         self.jpc_particles_tree.headerItem().setText(1, QtWidgets.QApplication.translate("MainWindow", "Texture Name", None, -1))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), QtWidgets.QApplication.translate("MainWindow", "JPC Particle Archives", None, -1))
