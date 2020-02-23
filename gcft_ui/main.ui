@@ -332,6 +332,21 @@
     <string>Delete File</string>
    </property>
   </action>
+  <action name="actionOpenRARCImage">
+   <property name="text">
+    <string>Open Image</string>
+   </property>
+  </action>
+  <action name="actionOpenJPCImage">
+   <property name="text">
+    <string>Open Image</string>
+   </property>
+  </action>
+  <action name="actionOpenGCMImage">
+   <property name="text">
+    <string>Open Image</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

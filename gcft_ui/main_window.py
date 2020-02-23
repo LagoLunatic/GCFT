@@ -72,6 +72,7 @@ class GCFTWindow(QMainWindow):
     self.ui.actionReplaceRARCFile.triggered.connect(self.replace_file_in_rarc)
     self.ui.actionDeleteRARCFile.triggered.connect(self.delete_file_in_rarc)
     self.ui.actionAddRARCFile.triggered.connect(self.add_file_to_rarc)
+    self.ui.actionOpenRARCImage.triggered.connect(self.open_image_in_rarc)
     
     self.ui.decompress_yaz0.clicked.connect(self.decompress_yaz0)
     self.ui.compress_yaz0.clicked.connect(self.compress_yaz0)
@@ -87,11 +88,16 @@ class GCFTWindow(QMainWindow):
     self.ui.actionReplaceGCMFile.triggered.connect(self.replace_file_in_gcm)
     self.ui.actionDeleteGCMFile.triggered.connect(self.delete_file_in_gcm)
     self.ui.actionAddGCMFile.triggered.connect(self.add_file_to_gcm)
+    self.ui.actionOpenGCMImage.triggered.connect(self.open_image_in_gcm)
     
     self.ui.import_jpc.clicked.connect(self.import_jpc)
     self.ui.export_jpc.clicked.connect(self.export_jpc)
     self.ui.add_particles_from_folder.clicked.connect(self.add_particles_from_folder)
     self.ui.export_jpc_folder.clicked.connect(self.export_jpc_folder)
+    
+    self.ui.jpc_particles_tree.setContextMenuPolicy(Qt.CustomContextMenu)
+    self.ui.jpc_particles_tree.customContextMenuRequested.connect(self.show_jpc_particles_tree_context_menu)
+    self.ui.actionOpenJPCImage.triggered.connect(self.open_image_in_jpc)
     
     self.ui.import_bti.clicked.connect(self.import_bti)
     self.ui.export_bti.clicked.connect(self.export_bti)
@@ -100,8 +106,8 @@ class GCFTWindow(QMainWindow):
     
     self.load_settings()
     
-    if "last_used_tab_index" in self.settings:
-      self.ui.tabWidget.setCurrentIndex(self.settings["last_used_tab_index"])
+    if "last_used_tab_name" in self.settings:
+      self.set_tab_by_name(self.settings["last_used_tab_name"])
     
     self.setWindowTitle("GameCube File Tools %s" % VERSION)
     
@@ -122,7 +128,15 @@ class GCFTWindow(QMainWindow):
       yaml.dump(self.settings, f, default_flow_style=False, Dumper=yaml.Dumper)
   
   def save_last_used_tab(self, tab_index):
-    self.settings["last_used_tab_index"] = tab_index
+    tab_name = self.ui.tabWidget.tabText(tab_index)
+    self.settings["last_used_tab_name"] = tab_name
+  
+  def set_tab_by_name(self, tab_name):
+    for i in range(self.ui.tabWidget.count()):
+      if self.ui.tabWidget.tabText(i) == tab_name:
+        self.ui.tabWidget.setCurrentIndex(i)
+        return
+    print("No tab with name %s found." % tab_name)
   
   
   def generic_do_gui_file_operation(self, op_callback, is_opening, is_saving, is_folder, file_type, file_filter="", default_file_name=None):
@@ -528,6 +542,9 @@ class GCFTWindow(QMainWindow):
         self.ui.actionReplaceRARCFile.setData(file)
         menu.addAction(self.ui.actionDeleteRARCFile)
         self.ui.actionDeleteRARCFile.setData(file)
+        if file.name.endswith(".bti"):
+          menu.addAction(self.ui.actionOpenRARCImage)
+          self.ui.actionOpenRARCImage.setData(file)
         menu.exec_(self.ui.rarc_files_tree.mapToGlobal(pos))
   
   def extract_file_from_rarc_by_path(self, file_path):
@@ -562,6 +579,14 @@ class GCFTWindow(QMainWindow):
     dir_item.removeChild(file_item)
     del self.rarc_file_entry_to_tree_widget_item[file_entry]
     del self.rarc_tree_widget_item_to_file_entry[file_item]
+  
+  def open_image_in_rarc(self):
+    file_entry = self.ui.actionOpenRARCImage.data()
+    
+    data = make_copy_data(file_entry.data)
+    self.import_bti_by_data(data)
+    
+    self.set_tab_by_name("BTI Images")
   
   def add_file_to_rarc_by_path(self, file_path):
     node = self.ui.actionAddRARCFile.data()
@@ -705,6 +730,9 @@ class GCFTWindow(QMainWindow):
       self.ui.actionReplaceGCMFile.setData(file)
       menu.addAction(self.ui.actionDeleteGCMFile)
       self.ui.actionDeleteGCMFile.setData(file)
+      if file.name.endswith(".bti"):
+        menu.addAction(self.ui.actionOpenGCMImage)
+        self.ui.actionOpenGCMImage.setData(file)
       menu.exec_(self.ui.gcm_files_tree.mapToGlobal(pos))
   
   def extract_file_from_gcm_by_path(self, file_path):
@@ -750,6 +778,15 @@ class GCFTWindow(QMainWindow):
     del self.gcm_file_entry_to_tree_widget_item[file_entry]
     del self.gcm_tree_widget_item_to_file_entry[file_item]
   
+  def open_image_in_gcm(self):
+    file_entry = self.ui.actionOpenGCMImage.data()
+    
+    data = self.gcm.get_changed_file_data(file_entry.file_path)
+    data = make_copy_data(data)
+    self.import_bti_by_data(data)
+    
+    self.set_tab_by_name("BTI Images")
+  
   def add_file_to_gcm_by_path(self, file_path):
     dir_entry = self.ui.actionAddGCMFile.data()
     
@@ -789,6 +826,8 @@ class GCFTWindow(QMainWindow):
     
     self.jpc_particle_to_tree_widget_item = {}
     self.jpc_tree_widget_item_to_particle = {}
+    self.jpc_texture_to_tree_widget_item = {}
+    self.jpc_tree_widget_item_to_texture = {}
     
     for particle in self.jpc.particles:
       particle_id_str = "0x%04X" % particle.particle_id
@@ -796,9 +835,16 @@ class GCFTWindow(QMainWindow):
       particle_item = QTreeWidgetItem([particle_id_str, ""])
       self.ui.jpc_particles_tree.addTopLevelItem(particle_item)
       
+      self.jpc_particle_to_tree_widget_item[particle] = particle_item
+      self.jpc_tree_widget_item_to_particle[particle_item] = particle
+      
       for texture_filename in particle.tdb1.texture_filenames:
         texture_item = QTreeWidgetItem(["", texture_filename])
         particle_item.addChild(texture_item)
+        
+        texture = self.jpc.textures_by_filename[texture_filename]
+        self.jpc_texture_to_tree_widget_item[texture] = texture_item
+        self.jpc_tree_widget_item_to_texture[texture_item] = texture
   
   def export_jpc_by_path(self, jpc_path):
     self.jpc.save_changes()
@@ -826,11 +872,68 @@ class GCFTWindow(QMainWindow):
     QMessageBox.information(self, "JPC extracted", "Successfully extracted all JPA particles from the JPC to \"%s\"." % folder_path)
   
   
+  def get_jpc_particle_by_tree_item(self, item):
+    if item not in self.jpc_tree_widget_item_to_particle:
+      return None
+    
+    return self.jpc_tree_widget_item_to_particle[item]
+  
+  def get_jpc_tree_item_by_particle(self, particle):
+    if particle not in self.jpc_particle_to_tree_widget_item:
+      return None
+    
+    return self.jpc_particle_to_tree_widget_item[particle]
+  
+  def get_jpc_texture_by_tree_item(self, item):
+    if item not in self.jpc_tree_widget_item_to_texture:
+      return None
+    
+    return self.jpc_tree_widget_item_to_texture[item]
+  
+  def get_jpc_tree_item_by_texture(self, texture):
+    if texture not in self.jpc_texture_to_tree_widget_item:
+      return None
+    
+    return self.jpc_texture_to_tree_widget_item[texture]
+  
+  def show_jpc_particles_tree_context_menu(self, pos):
+    if self.jpc is None:
+      return
+    
+    item = self.ui.jpc_particles_tree.itemAt(pos)
+    if item is None:
+      return
+    
+    texture = self.get_jpc_texture_by_tree_item(item)
+    if texture:
+      menu = QMenu(self)
+      menu.addAction(self.ui.actionOpenJPCImage)
+      self.ui.actionOpenJPCImage.setData(texture)
+      menu.exec_(self.ui.jpc_particles_tree.mapToGlobal(pos))
+  
+  def open_image_in_jpc(self):
+    texture = self.ui.actionOpenJPCImage.data()
+    
+    data = make_copy_data(texture.bti.data)
+    self.import_bti_by_data(data)
+    
+    self.set_tab_by_name("BTI Images")
+  
+  
   
   def import_bti_by_path(self, bti_path):
     with open(bti_path, "rb") as f:
       data = BytesIO(f.read())
     
+    self.bti = BTIFile(data)
+    
+    self.reload_bti_image()
+    
+    self.ui.export_bti.setDisabled(False)
+    self.ui.import_bti_image.setDisabled(False)
+    self.ui.export_bti_image.setDisabled(False)
+  
+  def import_bti_by_data(self, data):
     self.bti = BTIFile(data)
     
     self.reload_bti_image()
@@ -858,6 +961,8 @@ class GCFTWindow(QMainWindow):
   
   def import_bti_image_by_path(self, image_path):
     self.bti.replace_image_from_path(image_path)
+    
+    self.bti.save_changes()
     
     self.reload_bti_image()
   
