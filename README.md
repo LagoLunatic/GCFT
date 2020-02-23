@@ -49,4 +49,4 @@ Open the GCFT folder in a command prompt and install dependencies by running:
 Then run GCFT with:  
 `py -3.6 gcft.py` (on Windows)  
 `python3 gcft.py` (on Mac)  
-`python3 wwrando.py` (on Linux)  
+`python3 gcft.py` (on Linux)  
