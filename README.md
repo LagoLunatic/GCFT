@@ -46,7 +46,7 @@ Open the GCFT folder in a command prompt and install dependencies by running:
 `python3 -m pip install -r requirements.txt` (on Mac)  
 `python3 -m pip install $(cat requirements.txt) --user` (on Linux)  
 
-Then run the randomizer with:  
+Then run GCFT with:  
 `py -3.6 gcft.py` (on Windows)  
 `python3 gcft.py` (on Mac)  
 `python3 wwrando.py` (on Linux)  
