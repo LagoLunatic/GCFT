@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'main.ui',
 # licensing of 'main.ui' applies.
 #
-# Created: Fri Feb 21 18:01:24 2020
+# Created: Sun Feb 23 12:38:12 2020
 #      by: pyside2-uic  running on PySide2 5.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -66,6 +66,36 @@ class Ui_MainWindow(object):
         self.rarc_files_tree.setObjectName("rarc_files_tree")
         self.verticalLayout_2.addWidget(self.rarc_files_tree)
         self.tabWidget.addTab(self.tab, "")
+        self.tab_5 = QtWidgets.QWidget()
+        self.tab_5.setObjectName("tab_5")
+        self.verticalLayout_6 = QtWidgets.QVBoxLayout(self.tab_5)
+        self.verticalLayout_6.setObjectName("verticalLayout_6")
+        self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_5.setObjectName("horizontalLayout_5")
+        self.import_bti = QtWidgets.QPushButton(self.tab_5)
+        self.import_bti.setObjectName("import_bti")
+        self.horizontalLayout_5.addWidget(self.import_bti)
+        self.export_bti = QtWidgets.QPushButton(self.tab_5)
+        self.export_bti.setObjectName("export_bti")
+        self.horizontalLayout_5.addWidget(self.export_bti)
+        self.import_bti_image = QtWidgets.QPushButton(self.tab_5)
+        self.import_bti_image.setObjectName("import_bti_image")
+        self.horizontalLayout_5.addWidget(self.import_bti_image)
+        self.export_bti_image = QtWidgets.QPushButton(self.tab_5)
+        self.export_bti_image.setObjectName("export_bti_image")
+        self.horizontalLayout_5.addWidget(self.export_bti_image)
+        self.verticalLayout_6.addLayout(self.horizontalLayout_5)
+        self.bti_image_label = QtWidgets.QLabel(self.tab_5)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.bti_image_label.sizePolicy().hasHeightForWidth())
+        self.bti_image_label.setSizePolicy(sizePolicy)
+        self.bti_image_label.setText("")
+        self.bti_image_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.bti_image_label.setObjectName("bti_image_label")
+        self.verticalLayout_6.addWidget(self.bti_image_label)
+        self.tabWidget.addTab(self.tab_5, "")
         self.tab_4 = QtWidgets.QWidget()
         self.tab_4.setObjectName("tab_4")
         self.verticalLayout_5 = QtWidgets.QVBoxLayout(self.tab_4)
@@ -152,6 +182,11 @@ class Ui_MainWindow(object):
         self.rarc_files_tree.headerItem().setText(1, QtWidgets.QApplication.translate("MainWindow", "File ID", None, -1))
         self.rarc_files_tree.headerItem().setText(2, QtWidgets.QApplication.translate("MainWindow", "File Size", None, -1))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QtWidgets.QApplication.translate("MainWindow", "RARC Archives", None, -1))
+        self.import_bti.setText(QtWidgets.QApplication.translate("MainWindow", "Import BTI", None, -1))
+        self.export_bti.setText(QtWidgets.QApplication.translate("MainWindow", "Export BTI", None, -1))
+        self.import_bti_image.setText(QtWidgets.QApplication.translate("MainWindow", "Import Image", None, -1))
+        self.export_bti_image.setText(QtWidgets.QApplication.translate("MainWindow", "Export Image", None, -1))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_5), QtWidgets.QApplication.translate("MainWindow", "BTI Images", None, -1))
         self.import_jpc.setText(QtWidgets.QApplication.translate("MainWindow", "Import JPC", None, -1))
         self.export_jpc.setText(QtWidgets.QApplication.translate("MainWindow", "Export JPC", None, -1))
         self.add_particles_from_folder.setText(QtWidgets.QApplication.translate("MainWindow", "Add Particles From Folder", None, -1))

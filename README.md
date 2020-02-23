@@ -4,20 +4,22 @@
 GameCube File Tools (GCFT) is a GUI tool for editing the following common file formats used by GameCube games:
 * GCM (GameCube ISOs)
 * RARC (archives)
+* BTI (images)
 * JPC (particle effect archives)
-* Yaz0 compression
+* Yaz0 (compression)
 
 Currently, it can:
-* Open and view GCMs, RARCs, and JPCs (including file IDs inside RARCs)
+* Open and view GCMs, RARCs, BTIs, and JPCs (including file IDs inside RARCs)
 * Extract and replace individual files in GCMs and RARCs
 * Extract all files in a GCM, RARC, or JPC at once to a folder
 * Import a folder of files onto an existing GCM or RARC, overwriting the existing files (this preserves the original file IDs in RARCs)
 * Add new files to GCMs and RARCs
-* Import a folder of particle files onto an existing JPC, adding/overwriting all the particles from the folder to the JPC
 * Delete files from GCMs and RARCs
+* Convert BTI images to PNG and back
+* Import a folder of particle files onto an existing JPC, adding/overwriting all the particles from the folder to the JPC
 * Compress and decompress Yaz0 files
 
-It currently cannot create brand new GCMs, RARCs, or JPCs from scratch.  
+It currently cannot create brand new GCMs, RARCs, BTIs, or JPCs from scratch.  
 
 ### Usage
 

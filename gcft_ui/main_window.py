@@ -30,6 +30,7 @@ from wwlib.rarc import RARC
 from wwlib.yaz0 import Yaz0
 from wwlib.gcm import GCM
 from wwlib.jpc import JPC
+from wwlib.bti import BTIFile
 from fs_helpers import *
 
 class GCFTWindow(QMainWindow):
@@ -54,6 +55,9 @@ class GCFTWindow(QMainWindow):
     self.ui.export_jpc.setDisabled(True)
     self.ui.add_particles_from_folder.setDisabled(True)
     self.ui.export_jpc_folder.setDisabled(True)
+    self.ui.export_bti.setDisabled(True)
+    self.ui.import_bti_image.setDisabled(True)
+    self.ui.export_bti_image.setDisabled(True)
     
     self.ui.tabWidget.currentChanged.connect(self.save_last_used_tab)
     
@@ -88,6 +92,11 @@ class GCFTWindow(QMainWindow):
     self.ui.export_jpc.clicked.connect(self.export_jpc)
     self.ui.add_particles_from_folder.clicked.connect(self.add_particles_from_folder)
     self.ui.export_jpc_folder.clicked.connect(self.export_jpc_folder)
+    
+    self.ui.import_bti.clicked.connect(self.import_bti)
+    self.ui.export_bti.clicked.connect(self.export_bti)
+    self.ui.import_bti_image.clicked.connect(self.import_bti_image)
+    self.ui.export_bti_image.clicked.connect(self.export_bti_image)
     
     self.load_settings()
     
@@ -315,6 +324,34 @@ class GCFTWindow(QMainWindow):
       file_type="file"
     )
   
+  def import_bti(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.import_bti_by_path,
+      is_opening=True, is_saving=False, is_folder=False,
+      file_type="BTI", file_filter="BTI files (*.bti)"
+    )
+  
+  def export_bti(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.export_bti_by_path,
+      is_opening=False, is_saving=True, is_folder=False,
+      file_type="BTI", file_filter="BTI files (*.bti)"
+    )
+  
+  def import_bti_image(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.import_bti_image_by_path,
+      is_opening=True, is_saving=False, is_folder=False,
+      file_type="image", file_filter="PNG Files (*.png)"
+    )
+  
+  def export_bti_image(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.export_bti_image_by_path,
+      is_opening=False, is_saving=True, is_folder=False,
+      file_type="image", file_filter="PNG Files (*.png)"
+    )
+    
   def import_jpc(self):
     self.generic_do_gui_file_operation(
       op_callback=self.import_jpc_by_path,
@@ -742,6 +779,10 @@ class GCFTWindow(QMainWindow):
     self.jpc = JPC(data)
     
     self.reload_jpc_particles_tree()
+    
+    self.ui.export_jpc.setDisabled(False)
+    self.ui.add_particles_from_folder.setDisabled(False)
+    self.ui.export_jpc_folder.setDisabled(False)
   
   def reload_jpc_particles_tree(self):
     self.ui.jpc_particles_tree.clear()
@@ -758,10 +799,6 @@ class GCFTWindow(QMainWindow):
       for texture_filename in particle.tdb1.texture_filenames:
         texture_item = QTreeWidgetItem(["", texture_filename])
         particle_item.addChild(texture_item)
-    
-    self.ui.export_jpc.setDisabled(False)
-    self.ui.add_particles_from_folder.setDisabled(False)
-    self.ui.export_jpc_folder.setDisabled(False)
   
   def export_jpc_by_path(self, jpc_path):
     self.jpc.save_changes()
@@ -787,6 +824,47 @@ class GCFTWindow(QMainWindow):
     self.jpc.extract_all_particles_to_disk(output_directory=folder_path)
     
     QMessageBox.information(self, "JPC extracted", "Successfully extracted all JPA particles from the JPC to \"%s\"." % folder_path)
+  
+  
+  
+  def import_bti_by_path(self, bti_path):
+    with open(bti_path, "rb") as f:
+      data = BytesIO(f.read())
+    
+    self.bti = BTIFile(data)
+    
+    self.reload_bti_image()
+    
+    self.ui.export_bti.setDisabled(False)
+    self.ui.import_bti_image.setDisabled(False)
+    self.ui.export_bti_image.setDisabled(False)
+  
+  def reload_bti_image(self):
+    self.bti_image = self.bti.render()
+    
+    image_bytes = self.bti_image.tobytes('raw', 'BGRA')
+    qimage = QImage(image_bytes, self.bti_image.width, self.bti_image.height, QImage.Format_ARGB32)
+    pixmap = QPixmap.fromImage(qimage)
+    self.ui.bti_image_label.setPixmap(pixmap)
+  
+  def export_bti_by_path(self, bti_path):
+    self.bti.save_changes()
+    
+    with open(bti_path, "wb") as f:
+      self.bti.data.seek(0)
+      f.write(self.bti.data.read())
+    
+    QMessageBox.information(self, "BTI saved", "Successfully saved BTI.")
+  
+  def import_bti_image_by_path(self, image_path):
+    self.bti.replace_image_from_path(image_path)
+    
+    self.reload_bti_image()
+  
+  def export_bti_image_by_path(self, image_path):
+    self.bti_image.save(image_path)
+    
+    QMessageBox.information(self, "BTI saved", "Successfully saved image.")
   
   
   
