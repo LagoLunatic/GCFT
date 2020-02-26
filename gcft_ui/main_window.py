@@ -486,25 +486,25 @@ class GCFTWindow(QMainWindow):
     QMessageBox.information(self, "RARC extracted", "Successfully extracted RARC contents to \"%s\"." % folder_path)
   
   
-  def get_file_by_tree_item(self, item):
+  def get_rarc_file_by_tree_item(self, item):
     if item not in self.rarc_tree_widget_item_to_file_entry:
       return None
     
     return self.rarc_tree_widget_item_to_file_entry[item]
   
-  def get_tree_item_by_file(self, file):
+  def get_rarc_tree_item_by_file(self, file):
     if file not in self.rarc_file_entry_to_tree_widget_item:
       return None
     
     return self.rarc_file_entry_to_tree_widget_item[file]
   
-  def get_node_by_tree_item(self, item):
+  def get_rarc_node_by_tree_item(self, item):
     if item not in self.rarc_tree_widget_item_to_node:
       return None
     
     return self.rarc_tree_widget_item_to_node[item]
   
-  def get_tree_item_by_node(self, node):
+  def get_rarc_tree_item_by_node(self, node):
     if node not in self.rarc_node_to_tree_widget_item:
       return None
     
@@ -518,7 +518,7 @@ class GCFTWindow(QMainWindow):
     if item is None:
       return
     
-    node = self.get_node_by_tree_item(item)
+    node = self.get_rarc_node_by_tree_item(item)
     if node:
       # TODO: Implement extracting/replacing folders
       menu = QMenu(self)
@@ -526,7 +526,7 @@ class GCFTWindow(QMainWindow):
       self.ui.actionAddRARCFile.setData(node)
       menu.exec_(self.ui.rarc_files_tree.mapToGlobal(pos))
     else:
-      file = self.get_file_by_tree_item(item)
+      file = self.get_rarc_file_by_tree_item(item)
       if file is None:
         return
       
@@ -561,7 +561,7 @@ class GCFTWindow(QMainWindow):
       data = BytesIO(f.read())
     file.data = data
     
-    item = self.get_tree_item_by_file(file)
+    item = self.get_rarc_tree_item_by_file(file)
     item.setText(2, "0x%X" % data_len(file.data)) # Update changed file size
   
   def delete_file_in_rarc(self):
@@ -574,8 +574,8 @@ class GCFTWindow(QMainWindow):
     
     self.rarc.delete_file(file_entry)
     
-    file_item = self.get_tree_item_by_file(file_entry)
-    dir_item = self.get_tree_item_by_node(node)
+    file_item = self.get_rarc_tree_item_by_file(file_entry)
+    dir_item = self.get_rarc_tree_item_by_node(node)
     dir_item.removeChild(file_item)
     del self.rarc_file_entry_to_tree_widget_item[file_entry]
     del self.rarc_tree_widget_item_to_file_entry[file_item]
@@ -604,7 +604,7 @@ class GCFTWindow(QMainWindow):
     file_entry = self.rarc.add_new_file(file_name, file_data, node)
     file_id_str = "%d" % file_entry.id
     
-    dir_item = self.get_tree_item_by_node(node)
+    dir_item = self.get_rarc_tree_item_by_node(node)
     file_item = QTreeWidgetItem([file_entry.name, file_id_str, file_size_str])
     dir_item.addChild(file_item)
     self.rarc_file_entry_to_tree_widget_item[file_entry] = file_item
@@ -651,9 +651,10 @@ class GCFTWindow(QMainWindow):
     
     self.ui.gcm_files_tree.clear()
     
-    root_entry = self.gcm.file_entries[0]
     self.gcm_file_entry_to_tree_widget_item = {}
     self.gcm_tree_widget_item_to_file_entry = {}
+    
+    # Add data files.
     for file_entry in self.gcm.file_entries:
       if file_entry.is_dir:
         file_size_str = ""
@@ -673,8 +674,21 @@ class GCFTWindow(QMainWindow):
         self.gcm_file_entry_to_tree_widget_item[file_entry] = item
         self.gcm_tree_widget_item_to_file_entry[item] = file_entry
     
-    # Expand the root entry by default.
+    # Add system files.
+    # (Note that the "sys" folder has no corresponding directory file entry because it is not really a directory.)
+    sys_item = QTreeWidgetItem(["sys", ""])
+    self.ui.gcm_files_tree.addTopLevelItem(sys_item)
+    for file_entry in self.gcm.system_files:
+      file_size_str = "0x%X" % file_entry.file_size
+      parent_item = sys_item
+      item = QTreeWidgetItem([file_entry.name, file_size_str])
+      parent_item.addChild(item)
+      self.gcm_file_entry_to_tree_widget_item[file_entry] = item
+      self.gcm_tree_widget_item_to_file_entry[item] = file_entry
+    
+    # Expand the "files" and "sys" root entries by default.
     self.ui.gcm_files_tree.topLevelItem(0).setExpanded(True)
+    self.ui.gcm_files_tree.topLevelItem(1).setExpanded(True)
     
     self.ui.export_gcm.setDisabled(False)
     self.ui.import_folder_over_gcm.setDisabled(False)
@@ -704,6 +718,18 @@ class GCFTWindow(QMainWindow):
     QMessageBox.information(self, "GCM extracted", "Successfully extracted GCM contents to \"%s\"." % folder_path)
   
   
+  def get_gcm_file_by_tree_item(self, item):
+    if item not in self.gcm_tree_widget_item_to_file_entry:
+      return None
+    
+    return self.gcm_tree_widget_item_to_file_entry[item]
+  
+  def get_gcm_tree_item_by_file(self, file):
+    if file not in self.gcm_file_entry_to_tree_widget_item:
+      return None
+    
+    return self.gcm_file_entry_to_tree_widget_item[file]
+  
   def show_gcm_files_tree_context_menu(self, pos):
     if self.gcm is None:
       return
@@ -712,7 +738,7 @@ class GCFTWindow(QMainWindow):
     if item is None:
       return
     
-    file = self.gcm_tree_widget_item_to_file_entry[item]
+    file = self.get_gcm_file_by_tree_item(item)
     if file is None:
       return
     
@@ -726,10 +752,12 @@ class GCFTWindow(QMainWindow):
       menu = QMenu(self)
       menu.addAction(self.ui.actionExtractGCMFile)
       self.ui.actionExtractGCMFile.setData(file)
-      menu.addAction(self.ui.actionReplaceGCMFile)
-      self.ui.actionReplaceGCMFile.setData(file)
-      menu.addAction(self.ui.actionDeleteGCMFile)
-      self.ui.actionDeleteGCMFile.setData(file)
+      if file.file_path != "sys/fst.bin": # Regenerated automatically
+        menu.addAction(self.ui.actionReplaceGCMFile)
+        self.ui.actionReplaceGCMFile.setData(file)
+      if not file.is_system_file:
+        menu.addAction(self.ui.actionDeleteGCMFile)
+        self.ui.actionDeleteGCMFile.setData(file)
       if file.name.endswith(".bti"):
         menu.addAction(self.ui.actionOpenGCMImage)
         self.ui.actionOpenGCMImage.setData(file)
@@ -757,6 +785,11 @@ class GCFTWindow(QMainWindow):
     
     with open(file_path, "rb") as f:
       data = BytesIO(f.read())
+    
+    if file.file_path in ["sys/boot.bin", "sys/bi2.bin"] and data_len(data) != file.file_size:
+      QMessageBox.warning(self, "Cannot change this file's size", "The size of boot.bin and bi2.bin cannot be changed.")
+      return
+    
     self.gcm.changed_files[file.file_path] = data
     
     item = self.gcm_file_entry_to_tree_widget_item[file]
