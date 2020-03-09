@@ -230,6 +230,13 @@ class GCFTWindow(QMainWindow):
     else:
       return False
   
+  def stringify_number(self, num, min_hex_chars=1):
+    if True: # TODO setting
+      format_string = "0x%%0%dX" % min_hex_chars
+      return format_string % num
+    else:
+      return "%d" % num
+  
   
   
   def import_gcm(self):
@@ -446,8 +453,8 @@ class GCFTWindow(QMainWindow):
           assert file_entry in self.rarc_file_entry_to_tree_widget_item
         continue
       
-      file_size_str = "0x%X" % file_entry.data_size
-      file_id_str = "%d" % file_entry.id
+      file_size_str = self.stringify_number(file_entry.data_size)
+      file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
       
       parent_item = self.rarc_node_to_tree_widget_item[file_entry.parent_node]
       item = QTreeWidgetItem([file_entry.name, file_id_str, file_size_str])
@@ -561,8 +568,10 @@ class GCFTWindow(QMainWindow):
       data = BytesIO(f.read())
     file.data = data
     
+     # Update changed file size
+    file_size_str = self.stringify_number(data_len(file.data))
     item = self.get_rarc_tree_item_by_file(file)
-    item.setText(2, "0x%X" % data_len(file.data)) # Update changed file size
+    item.setText(2, file_size_str)
   
   def delete_file_in_rarc(self):
     file_entry = self.ui.actionDeleteRARCFile.data()
@@ -595,14 +604,14 @@ class GCFTWindow(QMainWindow):
     with open(file_path, "rb") as f:
       file_data = BytesIO(f.read())
     file_size = data_len(file_data)
-    file_size_str = "0x%X" % file_size
+    file_size_str = self.stringify_number(file_size)
     
     existing_file_names_in_node = [fe.name for fe in node.files]
     if file_name in existing_file_names_in_node:
       QMessageBox.warning(self, "File already exists", "Cannot add new file. The selected folder already contains a file named \"%s\".\n\nIf you wish to replace the existing file, right click on it in the files tree and select 'Replace File'." % file_name)
       return
     file_entry = self.rarc.add_new_file(file_name, file_data, node)
-    file_id_str = "%d" % file_entry.id
+    file_id_str = "%04X" % file_entry.id
     
     dir_item = self.get_rarc_tree_item_by_node(node)
     file_item = QTreeWidgetItem([file_entry.name, file_id_str, file_size_str])
@@ -659,7 +668,7 @@ class GCFTWindow(QMainWindow):
       if file_entry.is_dir:
         file_size_str = ""
       else:
-        file_size_str = "0x%X" % file_entry.file_size
+        file_size_str = self.stringify_number(file_entry.file_size)
       
       if file_entry.parent is None:
         # Root entry. Add as a top-level item.
@@ -679,7 +688,7 @@ class GCFTWindow(QMainWindow):
     sys_item = QTreeWidgetItem(["sys", ""])
     self.ui.gcm_files_tree.addTopLevelItem(sys_item)
     for file_entry in self.gcm.system_files:
-      file_size_str = "0x%X" % file_entry.file_size
+      file_size_str = self.stringify_number(file_entry.file_size)
       parent_item = sys_item
       item = QTreeWidgetItem([file_entry.name, file_size_str])
       parent_item.addChild(item)
@@ -792,8 +801,10 @@ class GCFTWindow(QMainWindow):
     
     self.gcm.changed_files[file.file_path] = data
     
+    # Update changed file size
+    file_size_str = self.stringify_number(data_len(data))
     item = self.gcm_file_entry_to_tree_widget_item[file]
-    item.setText(1, "0x%X" % data_len(data)) # Update changed file size
+    item.setText(1, file_size_str)
   
   def delete_file_in_gcm(self):
     file_entry = self.ui.actionDeleteGCMFile.data()
@@ -827,7 +838,7 @@ class GCFTWindow(QMainWindow):
     with open(file_path, "rb") as f:
       file_data = BytesIO(f.read())
     file_size = data_len(file_data)
-    file_size_str = "0x%X" % file_size
+    file_size_str = self.stringify_number(file_size)
     
     gcm_file_path = dir_entry.dir_path + "/" + file_name
     if gcm_file_path.lower() in self.gcm.files_by_path_lowercase:
@@ -863,7 +874,7 @@ class GCFTWindow(QMainWindow):
     self.jpc_tree_widget_item_to_texture = {}
     
     for particle in self.jpc.particles:
-      particle_id_str = "0x%04X" % particle.particle_id
+      particle_id_str = self.stringify_number(particle.particle_id, min_hex_chars=4)
       
       particle_item = QTreeWidgetItem([particle_id_str, ""])
       self.ui.jpc_particles_tree.addTopLevelItem(particle_item)
