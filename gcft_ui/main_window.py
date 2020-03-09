@@ -611,7 +611,7 @@ class GCFTWindow(QMainWindow):
       QMessageBox.warning(self, "File already exists", "Cannot add new file. The selected folder already contains a file named \"%s\".\n\nIf you wish to replace the existing file, right click on it in the files tree and select 'Replace File'." % file_name)
       return
     file_entry = self.rarc.add_new_file(file_name, file_data, node)
-    file_id_str = "%04X" % file_entry.id
+    file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
     
     dir_item = self.get_rarc_tree_item_by_node(node)
     file_item = QTreeWidgetItem([file_entry.name, file_id_str, file_size_str])
