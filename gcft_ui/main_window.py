@@ -7,6 +7,7 @@ import os
 from io import BytesIO
 from collections import OrderedDict
 import traceback
+import re
 
 import yaml
 try:
@@ -68,6 +69,8 @@ class GCFTWindow(QMainWindow):
     
     self.ui.rarc_files_tree.setContextMenuPolicy(Qt.CustomContextMenu)
     self.ui.rarc_files_tree.customContextMenuRequested.connect(self.show_rarc_files_tree_context_menu)
+    self.ui.rarc_files_tree.itemDoubleClicked.connect(self.edit_rarc_files_tree_item_text)
+    self.ui.rarc_files_tree.itemChanged.connect(self.rarc_file_tree_item_text_changed)
     self.ui.actionExtractRARCFile.triggered.connect(self.extract_file_from_rarc)
     self.ui.actionReplaceRARCFile.triggered.connect(self.replace_file_in_rarc)
     self.ui.actionDeleteRARCFile.triggered.connect(self.delete_file_in_rarc)
@@ -458,6 +461,7 @@ class GCFTWindow(QMainWindow):
       
       parent_item = self.rarc_node_to_tree_widget_item[file_entry.parent_node]
       item = QTreeWidgetItem([file_entry.name, file_id_str, file_size_str])
+      item.setFlags(item.flags() | Qt.ItemIsEditable)
       parent_item.addChild(item)
       self.rarc_file_entry_to_tree_widget_item[file_entry] = item
       self.rarc_tree_widget_item_to_file_entry[item] = file_entry
@@ -615,9 +619,61 @@ class GCFTWindow(QMainWindow):
     
     dir_item = self.get_rarc_tree_item_by_node(node)
     file_item = QTreeWidgetItem([file_entry.name, file_id_str, file_size_str])
+    file_item.setFlags(file_item.flags() | Qt.ItemIsEditable)
     dir_item.addChild(file_item)
     self.rarc_file_entry_to_tree_widget_item[file_entry] = file_item
     self.rarc_tree_widget_item_to_file_entry[file_item] = file_entry
+  
+  
+  def edit_rarc_files_tree_item_text(self, item, column):
+    if (item.flags() & Qt.ItemIsEditable) != 0 and column == 1: # Allow editing the file IDs column only.
+      self.ui.rarc_files_tree.editItem(item, column)
+  
+  def rarc_file_tree_item_text_changed(self, item, column):
+    if column == 1:
+      self.change_rarc_file_id(item)
+  
+  def change_rarc_file_id(self, item):
+    file_entry = self.get_rarc_file_by_tree_item(item)
+    new_file_id_str = item.text(1)
+    
+    if True: # TODO hex/decimal setting
+      hexadecimal_match = re.search(r"^\s*(?:0x)?([0-9a-f]+)\s*$", new_file_id_str, re.IGNORECASE)
+      if hexadecimal_match:
+        new_file_id = int(hexadecimal_match.group(1), 16)
+      else:
+        QMessageBox.warning(self, "Invalid file ID", "\"%s\" is not a valid hexadecimal number." % new_file_id_str)
+        file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
+        item.setText(1, file_id_str)
+        return
+    else:
+      decimal_match = re.search(r"^\s*(\d+)\s*$", new_file_id_str, re.IGNORECASE)
+      if decimal_match:
+        new_file_id = int(decimal_match.group(1))
+      else:
+        QMessageBox.warning(self, "Invalid file ID", "\"%s\" is not a valid decimal number." % new_file_id_str)
+        file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
+        item.setText(1, file_id_str)
+        return
+    
+    if new_file_id >= 0xFFFF:
+        QMessageBox.warning(self, "Invalid file ID", "\"%s\" is too large to be a file ID. It must be in the range 0x0000-0xFFFE." % new_file_id_str)
+        file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
+        item.setText(1, file_id_str)
+        return
+    
+    other_file_entry = next((fe for fe in self.rarc.file_entries if fe.id == new_file_id), None)
+    
+    if other_file_entry is not None and other_file_entry != file_entry:
+      QMessageBox.warning(self, "Duplicate file ID", "The file ID you entered is already used by the file \"%s\"." % other_file_entry.name)
+      file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
+      item.setText(1, file_id_str)
+      return
+    
+    file_entry.id = new_file_id
+    
+    file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
+    item.setText(1, file_id_str)
   
   
   

@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'main.ui',
 # licensing of 'main.ui' applies.
 #
-# Created: Sun Feb 23 16:02:53 2020
+# Created: Mon Mar  9 10:21:57 2020
 #      by: pyside2-uic  running on PySide2 5.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -63,6 +63,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.export_rarc_folder)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
         self.rarc_files_tree = QtWidgets.QTreeWidget(self.tab)
+        self.rarc_files_tree.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.rarc_files_tree.setObjectName("rarc_files_tree")
         self.verticalLayout_2.addWidget(self.rarc_files_tree)
         self.tabWidget.addTab(self.tab, "")
