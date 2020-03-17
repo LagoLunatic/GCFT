@@ -672,8 +672,15 @@ class GCFTWindow(QMainWindow):
     
     file_entry.id = new_file_id
     
+    # Reorder this folder's files by file ID.
+    file_entry.parent_node.files.sort(key=lambda fe: fe.id)
+    
     file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
     item.setText(1, file_id_str)
+    
+    # Also reorder this folder's files by file ID in the GUI.
+    dir_item = item.parent()
+    dir_item.sortChildren(1, Qt.AscendingOrder)
   
   
   
