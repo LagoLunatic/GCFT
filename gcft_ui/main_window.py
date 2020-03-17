@@ -669,7 +669,13 @@ class GCFTWindow(QMainWindow):
     
     other_file_entry = next((fe for fe in self.rarc.file_entries if fe.id == new_file_id), None)
     
-    if other_file_entry is not None and other_file_entry != file_entry:
+    if other_file_entry == file_entry:
+      # File ID not changed
+      file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
+      item.setText(1, file_id_str)
+      return
+    
+    if other_file_entry is not None:
       QMessageBox.warning(self, "Duplicate file ID", "The file ID you entered is already used by the file \"%s\"." % other_file_entry.name)
       file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
       item.setText(1, file_id_str)
