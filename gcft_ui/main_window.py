@@ -662,10 +662,10 @@ class GCFTWindow(QMainWindow):
         return
     
     if new_file_id >= 0xFFFF:
-        QMessageBox.warning(self, "Invalid file ID", "\"%s\" is too large to be a file ID. It must be in the range 0x0000-0xFFFE." % new_file_id_str)
-        file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
-        item.setText(1, file_id_str)
-        return
+      QMessageBox.warning(self, "Invalid file ID", "\"%s\" is too large to be a file ID. It must be in the range 0x0000-0xFFFE." % new_file_id_str)
+      file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
+      item.setText(1, file_id_str)
+      return
     
     other_file_entry = next((fe for fe in self.rarc.file_entries if fe.id == new_file_id), None)
     
