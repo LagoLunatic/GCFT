@@ -26,6 +26,7 @@ yaml.Dumper.add_representer(
 
 from gcft_ui.ui_main import Ui_MainWindow
 from version import VERSION
+from gcft_paths import ASSETS_PATH
 
 from wwlib.rarc import RARC
 from wwlib.yaz0 import Yaz0
@@ -60,7 +61,9 @@ class GCFTWindow(QMainWindow):
     self.ui.import_bti_image.setDisabled(True)
     self.ui.export_bti_image.setDisabled(True)
     
-    self.ui.bti_image_label.setStyleSheet("border-image: url(./assets/checkerboard.png) repeat;")
+    checkerboard_path = os.path.join(ASSETS_PATH, "checkerboard.png")
+    checkerboard_path = checkerboard_path.replace("\\", "/")
+    self.ui.bti_image_label.setStyleSheet("border-image: url(%s) repeat;" % checkerboard_path)
     
     self.ui.tabWidget.currentChanged.connect(self.save_last_used_tab)
     

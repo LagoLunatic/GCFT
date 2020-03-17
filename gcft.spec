@@ -31,7 +31,9 @@ def build_datas_recursive(paths):
 a = Analysis(['gcft.py'],
              pathex=["./wwrando"],
              binaries=[],
-             datas=build_datas_recursive([]),
+             datas=build_datas_recursive([
+               'assets/**/*.*',
+             ]),
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
