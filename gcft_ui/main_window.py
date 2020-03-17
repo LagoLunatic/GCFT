@@ -60,6 +60,8 @@ class GCFTWindow(QMainWindow):
     self.ui.import_bti_image.setDisabled(True)
     self.ui.export_bti_image.setDisabled(True)
     
+    self.ui.bti_image_label.setStyleSheet("border-image: url(./assets/checkerboard.png) repeat;")
+    
     self.ui.tabWidget.currentChanged.connect(self.save_last_used_tab)
     
     self.ui.import_rarc.clicked.connect(self.import_rarc)
