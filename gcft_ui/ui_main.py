@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'main.ui',
 # licensing of 'main.ui' applies.
 #
-# Created: Mon Mar  9 10:21:57 2020
+# Created: Tue Mar 17 20:27:32 2020
 #      by: pyside2-uic  running on PySide2 5.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -86,8 +86,13 @@ class Ui_MainWindow(object):
         self.export_bti_image.setObjectName("export_bti_image")
         self.horizontalLayout_5.addWidget(self.export_bti_image)
         self.verticalLayout_6.addLayout(self.horizontalLayout_5)
-        self.bti_image_label = QtWidgets.QLabel(self.tab_5)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
+        self.bti_image_container = QtWidgets.QWidget(self.tab_5)
+        self.bti_image_container.setObjectName("bti_image_container")
+        self.gridLayout = QtWidgets.QGridLayout(self.bti_image_container)
+        self.gridLayout.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout.setObjectName("gridLayout")
+        self.bti_image_label = QtWidgets.QLabel(self.bti_image_container)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.bti_image_label.sizePolicy().hasHeightForWidth())
@@ -95,7 +100,8 @@ class Ui_MainWindow(object):
         self.bti_image_label.setText("")
         self.bti_image_label.setAlignment(QtCore.Qt.AlignCenter)
         self.bti_image_label.setObjectName("bti_image_label")
-        self.verticalLayout_6.addWidget(self.bti_image_label)
+        self.gridLayout.addWidget(self.bti_image_label, 0, 0, 1, 1)
+        self.verticalLayout_6.addWidget(self.bti_image_container)
         self.tabWidget.addTab(self.tab_5, "")
         self.tab_4 = QtWidgets.QWidget()
         self.tab_4.setObjectName("tab_4")

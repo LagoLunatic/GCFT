@@ -64,6 +64,7 @@ class GCFTWindow(QMainWindow):
     checkerboard_path = os.path.join(ASSETS_PATH, "checkerboard.png")
     checkerboard_path = checkerboard_path.replace("\\", "/")
     self.ui.bti_image_label.setStyleSheet("border-image: url(%s) repeat;" % checkerboard_path)
+    self.ui.bti_image_label.hide()
     
     self.ui.tabWidget.currentChanged.connect(self.save_last_used_tab)
     
@@ -1060,6 +1061,10 @@ class GCFTWindow(QMainWindow):
     qimage = QImage(image_bytes, self.bti_image.width, self.bti_image.height, QImage.Format_ARGB32)
     pixmap = QPixmap.fromImage(qimage)
     self.ui.bti_image_label.setPixmap(pixmap)
+    
+    self.ui.bti_image_label.setFixedWidth(self.bti_image.width)
+    self.ui.bti_image_label.setFixedHeight(self.bti_image.height)
+    self.ui.bti_image_label.show()
   
   def export_bti_by_path(self, bti_path):
     self.bti.save_changes()
