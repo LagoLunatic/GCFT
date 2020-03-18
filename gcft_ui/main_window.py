@@ -226,6 +226,7 @@ class GCFTWindow(QMainWindow):
       self.settings[last_used_input_folder_key_name] = os.path.dirname(in_selected_path)
     if is_saving:
       self.settings[last_used_output_folder_key_name] = os.path.dirname(out_selected_path)
+    self.save_settings()
   
   def confirm_delete_file(self, file_name):
     response = QMessageBox.question(self, 
