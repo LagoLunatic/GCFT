@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'main.ui',
 # licensing of 'main.ui' applies.
 #
-# Created: Tue Mar 17 20:27:32 2020
+# Created: Tue Mar 17 20:36:29 2020
 #      by: pyside2-uic  running on PySide2 5.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -103,6 +103,23 @@ class Ui_MainWindow(object):
         self.gridLayout.addWidget(self.bti_image_label, 0, 0, 1, 1)
         self.verticalLayout_6.addWidget(self.bti_image_container)
         self.tabWidget.addTab(self.tab_5, "")
+        self.tab_6 = QtWidgets.QWidget()
+        self.tab_6.setObjectName("tab_6")
+        self.verticalLayout_7 = QtWidgets.QVBoxLayout(self.tab_6)
+        self.verticalLayout_7.setObjectName("verticalLayout_7")
+        self.horizontalLayout_6 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_6.setObjectName("horizontalLayout_6")
+        self.import_j3d = QtWidgets.QPushButton(self.tab_6)
+        self.import_j3d.setObjectName("import_j3d")
+        self.horizontalLayout_6.addWidget(self.import_j3d)
+        self.export_j3d = QtWidgets.QPushButton(self.tab_6)
+        self.export_j3d.setObjectName("export_j3d")
+        self.horizontalLayout_6.addWidget(self.export_j3d)
+        self.verticalLayout_7.addLayout(self.horizontalLayout_6)
+        self.j3d_chunks_tree = QtWidgets.QTreeWidget(self.tab_6)
+        self.j3d_chunks_tree.setObjectName("j3d_chunks_tree")
+        self.verticalLayout_7.addWidget(self.j3d_chunks_tree)
+        self.tabWidget.addTab(self.tab_6, "")
         self.tab_4 = QtWidgets.QWidget()
         self.tab_4.setObjectName("tab_4")
         self.verticalLayout_5 = QtWidgets.QVBoxLayout(self.tab_4)
@@ -200,6 +217,11 @@ class Ui_MainWindow(object):
         self.import_bti_image.setText(QtWidgets.QApplication.translate("MainWindow", "Import Image", None, -1))
         self.export_bti_image.setText(QtWidgets.QApplication.translate("MainWindow", "Export Image", None, -1))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_5), QtWidgets.QApplication.translate("MainWindow", "BTI Images", None, -1))
+        self.import_j3d.setText(QtWidgets.QApplication.translate("MainWindow", "Import J3D File", None, -1))
+        self.export_j3d.setText(QtWidgets.QApplication.translate("MainWindow", "Export J3D File", None, -1))
+        self.j3d_chunks_tree.headerItem().setText(0, QtWidgets.QApplication.translate("MainWindow", "Chunk Type", None, -1))
+        self.j3d_chunks_tree.headerItem().setText(1, QtWidgets.QApplication.translate("MainWindow", "Size", None, -1))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_6), QtWidgets.QApplication.translate("MainWindow", "J3D Files", None, -1))
         self.import_jpc.setText(QtWidgets.QApplication.translate("MainWindow", "Import JPC", None, -1))
         self.export_jpc.setText(QtWidgets.QApplication.translate("MainWindow", "Export JPC", None, -1))
         self.add_particles_from_folder.setText(QtWidgets.QApplication.translate("MainWindow", "Add Particles From Folder", None, -1))

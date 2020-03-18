@@ -33,6 +33,7 @@ from wwlib.yaz0 import Yaz0
 from wwlib.gcm import GCM
 from wwlib.jpc import JPC
 from wwlib.bti import BTIFile
+from wwlib.j3d import J3DFile
 from fs_helpers import *
 
 class GCFTWindow(QMainWindow):
@@ -60,6 +61,7 @@ class GCFTWindow(QMainWindow):
     self.ui.export_bti.setDisabled(True)
     self.ui.import_bti_image.setDisabled(True)
     self.ui.export_bti_image.setDisabled(True)
+    self.ui.export_j3d.setDisabled(True)
     
     checkerboard_path = os.path.join(ASSETS_PATH, "checkerboard.png")
     checkerboard_path = checkerboard_path.replace("\\", "/")
@@ -112,6 +114,9 @@ class GCFTWindow(QMainWindow):
     self.ui.export_bti.clicked.connect(self.export_bti)
     self.ui.import_bti_image.clicked.connect(self.import_bti_image)
     self.ui.export_bti_image.clicked.connect(self.export_bti_image)
+    
+    self.ui.import_j3d.clicked.connect(self.import_j3d)
+    self.ui.export_j3d.clicked.connect(self.export_j3d)
     
     self.load_settings()
     
@@ -382,7 +387,21 @@ class GCFTWindow(QMainWindow):
       is_opening=False, is_saving=True, is_folder=False,
       file_type="image", file_filter="PNG Files (*.png)"
     )
-    
+  
+  def import_j3d(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.import_j3d_by_path,
+      is_opening=True, is_saving=False, is_folder=False,
+      file_type="J3D file", file_filter="BDL models (*.bdl)" # TODO more
+    )
+  
+  def export_j3d(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.export_j3d_by_path,
+      is_opening=False, is_saving=True, is_folder=False,
+      file_type="J3D file", file_filter="BDL models (*.bdl)"
+    )
+  
   def import_jpc(self):
     self.generic_do_gui_file_operation(
       op_callback=self.import_jpc_by_path,
@@ -1087,6 +1106,42 @@ class GCFTWindow(QMainWindow):
     self.bti_image.save(image_path)
     
     QMessageBox.information(self, "BTI saved", "Successfully saved image.")
+  
+  
+  
+  def import_j3d_by_path(self, j3d_path):
+    with open(j3d_path, "rb") as f:
+      data = BytesIO(f.read())
+    
+    self.j3d = J3DFile(data)
+    
+    self.reload_j3d_chunks_tree()
+    
+    self.ui.export_j3d.setDisabled(False)
+  
+  def reload_j3d_chunks_tree(self):
+    self.ui.j3d_chunks_tree.clear()
+    
+    self.j3d_chunk_to_tree_widget_item = {}
+    self.j3d_tree_widget_item_to_chunk = {}
+    
+    for chunk in self.j3d.chunks:
+      chunk_size_str = self.stringify_number(chunk.size, min_hex_chars=5)
+      
+      chunk_item = QTreeWidgetItem([chunk.magic, chunk_size_str])
+      self.ui.j3d_chunks_tree.addTopLevelItem(chunk_item)
+      
+      self.j3d_chunk_to_tree_widget_item[chunk] = chunk_item
+      self.j3d_tree_widget_item_to_chunk[chunk_item] = chunk
+  
+  def export_j3d_by_path(self, j3d_path):
+    self.j3d.save_changes()
+    
+    with open(j3d_path, "wb") as f:
+      self.j3d.data.seek(0)
+      f.write(self.j3d.data.read())
+    
+    QMessageBox.information(self, "J3D file saved", "Successfully saved J3D file.")
   
   
   
