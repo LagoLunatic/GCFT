@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'main.ui',
 # licensing of 'main.ui' applies.
 #
-# Created: Tue Mar 17 20:36:29 2020
+# Created: Wed Mar 18 02:13:20 2020
 #      by: pyside2-uic  running on PySide2 5.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -220,7 +220,8 @@ class Ui_MainWindow(object):
         self.import_j3d.setText(QtWidgets.QApplication.translate("MainWindow", "Import J3D File", None, -1))
         self.export_j3d.setText(QtWidgets.QApplication.translate("MainWindow", "Export J3D File", None, -1))
         self.j3d_chunks_tree.headerItem().setText(0, QtWidgets.QApplication.translate("MainWindow", "Chunk Type", None, -1))
-        self.j3d_chunks_tree.headerItem().setText(1, QtWidgets.QApplication.translate("MainWindow", "Size", None, -1))
+        self.j3d_chunks_tree.headerItem().setText(1, QtWidgets.QApplication.translate("MainWindow", "Texture Name", None, -1))
+        self.j3d_chunks_tree.headerItem().setText(2, QtWidgets.QApplication.translate("MainWindow", "Size", None, -1))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_6), QtWidgets.QApplication.translate("MainWindow", "J3D Files", None, -1))
         self.import_jpc.setText(QtWidgets.QApplication.translate("MainWindow", "Import JPC", None, -1))
         self.export_jpc.setText(QtWidgets.QApplication.translate("MainWindow", "Export JPC", None, -1))

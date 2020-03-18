@@ -227,6 +227,11 @@
           </column>
           <column>
            <property name="text">
+            <string>Texture Name</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
             <string>Size</string>
            </property>
           </column>

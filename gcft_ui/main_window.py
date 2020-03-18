@@ -1135,15 +1135,45 @@ class GCFTWindow(QMainWindow):
     
     self.j3d_chunk_to_tree_widget_item = {}
     self.j3d_tree_widget_item_to_chunk = {}
+    self.j3d_texture_to_tree_widget_item = {}
+    self.j3d_tree_widget_item_to_texture = {}
     
     for chunk in self.j3d.chunks:
       chunk_size_str = self.stringify_number(chunk.size, min_hex_chars=5)
       
-      chunk_item = QTreeWidgetItem([chunk.magic, chunk_size_str])
+      chunk_item = QTreeWidgetItem([chunk.magic, "", chunk_size_str])
       self.ui.j3d_chunks_tree.addTopLevelItem(chunk_item)
       
       self.j3d_chunk_to_tree_widget_item[chunk] = chunk_item
       self.j3d_tree_widget_item_to_chunk[chunk_item] = chunk
+      
+      if chunk.magic == "TEX1":
+        seen_image_data_offsets = []
+        seen_palette_data_offsets = []
+        
+        for i, texture in enumerate(chunk.textures):
+          texture_name = chunk.texture_names[i]
+          
+          # We don't display sizes for texture headers that use image/palette datas duplicated from an earlier tex header.
+          # We also don't display the 0x20 byte size of any of the headers.
+          texture_total_size = 0
+          if texture.image_data_offset+texture.header_offset not in seen_image_data_offsets:
+            texture_total_size += data_len(texture.image_data)
+            seen_image_data_offsets.append(texture.image_data_offset+texture.header_offset)
+          if texture.palette_data_offset+texture.header_offset not in seen_palette_data_offsets:
+            texture_total_size += data_len(texture.palette_data)
+            seen_palette_data_offsets.append(texture.palette_data_offset+texture.header_offset)
+          
+          if texture_total_size == 0:
+            texture_size_str = ""
+          else:
+            texture_size_str = self.stringify_number(texture_total_size, min_hex_chars=5)
+          
+          texture_item = QTreeWidgetItem(["", texture_name, texture_size_str])
+          chunk_item.addChild(texture_item)
+          
+          self.j3d_texture_to_tree_widget_item[texture] = texture_item
+          self.j3d_tree_widget_item_to_texture[texture_item] = texture
   
   def export_j3d_by_path(self, j3d_path):
     self.j3d.save_changes()
