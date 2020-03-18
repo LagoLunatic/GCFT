@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'main.ui',
 # licensing of 'main.ui' applies.
 #
-# Created: Wed Mar 18 02:13:20 2020
+# Created: Wed Mar 18 02:27:08 2020
 #      by: pyside2-uic  running on PySide2 5.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -190,6 +190,8 @@ class Ui_MainWindow(object):
         self.actionOpenJPCImage.setObjectName("actionOpenJPCImage")
         self.actionOpenGCMImage = QtWidgets.QAction(MainWindow)
         self.actionOpenGCMImage.setObjectName("actionOpenGCMImage")
+        self.actionOpenJ3DImage = QtWidgets.QAction(MainWindow)
+        self.actionOpenJ3DImage.setObjectName("actionOpenJ3DImage")
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
@@ -244,4 +246,5 @@ class Ui_MainWindow(object):
         self.actionOpenRARCImage.setText(QtWidgets.QApplication.translate("MainWindow", "Open Image", None, -1))
         self.actionOpenJPCImage.setText(QtWidgets.QApplication.translate("MainWindow", "Open Image", None, -1))
         self.actionOpenGCMImage.setText(QtWidgets.QApplication.translate("MainWindow", "Open Image", None, -1))
+        self.actionOpenJ3DImage.setText(QtWidgets.QApplication.translate("MainWindow", "Open Image", None, -1))
 

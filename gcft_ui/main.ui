@@ -400,6 +400,11 @@
     <string>Open Image</string>
    </property>
   </action>
+  <action name="actionOpenJ3DImage">
+   <property name="text">
+    <string>Open Image</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

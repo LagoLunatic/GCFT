@@ -118,6 +118,10 @@ class GCFTWindow(QMainWindow):
     self.ui.import_j3d.clicked.connect(self.import_j3d)
     self.ui.export_j3d.clicked.connect(self.export_j3d)
     
+    self.ui.j3d_chunks_tree.setContextMenuPolicy(Qt.CustomContextMenu)
+    self.ui.j3d_chunks_tree.customContextMenuRequested.connect(self.show_j3d_chunks_tree_context_menu)
+    self.ui.actionOpenJ3DImage.triggered.connect(self.open_image_in_j3d)
+    
     self.load_settings()
     
     if "last_used_tab_name" in self.settings:
@@ -1148,6 +1152,9 @@ class GCFTWindow(QMainWindow):
       self.j3d_tree_widget_item_to_chunk[chunk_item] = chunk
       
       if chunk.magic == "TEX1":
+        # Expand TEX1 chunks by default.
+        chunk_item.setExpanded(True)
+        
         seen_image_data_offsets = []
         seen_palette_data_offsets = []
         
@@ -1201,6 +1208,70 @@ class GCFTWindow(QMainWindow):
       return "Texture Swap Animations (*.btp)"
     else:
       return None
+  
+  def get_j3d_chunk_by_tree_item(self, item):
+    if item not in self.j3d_tree_widget_item_to_chunk:
+      return None
+    
+    return self.j3d_tree_widget_item_to_chunk[item]
+  
+  def get_j3d_tree_item_by_chunk(self, chunk):
+    if chunk not in self.j3d_chunk_to_tree_widget_item:
+      return None
+    
+    return self.j3d_chunk_to_tree_widget_item[chunk]
+  
+  def get_j3d_texture_by_tree_item(self, item):
+    if item not in self.j3d_tree_widget_item_to_texture:
+      return None
+    
+    return self.j3d_tree_widget_item_to_texture[item]
+  
+  def get_jpc_tree_item_by_texture(self, texture):
+    if texture not in self.j3d_texture_to_tree_widget_item:
+      return None
+    
+    return self.j3d_texture_to_tree_widget_item[texture]
+  
+  def show_j3d_chunks_tree_context_menu(self, pos):
+    if self.j3d is None:
+      return
+    
+    item = self.ui.j3d_chunks_tree.itemAt(pos)
+    if item is None:
+      return
+    
+    texture = self.get_j3d_texture_by_tree_item(item)
+    if texture:
+      menu = QMenu(self)
+      menu.addAction(self.ui.actionOpenJ3DImage)
+      self.ui.actionOpenJ3DImage.setData(texture)
+      menu.exec_(self.ui.j3d_chunks_tree.mapToGlobal(pos))
+  
+  def open_image_in_j3d(self):
+    texture = self.ui.actionOpenJ3DImage.data()
+    
+    # Need to make a fake standalone BTI texture data so we can load it without it being the TEX1 format.
+    data = BytesIO()
+    bti_header_bytes = read_bytes(texture.data, texture.header_offset, 0x20)
+    write_bytes(data, 0x00, bti_header_bytes)
+    
+    bti_image_data = read_all_bytes(texture.image_data)
+    write_bytes(data, 0x20, bti_image_data)
+    image_data_offset = 0x20
+    write_u32(data, 0x1C, image_data_offset)
+    
+    if data_len(texture.palette_data) == 0:
+      palette_data_offset = 0
+    else:
+      bti_palette_data = read_all_bytes(texture.palette_data)
+      write_bytes(data, 0x20 + data_len(texture.image_data), bti_palette_data)
+      palette_data_offset = 0x20 + data_len(texture.image_data)
+    write_u32(data, 0x0C, palette_data_offset)
+    
+    self.import_bti_by_data(data)
+    
+    self.set_tab_by_name("BTI Images")
   
   
   
