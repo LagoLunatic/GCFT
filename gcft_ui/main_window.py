@@ -389,17 +389,28 @@ class GCFTWindow(QMainWindow):
     )
   
   def import_j3d(self):
+    filters = [
+      "Models and material tables (*.bmd *.bdl *.bmt)",
+      "All J3D files (*.bmd *.bdl *.bmt *.bls *.btk *.bck *.brk *.bpk *.btp *.bca *.bva *.bla)",
+    ]
+    
     self.generic_do_gui_file_operation(
       op_callback=self.import_j3d_by_path,
       is_opening=True, is_saving=False, is_folder=False,
-      file_type="J3D file", file_filter="BDL models (*.bdl)" # TODO more
+      file_type="J3D file", file_filter=";;".join(filters)
     )
   
   def export_j3d(self):
+    filters = []
+    current_filter = self.get_file_filter_by_current_j3d_file_type()
+    if current_filter is not None:
+      filters.append(current_filter)
+    filters.append("All J3D files (*.bmd *.bdl *.bmt *.bls *.btk *.bck *.brk *.bpk *.btp *.bca *.bva *.bla)")
+    
     self.generic_do_gui_file_operation(
       op_callback=self.export_j3d_by_path,
       is_opening=False, is_saving=True, is_folder=False,
-      file_type="J3D file", file_filter="BDL models (*.bdl)"
+      file_type="J3D file", file_filter=";;".join(filters)
     )
   
   def import_jpc(self):
@@ -1142,6 +1153,24 @@ class GCFTWindow(QMainWindow):
       f.write(self.j3d.data.read())
     
     QMessageBox.information(self, "J3D file saved", "Successfully saved J3D file.")
+  
+  def get_file_filter_by_current_j3d_file_type(self):
+    if self.j3d.file_type == "bdl4":
+      return "Binary Display List Models (*.bdl)"
+    elif self.j3d.file_type == "bmd3":
+      return "Binary Models (*.bmd)"
+    elif self.j3d.file_type == "bmt3":
+      return "Binary Material Tables (*.bmt)"
+    elif self.j3d.file_type == "btk1":
+      return "Texture SRT Animations (*.btk)"
+    elif self.j3d.file_type == "bck1":
+      return "Joint Animations (*.bck)"
+    elif self.j3d.file_type == "brk1":
+      return "Texture Register Animations (*.brk)"
+    elif self.j3d.file_type == "btp1":
+      return "Texture Swap Animations (*.btp)"
+    else:
+      return None
   
   
   
