@@ -79,6 +79,11 @@ class GCFTWindow(QMainWindow):
       column_name = self.ui.gcm_files_tree.headerItem().text(col)
       self.gcm_col_name_to_index[column_name] = col
     
+    self.j3d_col_name_to_index = {}
+    for col in range(self.ui.j3d_chunks_tree.columnCount()):
+      column_name = self.ui.j3d_chunks_tree.headerItem().text(col)
+      self.j3d_col_name_to_index[column_name] = col
+    
     self.ui.export_rarc.setDisabled(True)
     self.ui.import_folder_over_rarc.setDisabled(True)
     self.ui.export_rarc_folder.setDisabled(True)
@@ -170,6 +175,7 @@ class GCFTWindow(QMainWindow):
     self.ui.j3d_chunks_tree.setContextMenuPolicy(Qt.CustomContextMenu)
     self.ui.j3d_chunks_tree.customContextMenuRequested.connect(self.show_j3d_chunks_tree_context_menu)
     self.ui.actionOpenJ3DImage.triggered.connect(self.open_image_in_j3d)
+    self.ui.actionReplaceJ3DImage.triggered.connect(self.replace_image_in_j3d)
     
     self.load_settings()
     
@@ -1414,8 +1420,17 @@ class GCFTWindow(QMainWindow):
     texture = self.get_j3d_texture_by_tree_item(item)
     if texture:
       menu = QMenu(self)
+      
       menu.addAction(self.ui.actionOpenJ3DImage)
       self.ui.actionOpenJ3DImage.setData(texture)
+      
+      menu.addAction(self.ui.actionReplaceJ3DImage)
+      self.ui.actionReplaceJ3DImage.setData(texture)
+      if self.bti is None:
+        self.ui.actionReplaceJ3DImage.setDisabled(True)
+      else:
+        self.ui.actionReplaceJ3DImage.setDisabled(False)
+      
       menu.exec_(self.ui.j3d_chunks_tree.mapToGlobal(pos))
   
   def open_image_in_j3d(self):
@@ -1442,6 +1457,30 @@ class GCFTWindow(QMainWindow):
     self.import_bti_by_data(data)
     
     self.set_tab_by_name("BTI Images")
+  
+  def replace_image_in_j3d(self):
+    texture = self.ui.actionOpenJ3DImage.data()
+    
+    self.bti.save_changes()
+    
+    # Need to make a fake BTI header for it to read from.
+    data = BytesIO()
+    bti_header_bytes = read_bytes(self.bti.data, self.bti.header_offset, 0x20)
+    write_bytes(data, 0x00, bti_header_bytes)
+    
+    texture.read_header(data)
+    
+    texture.image_data = make_copy_data(self.bti.image_data)
+    texture.palette_data = make_copy_data(self.bti.palette_data)
+    
+    # Update texture size displayed in the UI.
+    texture_total_size = 0
+    texture_total_size += data_len(texture.image_data)
+    texture_total_size += data_len(texture.palette_data)
+    texture_size_str = self.stringify_number(texture_total_size, min_hex_chars=5)
+    
+    item = self.get_jpc_tree_item_by_texture(texture)
+    item.setText(self.j3d_col_name_to_index["Size"], texture_size_str)
   
   
   

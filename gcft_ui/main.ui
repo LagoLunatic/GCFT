@@ -605,6 +605,11 @@
     <string>Open J3D</string>
    </property>
   </action>
+  <action name="actionReplaceJ3DImage">
+   <property name="text">
+    <string>Replace Image</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
