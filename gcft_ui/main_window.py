@@ -1303,6 +1303,9 @@ class GCFTWindow(QMainWindow):
         QApplication.instance().clipboard().setText(file_path)
       elif curr_tab_text == "GCM ISOs" and self.ui.gcm_files_tree.currentColumn() == self.gcm_col_name_to_index["File Name"]:
         item = self.ui.gcm_files_tree.currentItem()
+        if item not in self.gcm_tree_widget_item_to_file_entry:
+          # The sys folder is not real.
+          return
         file_entry = self.gcm_tree_widget_item_to_file_entry[item]
         file_path = file_entry.file_path
         QApplication.instance().clipboard().setText(file_path)
