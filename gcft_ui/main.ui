@@ -410,6 +410,11 @@
     <string>Open Image</string>
    </property>
   </action>
+  <action name="actionOpenRARCJ3D">
+   <property name="text">
+    <string>Open J3D</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

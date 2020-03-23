@@ -94,6 +94,7 @@ class GCFTWindow(QMainWindow):
     self.ui.actionDeleteRARCFile.triggered.connect(self.delete_file_in_rarc)
     self.ui.actionAddRARCFile.triggered.connect(self.add_file_to_rarc)
     self.ui.actionOpenRARCImage.triggered.connect(self.open_image_in_rarc)
+    self.ui.actionOpenRARCJ3D.triggered.connect(self.open_j3d_in_rarc)
     
     self.ui.decompress_yaz0.clicked.connect(self.decompress_yaz0)
     self.ui.compress_yaz0.clicked.connect(self.compress_yaz0)
@@ -606,9 +607,15 @@ class GCFTWindow(QMainWindow):
         self.ui.actionReplaceRARCFile.setData(file)
         menu.addAction(self.ui.actionDeleteRARCFile)
         self.ui.actionDeleteRARCFile.setData(file)
-        if file.name.endswith(".bti"):
+        
+        basename, file_ext = os.path.splitext(file.name)
+        if file_ext == ".bti":
           menu.addAction(self.ui.actionOpenRARCImage)
           self.ui.actionOpenRARCImage.setData(file)
+        elif file_ext in [".bdl", ".bmd", ".bmt", ".btk", ".bck", ".brk", ".btp"]:
+          menu.addAction(self.ui.actionOpenRARCJ3D)
+          self.ui.actionOpenRARCJ3D.setData(file)
+        
         menu.exec_(self.ui.rarc_files_tree.mapToGlobal(pos))
   
   def extract_file_from_rarc_by_path(self, file_path):
@@ -653,6 +660,14 @@ class GCFTWindow(QMainWindow):
     self.import_bti_by_data(data)
     
     self.set_tab_by_name("BTI Images")
+  
+  def open_j3d_in_rarc(self):
+    file_entry = self.ui.actionOpenRARCJ3D.data()
+    
+    data = make_copy_data(file_entry.data)
+    self.import_j3d_by_data(data)
+    
+    self.set_tab_by_name("J3D Files")
   
   def add_file_to_rarc_by_path(self, file_path):
     node = self.ui.actionAddRARCFile.data()
@@ -1144,6 +1159,13 @@ class GCFTWindow(QMainWindow):
     with open(j3d_path, "rb") as f:
       data = BytesIO(f.read())
     
+    self.j3d = J3DFile(data)
+    
+    self.reload_j3d_chunks_tree()
+    
+    self.ui.export_j3d.setDisabled(False)
+  
+  def import_j3d_by_data(self, data):
     self.j3d = J3DFile(data)
     
     self.reload_j3d_chunks_tree()
