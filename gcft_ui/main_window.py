@@ -671,7 +671,7 @@ class GCFTWindow(QMainWindow):
      # Update changed file size
     file_size_str = self.stringify_number(data_len(file.data))
     item = self.get_rarc_tree_item_by_file(file)
-    item.setText(2, file_size_str)
+    item.setText(self.rarc_col_name_to_index["File Size"], file_size_str)
   
   def delete_file_in_rarc(self):
     file_entry = self.ui.actionDeleteRARCFile.data()
@@ -978,7 +978,7 @@ class GCFTWindow(QMainWindow):
     # Update changed file size
     file_size_str = self.stringify_number(data_len(data))
     item = self.gcm_file_entry_to_tree_widget_item[file]
-    item.setText(1, file_size_str)
+    item.setText(self.gcm_col_name_to_index["File Size"], file_size_str)
   
   def delete_file_in_gcm(self):
     file_entry = self.ui.actionDeleteGCMFile.data()
