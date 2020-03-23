@@ -32,7 +32,7 @@ from wwlib.rarc import RARC
 from wwlib.yaz0 import Yaz0
 from wwlib.gcm import GCM
 from wwlib.jpc import JPC
-from wwlib.bti import BTIFile, WrapMode, FilterMode
+from wwlib.bti import BTI, BTIFile, WrapMode, FilterMode
 from wwlib.j3d import J3DFile
 from wwlib.texture_utils import ImageFormat, PaletteFormat
 from fs_helpers import *
@@ -147,6 +147,7 @@ class GCFTWindow(QMainWindow):
     self.ui.jpc_particles_tree.setContextMenuPolicy(Qt.CustomContextMenu)
     self.ui.jpc_particles_tree.customContextMenuRequested.connect(self.show_jpc_particles_tree_context_menu)
     self.ui.actionOpenJPCImage.triggered.connect(self.open_image_in_jpc)
+    self.ui.actionReplaceJPCImage.triggered.connect(self.replace_image_in_jpc)
     
     self.ui.import_bti.clicked.connect(self.import_bti)
     self.ui.export_bti.clicked.connect(self.export_bti)
@@ -1175,17 +1176,60 @@ class GCFTWindow(QMainWindow):
     texture = self.get_jpc_texture_by_tree_item(item)
     if texture:
       menu = QMenu(self)
+      
       menu.addAction(self.ui.actionOpenJPCImage)
       self.ui.actionOpenJPCImage.setData(texture)
+        
+      menu.addAction(self.ui.actionReplaceJPCImage)
+      self.ui.actionReplaceJPCImage.setData(texture)
+      if self.bti is None:
+        self.ui.actionReplaceJPCImage.setDisabled(True)
+      else:
+        self.ui.actionReplaceJPCImage.setDisabled(False)
+      
       menu.exec_(self.ui.jpc_particles_tree.mapToGlobal(pos))
   
   def open_image_in_jpc(self):
     texture = self.ui.actionOpenJPCImage.data()
     
-    data = make_copy_data(texture.bti.data)
+    # Need to make a fake standalone BTI texture data so we can load it without it being the TEX1 format.
+    data = BytesIO()
+    bti_header_bytes = read_bytes(texture.bti.data, texture.bti.header_offset, 0x20)
+    write_bytes(data, 0x00, bti_header_bytes)
+    
+    bti_image_data = read_all_bytes(texture.bti.image_data)
+    write_bytes(data, 0x20, bti_image_data)
+    image_data_offset = 0x20
+    write_u32(data, 0x1C, image_data_offset)
+    
+    if data_len(texture.bti.palette_data) == 0:
+      palette_data_offset = 0
+    else:
+      bti_palette_data = read_all_bytes(texture.bti.palette_data)
+      write_bytes(data, 0x20 + data_len(texture.bti.image_data), bti_palette_data)
+      palette_data_offset = 0x20 + data_len(texture.bti.image_data)
+    write_u32(data, 0x0C, palette_data_offset)
+    
     self.import_bti_by_data(data)
     
     self.set_tab_by_name("BTI Images")
+  
+  def replace_image_in_jpc(self):
+    texture = self.ui.actionOpenJPCImage.data()
+    
+    self.bti.save_changes()
+    
+    # Need to make a fake BTI header for it to read from.
+    data = BytesIO()
+    bti_header_bytes = read_bytes(self.bti.data, self.bti.header_offset, 0x20)
+    write_bytes(data, 0x00, bti_header_bytes)
+    
+    texture.bti.read_header(data)
+    
+    texture.bti.image_data = make_copy_data(self.bti.image_data)
+    texture.bti.palette_data = make_copy_data(self.bti.palette_data)
+    
+    texture.bti.save_header_changes()
   
   
   
@@ -1513,6 +1557,8 @@ class GCFTWindow(QMainWindow):
     
     texture.image_data = make_copy_data(self.bti.image_data)
     texture.palette_data = make_copy_data(self.bti.palette_data)
+    
+    texture.save_header_changes()
     
     # Update texture size displayed in the UI.
     texture_total_size = 0
