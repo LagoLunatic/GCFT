@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'main.ui',
 # licensing of 'main.ui' applies.
 #
-# Created: Wed Mar 18 02:27:08 2020
+# Created: Mon Mar 23 12:40:48 2020
 #      by: pyside2-uic  running on PySide2 5.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -211,8 +211,9 @@ class Ui_MainWindow(object):
         self.import_folder_over_rarc.setText(QtWidgets.QApplication.translate("MainWindow", "Import Folder Over RARC", None, -1))
         self.export_rarc_folder.setText(QtWidgets.QApplication.translate("MainWindow", "Export Folder", None, -1))
         self.rarc_files_tree.headerItem().setText(0, QtWidgets.QApplication.translate("MainWindow", "File Name", None, -1))
-        self.rarc_files_tree.headerItem().setText(1, QtWidgets.QApplication.translate("MainWindow", "File ID", None, -1))
-        self.rarc_files_tree.headerItem().setText(2, QtWidgets.QApplication.translate("MainWindow", "File Size", None, -1))
+        self.rarc_files_tree.headerItem().setText(1, QtWidgets.QApplication.translate("MainWindow", "File Index", None, -1))
+        self.rarc_files_tree.headerItem().setText(2, QtWidgets.QApplication.translate("MainWindow", "File ID", None, -1))
+        self.rarc_files_tree.headerItem().setText(3, QtWidgets.QApplication.translate("MainWindow", "File Size", None, -1))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QtWidgets.QApplication.translate("MainWindow", "RARC Archives", None, -1))
         self.import_bti.setText(QtWidgets.QApplication.translate("MainWindow", "Import BTI", None, -1))
         self.export_bti.setText(QtWidgets.QApplication.translate("MainWindow", "Export BTI", None, -1))

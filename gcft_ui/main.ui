@@ -122,6 +122,11 @@
           </column>
           <column>
            <property name="text">
+            <string>File Index</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
             <string>File ID</string>
            </property>
           </column>

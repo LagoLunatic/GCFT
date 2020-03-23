@@ -473,13 +473,13 @@ class GCFTWindow(QMainWindow):
     self.rarc_tree_widget_item_to_file_entry = {}
     
     root_node = self.rarc.nodes[0]
-    root_item = QTreeWidgetItem([root_node.name, "", ""])
+    root_item = QTreeWidgetItem([root_node.name, "", "", ""])
     self.ui.rarc_files_tree.addTopLevelItem(root_item)
     self.rarc_node_to_tree_widget_item[root_node] = root_item
     self.rarc_tree_widget_item_to_node[root_item] = root_node
     
     for node in self.rarc.nodes[1:]:
-      item = QTreeWidgetItem([node.name, "", ""])
+      item = QTreeWidgetItem([node.name, "", "", ""])
       root_item.addChild(item)
       
       self.rarc_node_to_tree_widget_item[node] = item
@@ -499,9 +499,11 @@ class GCFTWindow(QMainWindow):
       
       file_size_str = self.stringify_number(file_entry.data_size)
       file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
+      file_index = self.rarc.file_entries.index(file_entry)
+      file_index_str = self.stringify_number(file_index, min_hex_chars=4)
       
       parent_item = self.rarc_node_to_tree_widget_item[file_entry.parent_node]
-      item = QTreeWidgetItem([file_entry.name, file_id_str, file_size_str])
+      item = QTreeWidgetItem([file_entry.name, file_index_str, file_id_str, file_size_str])
       item.setFlags(item.flags() | Qt.ItemIsEditable)
       parent_item.addChild(item)
       self.rarc_file_entry_to_tree_widget_item[file_entry] = item
@@ -655,11 +657,14 @@ class GCFTWindow(QMainWindow):
     if file_name in existing_file_names_in_node:
       QMessageBox.warning(self, "File already exists", "Cannot add new file. The selected folder already contains a file named \"%s\".\n\nIf you wish to replace the existing file, right click on it in the files tree and select 'Replace File'." % file_name)
       return
+    
     file_entry = self.rarc.add_new_file(file_name, file_data, node)
     file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
+    file_index = self.rarc.file_entries.index(file_entry)
+    file_index_str = self.stringify_number(file_index, min_hex_chars=4)
     
     dir_item = self.get_rarc_tree_item_by_node(node)
-    file_item = QTreeWidgetItem([file_entry.name, file_id_str, file_size_str])
+    file_item = QTreeWidgetItem([file_entry.name, file_index_str, file_id_str, file_size_str])
     file_item.setFlags(file_item.flags() | Qt.ItemIsEditable)
     dir_item.addChild(file_item)
     self.rarc_file_entry_to_tree_widget_item[file_entry] = file_item
@@ -667,16 +672,16 @@ class GCFTWindow(QMainWindow):
   
   
   def edit_rarc_files_tree_item_text(self, item, column):
-    if (item.flags() & Qt.ItemIsEditable) != 0 and column == 1: # Allow editing the file IDs column only.
+    if (item.flags() & Qt.ItemIsEditable) != 0 and column == 2: # Allow editing the file IDs column only.
       self.ui.rarc_files_tree.editItem(item, column)
   
   def rarc_file_tree_item_text_changed(self, item, column):
-    if column == 1:
+    if column == 2:
       self.change_rarc_file_id(item)
   
   def change_rarc_file_id(self, item):
     file_entry = self.get_rarc_file_by_tree_item(item)
-    new_file_id_str = item.text(1)
+    new_file_id_str = item.text(2)
     
     if True: # TODO hex/decimal setting
       hexadecimal_match = re.search(r"^\s*(?:0x)?([0-9a-f]+)\s*$", new_file_id_str, re.IGNORECASE)
@@ -685,7 +690,7 @@ class GCFTWindow(QMainWindow):
       else:
         QMessageBox.warning(self, "Invalid file ID", "\"%s\" is not a valid hexadecimal number." % new_file_id_str)
         file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
-        item.setText(1, file_id_str)
+        item.setText(2, file_id_str)
         return
     else:
       decimal_match = re.search(r"^\s*(\d+)\s*$", new_file_id_str, re.IGNORECASE)
@@ -694,13 +699,13 @@ class GCFTWindow(QMainWindow):
       else:
         QMessageBox.warning(self, "Invalid file ID", "\"%s\" is not a valid decimal number." % new_file_id_str)
         file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
-        item.setText(1, file_id_str)
+        item.setText(2, file_id_str)
         return
     
     if new_file_id >= 0xFFFF:
       QMessageBox.warning(self, "Invalid file ID", "\"%s\" is too large to be a file ID. It must be in the range 0x0000-0xFFFE." % new_file_id_str)
       file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
-      item.setText(1, file_id_str)
+      item.setText(2, file_id_str)
       return
     
     other_file_entry = next((fe for fe in self.rarc.file_entries if fe.id == new_file_id), None)
@@ -708,19 +713,19 @@ class GCFTWindow(QMainWindow):
     if other_file_entry == file_entry:
       # File ID not changed
       file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
-      item.setText(1, file_id_str)
+      item.setText(2, file_id_str)
       return
     
     if other_file_entry is not None:
       QMessageBox.warning(self, "Duplicate file ID", "The file ID you entered is already used by the file \"%s\"." % other_file_entry.name)
       file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
-      item.setText(1, file_id_str)
+      item.setText(2, file_id_str)
       return
     
     file_entry.id = new_file_id
     
     file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
-    item.setText(1, file_id_str)
+    item.setText(2, file_id_str)
   
   
   
