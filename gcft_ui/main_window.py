@@ -1213,9 +1213,16 @@ class GCFTWindow(QMainWindow):
     QMessageBox.information(self, "BTI saved", "Successfully saved BTI.")
   
   def import_bti_image_by_path(self, image_path):
-    self.bti.replace_image_from_path(image_path)
-    
-    self.bti.save_changes()
+    try:
+      self.bti.replace_image_from_path(image_path)
+      
+      self.bti.save_changes()
+    except Exception as e:
+      stack_trace = traceback.format_exc()
+      error_message_title = "Failed to import image"
+      error_message = "Failed to import image with error:\n%s\n\n%s" % (str(e), stack_trace)
+      QMessageBox.critical(self, error_message_title, error_message)
+      return
     
     self.reload_bti_image()
     self.original_bti_image = self.bti_image
@@ -1264,7 +1271,15 @@ class GCFTWindow(QMainWindow):
       setattr(self.bti, field_name, current_value)
     
     
-    self.bti.replace_image(self.original_bti_image)
+    try:
+      self.bti.replace_image(self.original_bti_image)
+    except Exception as e:
+      stack_trace = traceback.format_exc()
+      error_message_title = "Failed to import image"
+      error_message = "Failed to import image with error:\n%s\n\n%s" % (str(e), stack_trace)
+      QMessageBox.critical(self, error_message_title, error_message)
+      return
+    
     self.reload_bti_image()
   
   
