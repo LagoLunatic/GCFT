@@ -8,6 +8,7 @@ from io import BytesIO
 from collections import OrderedDict
 import traceback
 import re
+from PIL import Image
 
 import yaml
 try:
@@ -1308,7 +1309,9 @@ class GCFTWindow(QMainWindow):
   
   def import_bti_image_by_path(self, image_path):
     try:
-      self.bti.replace_image_from_path(image_path)
+      self.original_bti_image = Image.open(image_path)
+      
+      self.bti.replace_image(self.original_bti_image)
       
       self.bti.save_changes()
     except Exception as e:
@@ -1319,7 +1322,6 @@ class GCFTWindow(QMainWindow):
       return
     
     self.reload_bti_image()
-    self.original_bti_image = self.bti_image
   
   def export_bti_image_by_path(self, image_path):
     self.bti_image.save(image_path)
