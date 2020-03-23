@@ -61,6 +61,9 @@ class GCFTWindow(QMainWindow):
     
     self.gcm = None
     self.rarc = None
+    self.jpc = None
+    self.bti = None
+    self.j3d = None
     
     self.ui.rarc_files_tree.setColumnWidth(0, 300)
     self.ui.gcm_files_tree.setColumnWidth(0, 300)
