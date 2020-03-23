@@ -137,6 +137,7 @@ class GCFTWindow(QMainWindow):
     self.ui.actionDeleteGCMFile.triggered.connect(self.delete_file_in_gcm)
     self.ui.actionAddGCMFile.triggered.connect(self.add_file_to_gcm)
     self.ui.actionOpenGCMImage.triggered.connect(self.open_image_in_gcm)
+    self.ui.actionReplaceGCMImage.triggered.connect(self.replace_image_in_gcm)
     
     self.ui.import_jpc.clicked.connect(self.import_jpc)
     self.ui.export_jpc.clicked.connect(self.export_jpc)
@@ -963,6 +964,13 @@ class GCFTWindow(QMainWindow):
       if file_ext == ".bti":
         menu.addAction(self.ui.actionOpenGCMImage)
         self.ui.actionOpenGCMImage.setData(file)
+        
+        menu.addAction(self.ui.actionReplaceGCMImage)
+        self.ui.actionReplaceGCMImage.setData(file)
+        if self.bti is None:
+          self.ui.actionReplaceGCMImage.setDisabled(True)
+        else:
+          self.ui.actionReplaceGCMImage.setDisabled(False)
       
       menu.addAction(self.ui.actionExtractGCMFile)
       self.ui.actionExtractGCMFile.setData(file)
@@ -1033,6 +1041,19 @@ class GCFTWindow(QMainWindow):
     self.import_bti_by_data(data)
     
     self.set_tab_by_name("BTI Images")
+  
+  def replace_image_in_gcm(self):
+    file = self.ui.actionReplaceGCMFile.data()
+    
+    self.bti.save_changes()
+    
+    data = make_copy_data(self.bti.data)
+    self.gcm.changed_files[file.file_path] = data
+    
+    # Update changed file size
+    file_size_str = self.stringify_number(data_len(data))
+    item = self.gcm_file_entry_to_tree_widget_item[file]
+    item.setText(self.gcm_col_name_to_index["File Size"], file_size_str)
   
   def add_file_to_gcm_by_path(self, file_path):
     dir_entry = self.ui.actionAddGCMFile.data()
