@@ -601,12 +601,6 @@ class GCFTWindow(QMainWindow):
         pass
       else:
         menu = QMenu(self)
-        menu.addAction(self.ui.actionExtractRARCFile)
-        self.ui.actionExtractRARCFile.setData(file)
-        menu.addAction(self.ui.actionReplaceRARCFile)
-        self.ui.actionReplaceRARCFile.setData(file)
-        menu.addAction(self.ui.actionDeleteRARCFile)
-        self.ui.actionDeleteRARCFile.setData(file)
         
         basename, file_ext = os.path.splitext(file.name)
         if file_ext == ".bti":
@@ -615,6 +609,13 @@ class GCFTWindow(QMainWindow):
         elif file_ext in [".bdl", ".bmd", ".bmt", ".btk", ".bck", ".brk", ".btp"]:
           menu.addAction(self.ui.actionOpenRARCJ3D)
           self.ui.actionOpenRARCJ3D.setData(file)
+        
+        menu.addAction(self.ui.actionExtractRARCFile)
+        self.ui.actionExtractRARCFile.setData(file)
+        menu.addAction(self.ui.actionReplaceRARCFile)
+        self.ui.actionReplaceRARCFile.setData(file)
+        menu.addAction(self.ui.actionDeleteRARCFile)
+        self.ui.actionDeleteRARCFile.setData(file)
         
         menu.exec_(self.ui.rarc_files_tree.mapToGlobal(pos))
   
@@ -893,6 +894,12 @@ class GCFTWindow(QMainWindow):
       menu.exec_(self.ui.gcm_files_tree.mapToGlobal(pos))
     else:
       menu = QMenu(self)
+      
+      basename, file_ext = os.path.splitext(file.name)
+      if file_ext == ".bti":
+        menu.addAction(self.ui.actionOpenGCMImage)
+        self.ui.actionOpenGCMImage.setData(file)
+      
       menu.addAction(self.ui.actionExtractGCMFile)
       self.ui.actionExtractGCMFile.setData(file)
       if file.file_path != "sys/fst.bin": # Regenerated automatically
@@ -901,9 +908,7 @@ class GCFTWindow(QMainWindow):
       if not file.is_system_file:
         menu.addAction(self.ui.actionDeleteGCMFile)
         self.ui.actionDeleteGCMFile.setData(file)
-      if file.name.endswith(".bti"):
-        menu.addAction(self.ui.actionOpenGCMImage)
-        self.ui.actionOpenGCMImage.setData(file)
+      
       menu.exec_(self.ui.gcm_files_tree.mapToGlobal(pos))
   
   def extract_file_from_gcm_by_path(self, file_path):
