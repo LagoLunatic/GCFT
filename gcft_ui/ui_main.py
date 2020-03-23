@@ -1,373 +1,496 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'main.ui',
-# licensing of 'main.ui' applies.
-#
-# Created: Mon Mar 23 18:48:37 2020
-#      by: pyside2-uic  running on PySide2 5.11.2
-#
-# WARNING! All changes made in this file will be lost!
+################################################################################
+## Form generated from reading UI file 'main.ui'
+##
+## Created by: Qt User Interface Compiler version 5.14.1
+##
+## WARNING! All changes made in this file will be lost when recompiling UI file!
+################################################################################
 
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide2.QtCore import (QCoreApplication, QMetaObject, QObject, QPoint,
+    QRect, QSize, QUrl, Qt)
+from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
+    QFontDatabase, QIcon, QLinearGradient, QPalette, QPainter, QPixmap,
+    QRadialGradient)
+from PySide2.QtWidgets import *
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
+        if MainWindow.objectName():
+            MainWindow.setObjectName(u"MainWindow")
         MainWindow.resize(800, 600)
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
-        self.centralwidget.setObjectName("centralwidget")
-        self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
-        self.verticalLayout.setObjectName("verticalLayout")
-        self.tabWidget = QtWidgets.QTabWidget(self.centralwidget)
-        self.tabWidget.setObjectName("tabWidget")
-        self.tab_3 = QtWidgets.QWidget()
-        self.tab_3.setObjectName("tab_3")
-        self.verticalLayout_4 = QtWidgets.QVBoxLayout(self.tab_3)
-        self.verticalLayout_4.setObjectName("verticalLayout_4")
-        self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
-        self.import_gcm = QtWidgets.QPushButton(self.tab_3)
-        self.import_gcm.setObjectName("import_gcm")
+        self.actionReplaceRARCFile = QAction(MainWindow)
+        self.actionReplaceRARCFile.setObjectName(u"actionReplaceRARCFile")
+        self.actionExtractRARCFile = QAction(MainWindow)
+        self.actionExtractRARCFile.setObjectName(u"actionExtractRARCFile")
+        self.actionReplaceGCMFile = QAction(MainWindow)
+        self.actionReplaceGCMFile.setObjectName(u"actionReplaceGCMFile")
+        self.actionExtractGCMFile = QAction(MainWindow)
+        self.actionExtractGCMFile.setObjectName(u"actionExtractGCMFile")
+        self.actionAddGCMFile = QAction(MainWindow)
+        self.actionAddGCMFile.setObjectName(u"actionAddGCMFile")
+        self.actionAddRARCFile = QAction(MainWindow)
+        self.actionAddRARCFile.setObjectName(u"actionAddRARCFile")
+        self.actionDeleteRARCFile = QAction(MainWindow)
+        self.actionDeleteRARCFile.setObjectName(u"actionDeleteRARCFile")
+        self.actionDeleteGCMFile = QAction(MainWindow)
+        self.actionDeleteGCMFile.setObjectName(u"actionDeleteGCMFile")
+        self.actionOpenRARCImage = QAction(MainWindow)
+        self.actionOpenRARCImage.setObjectName(u"actionOpenRARCImage")
+        self.actionOpenJPCImage = QAction(MainWindow)
+        self.actionOpenJPCImage.setObjectName(u"actionOpenJPCImage")
+        self.actionOpenGCMImage = QAction(MainWindow)
+        self.actionOpenGCMImage.setObjectName(u"actionOpenGCMImage")
+        self.actionOpenJ3DImage = QAction(MainWindow)
+        self.actionOpenJ3DImage.setObjectName(u"actionOpenJ3DImage")
+        self.actionOpenRARCJ3D = QAction(MainWindow)
+        self.actionOpenRARCJ3D.setObjectName(u"actionOpenRARCJ3D")
+        self.actionReplaceJ3DImage = QAction(MainWindow)
+        self.actionReplaceJ3DImage.setObjectName(u"actionReplaceJ3DImage")
+        self.actionReplaceJPCImage = QAction(MainWindow)
+        self.actionReplaceJPCImage.setObjectName(u"actionReplaceJPCImage")
+        self.actionReplaceGCMImage = QAction(MainWindow)
+        self.actionReplaceGCMImage.setObjectName(u"actionReplaceGCMImage")
+        self.actionReplaceRARCImage = QAction(MainWindow)
+        self.actionReplaceRARCImage.setObjectName(u"actionReplaceRARCImage")
+        self.centralwidget = QWidget(MainWindow)
+        self.centralwidget.setObjectName(u"centralwidget")
+        self.verticalLayout = QVBoxLayout(self.centralwidget)
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.tabWidget = QTabWidget(self.centralwidget)
+        self.tabWidget.setObjectName(u"tabWidget")
+        self.tab_3 = QWidget()
+        self.tab_3.setObjectName(u"tab_3")
+        self.verticalLayout_4 = QVBoxLayout(self.tab_3)
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.horizontalLayout_3 = QHBoxLayout()
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.import_gcm = QPushButton(self.tab_3)
+        self.import_gcm.setObjectName(u"import_gcm")
+
         self.horizontalLayout_3.addWidget(self.import_gcm)
-        self.export_gcm = QtWidgets.QPushButton(self.tab_3)
-        self.export_gcm.setObjectName("export_gcm")
+
+        self.export_gcm = QPushButton(self.tab_3)
+        self.export_gcm.setObjectName(u"export_gcm")
+
         self.horizontalLayout_3.addWidget(self.export_gcm)
-        self.import_folder_over_gcm = QtWidgets.QPushButton(self.tab_3)
-        self.import_folder_over_gcm.setObjectName("import_folder_over_gcm")
+
+        self.import_folder_over_gcm = QPushButton(self.tab_3)
+        self.import_folder_over_gcm.setObjectName(u"import_folder_over_gcm")
+
         self.horizontalLayout_3.addWidget(self.import_folder_over_gcm)
-        self.export_gcm_folder = QtWidgets.QPushButton(self.tab_3)
-        self.export_gcm_folder.setObjectName("export_gcm_folder")
+
+        self.export_gcm_folder = QPushButton(self.tab_3)
+        self.export_gcm_folder.setObjectName(u"export_gcm_folder")
+
         self.horizontalLayout_3.addWidget(self.export_gcm_folder)
+
+
         self.verticalLayout_4.addLayout(self.horizontalLayout_3)
-        self.gcm_files_tree = QtWidgets.QTreeWidget(self.tab_3)
-        self.gcm_files_tree.setObjectName("gcm_files_tree")
+
+        self.gcm_files_tree = QTreeWidget(self.tab_3)
+        self.gcm_files_tree.setObjectName(u"gcm_files_tree")
+
         self.verticalLayout_4.addWidget(self.gcm_files_tree)
+
         self.tabWidget.addTab(self.tab_3, "")
-        self.tab = QtWidgets.QWidget()
-        self.tab.setObjectName("tab")
-        self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.tab)
-        self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.horizontalLayout = QtWidgets.QHBoxLayout()
-        self.horizontalLayout.setObjectName("horizontalLayout")
-        self.import_rarc = QtWidgets.QPushButton(self.tab)
-        self.import_rarc.setObjectName("import_rarc")
+        self.tab = QWidget()
+        self.tab.setObjectName(u"tab")
+        self.verticalLayout_2 = QVBoxLayout(self.tab)
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.import_rarc = QPushButton(self.tab)
+        self.import_rarc.setObjectName(u"import_rarc")
+
         self.horizontalLayout.addWidget(self.import_rarc)
-        self.export_rarc = QtWidgets.QPushButton(self.tab)
-        self.export_rarc.setObjectName("export_rarc")
+
+        self.export_rarc = QPushButton(self.tab)
+        self.export_rarc.setObjectName(u"export_rarc")
+
         self.horizontalLayout.addWidget(self.export_rarc)
-        self.import_folder_over_rarc = QtWidgets.QPushButton(self.tab)
-        self.import_folder_over_rarc.setObjectName("import_folder_over_rarc")
+
+        self.import_folder_over_rarc = QPushButton(self.tab)
+        self.import_folder_over_rarc.setObjectName(u"import_folder_over_rarc")
+
         self.horizontalLayout.addWidget(self.import_folder_over_rarc)
-        self.export_rarc_folder = QtWidgets.QPushButton(self.tab)
-        self.export_rarc_folder.setObjectName("export_rarc_folder")
+
+        self.export_rarc_folder = QPushButton(self.tab)
+        self.export_rarc_folder.setObjectName(u"export_rarc_folder")
+
         self.horizontalLayout.addWidget(self.export_rarc_folder)
+
+
         self.verticalLayout_2.addLayout(self.horizontalLayout)
-        self.rarc_files_tree = QtWidgets.QTreeWidget(self.tab)
-        self.rarc_files_tree.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.rarc_files_tree.setObjectName("rarc_files_tree")
+
+        self.rarc_files_tree = QTreeWidget(self.tab)
+        self.rarc_files_tree.setObjectName(u"rarc_files_tree")
+        self.rarc_files_tree.setEditTriggers(QAbstractItemView.NoEditTriggers)
+
         self.verticalLayout_2.addWidget(self.rarc_files_tree)
+
         self.tabWidget.addTab(self.tab, "")
-        self.tab_5 = QtWidgets.QWidget()
-        self.tab_5.setObjectName("tab_5")
-        self.verticalLayout_6 = QtWidgets.QVBoxLayout(self.tab_5)
-        self.verticalLayout_6.setObjectName("verticalLayout_6")
-        self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_5.setObjectName("horizontalLayout_5")
-        self.import_bti = QtWidgets.QPushButton(self.tab_5)
-        self.import_bti.setObjectName("import_bti")
+        self.tab_5 = QWidget()
+        self.tab_5.setObjectName(u"tab_5")
+        self.verticalLayout_6 = QVBoxLayout(self.tab_5)
+        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
+        self.horizontalLayout_5 = QHBoxLayout()
+        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+        self.import_bti = QPushButton(self.tab_5)
+        self.import_bti.setObjectName(u"import_bti")
+
         self.horizontalLayout_5.addWidget(self.import_bti)
-        self.export_bti = QtWidgets.QPushButton(self.tab_5)
-        self.export_bti.setObjectName("export_bti")
+
+        self.export_bti = QPushButton(self.tab_5)
+        self.export_bti.setObjectName(u"export_bti")
+
         self.horizontalLayout_5.addWidget(self.export_bti)
-        self.import_bti_image = QtWidgets.QPushButton(self.tab_5)
-        self.import_bti_image.setObjectName("import_bti_image")
+
+        self.import_bti_image = QPushButton(self.tab_5)
+        self.import_bti_image.setObjectName(u"import_bti_image")
+
         self.horizontalLayout_5.addWidget(self.import_bti_image)
-        self.export_bti_image = QtWidgets.QPushButton(self.tab_5)
-        self.export_bti_image.setObjectName("export_bti_image")
+
+        self.export_bti_image = QPushButton(self.tab_5)
+        self.export_bti_image.setObjectName(u"export_bti_image")
+
         self.horizontalLayout_5.addWidget(self.export_bti_image)
+
+
         self.verticalLayout_6.addLayout(self.horizontalLayout_5)
-        self.horizontalLayout_8 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_8.setObjectName("horizontalLayout_8")
-        self.bti_image_container = QtWidgets.QWidget(self.tab_5)
-        self.bti_image_container.setObjectName("bti_image_container")
-        self.verticalLayout_12 = QtWidgets.QVBoxLayout(self.bti_image_container)
+
+        self.horizontalLayout_8 = QHBoxLayout()
+        self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
+        self.bti_image_container = QWidget(self.tab_5)
+        self.bti_image_container.setObjectName(u"bti_image_container")
+        self.verticalLayout_12 = QVBoxLayout(self.bti_image_container)
         self.verticalLayout_12.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout_12.setObjectName("verticalLayout_12")
-        self.gridLayout = QtWidgets.QGridLayout()
-        self.gridLayout.setObjectName("gridLayout")
-        self.bti_image_label = QtWidgets.QLabel(self.bti_image_container)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        self.verticalLayout_12.setObjectName(u"verticalLayout_12")
+        self.gridLayout = QGridLayout()
+        self.gridLayout.setObjectName(u"gridLayout")
+        self.bti_image_label = QLabel(self.bti_image_container)
+        self.bti_image_label.setObjectName(u"bti_image_label")
+        sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.bti_image_label.sizePolicy().hasHeightForWidth())
         self.bti_image_label.setSizePolicy(sizePolicy)
-        self.bti_image_label.setText("")
-        self.bti_image_label.setAlignment(QtCore.Qt.AlignCenter)
-        self.bti_image_label.setObjectName("bti_image_label")
+        self.bti_image_label.setAlignment(Qt.AlignCenter)
+
         self.gridLayout.addWidget(self.bti_image_label, 2, 0, 1, 1)
+
+
         self.verticalLayout_12.addLayout(self.gridLayout)
-        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.verticalLayout_12.addItem(spacerItem)
+
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.verticalLayout_12.addItem(self.horizontalSpacer)
+
+
         self.horizontalLayout_8.addWidget(self.bti_image_container)
-        self.formLayout = QtWidgets.QFormLayout()
-        self.formLayout.setFieldGrowthPolicy(QtWidgets.QFormLayout.FieldsStayAtSizeHint)
-        self.formLayout.setObjectName("formLayout")
-        self.label = QtWidgets.QLabel(self.tab_5)
-        self.label.setObjectName("label")
-        self.formLayout.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.label)
-        self.label_2 = QtWidgets.QLabel(self.tab_5)
-        self.label_2.setObjectName("label_2")
-        self.formLayout.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.label_2)
-        self.label_3 = QtWidgets.QLabel(self.tab_5)
-        self.label_3.setObjectName("label_3")
-        self.formLayout.setWidget(2, QtWidgets.QFormLayout.LabelRole, self.label_3)
-        self.label_4 = QtWidgets.QLabel(self.tab_5)
-        self.label_4.setObjectName("label_4")
-        self.formLayout.setWidget(3, QtWidgets.QFormLayout.LabelRole, self.label_4)
-        self.label_5 = QtWidgets.QLabel(self.tab_5)
-        self.label_5.setObjectName("label_5")
-        self.formLayout.setWidget(4, QtWidgets.QFormLayout.LabelRole, self.label_5)
-        self.label_6 = QtWidgets.QLabel(self.tab_5)
-        self.label_6.setObjectName("label_6")
-        self.formLayout.setWidget(5, QtWidgets.QFormLayout.LabelRole, self.label_6)
-        self.label_7 = QtWidgets.QLabel(self.tab_5)
-        self.label_7.setObjectName("label_7")
-        self.formLayout.setWidget(6, QtWidgets.QFormLayout.LabelRole, self.label_7)
-        self.label_8 = QtWidgets.QLabel(self.tab_5)
-        self.label_8.setObjectName("label_8")
-        self.formLayout.setWidget(7, QtWidgets.QFormLayout.LabelRole, self.label_8)
-        self.label_9 = QtWidgets.QLabel(self.tab_5)
-        self.label_9.setObjectName("label_9")
-        self.formLayout.setWidget(8, QtWidgets.QFormLayout.LabelRole, self.label_9)
-        self.label_10 = QtWidgets.QLabel(self.tab_5)
-        self.label_10.setObjectName("label_10")
-        self.formLayout.setWidget(9, QtWidgets.QFormLayout.LabelRole, self.label_10)
-        self.bti_lod_bias = QtWidgets.QLineEdit(self.tab_5)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.bti_lod_bias.sizePolicy().hasHeightForWidth())
-        self.bti_lod_bias.setSizePolicy(sizePolicy)
-        self.bti_lod_bias.setMaximumSize(QtCore.QSize(45, 16777215))
-        self.bti_lod_bias.setObjectName("bti_lod_bias")
-        self.formLayout.setWidget(9, QtWidgets.QFormLayout.FieldRole, self.bti_lod_bias)
-        self.bti_max_lod = QtWidgets.QLineEdit(self.tab_5)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.bti_max_lod.sizePolicy().hasHeightForWidth())
-        self.bti_max_lod.setSizePolicy(sizePolicy)
-        self.bti_max_lod.setMaximumSize(QtCore.QSize(35, 16777215))
-        self.bti_max_lod.setObjectName("bti_max_lod")
-        self.formLayout.setWidget(8, QtWidgets.QFormLayout.FieldRole, self.bti_max_lod)
-        self.bti_min_lod = QtWidgets.QLineEdit(self.tab_5)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.bti_min_lod.sizePolicy().hasHeightForWidth())
-        self.bti_min_lod.setSizePolicy(sizePolicy)
-        self.bti_min_lod.setMaximumSize(QtCore.QSize(35, 16777215))
-        self.bti_min_lod.setObjectName("bti_min_lod")
-        self.formLayout.setWidget(7, QtWidgets.QFormLayout.FieldRole, self.bti_min_lod)
-        self.bti_alpha_setting = QtWidgets.QLineEdit(self.tab_5)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.bti_alpha_setting.sizePolicy().hasHeightForWidth())
-        self.bti_alpha_setting.setSizePolicy(sizePolicy)
-        self.bti_alpha_setting.setMaximumSize(QtCore.QSize(35, 16777215))
-        self.bti_alpha_setting.setObjectName("bti_alpha_setting")
-        self.formLayout.setWidget(6, QtWidgets.QFormLayout.FieldRole, self.bti_alpha_setting)
-        self.bti_image_format = QtWidgets.QComboBox(self.tab_5)
-        self.bti_image_format.setMinimumSize(QtCore.QSize(80, 0))
-        self.bti_image_format.setObjectName("bti_image_format")
-        self.formLayout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.bti_image_format)
-        self.bti_palette_format = QtWidgets.QComboBox(self.tab_5)
-        self.bti_palette_format.setObjectName("bti_palette_format")
-        self.formLayout.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.bti_palette_format)
-        self.bti_wrap_s = QtWidgets.QComboBox(self.tab_5)
-        self.bti_wrap_s.setObjectName("bti_wrap_s")
-        self.formLayout.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.bti_wrap_s)
-        self.bti_wrap_t = QtWidgets.QComboBox(self.tab_5)
-        self.bti_wrap_t.setObjectName("bti_wrap_t")
-        self.formLayout.setWidget(3, QtWidgets.QFormLayout.FieldRole, self.bti_wrap_t)
-        self.bti_min_filter = QtWidgets.QComboBox(self.tab_5)
-        self.bti_min_filter.setObjectName("bti_min_filter")
-        self.formLayout.setWidget(4, QtWidgets.QFormLayout.FieldRole, self.bti_min_filter)
-        self.bti_mag_filter = QtWidgets.QComboBox(self.tab_5)
-        self.bti_mag_filter.setObjectName("bti_mag_filter")
-        self.formLayout.setWidget(5, QtWidgets.QFormLayout.FieldRole, self.bti_mag_filter)
+
+        self.formLayout = QFormLayout()
+        self.formLayout.setObjectName(u"formLayout")
+        self.formLayout.setFieldGrowthPolicy(QFormLayout.FieldsStayAtSizeHint)
+        self.label = QLabel(self.tab_5)
+        self.label.setObjectName(u"label")
+
+        self.formLayout.setWidget(0, QFormLayout.LabelRole, self.label)
+
+        self.label_2 = QLabel(self.tab_5)
+        self.label_2.setObjectName(u"label_2")
+
+        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_2)
+
+        self.label_3 = QLabel(self.tab_5)
+        self.label_3.setObjectName(u"label_3")
+
+        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label_3)
+
+        self.label_4 = QLabel(self.tab_5)
+        self.label_4.setObjectName(u"label_4")
+
+        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.label_4)
+
+        self.label_5 = QLabel(self.tab_5)
+        self.label_5.setObjectName(u"label_5")
+
+        self.formLayout.setWidget(4, QFormLayout.LabelRole, self.label_5)
+
+        self.label_6 = QLabel(self.tab_5)
+        self.label_6.setObjectName(u"label_6")
+
+        self.formLayout.setWidget(5, QFormLayout.LabelRole, self.label_6)
+
+        self.label_7 = QLabel(self.tab_5)
+        self.label_7.setObjectName(u"label_7")
+
+        self.formLayout.setWidget(6, QFormLayout.LabelRole, self.label_7)
+
+        self.label_8 = QLabel(self.tab_5)
+        self.label_8.setObjectName(u"label_8")
+
+        self.formLayout.setWidget(7, QFormLayout.LabelRole, self.label_8)
+
+        self.label_9 = QLabel(self.tab_5)
+        self.label_9.setObjectName(u"label_9")
+
+        self.formLayout.setWidget(8, QFormLayout.LabelRole, self.label_9)
+
+        self.label_10 = QLabel(self.tab_5)
+        self.label_10.setObjectName(u"label_10")
+
+        self.formLayout.setWidget(9, QFormLayout.LabelRole, self.label_10)
+
+        self.bti_lod_bias = QLineEdit(self.tab_5)
+        self.bti_lod_bias.setObjectName(u"bti_lod_bias")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.bti_lod_bias.sizePolicy().hasHeightForWidth())
+        self.bti_lod_bias.setSizePolicy(sizePolicy1)
+        self.bti_lod_bias.setMaximumSize(QSize(45, 16777215))
+
+        self.formLayout.setWidget(9, QFormLayout.FieldRole, self.bti_lod_bias)
+
+        self.bti_max_lod = QLineEdit(self.tab_5)
+        self.bti_max_lod.setObjectName(u"bti_max_lod")
+        sizePolicy1.setHeightForWidth(self.bti_max_lod.sizePolicy().hasHeightForWidth())
+        self.bti_max_lod.setSizePolicy(sizePolicy1)
+        self.bti_max_lod.setMaximumSize(QSize(35, 16777215))
+
+        self.formLayout.setWidget(8, QFormLayout.FieldRole, self.bti_max_lod)
+
+        self.bti_min_lod = QLineEdit(self.tab_5)
+        self.bti_min_lod.setObjectName(u"bti_min_lod")
+        sizePolicy1.setHeightForWidth(self.bti_min_lod.sizePolicy().hasHeightForWidth())
+        self.bti_min_lod.setSizePolicy(sizePolicy1)
+        self.bti_min_lod.setMaximumSize(QSize(35, 16777215))
+
+        self.formLayout.setWidget(7, QFormLayout.FieldRole, self.bti_min_lod)
+
+        self.bti_alpha_setting = QLineEdit(self.tab_5)
+        self.bti_alpha_setting.setObjectName(u"bti_alpha_setting")
+        sizePolicy1.setHeightForWidth(self.bti_alpha_setting.sizePolicy().hasHeightForWidth())
+        self.bti_alpha_setting.setSizePolicy(sizePolicy1)
+        self.bti_alpha_setting.setMaximumSize(QSize(35, 16777215))
+
+        self.formLayout.setWidget(6, QFormLayout.FieldRole, self.bti_alpha_setting)
+
+        self.bti_image_format = QComboBox(self.tab_5)
+        self.bti_image_format.setObjectName(u"bti_image_format")
+        self.bti_image_format.setMinimumSize(QSize(80, 0))
+
+        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.bti_image_format)
+
+        self.bti_palette_format = QComboBox(self.tab_5)
+        self.bti_palette_format.setObjectName(u"bti_palette_format")
+
+        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.bti_palette_format)
+
+        self.bti_wrap_s = QComboBox(self.tab_5)
+        self.bti_wrap_s.setObjectName(u"bti_wrap_s")
+
+        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.bti_wrap_s)
+
+        self.bti_wrap_t = QComboBox(self.tab_5)
+        self.bti_wrap_t.setObjectName(u"bti_wrap_t")
+
+        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.bti_wrap_t)
+
+        self.bti_min_filter = QComboBox(self.tab_5)
+        self.bti_min_filter.setObjectName(u"bti_min_filter")
+
+        self.formLayout.setWidget(4, QFormLayout.FieldRole, self.bti_min_filter)
+
+        self.bti_mag_filter = QComboBox(self.tab_5)
+        self.bti_mag_filter.setObjectName(u"bti_mag_filter")
+
+        self.formLayout.setWidget(5, QFormLayout.FieldRole, self.bti_mag_filter)
+
+
         self.horizontalLayout_8.addLayout(self.formLayout)
+
+
         self.verticalLayout_6.addLayout(self.horizontalLayout_8)
+
         self.tabWidget.addTab(self.tab_5, "")
-        self.tab_6 = QtWidgets.QWidget()
-        self.tab_6.setObjectName("tab_6")
-        self.verticalLayout_7 = QtWidgets.QVBoxLayout(self.tab_6)
-        self.verticalLayout_7.setObjectName("verticalLayout_7")
-        self.horizontalLayout_6 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_6.setObjectName("horizontalLayout_6")
-        self.import_j3d = QtWidgets.QPushButton(self.tab_6)
-        self.import_j3d.setObjectName("import_j3d")
+        self.tab_6 = QWidget()
+        self.tab_6.setObjectName(u"tab_6")
+        self.verticalLayout_7 = QVBoxLayout(self.tab_6)
+        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
+        self.horizontalLayout_6 = QHBoxLayout()
+        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
+        self.import_j3d = QPushButton(self.tab_6)
+        self.import_j3d.setObjectName(u"import_j3d")
+
         self.horizontalLayout_6.addWidget(self.import_j3d)
-        self.export_j3d = QtWidgets.QPushButton(self.tab_6)
-        self.export_j3d.setObjectName("export_j3d")
+
+        self.export_j3d = QPushButton(self.tab_6)
+        self.export_j3d.setObjectName(u"export_j3d")
+
         self.horizontalLayout_6.addWidget(self.export_j3d)
+
+
         self.verticalLayout_7.addLayout(self.horizontalLayout_6)
-        self.j3d_chunks_tree = QtWidgets.QTreeWidget(self.tab_6)
-        self.j3d_chunks_tree.setObjectName("j3d_chunks_tree")
+
+        self.j3d_chunks_tree = QTreeWidget(self.tab_6)
+        self.j3d_chunks_tree.setObjectName(u"j3d_chunks_tree")
+
         self.verticalLayout_7.addWidget(self.j3d_chunks_tree)
+
         self.tabWidget.addTab(self.tab_6, "")
-        self.tab_4 = QtWidgets.QWidget()
-        self.tab_4.setObjectName("tab_4")
-        self.verticalLayout_5 = QtWidgets.QVBoxLayout(self.tab_4)
-        self.verticalLayout_5.setObjectName("verticalLayout_5")
-        self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_4.setObjectName("horizontalLayout_4")
-        self.import_jpc = QtWidgets.QPushButton(self.tab_4)
-        self.import_jpc.setObjectName("import_jpc")
+        self.tab_4 = QWidget()
+        self.tab_4.setObjectName(u"tab_4")
+        self.verticalLayout_5 = QVBoxLayout(self.tab_4)
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
+        self.horizontalLayout_4 = QHBoxLayout()
+        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.import_jpc = QPushButton(self.tab_4)
+        self.import_jpc.setObjectName(u"import_jpc")
+
         self.horizontalLayout_4.addWidget(self.import_jpc)
-        self.export_jpc = QtWidgets.QPushButton(self.tab_4)
-        self.export_jpc.setObjectName("export_jpc")
+
+        self.export_jpc = QPushButton(self.tab_4)
+        self.export_jpc.setObjectName(u"export_jpc")
+
         self.horizontalLayout_4.addWidget(self.export_jpc)
-        self.add_particles_from_folder = QtWidgets.QPushButton(self.tab_4)
-        self.add_particles_from_folder.setObjectName("add_particles_from_folder")
+
+        self.add_particles_from_folder = QPushButton(self.tab_4)
+        self.add_particles_from_folder.setObjectName(u"add_particles_from_folder")
+
         self.horizontalLayout_4.addWidget(self.add_particles_from_folder)
-        self.export_jpc_folder = QtWidgets.QPushButton(self.tab_4)
-        self.export_jpc_folder.setObjectName("export_jpc_folder")
+
+        self.export_jpc_folder = QPushButton(self.tab_4)
+        self.export_jpc_folder.setObjectName(u"export_jpc_folder")
+
         self.horizontalLayout_4.addWidget(self.export_jpc_folder)
+
+
         self.verticalLayout_5.addLayout(self.horizontalLayout_4)
-        self.jpc_particles_tree = QtWidgets.QTreeWidget(self.tab_4)
-        self.jpc_particles_tree.setObjectName("jpc_particles_tree")
+
+        self.jpc_particles_tree = QTreeWidget(self.tab_4)
+        self.jpc_particles_tree.setObjectName(u"jpc_particles_tree")
+
         self.verticalLayout_5.addWidget(self.jpc_particles_tree)
+
         self.tabWidget.addTab(self.tab_4, "")
-        self.tab_2 = QtWidgets.QWidget()
-        self.tab_2.setObjectName("tab_2")
-        self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.tab_2)
-        self.verticalLayout_3.setObjectName("verticalLayout_3")
-        self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-        self.decompress_yaz0 = QtWidgets.QPushButton(self.tab_2)
-        self.decompress_yaz0.setObjectName("decompress_yaz0")
+        self.tab_2 = QWidget()
+        self.tab_2.setObjectName(u"tab_2")
+        self.verticalLayout_3 = QVBoxLayout(self.tab_2)
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.decompress_yaz0 = QPushButton(self.tab_2)
+        self.decompress_yaz0.setObjectName(u"decompress_yaz0")
+
         self.horizontalLayout_2.addWidget(self.decompress_yaz0)
-        self.compress_yaz0 = QtWidgets.QPushButton(self.tab_2)
-        self.compress_yaz0.setObjectName("compress_yaz0")
+
+        self.compress_yaz0 = QPushButton(self.tab_2)
+        self.compress_yaz0.setObjectName(u"compress_yaz0")
+
         self.horizontalLayout_2.addWidget(self.compress_yaz0)
+
+
         self.verticalLayout_3.addLayout(self.horizontalLayout_2)
-        spacerItem1 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout_3.addItem(spacerItem1)
+
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        self.verticalLayout_3.addItem(self.verticalSpacer)
+
         self.tabWidget.addTab(self.tab_2, "")
+
         self.verticalLayout.addWidget(self.tabWidget)
+
         MainWindow.setCentralWidget(self.centralwidget)
-        self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
-        self.menubar.setObjectName("menubar")
+        self.menubar = QMenuBar(MainWindow)
+        self.menubar.setObjectName(u"menubar")
+        self.menubar.setGeometry(QRect(0, 0, 800, 21))
         MainWindow.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(MainWindow)
-        self.statusbar.setObjectName("statusbar")
+        self.statusbar = QStatusBar(MainWindow)
+        self.statusbar.setObjectName(u"statusbar")
         MainWindow.setStatusBar(self.statusbar)
-        self.actionReplaceRARCFile = QtWidgets.QAction(MainWindow)
-        self.actionReplaceRARCFile.setObjectName("actionReplaceRARCFile")
-        self.actionExtractRARCFile = QtWidgets.QAction(MainWindow)
-        self.actionExtractRARCFile.setObjectName("actionExtractRARCFile")
-        self.actionReplaceGCMFile = QtWidgets.QAction(MainWindow)
-        self.actionReplaceGCMFile.setObjectName("actionReplaceGCMFile")
-        self.actionExtractGCMFile = QtWidgets.QAction(MainWindow)
-        self.actionExtractGCMFile.setObjectName("actionExtractGCMFile")
-        self.actionAddGCMFile = QtWidgets.QAction(MainWindow)
-        self.actionAddGCMFile.setObjectName("actionAddGCMFile")
-        self.actionAddRARCFile = QtWidgets.QAction(MainWindow)
-        self.actionAddRARCFile.setObjectName("actionAddRARCFile")
-        self.actionDeleteRARCFile = QtWidgets.QAction(MainWindow)
-        self.actionDeleteRARCFile.setObjectName("actionDeleteRARCFile")
-        self.actionDeleteGCMFile = QtWidgets.QAction(MainWindow)
-        self.actionDeleteGCMFile.setObjectName("actionDeleteGCMFile")
-        self.actionOpenRARCImage = QtWidgets.QAction(MainWindow)
-        self.actionOpenRARCImage.setObjectName("actionOpenRARCImage")
-        self.actionOpenJPCImage = QtWidgets.QAction(MainWindow)
-        self.actionOpenJPCImage.setObjectName("actionOpenJPCImage")
-        self.actionOpenGCMImage = QtWidgets.QAction(MainWindow)
-        self.actionOpenGCMImage.setObjectName("actionOpenGCMImage")
-        self.actionOpenJ3DImage = QtWidgets.QAction(MainWindow)
-        self.actionOpenJ3DImage.setObjectName("actionOpenJ3DImage")
-        self.actionOpenRARCJ3D = QtWidgets.QAction(MainWindow)
-        self.actionOpenRARCJ3D.setObjectName("actionOpenRARCJ3D")
-        self.actionReplaceJ3DImage = QtWidgets.QAction(MainWindow)
-        self.actionReplaceJ3DImage.setObjectName("actionReplaceJ3DImage")
-        self.actionReplaceJPCImage = QtWidgets.QAction(MainWindow)
-        self.actionReplaceJPCImage.setObjectName("actionReplaceJPCImage")
-        self.actionReplaceGCMImage = QtWidgets.QAction(MainWindow)
-        self.actionReplaceGCMImage.setObjectName("actionReplaceGCMImage")
-        self.actionReplaceRARCImage = QtWidgets.QAction(MainWindow)
-        self.actionReplaceRARCImage.setObjectName("actionReplaceRARCImage")
 
         self.retranslateUi(MainWindow)
+
         self.tabWidget.setCurrentIndex(0)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+
+        QMetaObject.connectSlotsByName(MainWindow)
+    # setupUi
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QtWidgets.QApplication.translate("MainWindow", "GameCube File Tools", None, -1))
-        self.import_gcm.setText(QtWidgets.QApplication.translate("MainWindow", "Import GCM", None, -1))
-        self.export_gcm.setText(QtWidgets.QApplication.translate("MainWindow", "Export GCM", None, -1))
-        self.import_folder_over_gcm.setText(QtWidgets.QApplication.translate("MainWindow", "Import Folder Over GCM", None, -1))
-        self.export_gcm_folder.setText(QtWidgets.QApplication.translate("MainWindow", "Export Folder", None, -1))
-        self.gcm_files_tree.headerItem().setText(0, QtWidgets.QApplication.translate("MainWindow", "File Name", None, -1))
-        self.gcm_files_tree.headerItem().setText(1, QtWidgets.QApplication.translate("MainWindow", "File Size", None, -1))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), QtWidgets.QApplication.translate("MainWindow", "GCM ISOs", None, -1))
-        self.import_rarc.setText(QtWidgets.QApplication.translate("MainWindow", "Import RARC", None, -1))
-        self.export_rarc.setText(QtWidgets.QApplication.translate("MainWindow", "Export RARC", None, -1))
-        self.import_folder_over_rarc.setText(QtWidgets.QApplication.translate("MainWindow", "Import Folder Over RARC", None, -1))
-        self.export_rarc_folder.setText(QtWidgets.QApplication.translate("MainWindow", "Export Folder", None, -1))
-        self.rarc_files_tree.headerItem().setText(0, QtWidgets.QApplication.translate("MainWindow", "File Name", None, -1))
-        self.rarc_files_tree.headerItem().setText(1, QtWidgets.QApplication.translate("MainWindow", "File Index", None, -1))
-        self.rarc_files_tree.headerItem().setText(2, QtWidgets.QApplication.translate("MainWindow", "File ID", None, -1))
-        self.rarc_files_tree.headerItem().setText(3, QtWidgets.QApplication.translate("MainWindow", "File Size", None, -1))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QtWidgets.QApplication.translate("MainWindow", "RARC Archives", None, -1))
-        self.import_bti.setText(QtWidgets.QApplication.translate("MainWindow", "Import BTI", None, -1))
-        self.export_bti.setText(QtWidgets.QApplication.translate("MainWindow", "Export BTI", None, -1))
-        self.import_bti_image.setText(QtWidgets.QApplication.translate("MainWindow", "Import Image", None, -1))
-        self.export_bti_image.setText(QtWidgets.QApplication.translate("MainWindow", "Export Image", None, -1))
-        self.label.setText(QtWidgets.QApplication.translate("MainWindow", "Image Format", None, -1))
-        self.label_2.setText(QtWidgets.QApplication.translate("MainWindow", "Palette Format", None, -1))
-        self.label_3.setText(QtWidgets.QApplication.translate("MainWindow", "Wrap X", None, -1))
-        self.label_4.setText(QtWidgets.QApplication.translate("MainWindow", "Wrap Y", None, -1))
-        self.label_5.setText(QtWidgets.QApplication.translate("MainWindow", "Min Filter", None, -1))
-        self.label_6.setText(QtWidgets.QApplication.translate("MainWindow", "Mag Filter", None, -1))
-        self.label_7.setText(QtWidgets.QApplication.translate("MainWindow", "Alpha Setting", None, -1))
-        self.label_8.setText(QtWidgets.QApplication.translate("MainWindow", "Min LOD", None, -1))
-        self.label_9.setText(QtWidgets.QApplication.translate("MainWindow", "Max LOD", None, -1))
-        self.label_10.setText(QtWidgets.QApplication.translate("MainWindow", "LOD Bias", None, -1))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_5), QtWidgets.QApplication.translate("MainWindow", "BTI Images", None, -1))
-        self.import_j3d.setText(QtWidgets.QApplication.translate("MainWindow", "Import J3D File", None, -1))
-        self.export_j3d.setText(QtWidgets.QApplication.translate("MainWindow", "Export J3D File", None, -1))
-        self.j3d_chunks_tree.headerItem().setText(0, QtWidgets.QApplication.translate("MainWindow", "Chunk Type", None, -1))
-        self.j3d_chunks_tree.headerItem().setText(1, QtWidgets.QApplication.translate("MainWindow", "Texture Name", None, -1))
-        self.j3d_chunks_tree.headerItem().setText(2, QtWidgets.QApplication.translate("MainWindow", "Size", None, -1))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_6), QtWidgets.QApplication.translate("MainWindow", "J3D Files", None, -1))
-        self.import_jpc.setText(QtWidgets.QApplication.translate("MainWindow", "Import JPC", None, -1))
-        self.export_jpc.setText(QtWidgets.QApplication.translate("MainWindow", "Export JPC", None, -1))
-        self.add_particles_from_folder.setText(QtWidgets.QApplication.translate("MainWindow", "Add Particles From Folder", None, -1))
-        self.export_jpc_folder.setText(QtWidgets.QApplication.translate("MainWindow", "Export Folder", None, -1))
-        self.jpc_particles_tree.headerItem().setText(0, QtWidgets.QApplication.translate("MainWindow", "Particle ID", None, -1))
-        self.jpc_particles_tree.headerItem().setText(1, QtWidgets.QApplication.translate("MainWindow", "Texture Name", None, -1))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), QtWidgets.QApplication.translate("MainWindow", "JPC Particle Archives", None, -1))
-        self.decompress_yaz0.setText(QtWidgets.QApplication.translate("MainWindow", "Decompress File", None, -1))
-        self.compress_yaz0.setText(QtWidgets.QApplication.translate("MainWindow", "Compress File", None, -1))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QtWidgets.QApplication.translate("MainWindow", "Yaz0 Compression", None, -1))
-        self.actionReplaceRARCFile.setText(QtWidgets.QApplication.translate("MainWindow", "Replace File", None, -1))
-        self.actionExtractRARCFile.setText(QtWidgets.QApplication.translate("MainWindow", "Extract File", None, -1))
-        self.actionReplaceGCMFile.setText(QtWidgets.QApplication.translate("MainWindow", "Replace File", None, -1))
-        self.actionExtractGCMFile.setText(QtWidgets.QApplication.translate("MainWindow", "Extract File", None, -1))
-        self.actionAddGCMFile.setText(QtWidgets.QApplication.translate("MainWindow", "Add File", None, -1))
-        self.actionAddRARCFile.setText(QtWidgets.QApplication.translate("MainWindow", "Add File", None, -1))
-        self.actionDeleteRARCFile.setText(QtWidgets.QApplication.translate("MainWindow", "Delete File", None, -1))
-        self.actionDeleteGCMFile.setText(QtWidgets.QApplication.translate("MainWindow", "Delete File", None, -1))
-        self.actionOpenRARCImage.setText(QtWidgets.QApplication.translate("MainWindow", "Open Image", None, -1))
-        self.actionOpenJPCImage.setText(QtWidgets.QApplication.translate("MainWindow", "Open Image", None, -1))
-        self.actionOpenGCMImage.setText(QtWidgets.QApplication.translate("MainWindow", "Open Image", None, -1))
-        self.actionOpenJ3DImage.setText(QtWidgets.QApplication.translate("MainWindow", "Open Image", None, -1))
-        self.actionOpenRARCJ3D.setText(QtWidgets.QApplication.translate("MainWindow", "Open J3D", None, -1))
-        self.actionReplaceJ3DImage.setText(QtWidgets.QApplication.translate("MainWindow", "Replace Image", None, -1))
-        self.actionReplaceJPCImage.setText(QtWidgets.QApplication.translate("MainWindow", "Replace Image", None, -1))
-        self.actionReplaceGCMImage.setText(QtWidgets.QApplication.translate("MainWindow", "Replace Image", None, -1))
-        self.actionReplaceRARCImage.setText(QtWidgets.QApplication.translate("MainWindow", "Replace Image", None, -1))
+        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"GameCube File Tools", None))
+        self.actionReplaceRARCFile.setText(QCoreApplication.translate("MainWindow", u"Replace File", None))
+        self.actionExtractRARCFile.setText(QCoreApplication.translate("MainWindow", u"Extract File", None))
+        self.actionReplaceGCMFile.setText(QCoreApplication.translate("MainWindow", u"Replace File", None))
+        self.actionExtractGCMFile.setText(QCoreApplication.translate("MainWindow", u"Extract File", None))
+        self.actionAddGCMFile.setText(QCoreApplication.translate("MainWindow", u"Add File", None))
+        self.actionAddRARCFile.setText(QCoreApplication.translate("MainWindow", u"Add File", None))
+        self.actionDeleteRARCFile.setText(QCoreApplication.translate("MainWindow", u"Delete File", None))
+        self.actionDeleteGCMFile.setText(QCoreApplication.translate("MainWindow", u"Delete File", None))
+        self.actionOpenRARCImage.setText(QCoreApplication.translate("MainWindow", u"Open Image", None))
+        self.actionOpenJPCImage.setText(QCoreApplication.translate("MainWindow", u"Open Image", None))
+        self.actionOpenGCMImage.setText(QCoreApplication.translate("MainWindow", u"Open Image", None))
+        self.actionOpenJ3DImage.setText(QCoreApplication.translate("MainWindow", u"Open Image", None))
+        self.actionOpenRARCJ3D.setText(QCoreApplication.translate("MainWindow", u"Open J3D", None))
+        self.actionReplaceJ3DImage.setText(QCoreApplication.translate("MainWindow", u"Replace Image", None))
+        self.actionReplaceJPCImage.setText(QCoreApplication.translate("MainWindow", u"Replace Image", None))
+        self.actionReplaceGCMImage.setText(QCoreApplication.translate("MainWindow", u"Replace Image", None))
+        self.actionReplaceRARCImage.setText(QCoreApplication.translate("MainWindow", u"Replace Image", None))
+        self.import_gcm.setText(QCoreApplication.translate("MainWindow", u"Import GCM", None))
+        self.export_gcm.setText(QCoreApplication.translate("MainWindow", u"Export GCM", None))
+        self.import_folder_over_gcm.setText(QCoreApplication.translate("MainWindow", u"Import Folder Over GCM", None))
+        self.export_gcm_folder.setText(QCoreApplication.translate("MainWindow", u"Export Folder", None))
+        ___qtreewidgetitem = self.gcm_files_tree.headerItem()
+        ___qtreewidgetitem.setText(1, QCoreApplication.translate("MainWindow", u"File Size", None));
+        ___qtreewidgetitem.setText(0, QCoreApplication.translate("MainWindow", u"File Name", None));
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), QCoreApplication.translate("MainWindow", u"GCM ISOs", None))
+        self.import_rarc.setText(QCoreApplication.translate("MainWindow", u"Import RARC", None))
+        self.export_rarc.setText(QCoreApplication.translate("MainWindow", u"Export RARC", None))
+        self.import_folder_over_rarc.setText(QCoreApplication.translate("MainWindow", u"Import Folder Over RARC", None))
+        self.export_rarc_folder.setText(QCoreApplication.translate("MainWindow", u"Export Folder", None))
+        ___qtreewidgetitem1 = self.rarc_files_tree.headerItem()
+        ___qtreewidgetitem1.setText(3, QCoreApplication.translate("MainWindow", u"File Size", None));
+        ___qtreewidgetitem1.setText(2, QCoreApplication.translate("MainWindow", u"File ID", None));
+        ___qtreewidgetitem1.setText(1, QCoreApplication.translate("MainWindow", u"File Index", None));
+        ___qtreewidgetitem1.setText(0, QCoreApplication.translate("MainWindow", u"File Name", None));
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QCoreApplication.translate("MainWindow", u"RARC Archives", None))
+        self.import_bti.setText(QCoreApplication.translate("MainWindow", u"Import BTI", None))
+        self.export_bti.setText(QCoreApplication.translate("MainWindow", u"Export BTI", None))
+        self.import_bti_image.setText(QCoreApplication.translate("MainWindow", u"Import Image", None))
+        self.export_bti_image.setText(QCoreApplication.translate("MainWindow", u"Export Image", None))
+        self.bti_image_label.setText("")
+        self.label.setText(QCoreApplication.translate("MainWindow", u"Image Format", None))
+        self.label_2.setText(QCoreApplication.translate("MainWindow", u"Palette Format", None))
+        self.label_3.setText(QCoreApplication.translate("MainWindow", u"Wrap X", None))
+        self.label_4.setText(QCoreApplication.translate("MainWindow", u"Wrap Y", None))
+        self.label_5.setText(QCoreApplication.translate("MainWindow", u"Min Filter", None))
+        self.label_6.setText(QCoreApplication.translate("MainWindow", u"Mag Filter", None))
+        self.label_7.setText(QCoreApplication.translate("MainWindow", u"Alpha Setting", None))
+        self.label_8.setText(QCoreApplication.translate("MainWindow", u"Min LOD", None))
+        self.label_9.setText(QCoreApplication.translate("MainWindow", u"Max LOD", None))
+        self.label_10.setText(QCoreApplication.translate("MainWindow", u"LOD Bias", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_5), QCoreApplication.translate("MainWindow", u"BTI Images", None))
+        self.import_j3d.setText(QCoreApplication.translate("MainWindow", u"Import J3D File", None))
+        self.export_j3d.setText(QCoreApplication.translate("MainWindow", u"Export J3D File", None))
+        ___qtreewidgetitem2 = self.j3d_chunks_tree.headerItem()
+        ___qtreewidgetitem2.setText(2, QCoreApplication.translate("MainWindow", u"Size", None));
+        ___qtreewidgetitem2.setText(1, QCoreApplication.translate("MainWindow", u"Texture Name", None));
+        ___qtreewidgetitem2.setText(0, QCoreApplication.translate("MainWindow", u"Chunk Type", None));
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_6), QCoreApplication.translate("MainWindow", u"J3D Files", None))
+        self.import_jpc.setText(QCoreApplication.translate("MainWindow", u"Import JPC", None))
+        self.export_jpc.setText(QCoreApplication.translate("MainWindow", u"Export JPC", None))
+        self.add_particles_from_folder.setText(QCoreApplication.translate("MainWindow", u"Add Particles From Folder", None))
+        self.export_jpc_folder.setText(QCoreApplication.translate("MainWindow", u"Export Folder", None))
+        ___qtreewidgetitem3 = self.jpc_particles_tree.headerItem()
+        ___qtreewidgetitem3.setText(1, QCoreApplication.translate("MainWindow", u"Texture Name", None));
+        ___qtreewidgetitem3.setText(0, QCoreApplication.translate("MainWindow", u"Particle ID", None));
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), QCoreApplication.translate("MainWindow", u"JPC Particle Archives", None))
+        self.decompress_yaz0.setText(QCoreApplication.translate("MainWindow", u"Decompress File", None))
+        self.compress_yaz0.setText(QCoreApplication.translate("MainWindow", u"Compress File", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("MainWindow", u"Yaz0 Compression", None))
+    # retranslateUi
 
