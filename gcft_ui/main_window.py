@@ -49,6 +49,16 @@ class GCFTWindow(QMainWindow):
     self.ui.gcm_files_tree.setColumnWidth(0, 300)
     self.ui.jpc_particles_tree.setColumnWidth(0, 100)
     
+    self.rarc_col_name_to_index = {}
+    for col in range(self.ui.rarc_files_tree.columnCount()):
+      column_name = self.ui.rarc_files_tree.headerItem().text(col)
+      self.rarc_col_name_to_index[column_name] = col
+    
+    self.gcm_col_name_to_index = {}
+    for col in range(self.ui.gcm_files_tree.columnCount()):
+      column_name = self.ui.gcm_files_tree.headerItem().text(col)
+      self.gcm_col_name_to_index[column_name] = col
+    
     self.ui.export_rarc.setDisabled(True)
     self.ui.import_folder_over_rarc.setDisabled(True)
     self.ui.export_rarc_folder.setDisabled(True)
@@ -672,16 +682,17 @@ class GCFTWindow(QMainWindow):
   
   
   def edit_rarc_files_tree_item_text(self, item, column):
-    if (item.flags() & Qt.ItemIsEditable) != 0 and column == 2: # Allow editing the file IDs column only.
+    # Allow editing the file IDs column only.
+    if (item.flags() & Qt.ItemIsEditable) != 0 and column == self.rarc_col_name_to_index["File ID"]: 
       self.ui.rarc_files_tree.editItem(item, column)
   
   def rarc_file_tree_item_text_changed(self, item, column):
-    if column == 2:
+    if column == self.rarc_col_name_to_index["File ID"]:
       self.change_rarc_file_id(item)
   
   def change_rarc_file_id(self, item):
     file_entry = self.get_rarc_file_by_tree_item(item)
-    new_file_id_str = item.text(2)
+    new_file_id_str = item.text(self.rarc_col_name_to_index["File ID"])
     
     if True: # TODO hex/decimal setting
       hexadecimal_match = re.search(r"^\s*(?:0x)?([0-9a-f]+)\s*$", new_file_id_str, re.IGNORECASE)
@@ -690,7 +701,7 @@ class GCFTWindow(QMainWindow):
       else:
         QMessageBox.warning(self, "Invalid file ID", "\"%s\" is not a valid hexadecimal number." % new_file_id_str)
         file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
-        item.setText(2, file_id_str)
+        item.setText(self.rarc_col_name_to_index["File ID"], file_id_str)
         return
     else:
       decimal_match = re.search(r"^\s*(\d+)\s*$", new_file_id_str, re.IGNORECASE)
@@ -699,13 +710,13 @@ class GCFTWindow(QMainWindow):
       else:
         QMessageBox.warning(self, "Invalid file ID", "\"%s\" is not a valid decimal number." % new_file_id_str)
         file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
-        item.setText(2, file_id_str)
+        item.setText(self.rarc_col_name_to_index["File ID"], file_id_str)
         return
     
     if new_file_id >= 0xFFFF:
       QMessageBox.warning(self, "Invalid file ID", "\"%s\" is too large to be a file ID. It must be in the range 0x0000-0xFFFE." % new_file_id_str)
       file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
-      item.setText(2, file_id_str)
+      item.setText(self.rarc_col_name_to_index["File ID"], file_id_str)
       return
     
     other_file_entry = next((fe for fe in self.rarc.file_entries if fe.id == new_file_id), None)
@@ -713,19 +724,19 @@ class GCFTWindow(QMainWindow):
     if other_file_entry == file_entry:
       # File ID not changed
       file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
-      item.setText(2, file_id_str)
+      item.setText(self.rarc_col_name_to_index["File ID"], file_id_str)
       return
     
     if other_file_entry is not None:
       QMessageBox.warning(self, "Duplicate file ID", "The file ID you entered is already used by the file \"%s\"." % other_file_entry.name)
       file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
-      item.setText(2, file_id_str)
+      item.setText(self.rarc_col_name_to_index["File ID"], file_id_str)
       return
     
     file_entry.id = new_file_id
     
     file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
-    item.setText(2, file_id_str)
+    item.setText(self.rarc_col_name_to_index["File ID"], file_id_str)
   
   
   
@@ -1286,11 +1297,11 @@ class GCFTWindow(QMainWindow):
     elif event.matches(QKeySequence.Copy):
       curr_tab_text = self.ui.tabWidget.tabText(self.ui.tabWidget.currentIndex())
       # When copying the filename in a RARC/GCM, override the default behavior so it instead copies the whole path.
-      if curr_tab_text == "RARC Archives" and self.ui.rarc_files_tree.currentColumn() == 0:
+      if curr_tab_text == "RARC Archives" and self.ui.rarc_files_tree.currentColumn() == self.rarc_col_name_to_index["File Name"]:
         item = self.ui.rarc_files_tree.currentItem()
-        file_path = "%s/%s" % (item.parent().text(0), item.text(0))
+        file_path = "%s/%s" % (item.parent().text(self.rarc_col_name_to_index["File Name"]), item.text(self.rarc_col_name_to_index["File Name"]))
         QApplication.instance().clipboard().setText(file_path)
-      elif curr_tab_text == "GCM ISOs" and self.ui.gcm_files_tree.currentColumn() == 0:
+      elif curr_tab_text == "GCM ISOs" and self.ui.gcm_files_tree.currentColumn() == self.gcm_col_name_to_index["File Name"]:
         item = self.ui.gcm_files_tree.currentItem()
         file_entry = self.gcm_tree_widget_item_to_file_entry[item]
         file_path = file_entry.file_path
