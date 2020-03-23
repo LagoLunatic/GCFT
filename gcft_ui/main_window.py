@@ -119,6 +119,7 @@ class GCFTWindow(QMainWindow):
     self.ui.actionDeleteRARCFile.triggered.connect(self.delete_file_in_rarc)
     self.ui.actionAddRARCFile.triggered.connect(self.add_file_to_rarc)
     self.ui.actionOpenRARCImage.triggered.connect(self.open_image_in_rarc)
+    self.ui.actionReplaceRARCImage.triggered.connect(self.replace_image_in_rarc)
     self.ui.actionOpenRARCJ3D.triggered.connect(self.open_j3d_in_rarc)
     
     self.ui.decompress_yaz0.clicked.connect(self.decompress_yaz0)
@@ -650,6 +651,13 @@ class GCFTWindow(QMainWindow):
         if file_ext == ".bti":
           menu.addAction(self.ui.actionOpenRARCImage)
           self.ui.actionOpenRARCImage.setData(file)
+          
+          menu.addAction(self.ui.actionReplaceRARCImage)
+          self.ui.actionReplaceRARCImage.setData(file)
+          if self.bti is None:
+            self.ui.actionReplaceRARCImage.setDisabled(True)
+          else:
+            self.ui.actionReplaceRARCImage.setDisabled(False)
         elif file_ext in [".bdl", ".bmd", ".bmt", ".btk", ".bck", ".brk", ".btp"]:
           menu.addAction(self.ui.actionOpenRARCJ3D)
           self.ui.actionOpenRARCJ3D.setData(file)
@@ -677,7 +685,7 @@ class GCFTWindow(QMainWindow):
       data = BytesIO(f.read())
     file.data = data
     
-     # Update changed file size
+    # Update changed file size
     file_size_str = self.stringify_number(data_len(file.data))
     item = self.get_rarc_tree_item_by_file(file)
     item.setText(self.rarc_col_name_to_index["File Size"], file_size_str)
@@ -705,6 +713,18 @@ class GCFTWindow(QMainWindow):
     self.import_bti_by_data(data)
     
     self.set_tab_by_name("BTI Images")
+  
+  def replace_image_in_rarc(self):
+    file = self.ui.actionReplaceRARCImage.data()
+    
+    self.bti.save_changes()
+    
+    file.data = make_copy_data(self.bti.data)
+    
+    # Update changed file size
+    file_size_str = self.stringify_number(data_len(file.data))
+    item = self.get_rarc_tree_item_by_file(file)
+    item.setText(self.rarc_col_name_to_index["File Size"], file_size_str)
   
   def open_j3d_in_rarc(self):
     file_entry = self.ui.actionOpenRARCJ3D.data()

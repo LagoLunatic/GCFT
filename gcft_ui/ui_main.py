@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'main.ui',
 # licensing of 'main.ui' applies.
 #
-# Created: Mon Mar 23 18:12:30 2020
+# Created: Mon Mar 23 18:48:37 2020
 #      by: pyside2-uic  running on PySide2 5.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -293,6 +293,12 @@ class Ui_MainWindow(object):
         self.actionOpenRARCJ3D.setObjectName("actionOpenRARCJ3D")
         self.actionReplaceJ3DImage = QtWidgets.QAction(MainWindow)
         self.actionReplaceJ3DImage.setObjectName("actionReplaceJ3DImage")
+        self.actionReplaceJPCImage = QtWidgets.QAction(MainWindow)
+        self.actionReplaceJPCImage.setObjectName("actionReplaceJPCImage")
+        self.actionReplaceGCMImage = QtWidgets.QAction(MainWindow)
+        self.actionReplaceGCMImage.setObjectName("actionReplaceGCMImage")
+        self.actionReplaceRARCImage = QtWidgets.QAction(MainWindow)
+        self.actionReplaceRARCImage.setObjectName("actionReplaceRARCImage")
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
@@ -361,4 +367,7 @@ class Ui_MainWindow(object):
         self.actionOpenJ3DImage.setText(QtWidgets.QApplication.translate("MainWindow", "Open Image", None, -1))
         self.actionOpenRARCJ3D.setText(QtWidgets.QApplication.translate("MainWindow", "Open J3D", None, -1))
         self.actionReplaceJ3DImage.setText(QtWidgets.QApplication.translate("MainWindow", "Replace Image", None, -1))
+        self.actionReplaceJPCImage.setText(QtWidgets.QApplication.translate("MainWindow", "Replace Image", None, -1))
+        self.actionReplaceGCMImage.setText(QtWidgets.QApplication.translate("MainWindow", "Replace Image", None, -1))
+        self.actionReplaceRARCImage.setText(QtWidgets.QApplication.translate("MainWindow", "Replace Image", None, -1))
 

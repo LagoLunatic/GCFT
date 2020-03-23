@@ -610,6 +610,21 @@
     <string>Replace Image</string>
    </property>
   </action>
+  <action name="actionReplaceJPCImage">
+   <property name="text">
+    <string>Replace Image</string>
+   </property>
+  </action>
+  <action name="actionReplaceGCMImage">
+   <property name="text">
+    <string>Replace Image</string>
+   </property>
+  </action>
+  <action name="actionReplaceRARCImage">
+   <property name="text">
+    <string>Replace Image</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
