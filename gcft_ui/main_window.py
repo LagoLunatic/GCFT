@@ -32,9 +32,26 @@ from wwlib.rarc import RARC
 from wwlib.yaz0 import Yaz0
 from wwlib.gcm import GCM
 from wwlib.jpc import JPC
-from wwlib.bti import BTIFile
+from wwlib.bti import BTIFile, WrapMode, FilterMode
 from wwlib.j3d import J3DFile
+from wwlib.texture_utils import ImageFormat, PaletteFormat
 from fs_helpers import *
+
+BTI_ENUM_FIELDS = [
+  ("image_format", ImageFormat),
+  ("palette_format", PaletteFormat),
+  ("wrap_s", WrapMode),
+  ("wrap_t", WrapMode),
+  ("min_filter", FilterMode),
+  ("mag_filter", FilterMode),
+]
+
+BTI_INTEGER_FIELDS = [
+  ("alpha_setting", 1),
+  ("min_lod", 1),
+  ("max_lod", 1),
+  ("lod_bias", 2),
+]
 
 class GCFTWindow(QMainWindow):
   def __init__(self):
@@ -125,6 +142,24 @@ class GCFTWindow(QMainWindow):
     self.ui.export_bti.clicked.connect(self.export_bti)
     self.ui.import_bti_image.clicked.connect(self.import_bti_image)
     self.ui.export_bti_image.clicked.connect(self.export_bti_image)
+    
+    for field_name, field_enum in BTI_ENUM_FIELDS:
+      widget_name = "bti_" + field_name
+      combobox_widget = getattr(self.ui, widget_name)
+      combobox_widget.setDisabled(True)
+      
+      for enum_value in field_enum:
+        combobox_widget.addItem(enum_value.name)
+      combobox_widget.currentIndexChanged.connect(self.bti_header_field_changed)
+    
+    for field_name, byte_size in BTI_INTEGER_FIELDS:
+      widget_name = "bti_" + field_name
+      line_edit_widget = getattr(self.ui, widget_name)
+      line_edit_widget.setDisabled(True)
+      
+      value_str = self.stringify_number(0, min_hex_chars=2*byte_size)
+      line_edit_widget.setText(value_str)
+      line_edit_widget.textEdited.connect(self.bti_header_field_changed)
     
     self.ui.import_j3d.clicked.connect(self.import_j3d)
     self.ui.export_j3d.clicked.connect(self.export_j3d)
@@ -1108,18 +1143,49 @@ class GCFTWindow(QMainWindow):
     with open(bti_path, "rb") as f:
       data = BytesIO(f.read())
     
-    self.bti = BTIFile(data)
-    
-    self.reload_bti_image()
-    
-    self.ui.export_bti.setDisabled(False)
-    self.ui.import_bti_image.setDisabled(False)
-    self.ui.export_bti_image.setDisabled(False)
+    self.import_bti_by_data(data)
   
   def import_bti_by_data(self, data):
     self.bti = BTIFile(data)
     
+    
+    for field_name, field_enum in BTI_ENUM_FIELDS:
+      widget_name = "bti_" + field_name
+      combobox_widget = getattr(self.ui, widget_name)
+      combobox_widget.setDisabled(False)
+      
+      current_enum_value = getattr(self.bti, field_name)
+      current_enum_name = current_enum_value.name
+      
+      index_of_value = None
+      for i in range(combobox_widget.count()):
+        text = combobox_widget.itemText(i)
+        if text == current_enum_name:
+          index_of_value = i
+          break
+      if index_of_value is None:
+        print("Cannot find value %s in combobox %s" % (current_enum_name, widget_name))
+        index_of_value = 0
+      
+      combobox_widget.blockSignals(True)
+      combobox_widget.setCurrentIndex(index_of_value)
+      combobox_widget.blockSignals(False)
+    
+    
+    for field_name, byte_size in BTI_INTEGER_FIELDS:
+      widget_name = "bti_" + field_name
+      line_edit_widget = getattr(self.ui, widget_name)
+      line_edit_widget.setDisabled(False)
+      
+      value = getattr(self.bti, field_name)
+      value_str = self.stringify_number(value, min_hex_chars=2*byte_size)
+      combobox_widget.blockSignals(True)
+      line_edit_widget.setText(value_str)
+      combobox_widget.blockSignals(False)
+    
+    
     self.reload_bti_image()
+    self.original_bti_image = self.bti_image
     
     self.ui.export_bti.setDisabled(False)
     self.ui.import_bti_image.setDisabled(False)
@@ -1152,11 +1218,54 @@ class GCFTWindow(QMainWindow):
     self.bti.save_changes()
     
     self.reload_bti_image()
+    self.original_bti_image = self.bti_image
   
   def export_bti_image_by_path(self, image_path):
     self.bti_image.save(image_path)
     
     QMessageBox.information(self, "BTI saved", "Successfully saved image.")
+  
+  def bti_header_field_changed(self):
+    for field_name, field_enum in BTI_ENUM_FIELDS:
+      widget_name = "bti_" + field_name
+      combobox_widget = getattr(self.ui, widget_name)
+      
+      current_enum_name = combobox_widget.itemText(combobox_widget.currentIndex())
+      current_enum_value = field_enum[current_enum_name]
+      
+      setattr(self.bti, field_name, current_enum_value)
+    
+    
+    for field_name, byte_size in BTI_INTEGER_FIELDS:
+      widget_name = "bti_" + field_name
+      line_edit_widget = getattr(self.ui, widget_name)
+      current_str_value = line_edit_widget.text()
+      old_value = getattr(self.bti, field_name)
+      
+      if True: # TODO hex/decimal setting
+        hexadecimal_match = re.search(r"^\s*(?:0x)?([0-9a-f]+)\s*$", current_str_value, re.IGNORECASE)
+        if hexadecimal_match:
+          current_value = int(hexadecimal_match.group(1), 16)
+        else:
+          QMessageBox.warning(self, "Invalid value", "\"%s\" is not a valid hexadecimal number." % current_str_value)
+          current_str_value = self.stringify_number(old_value, min_hex_chars=4)
+          line_edit_widget.setText(current_str_value)
+          continue
+      else:
+        decimal_match = re.search(r"^\s*(\d+)\s*$", current_str_value, re.IGNORECASE)
+        if decimal_match:
+          current_value = int(decimal_match.group(1))
+        else:
+          QMessageBox.warning(self, "Invalid value", "\"%s\" is not a valid decimal number." % current_str_value)
+          current_str_value = self.stringify_number(old_value, min_hex_chars=4)
+          line_edit_widget.setText(current_str_value)
+          continue
+      
+      setattr(self.bti, field_name, current_value)
+    
+    
+    self.bti.replace_image(self.original_bti_image)
+    self.reload_bti_image()
   
   
   
