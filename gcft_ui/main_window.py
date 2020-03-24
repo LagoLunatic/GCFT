@@ -171,7 +171,7 @@ class GCFTWindow(QMainWindow):
       
       value_str = self.stringify_number(0, min_hex_chars=2*byte_size)
       line_edit_widget.setText(value_str)
-      line_edit_widget.textEdited.connect(self.bti_header_field_changed)
+      line_edit_widget.editingFinished.connect(self.bti_header_field_changed)
     
     self.ui.import_j3d.clicked.connect(self.import_j3d)
     self.ui.export_j3d.clicked.connect(self.export_j3d)
@@ -1342,30 +1342,41 @@ class GCFTWindow(QMainWindow):
     for field_name, byte_size in BTI_INTEGER_FIELDS:
       widget_name = "bti_" + field_name
       line_edit_widget = getattr(self.ui, widget_name)
-      current_str_value = line_edit_widget.text()
+      new_str_value = line_edit_widget.text()
       old_value = getattr(self.bti, field_name)
       
-      if True: # TODO hex/decimal setting
-        hexadecimal_match = re.search(r"^\s*(?:0x)?([0-9a-f]+)\s*$", current_str_value, re.IGNORECASE)
-        if hexadecimal_match:
-          current_value = int(hexadecimal_match.group(1), 16)
-        else:
-          QMessageBox.warning(self, "Invalid value", "\"%s\" is not a valid hexadecimal number." % current_str_value)
-          current_str_value = self.stringify_number(old_value, min_hex_chars=4)
-          line_edit_widget.setText(current_str_value)
-          continue
-      else:
-        decimal_match = re.search(r"^\s*(\d+)\s*$", current_str_value, re.IGNORECASE)
-        if decimal_match:
-          current_value = int(decimal_match.group(1))
-        else:
-          QMessageBox.warning(self, "Invalid value", "\"%s\" is not a valid decimal number." % current_str_value)
-          current_str_value = self.stringify_number(old_value, min_hex_chars=4)
-          line_edit_widget.setText(current_str_value)
-          continue
+      line_edit_widget.blockSignals(True)
       
-      setattr(self.bti, field_name, current_value)
-    
+      if True: # TODO hex/decimal setting
+        hexadecimal_match = re.search(r"^\s*(?:0x)?([0-9a-f]+)\s*$", new_str_value, re.IGNORECASE)
+        if hexadecimal_match:
+          new_value = int(hexadecimal_match.group(1), 16)
+        else:
+          QMessageBox.warning(self, "Invalid value", "\"%s\" is not a valid hexadecimal number." % new_str_value)
+          new_value = old_value
+      else:
+        decimal_match = re.search(r"^\s*(\d+)\s*$", new_str_value, re.IGNORECASE)
+        if decimal_match:
+          new_value = int(decimal_match.group(1))
+        else:
+          QMessageBox.warning(self, "Invalid value", "\"%s\" is not a valid decimal number." % new_str_value)
+          new_value = old_value
+      
+      if new_value < 0:
+        QMessageBox.warning(self, "Invalid value", "Value cannot be negative.")
+        new_value = old_value
+      if new_value >= 2**(byte_size*8):
+        QMessageBox.warning(
+          self, "Invalid value",
+          "Value is too large to fit in field %s (maximum value: 0x%X)" % (field_name, (2**(byte_size*8))-1)
+        )
+        new_value = old_value
+      
+      setattr(self.bti, field_name, new_value)
+      
+      new_str_value = self.stringify_number(new_value, min_hex_chars=2*byte_size)
+      line_edit_widget.setText(new_str_value)
+      line_edit_widget.blockSignals(False)
     
     try:
       self.bti.replace_image(self.original_bti_image)
