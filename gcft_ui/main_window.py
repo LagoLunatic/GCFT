@@ -1395,6 +1395,8 @@ class GCFTWindow(QMainWindow):
       QMessageBox.critical(self, error_message_title, error_message)
       return
     
+    self.bti.save_changes()
+    
     self.reload_bti_image()
   
   
