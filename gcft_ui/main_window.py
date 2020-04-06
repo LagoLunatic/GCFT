@@ -99,6 +99,9 @@ class GCFTWindow(QMainWindow):
     self.ui.export_bti_image.setDisabled(True)
     self.ui.export_j3d.setDisabled(True)
     
+    self.ui.bti_file_size.setText("")
+    self.ui.bti_resolution.setText("")
+    
     checkerboard_path = os.path.join(ASSETS_PATH, "checkerboard.png")
     checkerboard_path = checkerboard_path.replace("\\", "/")
     self.ui.bti_image_label.setStyleSheet("border-image: url(%s) repeat;" % checkerboard_path)
@@ -1293,6 +1296,11 @@ class GCFTWindow(QMainWindow):
     qimage = QImage(image_bytes, self.bti_image.width, self.bti_image.height, QImage.Format_ARGB32)
     pixmap = QPixmap.fromImage(qimage)
     self.ui.bti_image_label.setPixmap(pixmap)
+    
+    file_size_str = self.stringify_number(data_len(self.bti.data))
+    resolution_str = "%dx%d" % (self.bti_image.width, self.bti_image.height)
+    self.ui.bti_file_size.setText(file_size_str)
+    self.ui.bti_resolution.setText(resolution_str)
     
     self.ui.bti_image_label.setFixedWidth(self.bti_image.width)
     self.ui.bti_image_label.setFixedHeight(self.bti_image.height)

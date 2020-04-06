@@ -226,124 +226,87 @@
              <enum>QFormLayout::FieldsStayAtSizeHint</enum>
             </property>
             <item row="0" column="0">
+             <widget class="QLabel" name="label_11">
+              <property name="text">
+               <string>File Size</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
              <widget class="QLabel" name="label">
               <property name="text">
                <string>Image Format</string>
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
+            <item row="2" column="1">
+             <widget class="QComboBox" name="bti_image_format">
+              <property name="minimumSize">
+               <size>
+                <width>80</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
              <widget class="QLabel" name="label_2">
               <property name="text">
                <string>Palette Format</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
+            <item row="3" column="1">
+             <widget class="QComboBox" name="bti_palette_format"/>
+            </item>
+            <item row="4" column="0">
              <widget class="QLabel" name="label_3">
               <property name="text">
                <string>Wrap X</string>
               </property>
              </widget>
             </item>
-            <item row="3" column="0">
+            <item row="4" column="1">
+             <widget class="QComboBox" name="bti_wrap_s"/>
+            </item>
+            <item row="5" column="0">
              <widget class="QLabel" name="label_4">
               <property name="text">
                <string>Wrap Y</string>
               </property>
              </widget>
             </item>
-            <item row="4" column="0">
+            <item row="5" column="1">
+             <widget class="QComboBox" name="bti_wrap_t"/>
+            </item>
+            <item row="6" column="0">
              <widget class="QLabel" name="label_5">
               <property name="text">
                <string>Min Filter</string>
               </property>
              </widget>
             </item>
-            <item row="5" column="0">
+            <item row="6" column="1">
+             <widget class="QComboBox" name="bti_min_filter"/>
+            </item>
+            <item row="7" column="0">
              <widget class="QLabel" name="label_6">
               <property name="text">
                <string>Mag Filter</string>
               </property>
              </widget>
             </item>
-            <item row="6" column="0">
+            <item row="7" column="1">
+             <widget class="QComboBox" name="bti_mag_filter"/>
+            </item>
+            <item row="8" column="0">
              <widget class="QLabel" name="label_7">
               <property name="text">
                <string>Alpha Setting</string>
               </property>
              </widget>
             </item>
-            <item row="7" column="0">
-             <widget class="QLabel" name="label_8">
-              <property name="text">
-               <string>Min LOD</string>
-              </property>
-             </widget>
-            </item>
-            <item row="8" column="0">
-             <widget class="QLabel" name="label_9">
-              <property name="text">
-               <string>Max LOD</string>
-              </property>
-             </widget>
-            </item>
-            <item row="9" column="0">
-             <widget class="QLabel" name="label_10">
-              <property name="text">
-               <string>LOD Bias</string>
-              </property>
-             </widget>
-            </item>
-            <item row="9" column="1">
-             <widget class="QLineEdit" name="bti_lod_bias">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>45</width>
-                <height>16777215</height>
-               </size>
-              </property>
-             </widget>
-            </item>
             <item row="8" column="1">
-             <widget class="QLineEdit" name="bti_max_lod">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>35</width>
-                <height>16777215</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="1">
-             <widget class="QLineEdit" name="bti_min_lod">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>35</width>
-                <height>16777215</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="1">
              <widget class="QLineEdit" name="bti_alpha_setting">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -359,30 +322,95 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="1">
-             <widget class="QComboBox" name="bti_image_format">
-              <property name="minimumSize">
+            <item row="9" column="0">
+             <widget class="QLabel" name="label_8">
+              <property name="text">
+               <string>Min LOD</string>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="1">
+             <widget class="QLineEdit" name="bti_min_lod">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
                <size>
-                <width>80</width>
-                <height>0</height>
+                <width>35</width>
+                <height>16777215</height>
                </size>
               </property>
              </widget>
             </item>
+            <item row="10" column="0">
+             <widget class="QLabel" name="label_9">
+              <property name="text">
+               <string>Max LOD</string>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="1">
+             <widget class="QLineEdit" name="bti_max_lod">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>35</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="11" column="0">
+             <widget class="QLabel" name="label_10">
+              <property name="text">
+               <string>LOD Bias</string>
+              </property>
+             </widget>
+            </item>
+            <item row="11" column="1">
+             <widget class="QLineEdit" name="bti_lod_bias">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>45</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_12">
+              <property name="text">
+               <string>Resolution</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="bti_file_size">
+              <property name="text">
+               <string>123</string>
+              </property>
+             </widget>
+            </item>
             <item row="1" column="1">
-             <widget class="QComboBox" name="bti_palette_format"/>
-            </item>
-            <item row="2" column="1">
-             <widget class="QComboBox" name="bti_wrap_s"/>
-            </item>
-            <item row="3" column="1">
-             <widget class="QComboBox" name="bti_wrap_t"/>
-            </item>
-            <item row="4" column="1">
-             <widget class="QComboBox" name="bti_min_filter"/>
-            </item>
-            <item row="5" column="1">
-             <widget class="QComboBox" name="bti_mag_filter"/>
+             <widget class="QLabel" name="bti_resolution">
+              <property name="text">
+               <string>123x123</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
