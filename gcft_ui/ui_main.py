@@ -87,6 +87,11 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_3.addWidget(self.export_gcm_folder)
 
+        self.dump_all_gcm_textures = QPushButton(self.tab_3)
+        self.dump_all_gcm_textures.setObjectName(u"dump_all_gcm_textures")
+
+        self.horizontalLayout_3.addWidget(self.dump_all_gcm_textures)
+
 
         self.verticalLayout_4.addLayout(self.horizontalLayout_3)
 
@@ -194,74 +199,92 @@ class Ui_MainWindow(object):
         self.formLayout = QFormLayout()
         self.formLayout.setObjectName(u"formLayout")
         self.formLayout.setFieldGrowthPolicy(QFormLayout.FieldsStayAtSizeHint)
+        self.label_11 = QLabel(self.tab_5)
+        self.label_11.setObjectName(u"label_11")
+
+        self.formLayout.setWidget(0, QFormLayout.LabelRole, self.label_11)
+
         self.label = QLabel(self.tab_5)
         self.label.setObjectName(u"label")
 
-        self.formLayout.setWidget(0, QFormLayout.LabelRole, self.label)
+        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label)
+
+        self.bti_image_format = QComboBox(self.tab_5)
+        self.bti_image_format.setObjectName(u"bti_image_format")
+        self.bti_image_format.setMinimumSize(QSize(80, 0))
+
+        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.bti_image_format)
 
         self.label_2 = QLabel(self.tab_5)
         self.label_2.setObjectName(u"label_2")
 
-        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_2)
+        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.label_2)
+
+        self.bti_palette_format = QComboBox(self.tab_5)
+        self.bti_palette_format.setObjectName(u"bti_palette_format")
+
+        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.bti_palette_format)
 
         self.label_3 = QLabel(self.tab_5)
         self.label_3.setObjectName(u"label_3")
 
-        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label_3)
+        self.formLayout.setWidget(4, QFormLayout.LabelRole, self.label_3)
+
+        self.bti_wrap_s = QComboBox(self.tab_5)
+        self.bti_wrap_s.setObjectName(u"bti_wrap_s")
+
+        self.formLayout.setWidget(4, QFormLayout.FieldRole, self.bti_wrap_s)
 
         self.label_4 = QLabel(self.tab_5)
         self.label_4.setObjectName(u"label_4")
 
-        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.label_4)
+        self.formLayout.setWidget(5, QFormLayout.LabelRole, self.label_4)
+
+        self.bti_wrap_t = QComboBox(self.tab_5)
+        self.bti_wrap_t.setObjectName(u"bti_wrap_t")
+
+        self.formLayout.setWidget(5, QFormLayout.FieldRole, self.bti_wrap_t)
 
         self.label_5 = QLabel(self.tab_5)
         self.label_5.setObjectName(u"label_5")
 
-        self.formLayout.setWidget(4, QFormLayout.LabelRole, self.label_5)
+        self.formLayout.setWidget(6, QFormLayout.LabelRole, self.label_5)
+
+        self.bti_min_filter = QComboBox(self.tab_5)
+        self.bti_min_filter.setObjectName(u"bti_min_filter")
+
+        self.formLayout.setWidget(6, QFormLayout.FieldRole, self.bti_min_filter)
 
         self.label_6 = QLabel(self.tab_5)
         self.label_6.setObjectName(u"label_6")
 
-        self.formLayout.setWidget(5, QFormLayout.LabelRole, self.label_6)
+        self.formLayout.setWidget(7, QFormLayout.LabelRole, self.label_6)
+
+        self.bti_mag_filter = QComboBox(self.tab_5)
+        self.bti_mag_filter.setObjectName(u"bti_mag_filter")
+
+        self.formLayout.setWidget(7, QFormLayout.FieldRole, self.bti_mag_filter)
 
         self.label_7 = QLabel(self.tab_5)
         self.label_7.setObjectName(u"label_7")
 
-        self.formLayout.setWidget(6, QFormLayout.LabelRole, self.label_7)
+        self.formLayout.setWidget(8, QFormLayout.LabelRole, self.label_7)
+
+        self.bti_alpha_setting = QLineEdit(self.tab_5)
+        self.bti_alpha_setting.setObjectName(u"bti_alpha_setting")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.bti_alpha_setting.sizePolicy().hasHeightForWidth())
+        self.bti_alpha_setting.setSizePolicy(sizePolicy1)
+        self.bti_alpha_setting.setMaximumSize(QSize(35, 16777215))
+
+        self.formLayout.setWidget(8, QFormLayout.FieldRole, self.bti_alpha_setting)
 
         self.label_8 = QLabel(self.tab_5)
         self.label_8.setObjectName(u"label_8")
 
-        self.formLayout.setWidget(7, QFormLayout.LabelRole, self.label_8)
-
-        self.label_9 = QLabel(self.tab_5)
-        self.label_9.setObjectName(u"label_9")
-
-        self.formLayout.setWidget(8, QFormLayout.LabelRole, self.label_9)
-
-        self.label_10 = QLabel(self.tab_5)
-        self.label_10.setObjectName(u"label_10")
-
-        self.formLayout.setWidget(9, QFormLayout.LabelRole, self.label_10)
-
-        self.bti_lod_bias = QLineEdit(self.tab_5)
-        self.bti_lod_bias.setObjectName(u"bti_lod_bias")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.bti_lod_bias.sizePolicy().hasHeightForWidth())
-        self.bti_lod_bias.setSizePolicy(sizePolicy1)
-        self.bti_lod_bias.setMaximumSize(QSize(45, 16777215))
-
-        self.formLayout.setWidget(9, QFormLayout.FieldRole, self.bti_lod_bias)
-
-        self.bti_max_lod = QLineEdit(self.tab_5)
-        self.bti_max_lod.setObjectName(u"bti_max_lod")
-        sizePolicy1.setHeightForWidth(self.bti_max_lod.sizePolicy().hasHeightForWidth())
-        self.bti_max_lod.setSizePolicy(sizePolicy1)
-        self.bti_max_lod.setMaximumSize(QSize(35, 16777215))
-
-        self.formLayout.setWidget(8, QFormLayout.FieldRole, self.bti_max_lod)
+        self.formLayout.setWidget(9, QFormLayout.LabelRole, self.label_8)
 
         self.bti_min_lod = QLineEdit(self.tab_5)
         self.bti_min_lod.setObjectName(u"bti_min_lod")
@@ -269,46 +292,48 @@ class Ui_MainWindow(object):
         self.bti_min_lod.setSizePolicy(sizePolicy1)
         self.bti_min_lod.setMaximumSize(QSize(35, 16777215))
 
-        self.formLayout.setWidget(7, QFormLayout.FieldRole, self.bti_min_lod)
+        self.formLayout.setWidget(9, QFormLayout.FieldRole, self.bti_min_lod)
 
-        self.bti_alpha_setting = QLineEdit(self.tab_5)
-        self.bti_alpha_setting.setObjectName(u"bti_alpha_setting")
-        sizePolicy1.setHeightForWidth(self.bti_alpha_setting.sizePolicy().hasHeightForWidth())
-        self.bti_alpha_setting.setSizePolicy(sizePolicy1)
-        self.bti_alpha_setting.setMaximumSize(QSize(35, 16777215))
+        self.label_9 = QLabel(self.tab_5)
+        self.label_9.setObjectName(u"label_9")
 
-        self.formLayout.setWidget(6, QFormLayout.FieldRole, self.bti_alpha_setting)
+        self.formLayout.setWidget(10, QFormLayout.LabelRole, self.label_9)
 
-        self.bti_image_format = QComboBox(self.tab_5)
-        self.bti_image_format.setObjectName(u"bti_image_format")
-        self.bti_image_format.setMinimumSize(QSize(80, 0))
+        self.bti_max_lod = QLineEdit(self.tab_5)
+        self.bti_max_lod.setObjectName(u"bti_max_lod")
+        sizePolicy1.setHeightForWidth(self.bti_max_lod.sizePolicy().hasHeightForWidth())
+        self.bti_max_lod.setSizePolicy(sizePolicy1)
+        self.bti_max_lod.setMaximumSize(QSize(35, 16777215))
 
-        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.bti_image_format)
+        self.formLayout.setWidget(10, QFormLayout.FieldRole, self.bti_max_lod)
 
-        self.bti_palette_format = QComboBox(self.tab_5)
-        self.bti_palette_format.setObjectName(u"bti_palette_format")
+        self.label_10 = QLabel(self.tab_5)
+        self.label_10.setObjectName(u"label_10")
 
-        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.bti_palette_format)
+        self.formLayout.setWidget(11, QFormLayout.LabelRole, self.label_10)
 
-        self.bti_wrap_s = QComboBox(self.tab_5)
-        self.bti_wrap_s.setObjectName(u"bti_wrap_s")
+        self.bti_lod_bias = QLineEdit(self.tab_5)
+        self.bti_lod_bias.setObjectName(u"bti_lod_bias")
+        sizePolicy1.setHeightForWidth(self.bti_lod_bias.sizePolicy().hasHeightForWidth())
+        self.bti_lod_bias.setSizePolicy(sizePolicy1)
+        self.bti_lod_bias.setMaximumSize(QSize(45, 16777215))
 
-        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.bti_wrap_s)
+        self.formLayout.setWidget(11, QFormLayout.FieldRole, self.bti_lod_bias)
 
-        self.bti_wrap_t = QComboBox(self.tab_5)
-        self.bti_wrap_t.setObjectName(u"bti_wrap_t")
+        self.label_12 = QLabel(self.tab_5)
+        self.label_12.setObjectName(u"label_12")
 
-        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.bti_wrap_t)
+        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_12)
 
-        self.bti_min_filter = QComboBox(self.tab_5)
-        self.bti_min_filter.setObjectName(u"bti_min_filter")
+        self.bti_file_size = QLabel(self.tab_5)
+        self.bti_file_size.setObjectName(u"bti_file_size")
 
-        self.formLayout.setWidget(4, QFormLayout.FieldRole, self.bti_min_filter)
+        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.bti_file_size)
 
-        self.bti_mag_filter = QComboBox(self.tab_5)
-        self.bti_mag_filter.setObjectName(u"bti_mag_filter")
+        self.bti_resolution = QLabel(self.tab_5)
+        self.bti_resolution.setObjectName(u"bti_resolution")
 
-        self.formLayout.setWidget(5, QFormLayout.FieldRole, self.bti_mag_filter)
+        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.bti_resolution)
 
 
         self.horizontalLayout_8.addLayout(self.formLayout)
@@ -444,6 +469,7 @@ class Ui_MainWindow(object):
         self.export_gcm.setText(QCoreApplication.translate("MainWindow", u"Export GCM", None))
         self.import_folder_over_gcm.setText(QCoreApplication.translate("MainWindow", u"Import Folder Over GCM", None))
         self.export_gcm_folder.setText(QCoreApplication.translate("MainWindow", u"Export Folder", None))
+        self.dump_all_gcm_textures.setText(QCoreApplication.translate("MainWindow", u"Dump All Textures", None))
         ___qtreewidgetitem = self.gcm_files_tree.headerItem()
         ___qtreewidgetitem.setText(1, QCoreApplication.translate("MainWindow", u"File Size", None));
         ___qtreewidgetitem.setText(0, QCoreApplication.translate("MainWindow", u"File Name", None));
@@ -463,6 +489,7 @@ class Ui_MainWindow(object):
         self.import_bti_image.setText(QCoreApplication.translate("MainWindow", u"Import Image", None))
         self.export_bti_image.setText(QCoreApplication.translate("MainWindow", u"Export Image", None))
         self.bti_image_label.setText("")
+        self.label_11.setText(QCoreApplication.translate("MainWindow", u"File Size", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Image Format", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Palette Format", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"Wrap X", None))
@@ -473,6 +500,9 @@ class Ui_MainWindow(object):
         self.label_8.setText(QCoreApplication.translate("MainWindow", u"Min LOD", None))
         self.label_9.setText(QCoreApplication.translate("MainWindow", u"Max LOD", None))
         self.label_10.setText(QCoreApplication.translate("MainWindow", u"LOD Bias", None))
+        self.label_12.setText(QCoreApplication.translate("MainWindow", u"Resolution", None))
+        self.bti_file_size.setText(QCoreApplication.translate("MainWindow", u"123", None))
+        self.bti_resolution.setText(QCoreApplication.translate("MainWindow", u"123x123", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_5), QCoreApplication.translate("MainWindow", u"BTI Images", None))
         self.import_j3d.setText(QCoreApplication.translate("MainWindow", u"Import J3D File", None))
         self.export_j3d.setText(QCoreApplication.translate("MainWindow", u"Export J3D File", None))

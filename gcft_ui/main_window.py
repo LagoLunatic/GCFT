@@ -38,6 +38,8 @@ from wwlib.j3d import J3DFile
 from wwlib.texture_utils import ImageFormat, PaletteFormat
 from fs_helpers import *
 
+from asset_dumper import AssetDumper
+
 BTI_ENUM_FIELDS = [
   ("image_format", ImageFormat),
   ("palette_format", PaletteFormat),
@@ -91,6 +93,7 @@ class GCFTWindow(QMainWindow):
     self.ui.export_gcm.setDisabled(True)
     self.ui.import_folder_over_gcm.setDisabled(True)
     self.ui.export_gcm_folder.setDisabled(True)
+    self.ui.dump_all_gcm_textures.setDisabled(True)
     self.ui.export_jpc.setDisabled(True)
     self.ui.add_particles_from_folder.setDisabled(True)
     self.ui.export_jpc_folder.setDisabled(True)
@@ -133,6 +136,7 @@ class GCFTWindow(QMainWindow):
     self.ui.export_gcm.clicked.connect(self.export_gcm)
     self.ui.import_folder_over_gcm.clicked.connect(self.import_folder_over_gcm)
     self.ui.export_gcm_folder.clicked.connect(self.export_gcm_folder)
+    self.ui.dump_all_gcm_textures.clicked.connect(self.dump_all_gcm_textures)
     
     self.ui.gcm_files_tree.setContextMenuPolicy(Qt.CustomContextMenu)
     self.ui.gcm_files_tree.customContextMenuRequested.connect(self.show_gcm_files_tree_context_menu)
@@ -346,6 +350,13 @@ class GCFTWindow(QMainWindow):
       op_callback=self.export_gcm_folder_by_path,
       is_opening=False, is_saving=True, is_folder=True,
       file_type="GCM"
+    )
+  
+  def dump_all_gcm_textures(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.dump_all_gcm_textures_by_path,
+      is_opening=False, is_saving=True, is_folder=True,
+      file_type="all GCM texture"
     )
   
   def extract_file_from_gcm(self):
@@ -907,6 +918,7 @@ class GCFTWindow(QMainWindow):
     self.ui.export_gcm.setDisabled(False)
     self.ui.import_folder_over_gcm.setDisabled(False)
     self.ui.export_gcm_folder.setDisabled(False)
+    self.ui.dump_all_gcm_textures.setDisabled(False)
   
   def export_gcm_by_path(self, gcm_path):
     if os.path.realpath(self.gcm.iso_path) == os.path.realpath(gcm_path):
@@ -930,6 +942,24 @@ class GCFTWindow(QMainWindow):
     self.gcm.export_disc_to_folder_with_changed_files(folder_path)
     
     QMessageBox.information(self, "GCM extracted", "Successfully extracted GCM contents to \"%s\"." % folder_path)
+  
+  def dump_all_gcm_textures_by_path(self, folder_path):
+    asset_dumper = AssetDumper()
+    asset_dumper.dump_all_textures_in_gcm(self.gcm, folder_path)
+    
+    failed_dump_message = ""
+    if len(asset_dumper.failed_file_paths) > 0:
+      failed_dump_message = "Failed to dump %d textures." % len(asset_dumper.failed_file_paths)
+      failed_dump_message += "\nPaths of files that failed to dump:\n"
+      for file_path in asset_dumper.failed_file_paths:
+        failed_dump_message += file_path + "\n"
+    
+    if asset_dumper.succeeded_file_count == 0 and len(asset_dumper.failed_file_paths) == 0:
+      QMessageBox.warning(self, "Failed to find textures", "Could not find any textures to dump in this ISO.")
+    elif asset_dumper.succeeded_file_count > 0:
+      QMessageBox.information(self, "Textures dumped", "Successfully dumped %d textures.\n\n%s" % (asset_dumper.succeeded_file_count, failed_dump_message))
+    else:
+      QMessageBox.warning(self, "Failed to dump textures", failed_dump_message)
   
   
   def get_gcm_file_by_tree_item(self, item):
