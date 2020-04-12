@@ -1337,6 +1337,12 @@ class GCFTWindow(QMainWindow):
       line_edit_widget.setText(value_str)
       combobox_widget.blockSignals(False)
     
+    # Disable the palette format dropdown when the image format doesn't use palettes.
+    if self.bti.needs_palettes():
+      self.ui.bti_palette_format.setDisabled(False)
+    else:
+      self.ui.bti_palette_format.setDisabled(True)
+    
     
     self.reload_bti_image()
     self.original_bti_image = self.bti_image
@@ -1441,6 +1447,12 @@ class GCFTWindow(QMainWindow):
       new_str_value = self.stringify_number(new_value, min_hex_chars=2*byte_size)
       line_edit_widget.setText(new_str_value)
       line_edit_widget.blockSignals(False)
+    
+    # Disable the palette format dropdown when the image format doesn't use palettes.
+    if self.bti.needs_palettes():
+      self.ui.bti_palette_format.setDisabled(False)
+    else:
+      self.ui.bti_palette_format.setDisabled(True)
     
     try:
       self.bti.replace_image(self.original_bti_image)
