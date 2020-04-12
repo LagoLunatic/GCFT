@@ -322,6 +322,10 @@ class GCFTWindow(QMainWindow):
     else:
       return "%d" % num
   
+  def update_progress_dialog(self, next_progress_text, progress_value):
+    self.progress_dialog.setLabelText(next_progress_text)
+    self.progress_dialog.setValue(progress_value)
+  
   
   
   def import_gcm(self):
@@ -944,22 +948,44 @@ class GCFTWindow(QMainWindow):
     QMessageBox.information(self, "GCM extracted", "Successfully extracted GCM contents to \"%s\"." % folder_path)
   
   def dump_all_gcm_textures_by_path(self, folder_path):
-    asset_dumper = AssetDumper()
-    asset_dumper.dump_all_textures_in_gcm(self.gcm, folder_path)
+    self.asset_dumper = AssetDumper()
+    
+    dumper_generator = self.asset_dumper.dump_all_textures_in_gcm(self.gcm, folder_path)
+    
+    max_progress_val = len(self.asset_dumper.get_all_gcm_file_paths(self.gcm))
+    self.progress_dialog = GCFTProgressDialog("Dumping textures", "Initializing...", max_progress_val)
+    
+    self.dumper_thread = GCFTThread(dumper_generator)
+    self.dumper_thread.update_progress.connect(self.update_progress_dialog)
+    self.dumper_thread.action_complete.connect(self.dump_all_gcm_textures_complete)
+    self.dumper_thread.action_failed.connect(self.dump_all_gcm_textures_failed)
+    self.dumper_thread.start()
+  
+  def dump_all_gcm_textures_complete(self):
+    self.progress_dialog.reset()
     
     failed_dump_message = ""
-    if len(asset_dumper.failed_file_paths) > 0:
-      failed_dump_message = "Failed to dump textures from %d files." % len(asset_dumper.failed_file_paths)
+    if len(self.asset_dumper.failed_file_paths) > 0:
+      failed_dump_message = "Failed to dump textures from %d files." % len(self.asset_dumper.failed_file_paths)
       failed_dump_message += "\nPaths of files that failed to dump:\n"
-      for file_path in asset_dumper.failed_file_paths:
+      for file_path in self.asset_dumper.failed_file_paths:
         failed_dump_message += file_path + "\n"
     
-    if asset_dumper.succeeded_file_count == 0 and len(asset_dumper.failed_file_paths) == 0:
+    if self.asset_dumper.succeeded_file_count == 0 and len(self.asset_dumper.failed_file_paths) == 0:
       QMessageBox.warning(self, "Failed to find textures", "Could not find any textures to dump in this ISO.")
-    elif asset_dumper.succeeded_file_count > 0:
-      QMessageBox.information(self, "Textures dumped", "Successfully dumped %d textures.\n\n%s" % (asset_dumper.succeeded_file_count, failed_dump_message))
+    elif self.asset_dumper.succeeded_file_count > 0:
+      QMessageBox.information(self, "Textures dumped", "Successfully dumped %d textures.\n\n%s" % (self.asset_dumper.succeeded_file_count, failed_dump_message))
     else:
       QMessageBox.warning(self, "Failed to dump textures", failed_dump_message)
+  
+  def dump_all_gcm_textures_failed(self, error_message):
+    self.progress_dialog.reset()
+    
+    print(error_message)
+    QMessageBox.critical(
+      self, "Failed to dump textures",
+      error_message
+    )
   
   
   def get_gcm_file_by_tree_item(self, item):
@@ -1645,3 +1671,42 @@ class GCFTWindow(QMainWindow):
   
   def closeEvent(self, event):
     self.save_settings()
+
+class GCFTProgressDialog(QProgressDialog):
+  def __init__(self, title, description, max_val):
+    QProgressDialog.__init__(self)
+    self.setWindowTitle(title)
+    self.setLabelText(description)
+    self.setMaximum(max_val)
+    self.setWindowModality(Qt.ApplicationModal)
+    self.setWindowFlags(Qt.CustomizeWindowHint | Qt.WindowTitleHint)
+    self.setFixedSize(self.size())
+    self.setAutoReset(False)
+    self.setCancelButton(None)
+    self.show()
+
+class GCFTThread(QThread):
+  update_progress = Signal(str, int)
+  action_complete = Signal()
+  action_failed = Signal(str)
+  
+  def __init__(self, action_generator):
+    QThread.__init__(self)
+    
+    self.action_generator = action_generator
+  
+  def run(self):
+    try:
+      while True:
+        # Need to use a while loop to go through the generator instead of a for loop, as a for loop would silently exit if a StopIteration error ever happened for any reason.
+        next_progress_text, progress_value = next(self.action_generator)
+        if progress_value == -1:
+          break
+        self.update_progress.emit(next_progress_text, progress_value)
+    except Exception as e:
+      stack_trace = traceback.format_exc()
+      error_message = "Error:\n" + str(e) + "\n\n" + stack_trace
+      self.action_failed.emit(error_message)
+      return
+    
+    self.action_complete.emit()

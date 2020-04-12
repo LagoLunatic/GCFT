@@ -23,6 +23,9 @@ class AssetDumper:
   def dump_all_textures_in_gcm(self, gcm, out_dir):
     all_file_paths = self.get_all_gcm_file_paths(gcm)
     
+    files_checked = 0
+    yield("Initializing...", files_checked)
+    
     for file_path in all_file_paths:
       rel_dir = os.path.dirname(file_path)
       base_name, file_ext = os.path.splitext(os.path.basename(file_path))
@@ -43,6 +46,11 @@ class AssetDumper:
       except Exception as e:
         display_path = file_path
         self.failed_file_paths.append(display_path)
+      
+      files_checked += 1
+      yield(file_path, files_checked)
+    
+    yield("Done", -1)
   
   def dump_all_textures_in_rarc(self, rarc, out_dir, display_path_prefix=None):
     for file_entry in rarc.file_entries:
