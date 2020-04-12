@@ -949,7 +949,7 @@ class GCFTWindow(QMainWindow):
     
     failed_dump_message = ""
     if len(asset_dumper.failed_file_paths) > 0:
-      failed_dump_message = "Failed to dump %d textures." % len(asset_dumper.failed_file_paths)
+      failed_dump_message = "Failed to dump textures from %d files." % len(asset_dumper.failed_file_paths)
       failed_dump_message += "\nPaths of files that failed to dump:\n"
       for file_path in asset_dumper.failed_file_paths:
         failed_dump_message += file_path + "\n"
