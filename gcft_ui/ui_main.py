@@ -479,9 +479,10 @@ class Ui_MainWindow(object):
         self.import_folder_over_rarc.setText(QCoreApplication.translate("MainWindow", u"Import Folder Over RARC", None))
         self.export_rarc_folder.setText(QCoreApplication.translate("MainWindow", u"Export Folder", None))
         ___qtreewidgetitem1 = self.rarc_files_tree.headerItem()
-        ___qtreewidgetitem1.setText(3, QCoreApplication.translate("MainWindow", u"File Size", None));
-        ___qtreewidgetitem1.setText(2, QCoreApplication.translate("MainWindow", u"File ID", None));
-        ___qtreewidgetitem1.setText(1, QCoreApplication.translate("MainWindow", u"File Index", None));
+        ___qtreewidgetitem1.setText(4, QCoreApplication.translate("MainWindow", u"File Size", None));
+        ___qtreewidgetitem1.setText(3, QCoreApplication.translate("MainWindow", u"File ID", None));
+        ___qtreewidgetitem1.setText(2, QCoreApplication.translate("MainWindow", u"File Index", None));
+        ___qtreewidgetitem1.setText(1, QCoreApplication.translate("MainWindow", u"Folder Type", None));
         ___qtreewidgetitem1.setText(0, QCoreApplication.translate("MainWindow", u"File Name", None));
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QCoreApplication.translate("MainWindow", u"RARC Archives", None))
         self.import_bti.setText(QCoreApplication.translate("MainWindow", u"Import BTI", None))

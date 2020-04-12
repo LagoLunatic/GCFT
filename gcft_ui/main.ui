@@ -129,6 +129,11 @@
           </column>
           <column>
            <property name="text">
+            <string>Folder Type</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
             <string>File Index</string>
            </property>
           </column>

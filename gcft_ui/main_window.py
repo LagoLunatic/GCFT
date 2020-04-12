@@ -550,13 +550,13 @@ class GCFTWindow(QMainWindow):
     self.rarc_tree_widget_item_to_file_entry = {}
     
     root_node = self.rarc.nodes[0]
-    root_item = QTreeWidgetItem([root_node.name, "", "", ""])
+    root_item = QTreeWidgetItem([root_node.name, root_node.type, "", "", ""])
     self.ui.rarc_files_tree.addTopLevelItem(root_item)
     self.rarc_node_to_tree_widget_item[root_node] = root_item
     self.rarc_tree_widget_item_to_node[root_item] = root_node
     
     for node in self.rarc.nodes[1:]:
-      item = QTreeWidgetItem([node.name, "", "", ""])
+      item = QTreeWidgetItem([node.name, node.type, "", "", ""])
       root_item.addChild(item)
       
       self.rarc_node_to_tree_widget_item[node] = item
@@ -580,7 +580,7 @@ class GCFTWindow(QMainWindow):
       file_index_str = self.stringify_number(file_index, min_hex_chars=4)
       
       parent_item = self.rarc_node_to_tree_widget_item[file_entry.parent_node]
-      item = QTreeWidgetItem([file_entry.name, file_index_str, file_id_str, file_size_str])
+      item = QTreeWidgetItem([file_entry.name, "", file_index_str, file_id_str, file_size_str])
       item.setFlags(item.flags() | Qt.ItemIsEditable)
       parent_item.addChild(item)
       self.rarc_file_entry_to_tree_widget_item[file_entry] = item
@@ -775,7 +775,7 @@ class GCFTWindow(QMainWindow):
     file_index_str = self.stringify_number(file_index, min_hex_chars=4)
     
     dir_item = self.get_rarc_tree_item_by_node(node)
-    file_item = QTreeWidgetItem([file_entry.name, file_index_str, file_id_str, file_size_str])
+    file_item = QTreeWidgetItem([file_entry.name, "", file_index_str, file_id_str, file_size_str])
     file_item.setFlags(file_item.flags() | Qt.ItemIsEditable)
     dir_item.addChild(file_item)
     self.rarc_file_entry_to_tree_widget_item[file_entry] = file_item
