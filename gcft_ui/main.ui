@@ -115,6 +115,13 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QPushButton" name="dump_all_rarc_textures">
+            <property name="text">
+             <string>Dump All Textures</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item>

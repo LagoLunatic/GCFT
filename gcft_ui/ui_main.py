@@ -3,22 +3,22 @@
 ################################################################################
 ## Form generated from reading UI file 'main.ui'
 ##
-## Created by: Qt User Interface Compiler version 5.14.1
+## Created by: Qt User Interface Compiler version 5.14.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide2.QtCore import (QCoreApplication, QMetaObject, QObject, QPoint,
-    QRect, QSize, QUrl, Qt)
+from PySide2.QtCore import (QCoreApplication, QDate, QDateTime, QMetaObject,
+    QObject, QPoint, QRect, QSize, QTime, QUrl, Qt)
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
-    QFontDatabase, QIcon, QLinearGradient, QPalette, QPainter, QPixmap,
-    QRadialGradient)
+    QFontDatabase, QIcon, QKeySequence, QLinearGradient, QPalette, QPainter,
+    QPixmap, QRadialGradient)
 from PySide2.QtWidgets import *
 
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
-        if MainWindow.objectName():
+        if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
         MainWindow.resize(800, 600)
         self.actionReplaceRARCFile = QAction(MainWindow)
@@ -126,6 +126,11 @@ class Ui_MainWindow(object):
         self.export_rarc_folder.setObjectName(u"export_rarc_folder")
 
         self.horizontalLayout.addWidget(self.export_rarc_folder)
+
+        self.dump_all_rarc_textures = QPushButton(self.tab)
+        self.dump_all_rarc_textures.setObjectName(u"dump_all_rarc_textures")
+
+        self.horizontalLayout.addWidget(self.dump_all_rarc_textures)
 
 
         self.verticalLayout_2.addLayout(self.horizontalLayout)
@@ -478,6 +483,7 @@ class Ui_MainWindow(object):
         self.export_rarc.setText(QCoreApplication.translate("MainWindow", u"Export RARC", None))
         self.import_folder_over_rarc.setText(QCoreApplication.translate("MainWindow", u"Import Folder Over RARC", None))
         self.export_rarc_folder.setText(QCoreApplication.translate("MainWindow", u"Export Folder", None))
+        self.dump_all_rarc_textures.setText(QCoreApplication.translate("MainWindow", u"Dump All Textures", None))
         ___qtreewidgetitem1 = self.rarc_files_tree.headerItem()
         ___qtreewidgetitem1.setText(4, QCoreApplication.translate("MainWindow", u"File Size", None));
         ___qtreewidgetitem1.setText(3, QCoreApplication.translate("MainWindow", u"File ID", None));

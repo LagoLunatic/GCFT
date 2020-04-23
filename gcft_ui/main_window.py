@@ -90,6 +90,7 @@ class GCFTWindow(QMainWindow):
     self.ui.export_rarc.setDisabled(True)
     self.ui.import_folder_over_rarc.setDisabled(True)
     self.ui.export_rarc_folder.setDisabled(True)
+    self.ui.dump_all_rarc_textures.setDisabled(True)
     self.ui.export_gcm.setDisabled(True)
     self.ui.import_folder_over_gcm.setDisabled(True)
     self.ui.export_gcm_folder.setDisabled(True)
@@ -116,6 +117,7 @@ class GCFTWindow(QMainWindow):
     self.ui.export_rarc.clicked.connect(self.export_rarc)
     self.ui.import_folder_over_rarc.clicked.connect(self.import_folder_over_rarc)
     self.ui.export_rarc_folder.clicked.connect(self.export_rarc_folder)
+    self.ui.dump_all_rarc_textures.clicked.connect(self.dump_all_rarc_textures)
     
     self.ui.rarc_files_tree.setContextMenuPolicy(Qt.CustomContextMenu)
     self.ui.rarc_files_tree.customContextMenuRequested.connect(self.show_rarc_files_tree_context_menu)
@@ -326,6 +328,39 @@ class GCFTWindow(QMainWindow):
     self.progress_dialog.setLabelText(next_progress_text)
     self.progress_dialog.setValue(progress_value)
   
+  def start_texture_dumper_thread(self, dumper_generator):
+    self.dumper_thread = GCFTThread(dumper_generator)
+    self.dumper_thread.update_progress.connect(self.update_progress_dialog)
+    self.dumper_thread.action_complete.connect(self.dump_all_textures_complete)
+    self.dumper_thread.action_failed.connect(self.dump_all_textures_failed)
+    self.dumper_thread.start()
+  
+  def dump_all_textures_complete(self):
+    self.progress_dialog.reset()
+    
+    failed_dump_message = ""
+    if len(self.asset_dumper.failed_file_paths) > 0:
+      failed_dump_message = "Failed to dump textures from %d files." % len(self.asset_dumper.failed_file_paths)
+      failed_dump_message += "\nPaths of files that failed to dump:\n"
+      for file_path in self.asset_dumper.failed_file_paths:
+        failed_dump_message += file_path + "\n"
+    
+    if self.asset_dumper.succeeded_file_count == 0 and len(self.asset_dumper.failed_file_paths) == 0:
+      QMessageBox.warning(self, "Failed to find textures", "Could not find any textures to dump.")
+    elif self.asset_dumper.succeeded_file_count > 0:
+      QMessageBox.information(self, "Textures dumped", "Successfully dumped %d textures.\n\n%s" % (self.asset_dumper.succeeded_file_count, failed_dump_message))
+    else:
+      QMessageBox.warning(self, "Failed to dump textures", failed_dump_message)
+  
+  def dump_all_textures_failed(self, error_message):
+    self.progress_dialog.reset()
+    
+    print(error_message)
+    QMessageBox.critical(
+      self, "Failed to dump textures",
+      error_message
+    )
+  
   
   
   def import_gcm(self):
@@ -414,6 +449,13 @@ class GCFTWindow(QMainWindow):
       op_callback=self.export_rarc_folder_by_path,
       is_opening=False, is_saving=True, is_folder=True,
       file_type="RARC"
+    )
+  
+  def dump_all_rarc_textures(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.dump_all_rarc_textures_by_path,
+      is_opening=False, is_saving=True, is_folder=True,
+      file_type="all RARC texture"
     )
   
   def extract_file_from_rarc(self):
@@ -594,6 +636,7 @@ class GCFTWindow(QMainWindow):
     self.ui.export_rarc.setDisabled(False)
     self.ui.import_folder_over_rarc.setDisabled(False)
     self.ui.export_rarc_folder.setDisabled(False)
+    self.ui.dump_all_rarc_textures.setDisabled(False)
   
   def export_rarc_by_path(self, rarc_path):
     self.rarc.save_changes()
@@ -617,6 +660,16 @@ class GCFTWindow(QMainWindow):
     self.rarc.extract_all_files_to_disk(output_directory=folder_path)
     
     QMessageBox.information(self, "RARC extracted", "Successfully extracted RARC contents to \"%s\"." % folder_path)
+  
+  def dump_all_rarc_textures_by_path(self, folder_path):
+    self.asset_dumper = AssetDumper()
+    
+    dumper_generator = self.asset_dumper.dump_all_textures_in_rarc(self.rarc, folder_path)
+    
+    max_progress_val = len(self.asset_dumper.get_all_rarc_file_paths(self.rarc))
+    self.progress_dialog = GCFTProgressDialog("Dumping textures", "Initializing...", max_progress_val)
+    
+    self.start_texture_dumper_thread(dumper_generator)
   
   
   def get_rarc_file_by_tree_item(self, item):
@@ -957,37 +1010,7 @@ class GCFTWindow(QMainWindow):
     max_progress_val = len(self.asset_dumper.get_all_gcm_file_paths(self.gcm))
     self.progress_dialog = GCFTProgressDialog("Dumping textures", "Initializing...", max_progress_val)
     
-    self.dumper_thread = GCFTThread(dumper_generator)
-    self.dumper_thread.update_progress.connect(self.update_progress_dialog)
-    self.dumper_thread.action_complete.connect(self.dump_all_gcm_textures_complete)
-    self.dumper_thread.action_failed.connect(self.dump_all_gcm_textures_failed)
-    self.dumper_thread.start()
-  
-  def dump_all_gcm_textures_complete(self):
-    self.progress_dialog.reset()
-    
-    failed_dump_message = ""
-    if len(self.asset_dumper.failed_file_paths) > 0:
-      failed_dump_message = "Failed to dump textures from %d files." % len(self.asset_dumper.failed_file_paths)
-      failed_dump_message += "\nPaths of files that failed to dump:\n"
-      for file_path in self.asset_dumper.failed_file_paths:
-        failed_dump_message += file_path + "\n"
-    
-    if self.asset_dumper.succeeded_file_count == 0 and len(self.asset_dumper.failed_file_paths) == 0:
-      QMessageBox.warning(self, "Failed to find textures", "Could not find any textures to dump in this ISO.")
-    elif self.asset_dumper.succeeded_file_count > 0:
-      QMessageBox.information(self, "Textures dumped", "Successfully dumped %d textures.\n\n%s" % (self.asset_dumper.succeeded_file_count, failed_dump_message))
-    else:
-      QMessageBox.warning(self, "Failed to dump textures", failed_dump_message)
-  
-  def dump_all_gcm_textures_failed(self, error_message):
-    self.progress_dialog.reset()
-    
-    print(error_message)
-    QMessageBox.critical(
-      self, "Failed to dump textures",
-      error_message
-    )
+    self.start_texture_dumper_thread(dumper_generator)
   
   
   def get_gcm_file_by_tree_item(self, item):

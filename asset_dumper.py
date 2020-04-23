@@ -20,6 +20,18 @@ class AssetDumper:
     
     return all_file_paths
   
+  def get_all_rarc_file_paths(self, rarc):
+    all_file_paths = []
+    for file_entry in rarc.file_entries:
+      if file_entry.is_dir:
+        continue
+      
+      file_path = "%s/%s" % (file_entry.parent_node.name, file_entry.name)
+      print(file_path)
+      all_file_paths.append(file_path)
+      
+    return all_file_paths
+  
   def dump_all_textures_in_gcm(self, gcm, out_dir):
     all_file_paths = self.get_all_gcm_file_paths(gcm)
     
@@ -34,7 +46,8 @@ class AssetDumper:
         if file_ext == ".arc":
           out_path = os.path.join(out_dir, rel_dir, base_name)
           rarc = RARC(gcm.get_changed_file_data(file_path))
-          self.dump_all_textures_in_rarc(rarc, out_path, display_path_prefix=file_path)
+          for _ in self.dump_all_textures_in_rarc(rarc, out_path, display_path_prefix=file_path):
+            continue
         elif file_ext == ".bti":
           out_path = os.path.join(out_dir, rel_dir, base_name + ".png")
           bti = BTIFile(gcm.get_changed_file_data(file_path))
@@ -53,9 +66,16 @@ class AssetDumper:
     yield("Done", -1)
   
   def dump_all_textures_in_rarc(self, rarc, out_dir, display_path_prefix=None):
+    files_checked = 0
+    yield("Initializing...", files_checked)
+    
     for file_entry in rarc.file_entries:
+      if file_entry.is_dir:
+        continue
+      
       rel_dir = file_entry.parent_node.name
       base_name, file_ext = os.path.splitext(file_entry.name)
+      display_path = rel_dir + "/" + base_name + file_ext
       
       try:
         if file_ext == ".bti":
@@ -67,10 +87,14 @@ class AssetDumper:
           j3d_file = rarc.get_file(file_entry.name)
           self.dump_all_textures_in_j3d_file(j3d_file, out_path)
       except Exception as e:
-        display_path = rel_dir + "/" + base_name + file_ext
         if display_path_prefix is not None:
           display_path = display_path_prefix + "/" + display_path
         self.failed_file_paths.append(display_path)
+      
+      files_checked += 1
+      yield(display_path, files_checked)
+    
+    yield("Done", -1)
   
   def dump_all_textures_in_j3d_file(self, j3d_file, out_dir):
     if not hasattr(j3d_file, "tex1"):
