@@ -1124,7 +1124,7 @@ class GCFTWindow(QMainWindow):
       menu = QMenu(self)
       
       basename, file_ext = os.path.splitext(file.name)
-      if file_ext == ".bti":
+      if file_ext == ".bti" or file.file_path == "files/opening.bnr":
         menu.addAction(self.ui.actionOpenGCMImage)
         self.ui.actionOpenGCMImage.setData(file)
         
@@ -1201,21 +1201,42 @@ class GCFTWindow(QMainWindow):
     
     data = self.gcm.get_changed_file_data(file_entry.file_path)
     data = make_copy_data(data)
+    
+    if file_entry.file_path == "files/opening.bnr":
+      image_data = read_bytes(data, 0x20, 0x1800)
+      data = BytesIO()
+      write_bytes(data, 0x20, image_data)
+      
+      write_u8(data, 0x00, ImageFormat.RGB5A3.value) # Image format
+      write_u16(data, 0x02, 96) # Width
+      write_u16(data, 0x04, 32) # Height
+      write_u32(data, 0x1C, 0x20) # Image data offset
+    
     self.import_bti_by_data(data)
     
     self.set_tab_by_name("BTI Images")
   
   def replace_image_in_gcm(self):
-    file = self.ui.actionReplaceGCMFile.data()
+    file_entry = self.ui.actionReplaceGCMFile.data()
     
     self.bti.save_changes()
-    
     data = make_copy_data(self.bti.data)
-    self.gcm.changed_files[file.file_path] = data
+    
+    if file_entry.file_path == "files/opening.bnr":
+      if self.bti.image_format != ImageFormat.RGB5A3 or self.bti.width != 96 or self.bti.height != 32 or data_len(self.bti.image_data) != 0x1800:
+        QMessageBox.warning(self, "Invalid banner image", "Invalid banner image. Banner images must be exactly 96x32 pixels in size and use the RGB5A3 image format.")
+        return
+      
+      orig_banner_data = self.gcm.get_changed_file_data(file_entry.file_path)
+      image_data_bytes = read_bytes(self.bti.image_data, 0x00, 0x1800)
+      data = make_copy_data(orig_banner_data)
+      write_bytes(data, 0x20, image_data_bytes)
+    
+    self.gcm.changed_files[file_entry.file_path] = data
     
     # Update changed file size
     file_size_str = self.stringify_number(data_len(data))
-    item = self.gcm_file_entry_to_tree_widget_item[file]
+    item = self.gcm_file_entry_to_tree_widget_item[file_entry]
     item.setText(self.gcm_col_name_to_index["File Size"], file_size_str)
   
   def add_file_to_gcm_by_path(self, file_path):
