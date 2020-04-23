@@ -597,38 +597,36 @@ class GCFTWindow(QMainWindow):
     self.rarc_node_to_tree_widget_item[root_node] = root_item
     self.rarc_tree_widget_item_to_node[root_item] = root_node
     
-    for node in self.rarc.nodes[1:]:
-      node_index = self.rarc.nodes.index(node)
-      dir_file_entry = next(fe for fe in self.rarc.file_entries if fe.is_dir and fe.node_index == node_index)
-      
-      parent_item = self.rarc_node_to_tree_widget_item[dir_file_entry.parent_node]
-      
-      item = QTreeWidgetItem([node.name, node.type, "", "", ""])
-      parent_item.addChild(item)
-      
-      self.rarc_node_to_tree_widget_item[node] = item
-      self.rarc_tree_widget_item_to_node[item] = node
-      
-      self.rarc_file_entry_to_tree_widget_item[dir_file_entry] = item
-      self.rarc_tree_widget_item_to_file_entry[item] = dir_file_entry
-    
     for file_entry in self.rarc.file_entries:
       if file_entry.is_dir:
-        if file_entry.name not in [".", ".."]:
-          assert file_entry in self.rarc_file_entry_to_tree_widget_item
-        continue
-      
-      file_size_str = self.stringify_number(file_entry.data_size)
-      file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
-      file_index = self.rarc.file_entries.index(file_entry)
-      file_index_str = self.stringify_number(file_index, min_hex_chars=4)
-      
-      parent_item = self.rarc_node_to_tree_widget_item[file_entry.parent_node]
-      item = QTreeWidgetItem([file_entry.name, "", file_index_str, file_id_str, file_size_str])
-      item.setFlags(item.flags() | Qt.ItemIsEditable)
-      parent_item.addChild(item)
-      self.rarc_file_entry_to_tree_widget_item[file_entry] = item
-      self.rarc_tree_widget_item_to_file_entry[item] = file_entry
+        dir_file_entry = file_entry
+        if file_entry.name in [".", ".."]:
+          continue
+        
+        node = self.rarc.nodes[file_entry.node_index]
+        
+        parent_item = self.rarc_node_to_tree_widget_item[dir_file_entry.parent_node]
+        
+        item = QTreeWidgetItem([node.name, node.type, "", "", ""])
+        parent_item.addChild(item)
+        
+        self.rarc_node_to_tree_widget_item[node] = item
+        self.rarc_tree_widget_item_to_node[item] = node
+        
+        self.rarc_file_entry_to_tree_widget_item[dir_file_entry] = item
+        self.rarc_tree_widget_item_to_file_entry[item] = dir_file_entry
+      else:
+        file_size_str = self.stringify_number(file_entry.data_size)
+        file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
+        file_index = self.rarc.file_entries.index(file_entry)
+        file_index_str = self.stringify_number(file_index, min_hex_chars=4)
+        
+        parent_item = self.rarc_node_to_tree_widget_item[file_entry.parent_node]
+        item = QTreeWidgetItem([file_entry.name, "", file_index_str, file_id_str, file_size_str])
+        item.setFlags(item.flags() | Qt.ItemIsEditable)
+        parent_item.addChild(item)
+        self.rarc_file_entry_to_tree_widget_item[file_entry] = item
+        self.rarc_tree_widget_item_to_file_entry[item] = file_entry
     
     # Expand the root node by default.
     self.ui.rarc_files_tree.topLevelItem(0).setExpanded(True)
