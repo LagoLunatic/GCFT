@@ -562,7 +562,8 @@ class GCFTWindow(QMainWindow):
       self.rarc_node_to_tree_widget_item[node] = item
       self.rarc_tree_widget_item_to_node[item] = node
       
-      dir_file_entry = next(fe for fe in self.rarc.file_entries if fe.is_dir and fe.name == node.name)
+      node_index = self.rarc.nodes.index(node)
+      dir_file_entry = next(fe for fe in self.rarc.file_entries if fe.is_dir and fe.node_index == node_index)
       assert dir_file_entry.is_dir
       
       self.rarc_file_entry_to_tree_widget_item[dir_file_entry] = item
