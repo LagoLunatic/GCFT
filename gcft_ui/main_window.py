@@ -127,6 +127,7 @@ class GCFTWindow(QMainWindow):
     self.ui.actionReplaceRARCFile.triggered.connect(self.replace_file_in_rarc)
     self.ui.actionDeleteRARCFile.triggered.connect(self.delete_file_in_rarc)
     self.ui.actionAddRARCFile.triggered.connect(self.add_file_to_rarc)
+    self.ui.actionAddRARCFolder.triggered.connect(self.add_folder_to_rarc)
     self.ui.actionOpenRARCImage.triggered.connect(self.open_image_in_rarc)
     self.ui.actionReplaceRARCImage.triggered.connect(self.replace_image_in_rarc)
     self.ui.actionOpenRARCJ3D.triggered.connect(self.open_j3d_in_rarc)
@@ -708,6 +709,8 @@ class GCFTWindow(QMainWindow):
       menu = QMenu(self)
       menu.addAction(self.ui.actionAddRARCFile)
       self.ui.actionAddRARCFile.setData(node)
+      menu.addAction(self.ui.actionAddRARCFolder)
+      self.ui.actionAddRARCFolder.setData(node)
       menu.exec_(self.ui.rarc_files_tree.mapToGlobal(pos))
     else:
       file = self.get_rarc_file_by_tree_item(item)
@@ -809,7 +812,7 @@ class GCFTWindow(QMainWindow):
     self.set_tab_by_name("J3D Files")
   
   def add_file_to_rarc_by_path(self, file_path):
-    node = self.ui.actionAddRARCFile.data()
+    parent_node = self.ui.actionAddRARCFile.data()
     
     file_name = os.path.basename(file_path)
     with open(file_path, "rb") as f:
@@ -817,22 +820,73 @@ class GCFTWindow(QMainWindow):
     file_size = data_len(file_data)
     file_size_str = self.stringify_number(file_size)
     
-    existing_file_names_in_node = [fe.name for fe in node.files]
+    existing_file_names_in_node = [fe.name for fe in parent_node.files]
     if file_name in existing_file_names_in_node:
       QMessageBox.warning(self, "File already exists", "Cannot add new file. The selected folder already contains a file named \"%s\".\n\nIf you wish to replace the existing file, right click on it in the files tree and select 'Replace File'." % file_name)
       return
     
-    file_entry = self.rarc.add_new_file(file_name, file_data, node)
+    file_entry = self.rarc.add_new_file(file_name, file_data, parent_node)
+    
     file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
     file_index = self.rarc.file_entries.index(file_entry)
     file_index_str = self.stringify_number(file_index, min_hex_chars=4)
     
-    dir_item = self.get_rarc_tree_item_by_node(node)
+    parent_dir_item = self.get_rarc_tree_item_by_node(parent_node)
     file_item = QTreeWidgetItem([file_entry.name, "", file_index_str, file_id_str, file_size_str])
     file_item.setFlags(file_item.flags() | Qt.ItemIsEditable)
-    dir_item.addChild(file_item)
+    parent_dir_item.addChild(file_item)
+    
     self.rarc_file_entry_to_tree_widget_item[file_entry] = file_item
     self.rarc_tree_widget_item_to_file_entry[file_item] = file_entry
+  
+  def add_folder_to_rarc(self):
+    parent_node = self.ui.actionAddRARCFolder.data()
+    
+    dir_name, confirmed = QInputDialog.getText(
+      self, "Input Folder Name", "Write the name for the new folder:",
+      flags=Qt.WindowSystemMenuHint | Qt.WindowTitleHint
+    )
+    if not confirmed:
+      return
+    if len(dir_name) == 0:
+      QMessageBox.warning(self, "Invalid folder name", "Folder name cannot be empty.")
+      return
+    if dir_name in [".", ".."]:
+      QMessageBox.warning(self, "Invalid folder name", "You cannot create folders named \".\" or \"..\".")
+      return
+    
+    node_type, confirmed = QInputDialog.getText(
+      self, "Input Folder Type", "Write the type of the new folder (maximum 4 characters):",
+      flags=Qt.WindowSystemMenuHint | Qt.WindowTitleHint
+    )
+    if not confirmed:
+      return
+    if len(node_type) == 0:
+      QMessageBox.warning(self, "Invalid folder type", "Folder type cannot be empty.")
+      return
+    if len(node_type) > 4:
+      QMessageBox.warning(self, "Invalid folder type", "Folder types cannot be longer than 4 characters.")
+      return
+    
+    dir_file_entry, node = self.rarc.add_new_directory(dir_name, node_type, parent_node)
+    
+    parent_dir_item = self.get_rarc_tree_item_by_node(parent_node)
+    dir_item = QTreeWidgetItem([dir_name, node_type, "", "", ""])
+    dir_item.setFlags(dir_item.flags() | Qt.ItemIsEditable)
+    parent_dir_item.addChild(dir_item)
+    
+    self.rarc_node_to_tree_widget_item[node] = dir_item
+    self.rarc_tree_widget_item_to_node[dir_item] = node
+    self.rarc_file_entry_to_tree_widget_item[dir_file_entry] = dir_item
+    self.rarc_tree_widget_item_to_file_entry[dir_item] = dir_file_entry
+    
+    # Update all the displayed file indexes in case they got shuffled around by adding a new directory.
+    for file_entry, item in self.rarc_file_entry_to_tree_widget_item.items():
+      if file_entry.is_dir:
+        continue
+      file_index = self.rarc.file_entries.index(file_entry)
+      file_index_str = self.stringify_number(file_index, min_hex_chars=4)
+      item.setText(self.rarc_col_name_to_index["File Index"], file_index_str)
   
   
   def edit_rarc_files_tree_item_text(self, item, column):

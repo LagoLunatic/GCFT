@@ -672,6 +672,11 @@
     <string>Replace Image</string>
    </property>
   </action>
+  <action name="actionAddRARCFolder">
+   <property name="text">
+    <string>Add Folder</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
