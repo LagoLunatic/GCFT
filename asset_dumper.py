@@ -27,7 +27,6 @@ class AssetDumper:
         continue
       
       file_path = "%s/%s" % (file_entry.parent_node.name, file_entry.name)
-      print(file_path)
       all_file_paths.append(file_path)
       
     return all_file_paths
