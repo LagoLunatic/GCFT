@@ -677,6 +677,11 @@
     <string>Add Folder</string>
    </property>
   </action>
+  <action name="actionDeleteRARCFolder">
+   <property name="text">
+    <string>Delete Folder</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

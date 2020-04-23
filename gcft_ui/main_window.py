@@ -128,6 +128,7 @@ class GCFTWindow(QMainWindow):
     self.ui.actionDeleteRARCFile.triggered.connect(self.delete_file_in_rarc)
     self.ui.actionAddRARCFile.triggered.connect(self.add_file_to_rarc)
     self.ui.actionAddRARCFolder.triggered.connect(self.add_folder_to_rarc)
+    self.ui.actionDeleteRARCFolder.triggered.connect(self.delete_folder_in_rarc)
     self.ui.actionOpenRARCImage.triggered.connect(self.open_image_in_rarc)
     self.ui.actionReplaceRARCImage.triggered.connect(self.replace_image_in_rarc)
     self.ui.actionOpenRARCJ3D.triggered.connect(self.open_j3d_in_rarc)
@@ -306,10 +307,15 @@ class GCFTWindow(QMainWindow):
       self.settings[last_used_output_folder_key_name] = os.path.dirname(out_selected_path)
     self.save_settings()
   
-  def confirm_delete_file(self, file_name):
+  def confirm_delete(self, file_name, is_folder=False):
+    message = "Are you sure you want to delete \"%s\"" % file_name
+    if is_folder:
+      message += " and all of its children"
+    message += "?"
+    
     response = QMessageBox.question(self, 
       "Confirm delete",
-      "Are you sure you want to delete \"%s\"?" % file_name,
+      message,
       QMessageBox.Cancel | QMessageBox.Yes,
       QMessageBox.Cancel
     )
@@ -604,7 +610,7 @@ class GCFTWindow(QMainWindow):
         if file_entry.name in [".", ".."]:
           continue
         
-        node = self.rarc.nodes[file_entry.node_index]
+        node = file_entry.node
         
         parent_item = self.rarc_node_to_tree_widget_item[dir_file_entry.parent_node]
         
@@ -711,6 +717,9 @@ class GCFTWindow(QMainWindow):
       self.ui.actionAddRARCFile.setData(node)
       menu.addAction(self.ui.actionAddRARCFolder)
       self.ui.actionAddRARCFolder.setData(node)
+      if node.dir_entry is not None:
+        menu.addAction(self.ui.actionDeleteRARCFolder)
+        self.ui.actionDeleteRARCFolder.setData(node)
       menu.exec_(self.ui.rarc_files_tree.mapToGlobal(pos))
     else:
       file = self.get_rarc_file_by_tree_item(item)
@@ -770,7 +779,7 @@ class GCFTWindow(QMainWindow):
   def delete_file_in_rarc(self):
     file_entry = self.ui.actionDeleteRARCFile.data()
     
-    if not self.confirm_delete_file(file_entry.name):
+    if not self.confirm_delete(file_entry.name):
       return
     
     node = file_entry.parent_node
@@ -887,6 +896,22 @@ class GCFTWindow(QMainWindow):
       file_index = self.rarc.file_entries.index(file_entry)
       file_index_str = self.stringify_number(file_index, min_hex_chars=4)
       item.setText(self.rarc_col_name_to_index["File Index"], file_index_str)
+  
+  def delete_folder_in_rarc(self):
+    node = self.ui.actionDeleteRARCFolder.data()
+    
+    if not self.confirm_delete(node.name, is_folder=True):
+      return
+    
+    dir_entry = node.dir_entry
+    
+    self.rarc.delete_directory(dir_entry)
+    
+    dir_item = self.get_rarc_tree_item_by_file(dir_entry)
+    parent_dir_item = self.get_rarc_tree_item_by_node(dir_entry.parent_node)
+    parent_dir_item.removeChild(dir_item)
+    del self.rarc_file_entry_to_tree_widget_item[dir_entry]
+    del self.rarc_tree_widget_item_to_file_entry[dir_item]
   
   
   def edit_rarc_files_tree_item_text(self, item, column):
@@ -1158,7 +1183,7 @@ class GCFTWindow(QMainWindow):
   def delete_file_in_gcm(self):
     file_entry = self.ui.actionDeleteGCMFile.data()
     
-    if not self.confirm_delete_file(file_entry.name):
+    if not self.confirm_delete(file_entry.name):
       return
     
     dir_entry = file_entry.parent
