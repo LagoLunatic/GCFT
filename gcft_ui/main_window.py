@@ -154,6 +154,7 @@ class GCFTWindow(QMainWindow):
     self.ui.actionReplaceGCMFile.triggered.connect(self.replace_file_in_gcm)
     self.ui.actionDeleteGCMFile.triggered.connect(self.delete_file_in_gcm)
     self.ui.actionAddGCMFile.triggered.connect(self.add_file_to_gcm)
+    self.ui.actionOpenGCMRARC.triggered.connect(self.open_rarc_in_gcm)
     self.ui.actionOpenGCMImage.triggered.connect(self.open_image_in_gcm)
     self.ui.actionReplaceGCMImage.triggered.connect(self.replace_image_in_gcm)
     
@@ -602,6 +603,9 @@ class GCFTWindow(QMainWindow):
   def import_rarc_by_path(self, rarc_path):
     with open(rarc_path, "rb") as f:
       data = BytesIO(f.read())
+    self.import_rarc_by_data(data)
+  
+  def import_rarc_by_data(self, data):
     self.rarc = RARC()
     self.rarc.read(data)
     
@@ -1225,6 +1229,9 @@ class GCFTWindow(QMainWindow):
           self.ui.actionReplaceGCMImage.setDisabled(True)
         else:
           self.ui.actionReplaceGCMImage.setDisabled(False)
+      elif file_ext == ".arc":
+        menu.addAction(self.ui.actionOpenGCMRARC)
+        self.ui.actionOpenGCMRARC.setData(file)
       
       menu.addAction(self.ui.actionExtractGCMFile)
       self.ui.actionExtractGCMFile.setData(file)
@@ -1286,6 +1293,16 @@ class GCFTWindow(QMainWindow):
     dir_item.removeChild(file_item)
     del self.gcm_file_entry_to_tree_widget_item[file_entry]
     del self.gcm_tree_widget_item_to_file_entry[file_item]
+  
+  def open_rarc_in_gcm(self):
+    file_entry = self.ui.actionOpenGCMRARC.data()
+    
+    data = self.gcm.get_changed_file_data(file_entry.file_path)
+    data = make_copy_data(data)
+    
+    self.import_rarc_by_data(data)
+    
+    self.set_tab_by_name("RARC Archives")
   
   def open_image_in_gcm(self):
     file_entry = self.ui.actionOpenGCMImage.data()

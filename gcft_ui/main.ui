@@ -703,6 +703,11 @@
     <string>Delete Folder</string>
    </property>
   </action>
+  <action name="actionOpenGCMRARC">
+   <property name="text">
+    <string>Open RARC</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
