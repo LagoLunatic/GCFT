@@ -968,13 +968,37 @@ class GCFTWindow(QMainWindow):
   
   
   def edit_rarc_files_tree_item_text(self, item, column):
-    # Allow editing the file IDs column only.
-    if (item.flags() & Qt.ItemIsEditable) != 0 and column == self.rarc_col_name_to_index["File ID"]: 
+    if (item.flags() & Qt.ItemIsEditable) == 0:
+      return
+    
+    # Allow editing only certain columns.
+    if column in [self.rarc_col_name_to_index["File Name"], self.rarc_col_name_to_index["File ID"]]: 
       self.ui.rarc_files_tree.editItem(item, column)
   
   def rarc_file_tree_item_text_changed(self, item, column):
-    if column == self.rarc_col_name_to_index["File ID"]:
+    if column == self.rarc_col_name_to_index["File Name"]:
+      self.change_rarc_file_name(item)
+    elif column == self.rarc_col_name_to_index["File ID"]:
       self.change_rarc_file_id(item)
+  
+  def change_rarc_file_name(self, item):
+    file_entry = self.get_rarc_file_by_tree_item(item)
+    new_file_name = item.text(self.rarc_col_name_to_index["File Name"])
+    
+    other_file_entry = next((fe for fe in self.rarc.file_entries if fe.name == new_file_name), None)
+    
+    if other_file_entry == file_entry:
+      # File name not changed
+      return
+    
+    if other_file_entry is not None:
+      QMessageBox.warning(self, "Duplicate file name", "The file name you entered is already used by another file.\n\nNote that file names in RARCs must be unique - even if the other file is in a completely different folder.")
+      item.setText(self.rarc_col_name_to_index["File Name"], file_entry.name)
+      return
+    
+    file_entry.name = new_file_name
+    
+    item.setText(self.rarc_col_name_to_index["File Name"], file_entry.name)
   
   def change_rarc_file_id(self, item):
     file_entry = self.get_rarc_file_by_tree_item(item)
