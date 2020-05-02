@@ -643,6 +643,7 @@ class GCFTWindow(QMainWindow):
     
     root_node = self.rarc.nodes[0]
     root_item = QTreeWidgetItem([root_node.name, root_node.type, "", "", ""])
+    root_item.setFlags(root_item.flags() | Qt.ItemIsEditable)
     self.ui.rarc_files_tree.addTopLevelItem(root_item)
     self.rarc_node_to_tree_widget_item[root_node] = root_item
     self.rarc_tree_widget_item_to_node[root_item] = root_node
@@ -681,6 +682,7 @@ class GCFTWindow(QMainWindow):
         parent_item.insertChild(index_of_entry_in_parent_dir, item)
       else:
         item = QTreeWidgetItem([node.name, node.type, dir_file_index_str, "", ""])
+        item.setFlags(item.flags() | Qt.ItemIsEditable)
         parent_item.insertChild(index_of_entry_in_parent_dir, item)
         
         self.rarc_node_to_tree_widget_item[node] = item
@@ -971,9 +973,15 @@ class GCFTWindow(QMainWindow):
     if (item.flags() & Qt.ItemIsEditable) == 0:
       return
     
+    node = self.get_rarc_node_by_tree_item(item)
+    
     # Allow editing only certain columns.
-    if column in [self.rarc_col_name_to_index["File Name"], self.rarc_col_name_to_index["File ID"]]: 
-      self.ui.rarc_files_tree.editItem(item, column)
+    if node is not None:
+      if column in [self.rarc_col_name_to_index["File Name"]]: 
+        self.ui.rarc_files_tree.editItem(item, column)
+    else:
+      if column in [self.rarc_col_name_to_index["File Name"], self.rarc_col_name_to_index["File ID"]]: 
+        self.ui.rarc_files_tree.editItem(item, column)
   
   def rarc_file_tree_item_text_changed(self, item, column):
     if column == self.rarc_col_name_to_index["File Name"]:
@@ -982,23 +990,29 @@ class GCFTWindow(QMainWindow):
       self.change_rarc_file_id(item)
   
   def change_rarc_file_name(self, item):
+    node = self.get_rarc_node_by_tree_item(item)
     file_entry = self.get_rarc_file_by_tree_item(item)
     new_file_name = item.text(self.rarc_col_name_to_index["File Name"])
     
-    other_file_entry = next((fe for fe in self.rarc.file_entries if fe.name == new_file_name), None)
+    if node is not None:
+      node.name = new_file_name
+      if node.dir_entry is not None:
+        node.dir_entry.name = new_file_name
+    else:
+      other_file_entry = next((fe for fe in self.rarc.file_entries if fe.name == new_file_name), None)
+      
+      if other_file_entry == file_entry:
+        # File name not changed
+        return
+      
+      if other_file_entry is not None:
+        QMessageBox.warning(self, "Duplicate file name", "The file name you entered is already used by another file.\n\nNote that file names in RARCs must be unique - even if the other file is in a completely different folder.")
+        item.setText(self.rarc_col_name_to_index["File Name"], file_entry.name)
+        return
     
-    if other_file_entry == file_entry:
-      # File name not changed
-      return
+      file_entry.name = new_file_name
     
-    if other_file_entry is not None:
-      QMessageBox.warning(self, "Duplicate file name", "The file name you entered is already used by another file.\n\nNote that file names in RARCs must be unique - even if the other file is in a completely different folder.")
-      item.setText(self.rarc_col_name_to_index["File Name"], file_entry.name)
-      return
-    
-    file_entry.name = new_file_name
-    
-    item.setText(self.rarc_col_name_to_index["File Name"], file_entry.name)
+    item.setText(self.rarc_col_name_to_index["File Name"], new_file_name)
   
   def change_rarc_file_id(self, item):
     file_entry = self.get_rarc_file_by_tree_item(item)
