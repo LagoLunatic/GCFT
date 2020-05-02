@@ -64,6 +64,7 @@ class GCFTWindow(QMainWindow):
     
     self.display_hexadecimal_numbers = True # TODO hex/decimal setting
     self.display_relative_dir_entries = False
+    self.display_rarc_dir_indexes = False
     
     self.gcm = None
     self.rarc = None
@@ -612,8 +613,25 @@ class GCFTWindow(QMainWindow):
     
     self.reload_rarc_files_tree()
   
-  def create_rarc_from_folder_by_path(self):
-    pass # TODO
+  def create_rarc_from_folder_by_path(self, base_dir):
+    self.rarc = RARC()
+    self.rarc.add_root_directory()
+    
+    for dir_path, subdir_names, file_names in os.walk(base_dir):
+      dir_relative_path = os.path.relpath(dir_path, base_dir).replace("\\", "/")
+      dir_node = self.rarc.get_node_by_path(dir_relative_path)
+      
+      for subdir_name in subdir_names:
+        node_type = subdir_name[:4].upper()
+        dir_file_entry, node = self.rarc.add_new_directory(subdir_name, node_type, dir_node)
+      
+      for file_name in file_names:
+        file_path = os.path.join(dir_path, file_name)
+        with open(file_path, "rb") as f:
+          file_data = BytesIO(f.read())
+        file_entry = self.rarc.add_new_file(file_name, file_data, dir_node)
+    
+    self.reload_rarc_files_tree()
   
   def reload_rarc_files_tree(self):
     self.ui.rarc_files_tree.clear()
@@ -652,11 +670,17 @@ class GCFTWindow(QMainWindow):
       
       parent_item = self.rarc_node_to_tree_widget_item[dir_file_entry.parent_node]
       
+      if self.display_rarc_dir_indexes:
+        dir_file_index = self.rarc.file_entries.index(dir_file_entry)
+        dir_file_index_str = self.stringify_number(dir_file_index, min_hex_chars=4)
+      else:
+        dir_file_index_str = ""
+      
       if file_entry.name in [".", ".."]:
-        item = QTreeWidgetItem([file_entry.name, "", "", "", ""])
+        item = QTreeWidgetItem([file_entry.name, "", dir_file_index_str, "", ""])
         parent_item.insertChild(index_of_entry_in_parent_dir, item)
       else:
-        item = QTreeWidgetItem([node.name, node.type, "", "", ""])
+        item = QTreeWidgetItem([node.name, node.type, dir_file_index_str, "", ""])
         parent_item.insertChild(index_of_entry_in_parent_dir, item)
         
         self.rarc_node_to_tree_widget_item[node] = item
