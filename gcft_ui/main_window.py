@@ -982,7 +982,7 @@ class GCFTWindow(QMainWindow):
     
     # Allow editing only certain columns.
     if node is not None:
-      if column in [self.rarc_col_name_to_index["File Name"]]: 
+      if column in [self.rarc_col_name_to_index["File Name"], self.rarc_col_name_to_index["Folder Type"]]: 
         self.ui.rarc_files_tree.editItem(item, column)
     else:
       if column in [self.rarc_col_name_to_index["File Name"], self.rarc_col_name_to_index["File ID"]]: 
@@ -991,6 +991,8 @@ class GCFTWindow(QMainWindow):
   def rarc_file_tree_item_text_changed(self, item, column):
     if column == self.rarc_col_name_to_index["File Name"]:
       self.change_rarc_file_name(item)
+    elif column == self.rarc_col_name_to_index["Folder Type"]:
+      self.change_rarc_node_type(item)
     elif column == self.rarc_col_name_to_index["File ID"]:
       self.change_rarc_file_id(item)
   
@@ -1000,10 +1002,20 @@ class GCFTWindow(QMainWindow):
     new_file_name = item.text(self.rarc_col_name_to_index["File Name"])
     
     if node is not None:
+      if len(new_file_name) == 0:
+        QMessageBox.warning(self, "Invalid folder name", "Folder name cannot be empty.")
+        item.setText(self.rarc_col_name_to_index["File Name"], node.name)
+        return
+      
       node.name = new_file_name
       if node.dir_entry is not None:
         node.dir_entry.name = new_file_name
     else:
+      if len(new_file_name) == 0:
+        QMessageBox.warning(self, "Invalid file name", "File name cannot be empty.")
+        item.setText(self.rarc_col_name_to_index["File Name"], file_entry.name)
+        return
+      
       other_file_entry = next((fe for fe in self.rarc.file_entries if fe.name == new_file_name), None)
       
       if other_file_entry == file_entry:
@@ -1018,6 +1030,27 @@ class GCFTWindow(QMainWindow):
       file_entry.name = new_file_name
     
     item.setText(self.rarc_col_name_to_index["File Name"], new_file_name)
+  
+  def change_rarc_node_type(self, item):
+    node = self.get_rarc_node_by_tree_item(item)
+    new_node_type = item.text(self.rarc_col_name_to_index["Folder Type"])
+    
+    if len(new_node_type) == 0:
+      QMessageBox.warning(self, "Invalid folder type", "Folder type cannot be empty.")
+      item.setText(self.rarc_col_name_to_index["Folder Type"], node.type)
+      return
+    if len(new_node_type) > 4:
+      QMessageBox.warning(self, "Invalid folder type", "Folder types cannot be longer than 4 characters.")
+      item.setText(self.rarc_col_name_to_index["Folder Type"], node.type)
+      return
+    
+    if len(new_node_type) < 4:
+      spaces_to_add = 4-len(new_node_type)
+      new_node_type += " "*spaces_to_add
+    
+    node.type = new_node_type
+    
+    item.setText(self.rarc_col_name_to_index["Folder Type"], new_node_type)
   
   def change_rarc_file_id(self, item):
     file_entry = self.get_rarc_file_by_tree_item(item)
