@@ -13,8 +13,8 @@ Features:
 * Extract and replace individual files in GCMs and RARCs
 * Extract all files in a GCM, RARC, or JPC at once to a folder
 * Import a folder of files onto an existing GCM or RARC, overwriting the existing files
-* Create a new RARCs from scratch
-* Add/delete files/folders in GCMs and RARCs
+* Create brand new RARCs from scratch
+* Add/delete files in GCMs and RARCs, as well as folders in RARCs
 * Convert BTI images to PNG and back
 * Dump all BTI images in a GCM or a RARC to a folder as PNG
 * Edit the header attributes of BTI images (e.g. image format, palette format, wrapping, filter mode)
