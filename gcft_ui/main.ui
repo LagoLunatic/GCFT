@@ -95,6 +95,27 @@
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="create_rarc">
+            <property name="text">
+             <string>Create New RARC</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="create_rarc_from_folder">
+            <property name="text">
+             <string>Create New RARC From Folder</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="widget" native="true"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_7">
+          <item>
            <widget class="QPushButton" name="export_rarc">
             <property name="text">
              <string>Export RARC</string>

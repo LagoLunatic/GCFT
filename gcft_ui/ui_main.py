@@ -116,28 +116,48 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout.addWidget(self.import_rarc)
 
+        self.create_rarc = QPushButton(self.tab)
+        self.create_rarc.setObjectName(u"create_rarc")
+
+        self.horizontalLayout.addWidget(self.create_rarc)
+
+        self.create_rarc_from_folder = QPushButton(self.tab)
+        self.create_rarc_from_folder.setObjectName(u"create_rarc_from_folder")
+
+        self.horizontalLayout.addWidget(self.create_rarc_from_folder)
+
+        self.widget = QWidget(self.tab)
+        self.widget.setObjectName(u"widget")
+
+        self.horizontalLayout.addWidget(self.widget)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout)
+
+        self.horizontalLayout_7 = QHBoxLayout()
+        self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
         self.export_rarc = QPushButton(self.tab)
         self.export_rarc.setObjectName(u"export_rarc")
 
-        self.horizontalLayout.addWidget(self.export_rarc)
+        self.horizontalLayout_7.addWidget(self.export_rarc)
 
         self.import_folder_over_rarc = QPushButton(self.tab)
         self.import_folder_over_rarc.setObjectName(u"import_folder_over_rarc")
 
-        self.horizontalLayout.addWidget(self.import_folder_over_rarc)
+        self.horizontalLayout_7.addWidget(self.import_folder_over_rarc)
 
         self.export_rarc_folder = QPushButton(self.tab)
         self.export_rarc_folder.setObjectName(u"export_rarc_folder")
 
-        self.horizontalLayout.addWidget(self.export_rarc_folder)
+        self.horizontalLayout_7.addWidget(self.export_rarc_folder)
 
         self.dump_all_rarc_textures = QPushButton(self.tab)
         self.dump_all_rarc_textures.setObjectName(u"dump_all_rarc_textures")
 
-        self.horizontalLayout.addWidget(self.dump_all_rarc_textures)
+        self.horizontalLayout_7.addWidget(self.dump_all_rarc_textures)
 
 
-        self.verticalLayout_2.addLayout(self.horizontalLayout)
+        self.verticalLayout_2.addLayout(self.horizontalLayout_7)
 
         self.rarc_files_tree = QTreeWidget(self.tab)
         self.rarc_files_tree.setObjectName(u"rarc_files_tree")
@@ -486,6 +506,8 @@ class Ui_MainWindow(object):
         ___qtreewidgetitem.setText(0, QCoreApplication.translate("MainWindow", u"File Name", None));
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), QCoreApplication.translate("MainWindow", u"GCM ISOs", None))
         self.import_rarc.setText(QCoreApplication.translate("MainWindow", u"Import RARC", None))
+        self.create_rarc.setText(QCoreApplication.translate("MainWindow", u"Create New RARC", None))
+        self.create_rarc_from_folder.setText(QCoreApplication.translate("MainWindow", u"Create New RARC From Folder", None))
         self.export_rarc.setText(QCoreApplication.translate("MainWindow", u"Export RARC", None))
         self.import_folder_over_rarc.setText(QCoreApplication.translate("MainWindow", u"Import Folder Over RARC", None))
         self.export_rarc_folder.setText(QCoreApplication.translate("MainWindow", u"Export Folder", None))

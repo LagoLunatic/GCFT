@@ -62,6 +62,9 @@ class GCFTWindow(QMainWindow):
     self.ui = Ui_MainWindow()
     self.ui.setupUi(self)
     
+    self.display_hexadecimal_numbers = True # TODO hex/decimal setting
+    self.display_relative_dir_entries = False
+    
     self.gcm = None
     self.rarc = None
     self.jpc = None
@@ -114,6 +117,8 @@ class GCFTWindow(QMainWindow):
     self.ui.tabWidget.currentChanged.connect(self.save_last_used_tab)
     
     self.ui.import_rarc.clicked.connect(self.import_rarc)
+    self.ui.create_rarc.clicked.connect(self.create_rarc)
+    self.ui.create_rarc_from_folder.clicked.connect(self.create_rarc_from_folder)
     self.ui.export_rarc.clicked.connect(self.export_rarc)
     self.ui.import_folder_over_rarc.clicked.connect(self.import_folder_over_rarc)
     self.ui.export_rarc_folder.clicked.connect(self.export_rarc_folder)
@@ -325,7 +330,7 @@ class GCFTWindow(QMainWindow):
       return False
   
   def stringify_number(self, num, min_hex_chars=1):
-    if True: # TODO setting
+    if self.display_hexadecimal_numbers:
       format_string = "0x%%0%dX" % min_hex_chars
       return format_string % num
     else:
@@ -435,6 +440,13 @@ class GCFTWindow(QMainWindow):
       op_callback=self.import_rarc_by_path,
       is_opening=True, is_saving=False, is_folder=False,
       file_type="RARC", file_filter="RARC files (*.arc)"
+    )
+  
+  def create_rarc_from_folder(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.create_rarc_from_folder_by_path,
+      is_opening=True, is_saving=False, is_folder=True,
+      file_type="RARC"
     )
   
   def export_rarc(self):
@@ -589,8 +601,21 @@ class GCFTWindow(QMainWindow):
   def import_rarc_by_path(self, rarc_path):
     with open(rarc_path, "rb") as f:
       data = BytesIO(f.read())
-    self.rarc = RARC(data)
+    self.rarc = RARC()
+    self.rarc.read(data)
     
+    self.reload_rarc_files_tree()
+  
+  def create_rarc(self):
+    self.rarc = RARC()
+    self.rarc.add_root_directory()
+    
+    self.reload_rarc_files_tree()
+  
+  def create_rarc_from_folder_by_path(self):
+    pass # TODO
+  
+  def reload_rarc_files_tree(self):
     self.ui.rarc_files_tree.clear()
     
     self.rarc_node_to_tree_widget_item = {}
@@ -605,35 +630,7 @@ class GCFTWindow(QMainWindow):
     self.rarc_tree_widget_item_to_node[root_item] = root_node
     
     for file_entry in self.rarc.file_entries:
-      if file_entry.is_dir:
-        dir_file_entry = file_entry
-        if file_entry.name in [".", ".."]:
-          continue
-        
-        node = file_entry.node
-        
-        parent_item = self.rarc_node_to_tree_widget_item[dir_file_entry.parent_node]
-        
-        item = QTreeWidgetItem([node.name, node.type, "", "", ""])
-        parent_item.addChild(item)
-        
-        self.rarc_node_to_tree_widget_item[node] = item
-        self.rarc_tree_widget_item_to_node[item] = node
-        
-        self.rarc_file_entry_to_tree_widget_item[dir_file_entry] = item
-        self.rarc_tree_widget_item_to_file_entry[item] = dir_file_entry
-      else:
-        file_size_str = self.stringify_number(file_entry.data_size)
-        file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
-        file_index = self.rarc.file_entries.index(file_entry)
-        file_index_str = self.stringify_number(file_index, min_hex_chars=4)
-        
-        parent_item = self.rarc_node_to_tree_widget_item[file_entry.parent_node]
-        item = QTreeWidgetItem([file_entry.name, "", file_index_str, file_id_str, file_size_str])
-        item.setFlags(item.flags() | Qt.ItemIsEditable)
-        parent_item.addChild(item)
-        self.rarc_file_entry_to_tree_widget_item[file_entry] = item
-        self.rarc_tree_widget_item_to_file_entry[item] = file_entry
+      self.add_rarc_file_entry_to_files_tree(file_entry)
     
     # Expand the root node by default.
     self.ui.rarc_files_tree.topLevelItem(0).setExpanded(True)
@@ -642,6 +639,43 @@ class GCFTWindow(QMainWindow):
     self.ui.import_folder_over_rarc.setDisabled(False)
     self.ui.export_rarc_folder.setDisabled(False)
     self.ui.dump_all_rarc_textures.setDisabled(False)
+  
+  def add_rarc_file_entry_to_files_tree(self, file_entry):
+    index_of_entry_in_parent_dir = file_entry.parent_node.files.index(file_entry)
+    
+    if file_entry.is_dir:
+      dir_file_entry = file_entry
+      if file_entry.name in [".", ".."] and not self.display_relative_dir_entries:
+        return
+      
+      node = file_entry.node
+      
+      parent_item = self.rarc_node_to_tree_widget_item[dir_file_entry.parent_node]
+      
+      if file_entry.name in [".", ".."]:
+        item = QTreeWidgetItem([file_entry.name, "", "", "", ""])
+        parent_item.insertChild(index_of_entry_in_parent_dir, item)
+      else:
+        item = QTreeWidgetItem([node.name, node.type, "", "", ""])
+        parent_item.insertChild(index_of_entry_in_parent_dir, item)
+        
+        self.rarc_node_to_tree_widget_item[node] = item
+        self.rarc_tree_widget_item_to_node[item] = node
+      
+      self.rarc_file_entry_to_tree_widget_item[dir_file_entry] = item
+      self.rarc_tree_widget_item_to_file_entry[item] = dir_file_entry
+    else:
+      file_size_str = self.stringify_number(file_entry.data_size)
+      file_id_str = self.stringify_number(file_entry.id, min_hex_chars=4)
+      file_index = self.rarc.file_entries.index(file_entry)
+      file_index_str = self.stringify_number(file_index, min_hex_chars=4)
+      
+      parent_item = self.rarc_node_to_tree_widget_item[file_entry.parent_node]
+      item = QTreeWidgetItem([file_entry.name, "", file_index_str, file_id_str, file_size_str])
+      item.setFlags(item.flags() | Qt.ItemIsEditable)
+      parent_item.insertChild(index_of_entry_in_parent_dir, item)
+      self.rarc_file_entry_to_tree_widget_item[file_entry] = item
+      self.rarc_tree_widget_item_to_file_entry[item] = file_entry
   
   def export_rarc_by_path(self, rarc_path):
     self.rarc.save_changes()
@@ -727,8 +761,7 @@ class GCFTWindow(QMainWindow):
         return
       
       if file.is_dir:
-        print(file.name)
-        # TODO: when is there a dir with no node?
+        # Selected a . or .. relative directory entry. Don't give any options for this..
         pass
       else:
         menu = QMenu(self)
@@ -843,7 +876,8 @@ class GCFTWindow(QMainWindow):
     parent_dir_item = self.get_rarc_tree_item_by_node(parent_node)
     file_item = QTreeWidgetItem([file_entry.name, "", file_index_str, file_id_str, file_size_str])
     file_item.setFlags(file_item.flags() | Qt.ItemIsEditable)
-    parent_dir_item.addChild(file_item)
+    index_of_file_in_dir = parent_node.files.index(file_entry)
+    parent_dir_item.insertChild(index_of_file_in_dir, file_item)
     
     self.rarc_file_entry_to_tree_widget_item[file_entry] = file_item
     self.rarc_tree_widget_item_to_file_entry[file_item] = file_entry
@@ -879,15 +913,10 @@ class GCFTWindow(QMainWindow):
     
     dir_file_entry, node = self.rarc.add_new_directory(dir_name, node_type, parent_node)
     
-    parent_dir_item = self.get_rarc_tree_item_by_node(parent_node)
-    dir_item = QTreeWidgetItem([dir_name, node_type, "", "", ""])
-    dir_item.setFlags(dir_item.flags() | Qt.ItemIsEditable)
-    parent_dir_item.addChild(dir_item)
-    
-    self.rarc_node_to_tree_widget_item[node] = dir_item
-    self.rarc_tree_widget_item_to_node[dir_item] = node
-    self.rarc_file_entry_to_tree_widget_item[dir_file_entry] = dir_item
-    self.rarc_tree_widget_item_to_file_entry[dir_item] = dir_file_entry
+    self.add_rarc_file_entry_to_files_tree(dir_file_entry)
+    for child_file_entry in dir_file_entry.node.files:
+      # Add the . and .. relative dir entries.
+      self.add_rarc_file_entry_to_files_tree(child_file_entry)
     
     # Update all the displayed file indexes in case they got shuffled around by adding a new directory.
     for file_entry, item in self.rarc_file_entry_to_tree_widget_item.items():
@@ -927,7 +956,7 @@ class GCFTWindow(QMainWindow):
     file_entry = self.get_rarc_file_by_tree_item(item)
     new_file_id_str = item.text(self.rarc_col_name_to_index["File ID"])
     
-    if True: # TODO hex/decimal setting
+    if self.display_hexadecimal_numbers:
       hexadecimal_match = re.search(r"^\s*(?:0x)?([0-9a-f]+)\s*$", new_file_id_str, re.IGNORECASE)
       if hexadecimal_match:
         new_file_id = int(hexadecimal_match.group(1), 16)
@@ -1540,7 +1569,7 @@ class GCFTWindow(QMainWindow):
       
       line_edit_widget.blockSignals(True)
       
-      if True: # TODO hex/decimal setting
+      if self.display_hexadecimal_numbers:
         hexadecimal_match = re.search(r"^\s*(?:0x)?([0-9a-f]+)\s*$", new_str_value, re.IGNORECASE)
         if hexadecimal_match:
           new_value = int(hexadecimal_match.group(1), 16)
