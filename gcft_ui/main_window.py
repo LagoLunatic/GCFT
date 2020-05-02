@@ -155,6 +155,7 @@ class GCFTWindow(QMainWindow):
     self.ui.actionDeleteGCMFile.triggered.connect(self.delete_file_in_gcm)
     self.ui.actionAddGCMFile.triggered.connect(self.add_file_to_gcm)
     self.ui.actionOpenGCMRARC.triggered.connect(self.open_rarc_in_gcm)
+    self.ui.actionReplaceGCMRARC.triggered.connect(self.replace_rarc_in_gcm)
     self.ui.actionOpenGCMImage.triggered.connect(self.open_image_in_gcm)
     self.ui.actionReplaceGCMImage.triggered.connect(self.replace_image_in_gcm)
     
@@ -1232,6 +1233,13 @@ class GCFTWindow(QMainWindow):
       elif file_ext == ".arc":
         menu.addAction(self.ui.actionOpenGCMRARC)
         self.ui.actionOpenGCMRARC.setData(file)
+        
+        menu.addAction(self.ui.actionReplaceGCMRARC)
+        self.ui.actionReplaceGCMRARC.setData(file)
+        if self.rarc is None:
+          self.ui.actionReplaceGCMRARC.setDisabled(True)
+        else:
+          self.ui.actionReplaceGCMRARC.setDisabled(False)
       
       menu.addAction(self.ui.actionExtractGCMFile)
       self.ui.actionExtractGCMFile.setData(file)
@@ -1304,6 +1312,19 @@ class GCFTWindow(QMainWindow):
     
     self.set_tab_by_name("RARC Archives")
   
+  def replace_rarc_in_gcm(self):
+    file_entry = self.ui.actionReplaceGCMRARC.data()
+    
+    self.rarc.save_changes()
+    data = make_copy_data(self.rarc.data)
+    
+    self.gcm.changed_files[file_entry.file_path] = data
+    
+    # Update changed file size
+    file_size_str = self.stringify_number(data_len(data))
+    item = self.gcm_file_entry_to_tree_widget_item[file_entry]
+    item.setText(self.gcm_col_name_to_index["File Size"], file_size_str)
+  
   def open_image_in_gcm(self):
     file_entry = self.ui.actionOpenGCMImage.data()
     
@@ -1325,7 +1346,7 @@ class GCFTWindow(QMainWindow):
     self.set_tab_by_name("BTI Images")
   
   def replace_image_in_gcm(self):
-    file_entry = self.ui.actionReplaceGCMFile.data()
+    file_entry = self.ui.actionReplaceGCMImage.data()
     
     self.bti.save_changes()
     data = make_copy_data(self.bti.data)

@@ -708,6 +708,11 @@
     <string>Open RARC</string>
    </property>
   </action>
+  <action name="actionReplaceGCMRARC">
+   <property name="text">
+    <string>Replace RARC</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
