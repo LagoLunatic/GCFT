@@ -109,7 +109,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QWidget" name="widget" native="true"/>
+           <widget class="QPushButton" name="import_folder_over_rarc">
+            <property name="text">
+             <string>Import Folder Over RARC</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -119,13 +123,6 @@
            <widget class="QPushButton" name="export_rarc">
             <property name="text">
              <string>Export RARC</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="import_folder_over_rarc">
-            <property name="text">
-             <string>Import Folder Over RARC</string>
             </property>
            </widget>
           </item>
@@ -140,6 +137,13 @@
            <widget class="QPushButton" name="dump_all_rarc_textures">
             <property name="text">
              <string>Dump All Textures</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="export_rarc_to_c_header">
+            <property name="text">
+             <string>Export File List to C Header</string>
             </property>
            </widget>
           </item>

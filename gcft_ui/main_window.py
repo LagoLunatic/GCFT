@@ -96,6 +96,7 @@ class GCFTWindow(QMainWindow):
     self.ui.import_folder_over_rarc.setDisabled(True)
     self.ui.export_rarc_folder.setDisabled(True)
     self.ui.dump_all_rarc_textures.setDisabled(True)
+    self.ui.export_rarc_to_c_header.setDisabled(True)
     self.ui.export_gcm.setDisabled(True)
     self.ui.import_folder_over_gcm.setDisabled(True)
     self.ui.export_gcm_folder.setDisabled(True)
@@ -125,6 +126,7 @@ class GCFTWindow(QMainWindow):
     self.ui.import_folder_over_rarc.clicked.connect(self.import_folder_over_rarc)
     self.ui.export_rarc_folder.clicked.connect(self.export_rarc_folder)
     self.ui.dump_all_rarc_textures.clicked.connect(self.dump_all_rarc_textures)
+    self.ui.export_rarc_to_c_header.clicked.connect(self.export_rarc_to_c_header)
     
     self.ui.rarc_files_tree.setContextMenuPolicy(Qt.CustomContextMenu)
     self.ui.rarc_files_tree.customContextMenuRequested.connect(self.show_rarc_files_tree_context_menu)
@@ -483,6 +485,15 @@ class GCFTWindow(QMainWindow):
       file_type="all RARC texture"
     )
   
+  def export_rarc_to_c_header(self):
+    header_name = "res_%s.h" % self.rarc_name.lower()
+    self.generic_do_gui_file_operation(
+      op_callback=self.export_rarc_to_c_header_by_path,
+      is_opening=False, is_saving=True, is_folder=False,
+      file_type="C header",
+      default_file_name=header_name
+    )
+  
   def extract_file_from_rarc(self):
     file = self.ui.actionExtractRARCFile.data()
     self.generic_do_gui_file_operation(
@@ -676,6 +687,7 @@ class GCFTWindow(QMainWindow):
     self.ui.import_folder_over_rarc.setDisabled(False)
     self.ui.export_rarc_folder.setDisabled(False)
     self.ui.dump_all_rarc_textures.setDisabled(False)
+    self.ui.export_rarc_to_c_header.setDisabled(False)
   
   def add_rarc_file_entry_to_files_tree(self, file_entry):
     index_of_entry_in_parent_dir = file_entry.parent_node.files.index(file_entry)
@@ -757,6 +769,43 @@ class GCFTWindow(QMainWindow):
     self.progress_dialog = GCFTProgressDialog("Dumping textures", "Initializing...", max_progress_val)
     
     self.start_texture_dumper_thread(dumper_generator)
+  
+  def export_rarc_to_c_header_by_path(self, header_path):
+    out_str = "#define %s_RES_NAME \"%s\"\n\n" % (self.rarc_name.upper(), self.rarc_name)
+    out_str += "enum %s_RES_FILE_IDS {\n" % (self.rarc_name.upper())
+    on_first_node = True
+    for node in self.rarc.nodes:
+      wrote_node_comment = False
+      
+      for file_entry in node.files:
+        if file_entry.is_dir:
+          continue
+        
+        if not wrote_node_comment:
+          if not on_first_node:
+            out_str += "  \n"
+          out_str += "  /* %s */\n" % node.type.strip()
+          wrote_node_comment = True
+          on_first_node = False
+        
+        file_name, file_ext = os.path.splitext(file_entry.name)
+        file_ext = file_ext[1:]
+        
+        # Try to prevent duplicate names.
+        all_files_with_same_name = [f for f in self.rarc.file_entries if f.name == file_entry.name]
+        if len(all_files_with_same_name) > 1:
+          duplicate_index = all_files_with_same_name.index(file_entry)
+          file_name = "%s_%d" % (file_name, duplicate_index+1)
+        
+        enum_val_name = "%s_%s_%s" % (self.rarc_name, file_ext, file_name)
+        enum_val_name = re.sub(r"[\s@:\.,\-<>*%\"!&()|]", "_", enum_val_name) # Sanitize identifier
+        enum_val_name = enum_val_name.upper()
+        
+        out_str += "  %s=0x%X,\n" % (enum_val_name, file_entry.id)
+    out_str += "};\n"
+    
+    with open(header_path, "w") as f:
+      f.write(out_str)
   
   
   def get_rarc_file_by_tree_item(self, item):

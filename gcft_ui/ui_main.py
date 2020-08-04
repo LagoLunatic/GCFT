@@ -130,10 +130,10 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout.addWidget(self.create_rarc_from_folder)
 
-        self.widget = QWidget(self.tab)
-        self.widget.setObjectName(u"widget")
+        self.import_folder_over_rarc = QPushButton(self.tab)
+        self.import_folder_over_rarc.setObjectName(u"import_folder_over_rarc")
 
-        self.horizontalLayout.addWidget(self.widget)
+        self.horizontalLayout.addWidget(self.import_folder_over_rarc)
 
 
         self.verticalLayout_2.addLayout(self.horizontalLayout)
@@ -145,11 +145,6 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_7.addWidget(self.export_rarc)
 
-        self.import_folder_over_rarc = QPushButton(self.tab)
-        self.import_folder_over_rarc.setObjectName(u"import_folder_over_rarc")
-
-        self.horizontalLayout_7.addWidget(self.import_folder_over_rarc)
-
         self.export_rarc_folder = QPushButton(self.tab)
         self.export_rarc_folder.setObjectName(u"export_rarc_folder")
 
@@ -159,6 +154,11 @@ class Ui_MainWindow(object):
         self.dump_all_rarc_textures.setObjectName(u"dump_all_rarc_textures")
 
         self.horizontalLayout_7.addWidget(self.dump_all_rarc_textures)
+
+        self.export_rarc_to_c_header = QPushButton(self.tab)
+        self.export_rarc_to_c_header.setObjectName(u"export_rarc_to_c_header")
+
+        self.horizontalLayout_7.addWidget(self.export_rarc_to_c_header)
 
 
         self.verticalLayout_2.addLayout(self.horizontalLayout_7)
@@ -514,10 +514,11 @@ class Ui_MainWindow(object):
         self.import_rarc.setText(QCoreApplication.translate("MainWindow", u"Import RARC", None))
         self.create_rarc.setText(QCoreApplication.translate("MainWindow", u"Create New RARC", None))
         self.create_rarc_from_folder.setText(QCoreApplication.translate("MainWindow", u"Create New RARC From Folder", None))
-        self.export_rarc.setText(QCoreApplication.translate("MainWindow", u"Export RARC", None))
         self.import_folder_over_rarc.setText(QCoreApplication.translate("MainWindow", u"Import Folder Over RARC", None))
+        self.export_rarc.setText(QCoreApplication.translate("MainWindow", u"Export RARC", None))
         self.export_rarc_folder.setText(QCoreApplication.translate("MainWindow", u"Export Folder", None))
         self.dump_all_rarc_textures.setText(QCoreApplication.translate("MainWindow", u"Dump All Textures", None))
+        self.export_rarc_to_c_header.setText(QCoreApplication.translate("MainWindow", u"Export File List to C Header", None))
         ___qtreewidgetitem1 = self.rarc_files_tree.headerItem()
         ___qtreewidgetitem1.setText(4, QCoreApplication.translate("MainWindow", u"File Size", None));
         ___qtreewidgetitem1.setText(3, QCoreApplication.translate("MainWindow", u"File ID", None));
