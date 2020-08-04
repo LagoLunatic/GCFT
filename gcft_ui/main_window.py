@@ -68,6 +68,7 @@ class GCFTWindow(QMainWindow):
     
     self.gcm = None
     self.rarc = None
+    self.rarc_name = None
     self.jpc = None
     self.bti = None
     self.j3d = None
@@ -453,10 +454,12 @@ class GCFTWindow(QMainWindow):
     )
   
   def export_rarc(self):
+    rarc_name = self.rarc_name + ".arc"
     self.generic_do_gui_file_operation(
       op_callback=self.export_rarc_by_path,
       is_opening=False, is_saving=True, is_folder=False,
-      file_type="RARC", file_filter="RARC files (*.arc)"
+      file_type="RARC", file_filter="RARC files (*.arc)",
+      default_file_name=rarc_name
     )
   
   def import_folder_over_rarc(self):
@@ -604,11 +607,17 @@ class GCFTWindow(QMainWindow):
   def import_rarc_by_path(self, rarc_path):
     with open(rarc_path, "rb") as f:
       data = BytesIO(f.read())
-    self.import_rarc_by_data(data)
+    
+    file_name = os.path.basename(rarc_path)
+    file_name = os.path.splitext(file_name)[0]
+    
+    self.import_rarc_by_data(data, file_name)
   
-  def import_rarc_by_data(self, data):
+  def import_rarc_by_data(self, data, rarc_name):
     self.rarc = RARC()
     self.rarc.read(data)
+    
+    self.rarc_name = rarc_name
     
     self.reload_rarc_files_tree()
   
@@ -616,11 +625,15 @@ class GCFTWindow(QMainWindow):
     self.rarc = RARC()
     self.rarc.add_root_directory()
     
+    self.rarc_name = "archive"
+    
     self.reload_rarc_files_tree()
   
   def create_rarc_from_folder_by_path(self, base_dir):
     self.rarc = RARC()
     self.rarc.add_root_directory()
+    
+    self.rarc_name = os.path.basename(base_dir)
     
     for dir_path, subdir_names, file_names in os.walk(base_dir):
       dir_relative_path = os.path.relpath(dir_path, base_dir).replace("\\", "/")
@@ -714,6 +727,10 @@ class GCFTWindow(QMainWindow):
     with open(rarc_path, "wb") as f:
       self.rarc.data.seek(0)
       f.write(self.rarc.data.read())
+    
+    file_name = os.path.basename(rarc_path)
+    file_name = os.path.splitext(file_name)[0]
+    self.rarc_name = file_name
     
     QMessageBox.information(self, "RARC saved", "Successfully saved RARC.")
   
@@ -1341,7 +1358,9 @@ class GCFTWindow(QMainWindow):
     data = self.gcm.get_changed_file_data(file_entry.file_path)
     data = make_copy_data(data)
     
-    self.import_rarc_by_data(data)
+    file_name = os.path.splitext(file_entry.name)[0]
+    
+    self.import_rarc_by_data(data, file_name)
     
     self.set_tab_by_name("RARC Archives")
   
