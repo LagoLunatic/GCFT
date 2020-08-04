@@ -717,6 +717,16 @@
     <string>Replace RARC</string>
    </property>
   </action>
+  <action name="actionOpenGCMJPC">
+   <property name="text">
+    <string>Open JPC</string>
+   </property>
+  </action>
+  <action name="actionReplaceGCMJPC">
+   <property name="text">
+    <string>Replace JPC</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

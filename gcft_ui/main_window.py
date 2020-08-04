@@ -164,6 +164,8 @@ class GCFTWindow(QMainWindow):
     self.ui.actionReplaceGCMRARC.triggered.connect(self.replace_rarc_in_gcm)
     self.ui.actionOpenGCMImage.triggered.connect(self.open_image_in_gcm)
     self.ui.actionReplaceGCMImage.triggered.connect(self.replace_image_in_gcm)
+    self.ui.actionOpenGCMJPC.triggered.connect(self.open_jpc_in_gcm)
+    self.ui.actionReplaceGCMJPC.triggered.connect(self.replace_jpc_in_gcm)
     
     self.ui.import_jpc.clicked.connect(self.import_jpc)
     self.ui.export_jpc.clicked.connect(self.export_jpc)
@@ -1351,6 +1353,16 @@ class GCFTWindow(QMainWindow):
           self.ui.actionReplaceGCMRARC.setDisabled(True)
         else:
           self.ui.actionReplaceGCMRARC.setDisabled(False)
+      elif file_ext == ".jpc":
+        menu.addAction(self.ui.actionOpenGCMJPC)
+        self.ui.actionOpenGCMJPC.setData(file)
+        
+        menu.addAction(self.ui.actionReplaceGCMJPC)
+        self.ui.actionReplaceGCMJPC.setData(file)
+        if self.jpc is None:
+          self.ui.actionReplaceGCMJPC.setDisabled(True)
+        else:
+          self.ui.actionReplaceGCMJPC.setDisabled(False)
       
       menu.addAction(self.ui.actionExtractGCMFile)
       self.ui.actionExtractGCMFile.setData(file)
@@ -1477,6 +1489,31 @@ class GCFTWindow(QMainWindow):
       image_data_bytes = read_bytes(self.bti.image_data, 0x00, 0x1800)
       data = make_copy_data(orig_banner_data)
       write_bytes(data, 0x20, image_data_bytes)
+    
+    self.gcm.changed_files[file_entry.file_path] = data
+    
+    # Update changed file size
+    file_size_str = self.stringify_number(data_len(data))
+    item = self.gcm_file_entry_to_tree_widget_item[file_entry]
+    item.setText(self.gcm_col_name_to_index["File Size"], file_size_str)
+  
+  def open_jpc_in_gcm(self):
+    file_entry = self.ui.actionOpenGCMJPC.data()
+    
+    data = self.gcm.get_changed_file_data(file_entry.file_path)
+    data = make_copy_data(data)
+    
+    jpc_name = os.path.splitext(file_entry.name)[0]
+    
+    self.import_jpc_by_data(data, jpc_name)
+    
+    self.set_tab_by_name("JPC Particle Archives")
+  
+  def replace_jpc_in_gcm(self):
+    file_entry = self.ui.actionReplaceGCMJPC.data()
+    
+    self.jpc.save_changes()
+    data = make_copy_data(self.jpc.data)
     
     self.gcm.changed_files[file_entry.file_path] = data
     
