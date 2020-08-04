@@ -1596,6 +1596,8 @@ class GCFTWindow(QMainWindow):
       self.jpc.data.seek(0)
       f.write(self.jpc.data.read())
     
+    self.jpc_name = os.path.splitext(os.path.basename(jpc_path))[0]
+    
     QMessageBox.information(self, "JPC saved", "Successfully saved JPC.")
   
   def add_particles_from_folder_by_path(self, folder_path):
