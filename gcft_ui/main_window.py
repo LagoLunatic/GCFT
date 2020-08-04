@@ -70,8 +70,11 @@ class GCFTWindow(QMainWindow):
     self.rarc = None
     self.rarc_name = None
     self.jpc = None
+    self.jpc_name = None
     self.bti = None
+    self.bti_name = None
     self.j3d = None
+    self.j3d_name = None
     
     self.ui.rarc_files_tree.setColumnWidth(0, 300)
     self.ui.gcm_files_tree.setColumnWidth(0, 300)
@@ -527,10 +530,12 @@ class GCFTWindow(QMainWindow):
     )
   
   def export_bti(self):
+    bti_name = self.bti_name + ".bti"
     self.generic_do_gui_file_operation(
       op_callback=self.export_bti_by_path,
       is_opening=False, is_saving=True, is_folder=False,
-      file_type="BTI", file_filter="BTI files (*.bti)"
+      file_type="BTI", file_filter="BTI files (*.bti)",
+      default_file_name=bti_name
     )
   
   def import_bti_image(self):
@@ -541,10 +546,12 @@ class GCFTWindow(QMainWindow):
     )
   
   def export_bti_image(self):
+    png_name = self.bti_name + ".png"
     self.generic_do_gui_file_operation(
       op_callback=self.export_bti_image_by_path,
       is_opening=False, is_saving=True, is_folder=False,
-      file_type="image", file_filter="PNG Files (*.png)"
+      file_type="image", file_filter="PNG Files (*.png)",
+      default_file_name=png_name
     )
   
   def import_j3d(self):
@@ -566,10 +573,12 @@ class GCFTWindow(QMainWindow):
       filters.append(current_filter)
     filters.append("All J3D files (*.bmd *.bdl *.bmt *.bls *.btk *.bck *.brk *.bpk *.btp *.bca *.bva *.bla)")
     
+    j3d_name = "%s.%s" % (self.j3d_name, self.j3d.file_type[:3])
     self.generic_do_gui_file_operation(
       op_callback=self.export_j3d_by_path,
       is_opening=False, is_saving=True, is_folder=False,
-      file_type="J3D file", file_filter=";;".join(filters)
+      file_type="J3D file", file_filter=";;".join(filters),
+      default_file_name=j3d_name
     )
   
   def import_jpc(self):
@@ -580,10 +589,12 @@ class GCFTWindow(QMainWindow):
     )
   
   def export_jpc(self):
+    jpc_name = self.jpc_name + ".jpc"
     self.generic_do_gui_file_operation(
       op_callback=self.export_jpc_by_path,
       is_opening=False, is_saving=True, is_folder=False,
-      file_type="JPC", file_filter="JPC Files (*.jpc)"
+      file_type="JPC", file_filter="JPC Files (*.jpc)",
+      default_file_name=jpc_name
     )
   
   def add_particles_from_folder(self):
@@ -619,10 +630,9 @@ class GCFTWindow(QMainWindow):
     with open(rarc_path, "rb") as f:
       data = BytesIO(f.read())
     
-    file_name = os.path.basename(rarc_path)
-    file_name = os.path.splitext(file_name)[0]
+    rarc_name = os.path.splitext(os.path.basename(rarc_path))[0]
     
-    self.import_rarc_by_data(data, file_name)
+    self.import_rarc_by_data(data, rarc_name)
   
   def import_rarc_by_data(self, data, rarc_name):
     self.rarc = RARC()
@@ -740,9 +750,7 @@ class GCFTWindow(QMainWindow):
       self.rarc.data.seek(0)
       f.write(self.rarc.data.read())
     
-    file_name = os.path.basename(rarc_path)
-    file_name = os.path.splitext(file_name)[0]
-    self.rarc_name = file_name
+    self.rarc_name = os.path.splitext(os.path.basename(rarc_path))[0]
     
     QMessageBox.information(self, "RARC saved", "Successfully saved RARC.")
   
@@ -925,8 +933,10 @@ class GCFTWindow(QMainWindow):
   def open_image_in_rarc(self):
     file_entry = self.ui.actionOpenRARCImage.data()
     
+    bti_name = os.path.splitext(file_entry.name)[0]
+    
     data = make_copy_data(file_entry.data)
-    self.import_bti_by_data(data)
+    self.import_bti_by_data(data, bti_name)
     
     self.set_tab_by_name("BTI Images")
   
@@ -945,8 +955,10 @@ class GCFTWindow(QMainWindow):
   def open_j3d_in_rarc(self):
     file_entry = self.ui.actionOpenRARCJ3D.data()
     
+    j3d_name = os.path.splitext(file_entry.name)[0]
+    
     data = make_copy_data(file_entry.data)
-    self.import_j3d_by_data(data)
+    self.import_j3d_by_data(data, j3d_name)
     
     self.set_tab_by_name("J3D Files")
   
@@ -1407,9 +1419,9 @@ class GCFTWindow(QMainWindow):
     data = self.gcm.get_changed_file_data(file_entry.file_path)
     data = make_copy_data(data)
     
-    file_name = os.path.splitext(file_entry.name)[0]
+    rarc_name = os.path.splitext(file_entry.name)[0]
     
-    self.import_rarc_by_data(data, file_name)
+    self.import_rarc_by_data(data, rarc_name)
     
     self.set_tab_by_name("RARC Archives")
   
@@ -1429,6 +1441,8 @@ class GCFTWindow(QMainWindow):
   def open_image_in_gcm(self):
     file_entry = self.ui.actionOpenGCMImage.data()
     
+    bti_name = os.path.splitext(file_entry.name)[0]
+    
     data = self.gcm.get_changed_file_data(file_entry.file_path)
     data = make_copy_data(data)
     
@@ -1441,8 +1455,10 @@ class GCFTWindow(QMainWindow):
       write_u16(data, 0x02, 96) # Width
       write_u16(data, 0x04, 32) # Height
       write_u32(data, 0x1C, 0x20) # Image data offset
+      
+      bti_name = "opening_bnr"
     
-    self.import_bti_by_data(data)
+    self.import_bti_by_data(data, bti_name)
     
     self.set_tab_by_name("BTI Images")
   
@@ -1495,7 +1511,15 @@ class GCFTWindow(QMainWindow):
   def import_jpc_by_path(self, jpc_path):
     with open(jpc_path, "rb") as f:
       data = BytesIO(f.read())
+    
+    jpc_name = os.path.splitext(os.path.basename(jpc_path))[0]
+    
+    self.import_jpc_by_data(data, jpc_name)
+  
+  def import_jpc_by_data(self, data, jpc_name):
     self.jpc = JPC(data)
+    
+    self.jpc_name = jpc_name
     
     self.reload_jpc_particles_tree()
     
@@ -1623,7 +1647,7 @@ class GCFTWindow(QMainWindow):
       palette_data_offset = 0x20 + data_len(texture.bti.image_data)
     write_u32(data, 0x0C, palette_data_offset)
     
-    self.import_bti_by_data(data)
+    self.import_bti_by_data(data, texture.filename)
     
     self.set_tab_by_name("BTI Images")
   
@@ -1650,10 +1674,14 @@ class GCFTWindow(QMainWindow):
     with open(bti_path, "rb") as f:
       data = BytesIO(f.read())
     
-    self.import_bti_by_data(data)
+    bti_name = os.path.splitext(os.path.basename(bti_path))[0]
+    
+    self.import_bti_by_data(data, bti_name)
   
-  def import_bti_by_data(self, data):
+  def import_bti_by_data(self, data, bti_name):
     self.bti = BTIFile(data)
+    
+    self.bti_name = bti_name
     
     
     for field_name, field_enum in BTI_ENUM_FIELDS:
@@ -1727,6 +1755,8 @@ class GCFTWindow(QMainWindow):
     with open(bti_path, "wb") as f:
       self.bti.data.seek(0)
       f.write(self.bti.data.read())
+    
+    self.bti_name = os.path.splitext(os.path.basename(bti_path))[0]
     
     QMessageBox.information(self, "BTI saved", "Successfully saved BTI.")
   
@@ -1826,14 +1856,14 @@ class GCFTWindow(QMainWindow):
     with open(j3d_path, "rb") as f:
       data = BytesIO(f.read())
     
-    self.j3d = J3DFile(data)
+    j3d_name = os.path.splitext(os.path.basename(j3d_path))[0]
     
-    self.reload_j3d_chunks_tree()
-    
-    self.ui.export_j3d.setDisabled(False)
+    self.import_j3d_by_data(data, j3d_name)
   
-  def import_j3d_by_data(self, data):
+  def import_j3d_by_data(self, data, j3d_name):
     self.j3d = J3DFile(data)
+    
+    self.j3d_name = j3d_name
     
     self.reload_j3d_chunks_tree()
     
@@ -1893,6 +1923,8 @@ class GCFTWindow(QMainWindow):
     with open(j3d_path, "wb") as f:
       self.j3d.data.seek(0)
       f.write(self.j3d.data.read())
+    
+    self.j3d_name = os.path.splitext(os.path.basename(j3d_path))[0]
     
     QMessageBox.information(self, "J3D file saved", "Successfully saved J3D file.")
   
@@ -1983,7 +2015,10 @@ class GCFTWindow(QMainWindow):
       palette_data_offset = 0x20 + data_len(texture.image_data)
     write_u32(data, 0x0C, palette_data_offset)
     
-    self.import_bti_by_data(data)
+    texture_index = self.j3d.tex1.textures.index(texture)
+    bti_name = self.j3d.tex1.texture_names[texture_index]
+    
+    self.import_bti_by_data(data, bti_name)
     
     self.set_tab_by_name("BTI Images")
   
