@@ -20,16 +20,17 @@ Features:
 * Edit the header attributes of BTI images (e.g. image format, palette format, wrapping, filter mode)
 * Extract and replace the BTI textures embedded in J3D BDL and BMD models and BMT material tables, and JPC particle archives
 * Import a folder of particle files onto an existing JPC, adding/overwriting all the particles from the folder to the JPC
+* Viewing DOL executable sections, and converting between offsets within the DOL file and RAM addresses in the game's memory
 * Compress and decompress Yaz0 files
 
-It currently cannot create brand new GCMs, BTIs, or JPCs from scratch.  
+It currently cannot create brand new GCMs or JPCs from scratch.  
 
 If you're on Windows, you can download GCFT here: <https://github.com/LagoLunatic/GCFT/releases>  
 If you're on Mac or Linux, executable builds are not provided, so you must run it from the source code instead. See the "Running from source" section at the bottom of this readme.  
 
 ### Usage
 
-Importing and exporting entire GCMs, RARCs, or JPCs can be done via the buttons in the appropriate tabs.  
+Importing and exporting entire GCMs, RARCs, or JPCs can be done via the buttons in the appropriate tabs. Alternatively, you can drag and drop files onto GCFT and it will automatically open them in the correct tab (based on the file extension).  
 Extracting, replacing, or deleting a single file can be done by first importing the GCM/RARC the file is in, and then right-clicking on the file you want to edit.  
 Adding a new file can similarly be done by importing a GCM or RARC, and then right-clicking on the folder you want to add the file to.  
 Editing the file name, folder type, or file ID of RARC files/folders can be done by double clicking on the field you want to edit, and then typing the new value into the text field.
