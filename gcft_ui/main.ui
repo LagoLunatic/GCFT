@@ -305,8 +305,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>591</width>
-                  <height>464</height>
+                  <width>98</width>
+                  <height>31</height>
                  </rect>
                 </property>
                 <layout class="QGridLayout" name="gridLayout">
@@ -628,6 +628,55 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tab_7">
+       <attribute name="title">
+        <string>DOL Executables</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_8">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_9">
+          <item>
+           <widget class="QPushButton" name="import_dol">
+            <property name="text">
+             <string>Import DOL</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="export_dol">
+            <property name="text">
+             <string>Export DOL</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTreeWidget" name="dol_sections_tree">
+          <column>
+           <property name="text">
+            <string>Section Name</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Offset</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Address</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Size</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="tab_2">
        <attribute name="title">
         <string>Yaz0 Compression</string>
@@ -794,6 +843,16 @@
   <action name="actionReplaceGCMJPC">
    <property name="text">
     <string>Replace JPC</string>
+   </property>
+  </action>
+  <action name="actionOpenGCMDOL">
+   <property name="text">
+    <string>Open DOL</string>
+   </property>
+  </action>
+  <action name="actionReplaceGCMDOL">
+   <property name="text">
+    <string>Replace DOL</string>
    </property>
   </action>
  </widget>

@@ -35,6 +35,7 @@ from wwlib.gcm import GCM
 from wwlib.jpc import JPC
 from wwlib.bti import BTI, BTIFile, WrapMode, FilterMode
 from wwlib.j3d import J3DFile
+from wwlib.dol import DOL
 from wwlib.texture_utils import ImageFormat, PaletteFormat
 from fs_helpers import *
 
@@ -96,6 +97,8 @@ class GCFTWindow(QMainWindow):
     self.bti_name = None
     self.j3d = None
     self.j3d_name = None
+    self.dol = None
+    self.dolname = None
     
     self.ui.rarc_files_tree.setColumnWidth(0, 300)
     self.ui.gcm_files_tree.setColumnWidth(0, 300)
@@ -131,6 +134,7 @@ class GCFTWindow(QMainWindow):
     self.ui.export_bti.setDisabled(True)
     self.ui.export_bti_image.setDisabled(True)
     self.ui.export_j3d.setDisabled(True)
+    self.ui.export_dol.setDisabled(True)
     
     self.ui.bti_file_size.setText("")
     self.ui.bti_resolution.setText("")
@@ -186,6 +190,8 @@ class GCFTWindow(QMainWindow):
     self.ui.actionReplaceGCMImage.triggered.connect(self.replace_image_in_gcm)
     self.ui.actionOpenGCMJPC.triggered.connect(self.open_jpc_in_gcm)
     self.ui.actionReplaceGCMJPC.triggered.connect(self.replace_jpc_in_gcm)
+    self.ui.actionOpenGCMDOL.triggered.connect(self.open_dol_in_gcm)
+    self.ui.actionReplaceGCMDOL.triggered.connect(self.replace_dol_in_gcm)
     
     self.ui.import_jpc.clicked.connect(self.import_jpc)
     self.ui.export_jpc.clicked.connect(self.export_jpc)
@@ -227,6 +233,9 @@ class GCFTWindow(QMainWindow):
     self.ui.j3d_chunks_tree.customContextMenuRequested.connect(self.show_j3d_chunks_tree_context_menu)
     self.ui.actionOpenJ3DImage.triggered.connect(self.open_image_in_j3d)
     self.ui.actionReplaceJ3DImage.triggered.connect(self.replace_image_in_j3d)
+    
+    self.ui.import_dol.clicked.connect(self.import_dol)
+    self.ui.export_dol.clicked.connect(self.export_dol)
     
     self.load_settings()
     
@@ -631,6 +640,22 @@ class GCFTWindow(QMainWindow):
       op_callback=self.export_jpc_folder_by_path,
       is_opening=False, is_saving=True, is_folder=True,
       file_type="JPC"
+    )
+  
+  def import_dol(self):
+    self.generic_do_gui_file_operation(
+      op_callback=self.import_dol_by_path,
+      is_opening=True, is_saving=False, is_folder=False,
+      file_type="DOL executable", file_filter="DOL Executables (*.dol)",
+    )
+  
+  def export_dol(self):
+    dol_name = self.dol_name + ".dol"
+    self.generic_do_gui_file_operation(
+      op_callback=self.export_dol_by_path,
+      is_opening=False, is_saving=True, is_folder=False,
+      file_type="DOL executable", file_filter="DOL Executables (*.dol)",
+      default_file_name=dol_name
     )
   
   def decompress_yaz0(self):
@@ -1383,6 +1408,16 @@ class GCFTWindow(QMainWindow):
           self.ui.actionReplaceGCMJPC.setDisabled(True)
         else:
           self.ui.actionReplaceGCMJPC.setDisabled(False)
+      elif file.file_path == "sys/main.dol":
+        menu.addAction(self.ui.actionOpenGCMDOL)
+        self.ui.actionOpenGCMDOL.setData(file)
+        
+        menu.addAction(self.ui.actionReplaceGCMDOL)
+        self.ui.actionReplaceGCMDOL.setData(file)
+        if self.dol is None:
+          self.ui.actionReplaceGCMDOL.setDisabled(True)
+        else:
+          self.ui.actionReplaceGCMDOL.setDisabled(False)
       
       menu.addAction(self.ui.actionExtractGCMFile)
       self.ui.actionExtractGCMFile.setData(file)
@@ -1412,6 +1447,12 @@ class GCFTWindow(QMainWindow):
     with open(file_path, "wb") as f:
       f.write(data)
   
+  def update_changed_file_size_in_gcm(self, file):
+    data = self.gcm.get_changed_file_data(file.file_path)
+    file_size_str = self.stringify_number(data_len(data))
+    item = self.gcm_file_entry_to_tree_widget_item[file]
+    item.setText(self.gcm_col_name_to_index["File Size"], file_size_str)
+  
   def replace_file_in_gcm_by_path(self, file_path):
     file = self.ui.actionReplaceGCMFile.data()
     
@@ -1424,10 +1465,7 @@ class GCFTWindow(QMainWindow):
     
     self.gcm.changed_files[file.file_path] = data
     
-    # Update changed file size
-    file_size_str = self.stringify_number(data_len(data))
-    item = self.gcm_file_entry_to_tree_widget_item[file]
-    item.setText(self.gcm_col_name_to_index["File Size"], file_size_str)
+    self.update_changed_file_size_in_gcm(file)
   
   def delete_file_in_gcm(self):
     file_entry = self.ui.actionDeleteGCMFile.data()
@@ -1465,10 +1503,7 @@ class GCFTWindow(QMainWindow):
     
     self.gcm.changed_files[file_entry.file_path] = data
     
-    # Update changed file size
-    file_size_str = self.stringify_number(data_len(data))
-    item = self.gcm_file_entry_to_tree_widget_item[file_entry]
-    item.setText(self.gcm_col_name_to_index["File Size"], file_size_str)
+    self.update_changed_file_size_in_gcm(file_entry)
   
   def open_image_in_gcm(self):
     file_entry = self.ui.actionOpenGCMImage.data()
@@ -1512,10 +1547,7 @@ class GCFTWindow(QMainWindow):
     
     self.gcm.changed_files[file_entry.file_path] = data
     
-    # Update changed file size
-    file_size_str = self.stringify_number(data_len(data))
-    item = self.gcm_file_entry_to_tree_widget_item[file_entry]
-    item.setText(self.gcm_col_name_to_index["File Size"], file_size_str)
+    self.update_changed_file_size_in_gcm(file_entry)
   
   def open_jpc_in_gcm(self):
     file_entry = self.ui.actionOpenGCMJPC.data()
@@ -1537,10 +1569,29 @@ class GCFTWindow(QMainWindow):
     
     self.gcm.changed_files[file_entry.file_path] = data
     
-    # Update changed file size
-    file_size_str = self.stringify_number(data_len(data))
-    item = self.gcm_file_entry_to_tree_widget_item[file_entry]
-    item.setText(self.gcm_col_name_to_index["File Size"], file_size_str)
+    self.update_changed_file_size_in_gcm(file_entry)
+  
+  def open_dol_in_gcm(self):
+    file_entry = self.ui.actionOpenGCMDOL.data()
+    
+    data = self.gcm.get_changed_file_data(file_entry.file_path)
+    data = make_copy_data(data)
+    
+    dol_name = os.path.splitext(file_entry.name)[0]
+    
+    self.import_dol_by_data(data, dol_name)
+    
+    self.set_tab_by_name("DOL Executables")
+  
+  def replace_dol_in_gcm(self):
+    file_entry = self.ui.actionReplaceGCMDOL.data()
+    
+    self.dol.save_changes()
+    data = make_copy_data(self.dol.data)
+    
+    self.gcm.changed_files[file_entry.file_path] = data
+    
+    self.update_changed_file_size_in_gcm(file_entry)
   
   def add_file_to_gcm_by_path(self, file_path):
     dir_entry = self.ui.actionAddGCMFile.data()
@@ -2125,6 +2176,53 @@ class GCFTWindow(QMainWindow):
     
     item = self.get_jpc_tree_item_by_texture(texture)
     item.setText(self.j3d_col_name_to_index["Size"], texture_size_str)
+  
+  
+  
+  def import_dol_by_path(self, dol_path):
+    with open(dol_path, "rb") as f:
+      data = BytesIO(f.read())
+    
+    dol_name = os.path.splitext(os.path.basename(dol_path))[0]
+    
+    self.import_dol_by_data(data, dol_name)
+  
+  def import_dol_by_data(self, data, dol_name):
+    self.dol = DOL()
+    self.dol.read(data)
+    
+    self.dol_name = dol_name
+    
+    self.reload_dol_sections_tree()
+    
+    self.ui.export_dol.setDisabled(False)
+  
+  def reload_dol_sections_tree(self):
+    self.ui.dol_sections_tree.clear()
+    
+    for section_index, section in enumerate(self.dol.sections):
+      if section_index < DOL.TEXT_SECTION_COUNT:
+        section_name = ".text%d" % section_index
+      else:
+        section_name = ".data%d" % (section_index-DOL.TEXT_SECTION_COUNT)
+      
+      if section.offset == section.address == section.size == 0:
+        section_columns = [section_name, "", "", ""]
+      else:
+        section_columns = [section_name, "0x%06X" % section.offset, "0x%08X" % section.address, "0x%06X" % section.size]
+      section_item = QTreeWidgetItem(section_columns)
+      self.ui.dol_sections_tree.addTopLevelItem(section_item)
+  
+  def export_dol_by_path(self, dol_path):
+    self.dol.save_changes()
+    
+    with open(dol_path, "wb") as f:
+      self.dol.data.seek(0)
+      f.write(self.dol.data.read())
+    
+    self.dol_name = os.path.splitext(os.path.basename(dol_path))[0]
+    
+    QMessageBox.information(self, "DOL saved", "Successfully saved DOL.")
   
   
   

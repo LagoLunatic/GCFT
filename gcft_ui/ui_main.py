@@ -67,6 +67,10 @@ class Ui_MainWindow(object):
         self.actionOpenGCMJPC.setObjectName(u"actionOpenGCMJPC")
         self.actionReplaceGCMJPC = QAction(MainWindow)
         self.actionReplaceGCMJPC.setObjectName(u"actionReplaceGCMJPC")
+        self.actionOpenGCMDOL = QAction(MainWindow)
+        self.actionOpenGCMDOL.setObjectName(u"actionOpenGCMDOL")
+        self.actionReplaceGCMDOL = QAction(MainWindow)
+        self.actionReplaceGCMDOL.setObjectName(u"actionReplaceGCMDOL")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout = QVBoxLayout(self.centralwidget)
@@ -228,7 +232,7 @@ class Ui_MainWindow(object):
         self.bti_image_scroll_area.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 591, 464))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 98, 31))
         self.gridLayout = QGridLayout(self.scrollAreaWidgetContents)
         self.gridLayout.setObjectName(u"gridLayout")
         self.bti_image_label = QLabel(self.scrollAreaWidgetContents)
@@ -455,6 +459,31 @@ class Ui_MainWindow(object):
         self.verticalLayout_5.addWidget(self.jpc_particles_tree)
 
         self.tabWidget.addTab(self.tab_4, "")
+        self.tab_7 = QWidget()
+        self.tab_7.setObjectName(u"tab_7")
+        self.verticalLayout_8 = QVBoxLayout(self.tab_7)
+        self.verticalLayout_8.setObjectName(u"verticalLayout_8")
+        self.horizontalLayout_9 = QHBoxLayout()
+        self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
+        self.import_dol = QPushButton(self.tab_7)
+        self.import_dol.setObjectName(u"import_dol")
+
+        self.horizontalLayout_9.addWidget(self.import_dol)
+
+        self.export_dol = QPushButton(self.tab_7)
+        self.export_dol.setObjectName(u"export_dol")
+
+        self.horizontalLayout_9.addWidget(self.export_dol)
+
+
+        self.verticalLayout_8.addLayout(self.horizontalLayout_9)
+
+        self.dol_sections_tree = QTreeWidget(self.tab_7)
+        self.dol_sections_tree.setObjectName(u"dol_sections_tree")
+
+        self.verticalLayout_8.addWidget(self.dol_sections_tree)
+
+        self.tabWidget.addTab(self.tab_7, "")
         self.tab_2 = QWidget()
         self.tab_2.setObjectName(u"tab_2")
         self.verticalLayout_3 = QVBoxLayout(self.tab_2)
@@ -524,6 +553,8 @@ class Ui_MainWindow(object):
         self.actionReplaceGCMRARC.setText(QCoreApplication.translate("MainWindow", u"Replace RARC", None))
         self.actionOpenGCMJPC.setText(QCoreApplication.translate("MainWindow", u"Open JPC", None))
         self.actionReplaceGCMJPC.setText(QCoreApplication.translate("MainWindow", u"Replace JPC", None))
+        self.actionOpenGCMDOL.setText(QCoreApplication.translate("MainWindow", u"Open DOL", None))
+        self.actionReplaceGCMDOL.setText(QCoreApplication.translate("MainWindow", u"Replace DOL", None))
         self.import_gcm.setText(QCoreApplication.translate("MainWindow", u"Import GCM", None))
         self.export_gcm.setText(QCoreApplication.translate("MainWindow", u"Export GCM", None))
         self.import_folder_over_gcm.setText(QCoreApplication.translate("MainWindow", u"Import Folder Over GCM", None))
@@ -583,6 +614,14 @@ class Ui_MainWindow(object):
         ___qtreewidgetitem3.setText(1, QCoreApplication.translate("MainWindow", u"Texture Name", None));
         ___qtreewidgetitem3.setText(0, QCoreApplication.translate("MainWindow", u"Particle ID", None));
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), QCoreApplication.translate("MainWindow", u"JPC Particle Archives", None))
+        self.import_dol.setText(QCoreApplication.translate("MainWindow", u"Import DOL", None))
+        self.export_dol.setText(QCoreApplication.translate("MainWindow", u"Export DOL", None))
+        ___qtreewidgetitem4 = self.dol_sections_tree.headerItem()
+        ___qtreewidgetitem4.setText(3, QCoreApplication.translate("MainWindow", u"Size", None));
+        ___qtreewidgetitem4.setText(2, QCoreApplication.translate("MainWindow", u"Address", None));
+        ___qtreewidgetitem4.setText(1, QCoreApplication.translate("MainWindow", u"Offset", None));
+        ___qtreewidgetitem4.setText(0, QCoreApplication.translate("MainWindow", u"Section Name", None));
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_7), QCoreApplication.translate("MainWindow", u"DOL Executables", None))
         self.decompress_yaz0.setText(QCoreApplication.translate("MainWindow", u"Decompress File", None))
         self.compress_yaz0.setText(QCoreApplication.translate("MainWindow", u"Compress File", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("MainWindow", u"Yaz0 Compression", None))
