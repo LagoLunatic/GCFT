@@ -56,11 +56,32 @@ BTI_INTEGER_FIELDS = [
   ("lod_bias", 2),
 ]
 
+GCM_FILE_EXTS = [".iso", ".gcm"]
+RARC_FILE_EXTS = [".arc"]
+BTI_FILE_EXTS = [".bti"]
+J3D_FILE_EXTS = [
+  ".bmd",
+  ".bdl",
+  ".bmt",
+  ".bls",
+  ".btk",
+  ".bck",
+  ".brk",
+  ".bpk",
+  ".btp",
+  ".bca",
+  ".bva",
+  ".bla",
+]
+JPC_FILE_EXTS = [".jpc"]
+
 class GCFTWindow(QMainWindow):
   def __init__(self):
     super().__init__()
     self.ui = Ui_MainWindow()
     self.ui.setupUi(self)
+    
+    self.setAcceptDrops(True)
     
     self.display_hexadecimal_numbers = True # TODO hex/decimal setting
     self.display_relative_dir_entries = False
@@ -2110,6 +2131,42 @@ class GCFTWindow(QMainWindow):
   
   def closeEvent(self, event):
     self.save_settings()
+  
+  def get_drop_action_for_file_path(self, file_path):
+    file_ext = os.path.splitext(file_path)[1]
+    
+    if file_ext in GCM_FILE_EXTS:
+      return (self.import_gcm_by_path, "GCM ISOs")
+    elif file_ext in RARC_FILE_EXTS:
+      return (self.import_rarc_by_path, "RARC Archives")
+    elif file_ext in BTI_FILE_EXTS:
+      return (self.import_bti_by_path, "BTI Images")
+    elif file_ext in [".png"] and self.bti is not None:
+      return (self.import_bti_image_by_path, "BTI Images")
+    elif file_ext in J3D_FILE_EXTS:
+      return (self.import_j3d_by_path, "J3D Files")
+    elif file_ext in JPC_FILE_EXTS:
+      return (self.import_jpc_by_path, "JPC Particle Archives")
+  
+  def dragEnterEvent(self, event):
+    mime_data = event.mimeData()
+    if mime_data.hasUrls:
+      url = mime_data.urls()[0]
+      file_path = url.toLocalFile()
+      drop_action = self.get_drop_action_for_file_path(file_path)
+      if drop_action is not None:
+        event.acceptProposedAction()
+  
+  def dropEvent(self, event):
+    mime_data = event.mimeData()
+    if mime_data.hasUrls:
+      url = mime_data.urls()[0]
+      file_path = url.toLocalFile()
+      drop_action = self.get_drop_action_for_file_path(file_path)
+      if drop_action is not None:
+        func_to_call, tab_name = drop_action
+        func_to_call(file_path)
+        self.set_tab_by_name(tab_name)
 
 class GCFTProgressDialog(QProgressDialog):
   def __init__(self, title, description, max_val):
