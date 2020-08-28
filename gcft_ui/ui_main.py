@@ -210,9 +210,28 @@ class Ui_MainWindow(object):
         self.verticalLayout_12 = QVBoxLayout(self.bti_image_container)
         self.verticalLayout_12.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_12.setObjectName(u"verticalLayout_12")
-        self.gridLayout = QGridLayout()
+        self.bti_image_scroll_area = QScrollArea(self.bti_image_container)
+        self.bti_image_scroll_area.setObjectName(u"bti_image_scroll_area")
+        palette = QPalette()
+        brush = QBrush(QColor(255, 255, 255, 255))
+        brush.setStyle(Qt.SolidPattern)
+        palette.setBrush(QPalette.Active, QPalette.Base, brush)
+        brush1 = QBrush(QColor(255, 255, 255, 0))
+        brush1.setStyle(Qt.SolidPattern)
+        palette.setBrush(QPalette.Active, QPalette.Window, brush1)
+        palette.setBrush(QPalette.Inactive, QPalette.Base, brush)
+        palette.setBrush(QPalette.Inactive, QPalette.Window, brush1)
+        palette.setBrush(QPalette.Disabled, QPalette.Base, brush1)
+        palette.setBrush(QPalette.Disabled, QPalette.Window, brush1)
+        self.bti_image_scroll_area.setPalette(palette)
+        self.bti_image_scroll_area.setFrameShape(QFrame.NoFrame)
+        self.bti_image_scroll_area.setWidgetResizable(True)
+        self.scrollAreaWidgetContents = QWidget()
+        self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 591, 464))
+        self.gridLayout = QGridLayout(self.scrollAreaWidgetContents)
         self.gridLayout.setObjectName(u"gridLayout")
-        self.bti_image_label = QLabel(self.bti_image_container)
+        self.bti_image_label = QLabel(self.scrollAreaWidgetContents)
         self.bti_image_label.setObjectName(u"bti_image_label")
         sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
@@ -221,14 +240,11 @@ class Ui_MainWindow(object):
         self.bti_image_label.setSizePolicy(sizePolicy)
         self.bti_image_label.setAlignment(Qt.AlignCenter)
 
-        self.gridLayout.addWidget(self.bti_image_label, 2, 0, 1, 1)
+        self.gridLayout.addWidget(self.bti_image_label, 0, 0, 1, 1)
 
+        self.bti_image_scroll_area.setWidget(self.scrollAreaWidgetContents)
 
-        self.verticalLayout_12.addLayout(self.gridLayout)
-
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.verticalLayout_12.addItem(self.horizontalSpacer)
+        self.verticalLayout_12.addWidget(self.bti_image_scroll_area)
 
 
         self.horizontalLayout_8.addWidget(self.bti_image_container)
