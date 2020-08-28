@@ -478,6 +478,53 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_8.addLayout(self.horizontalLayout_9)
 
+        self.horizontalLayout_10 = QHBoxLayout()
+        self.horizontalLayout_10.setObjectName(u"horizontalLayout_10")
+        self.formLayout_2 = QFormLayout()
+        self.formLayout_2.setObjectName(u"formLayout_2")
+        self.formLayout_2.setHorizontalSpacing(0)
+        self.label_13 = QLabel(self.tab_7)
+        self.label_13.setObjectName(u"label_13")
+
+        self.formLayout_2.setWidget(0, QFormLayout.LabelRole, self.label_13)
+
+        self.dol_address = QLineEdit(self.tab_7)
+        self.dol_address.setObjectName(u"dol_address")
+
+        self.formLayout_2.setWidget(0, QFormLayout.FieldRole, self.dol_address)
+
+
+        self.horizontalLayout_10.addLayout(self.formLayout_2)
+
+        self.convert_from_dol_offset = QPushButton(self.tab_7)
+        self.convert_from_dol_offset.setObjectName(u"convert_from_dol_offset")
+
+        self.horizontalLayout_10.addWidget(self.convert_from_dol_offset)
+
+        self.convert_from_dol_address = QPushButton(self.tab_7)
+        self.convert_from_dol_address.setObjectName(u"convert_from_dol_address")
+
+        self.horizontalLayout_10.addWidget(self.convert_from_dol_address)
+
+        self.formLayout_3 = QFormLayout()
+        self.formLayout_3.setObjectName(u"formLayout_3")
+        self.formLayout_3.setHorizontalSpacing(0)
+        self.label_14 = QLabel(self.tab_7)
+        self.label_14.setObjectName(u"label_14")
+
+        self.formLayout_3.setWidget(0, QFormLayout.LabelRole, self.label_14)
+
+        self.dol_offset = QLineEdit(self.tab_7)
+        self.dol_offset.setObjectName(u"dol_offset")
+
+        self.formLayout_3.setWidget(0, QFormLayout.FieldRole, self.dol_offset)
+
+
+        self.horizontalLayout_10.addLayout(self.formLayout_3)
+
+
+        self.verticalLayout_8.addLayout(self.horizontalLayout_10)
+
         self.dol_sections_tree = QTreeWidget(self.tab_7)
         self.dol_sections_tree.setObjectName(u"dol_sections_tree")
 
@@ -616,6 +663,10 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), QCoreApplication.translate("MainWindow", u"JPC Particle Archives", None))
         self.import_dol.setText(QCoreApplication.translate("MainWindow", u"Import DOL", None))
         self.export_dol.setText(QCoreApplication.translate("MainWindow", u"Export DOL", None))
+        self.label_13.setText(QCoreApplication.translate("MainWindow", u"RAM Address: 0x", None))
+        self.convert_from_dol_offset.setText(QCoreApplication.translate("MainWindow", u"<- Convert offset to address", None))
+        self.convert_from_dol_address.setText(QCoreApplication.translate("MainWindow", u"Convert address to offset ->", None))
+        self.label_14.setText(QCoreApplication.translate("MainWindow", u"Offset in DOL: 0x", None))
         ___qtreewidgetitem4 = self.dol_sections_tree.headerItem()
         ___qtreewidgetitem4.setText(3, QCoreApplication.translate("MainWindow", u"Size", None));
         ___qtreewidgetitem4.setText(2, QCoreApplication.translate("MainWindow", u"Address", None));

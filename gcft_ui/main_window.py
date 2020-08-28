@@ -135,6 +135,10 @@ class GCFTWindow(QMainWindow):
     self.ui.export_bti_image.setDisabled(True)
     self.ui.export_j3d.setDisabled(True)
     self.ui.export_dol.setDisabled(True)
+    self.ui.convert_from_dol_offset.setDisabled(True)
+    self.ui.convert_from_dol_address.setDisabled(True)
+    self.ui.dol_offset.setDisabled(True)
+    self.ui.dol_address.setDisabled(True)
     
     self.ui.bti_file_size.setText("")
     self.ui.bti_resolution.setText("")
@@ -236,6 +240,8 @@ class GCFTWindow(QMainWindow):
     
     self.ui.import_dol.clicked.connect(self.import_dol)
     self.ui.export_dol.clicked.connect(self.export_dol)
+    self.ui.convert_from_dol_offset.clicked.connect(self.convert_from_dol_offset)
+    self.ui.convert_from_dol_address.clicked.connect(self.convert_from_dol_address)
     
     self.load_settings()
     
@@ -2196,6 +2202,10 @@ class GCFTWindow(QMainWindow):
     self.reload_dol_sections_tree()
     
     self.ui.export_dol.setDisabled(False)
+    self.ui.convert_from_dol_offset.setDisabled(False)
+    self.ui.convert_from_dol_address.setDisabled(False)
+    self.ui.dol_offset.setDisabled(False)
+    self.ui.dol_address.setDisabled(False)
   
   def reload_dol_sections_tree(self):
     self.ui.dol_sections_tree.clear()
@@ -2223,6 +2233,57 @@ class GCFTWindow(QMainWindow):
     self.dol_name = os.path.splitext(os.path.basename(dol_path))[0]
     
     QMessageBox.information(self, "DOL saved", "Successfully saved DOL.")
+  
+  def convert_from_dol_offset(self):
+    offset_str = self.ui.dol_offset.text().strip()
+    if not offset_str:
+      QMessageBox.warning(self, "Conversion failed", "No offset given.")
+      return
+    if not re.search(r"^(?:0x)?[0-9a-f]+$", offset_str, re.IGNORECASE):
+      QMessageBox.warning(self, "Conversion failed", "'%s' is not a valid hexadecimal number." % offset_str)
+      return
+    
+    offset = int(offset_str, 16)
+    
+    if offset < 0:
+      QMessageBox.warning(self, "Conversion failed", "Offset can not be a negative number.")
+      return
+    if offset >= data_len(self.dol.data):
+      QMessageBox.warning(self, "Conversion failed", "Offset is past the end of the DOL.")
+      return
+    
+    address = self.dol.convert_offset_to_address(offset)
+    
+    if address is None:
+      QMessageBox.warning(self, "Conversion failed", "Offset is not in any of the DOL sections, so it is not loaded to RAM.")
+      return
+    
+    self.ui.dol_address.setText("%08X" % address)
+    self.ui.dol_offset.setText("%06X" % offset)
+  
+  def convert_from_dol_address(self):
+    address_str = self.ui.dol_address.text().strip()
+    if not address_str:
+      QMessageBox.warning(self, "Conversion failed", "No address given.")
+      return
+    if not re.search(r"^(?:0x)?[0-9a-f]+$", address_str, re.IGNORECASE):
+      QMessageBox.warning(self, "Conversion failed", "'%s' is not a valid hexadecimal number." % address_str)
+      return
+    
+    address = int(address_str, 16)
+    
+    if address < 0:
+      QMessageBox.warning(self, "Conversion failed", "Address can not be a negative number.")
+      return
+    
+    offset = self.dol.convert_address_to_offset(address)
+    
+    if offset is None:
+      QMessageBox.warning(self, "Conversion failed", "Address is not in any of the DOL sections, so it is not loaded from the DOL.")
+      return
+    
+    self.ui.dol_offset.setText("%06X" % offset)
+    self.ui.dol_address.setText("%08X" % address)
   
   
   
