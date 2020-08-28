@@ -129,7 +129,6 @@ class GCFTWindow(QMainWindow):
     self.ui.add_particles_from_folder.setDisabled(True)
     self.ui.export_jpc_folder.setDisabled(True)
     self.ui.export_bti.setDisabled(True)
-    self.ui.import_bti_image.setDisabled(True)
     self.ui.export_bti_image.setDisabled(True)
     self.ui.export_j3d.setDisabled(True)
     
@@ -1789,7 +1788,6 @@ class GCFTWindow(QMainWindow):
     self.original_bti_image = self.bti_image
     
     self.ui.export_bti.setDisabled(False)
-    self.ui.import_bti_image.setDisabled(False)
     self.ui.export_bti_image.setDisabled(False)
   
   def reload_bti_image(self):
@@ -1822,6 +1820,26 @@ class GCFTWindow(QMainWindow):
   
   def import_bti_image_by_path(self, image_path):
     try:
+      if self.bti is None:
+        # No BTI is already loaded. Create a dummy one from scratch to allow importing this image.
+        data = BytesIO()
+        image_data = b"\0"*0x20
+        write_bytes(data, 0x20, image_data)
+        palette_data = b"\0"*2
+        write_bytes(data, 0x20+len(image_data), palette_data)
+        write_u8(data,  0x00, ImageFormat.C8.value) # Image format
+        write_u16(data, 0x02, 8) # Width
+        write_u16(data, 0x04, 4) # Height
+        write_u8(data,  0x08, 1) # Palettes enabled
+        write_u8(data,  0x09, PaletteFormat.RGB5A3.value) # Palette format
+        write_u16(data, 0x0A, 1) # Num colors
+        write_u32(data, 0x0C, 0x20+len(image_data)) # Palette data offset
+        write_u32(data, 0x1C, 0x20) # Image data offset
+        
+        image_name = os.path.splitext(os.path.basename(image_path))[0]
+        
+        self.import_bti_by_data(data, image_name)
+      
       self.original_bti_image = Image.open(image_path)
       
       self.bti.replace_image(self.original_bti_image)
@@ -2141,7 +2159,7 @@ class GCFTWindow(QMainWindow):
       return (self.import_rarc_by_path, "RARC Archives")
     elif file_ext in BTI_FILE_EXTS:
       return (self.import_bti_by_path, "BTI Images")
-    elif file_ext in [".png"] and self.bti is not None:
+    elif file_ext in [".png"]:
       return (self.import_bti_image_by_path, "BTI Images")
     elif file_ext in J3D_FILE_EXTS:
       return (self.import_j3d_by_path, "J3D Files")
