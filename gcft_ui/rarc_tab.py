@@ -11,7 +11,6 @@ from PySide2.QtWidgets import *
 from wwlib.rarc import RARC
 from gcft_ui.uic.ui_rarc_tab import Ui_RARCTab
 from asset_dumper import AssetDumper
-from gcft_ui.gcft_common import GCFTProgressDialog
 
 class RARCTab(QWidget):
   def __init__(self):
@@ -284,13 +283,10 @@ class RARCTab(QWidget):
   
   def dump_all_rarc_textures_by_path(self, folder_path):
     asset_dumper = AssetDumper()
-    
     dumper_generator = asset_dumper.dump_all_textures_in_rarc(self.rarc, folder_path)
+    max_val = len(asset_dumper.get_all_rarc_file_paths(self.rarc))
     
-    max_progress_val = len(asset_dumper.get_all_rarc_file_paths(self.rarc))
-    progress_dialog = GCFTProgressDialog("Dumping textures", "Initializing...", max_progress_val)
-    
-    self.window().start_texture_dumper_thread(asset_dumper, dumper_generator, progress_dialog)
+    self.window().start_texture_dumper_thread(asset_dumper, dumper_generator, max_val)
   
   def export_rarc_to_c_header_by_path(self, header_path):
     out_str = "#define %s_RES_NAME \"%s\"\n\n" % (self.rarc_name.upper(), self.rarc_name)

@@ -12,7 +12,6 @@ from wwlib.gcm import GCM
 from wwlib.texture_utils import ImageFormat, PaletteFormat
 from gcft_ui.uic.ui_gcm_tab import Ui_GCMTab
 from asset_dumper import AssetDumper
-from gcft_ui.gcft_common import GCFTProgressDialog
 
 class GCMTab(QWidget):
   def __init__(self):
@@ -171,9 +170,15 @@ class GCMTab(QWidget):
     if os.path.realpath(self.gcm.iso_path) == os.path.realpath(gcm_path):
       raise Exception("Cannot export an ISO over the currently opened ISO. Please choose a different path.")
     
-    # TODO: progress bar?
-    self.gcm.export_disc_to_iso_with_changed_files(gcm_path)
+    generator = self.gcm.export_disc_to_iso_with_changed_files(gcm_path)
+    max_val = len(self.gcm.files_by_path)
     
+    self.window().start_progress_thread(
+      generator, "Saving ISO", max_val,
+      self.export_gcm_by_path_complete
+    )
+  
+  def export_gcm_by_path_complete(self):
     QMessageBox.information(self, "GCM saved", "Successfully saved GCM.")
   
   def import_folder_over_gcm_by_path(self, folder_path):
@@ -186,19 +191,23 @@ class GCMTab(QWidget):
     QMessageBox.information(self, "Folder imported", "Successfully overwrote %d files in the GCM from \"%s\"." % (num_files_overwritten, folder_path))
   
   def export_gcm_folder_by_path(self, folder_path):
-    self.gcm.export_disc_to_folder_with_changed_files(folder_path)
+    generator = self.gcm.export_disc_to_folder_with_changed_files(folder_path)
+    max_val = len(self.gcm.files_by_path)
     
-    QMessageBox.information(self, "GCM extracted", "Successfully extracted GCM contents to \"%s\"." % folder_path)
+    self.window().start_progress_thread(
+      generator, "Extracting files", max_val,
+      self.export_gcm_folder_by_path_complete
+    )
+  
+  def export_gcm_folder_by_path_complete(self):
+    QMessageBox.information(self, "GCM extracted", "Successfully extracted GCM contents.")
   
   def dump_all_gcm_textures_by_path(self, folder_path):
     asset_dumper = AssetDumper()
-    
     dumper_generator = asset_dumper.dump_all_textures_in_gcm(self.gcm, folder_path)
+    max_val = len(asset_dumper.get_all_gcm_file_paths(self.gcm))
     
-    max_progress_val = len(asset_dumper.get_all_gcm_file_paths(self.gcm))
-    progress_dialog = GCFTProgressDialog("Dumping textures", "Initializing...", max_progress_val)
-    
-    self.window().start_texture_dumper_thread(asset_dumper, dumper_generator, progress_dialog)
+    self.window().start_texture_dumper_thread(asset_dumper, dumper_generator, max_val)
   
   
   def get_gcm_file_by_tree_item(self, item):

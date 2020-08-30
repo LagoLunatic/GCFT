@@ -38,7 +38,7 @@ Editing the file name, folder type, or file ID of RARC files/folders can be done
 Modifying BTI images can be done by importing a standalone .bti file from the BTI Images tab, or first opening a GCM/RARC/JPC/J3D file that has BTIs inside it, right clicking on the image you want to edit there, and clicking "Open Image".
 Once you're on the BTI Images tab, you can import or export the image as a PNG via the buttons at the top, and modify various attributes of the BTI image via the sidebar on the right.
 
-Note that GCFT currently has no progress bars, so certain slow operations like compressing Yaz0 or saving GCMs might look like the program is frozen, but it's actually working.  
+Note that compressing Yaz0 is slow and doesn't have a progress bar, so the program might look frozen for a while, but it's actually working.  
 
 ### Running from source
 

@@ -10,7 +10,7 @@ from PySide2.QtWidgets import *
 
 from collections import OrderedDict
 from gcft_ui.uic.ui_main import Ui_MainWindow
-from gcft_ui.gcft_common import GCFTThread
+from gcft_ui.gcft_common import GCFTThread, GCFTProgressDialog
 from version import VERSION
 
 import yaml
@@ -206,23 +206,41 @@ class GCFTWindow(QMainWindow):
     else:
       return "%d" % num
   
+  
+  def start_progress_thread(self, generator, title, max_val, completed_callback):
+    self.progress_dialog = GCFTProgressDialog(title, "Initializing...", max_val)
+    
+    self.progress_thread = GCFTThread(generator)
+    self.progress_thread.update_progress.connect(self.update_progress_dialog)
+    self.progress_thread.action_complete.connect(completed_callback)
+    self.progress_thread.action_failed.connect(self.progress_thread_failed)
+    self.progress_thread.action_complete.connect(self.reset_progress_dialog)
+    self.progress_thread.action_failed.connect(self.reset_progress_dialog)
+    self.progress_thread.start()
+  
   def update_progress_dialog(self, next_progress_text, progress_value):
     self.progress_dialog.setLabelText(next_progress_text)
     self.progress_dialog.setValue(progress_value)
   
-  def start_texture_dumper_thread(self, asset_dumper, dumper_generator, progress_dialog):
+  def reset_progress_dialog(self):
+    self.progress_dialog.reset()
+  
+  def progress_thread_failed(self, error_message):
+    print(error_message)
+    QMessageBox.critical(
+      self, "Failed",
+      error_message
+    )
+  
+  def start_texture_dumper_thread(self, asset_dumper, dumper_generator, max_val):
     self.asset_dumper = asset_dumper
-    self.progress_dialog = progress_dialog
     
-    self.dumper_thread = GCFTThread(dumper_generator)
-    self.dumper_thread.update_progress.connect(self.update_progress_dialog)
-    self.dumper_thread.action_complete.connect(self.dump_all_textures_complete)
-    self.dumper_thread.action_failed.connect(self.dump_all_textures_failed)
-    self.dumper_thread.start()
+    self.start_progress_thread(
+      dumper_generator, "Dumping textures", max_val,
+      self.dump_all_textures_complete
+    )
   
   def dump_all_textures_complete(self):
-    self.progress_dialog.reset()
-    
     failed_dump_message = ""
     if len(self.asset_dumper.failed_file_paths) > 0:
       failed_dump_message = "Failed to dump textures from %d files." % len(self.asset_dumper.failed_file_paths)
@@ -239,15 +257,6 @@ class GCFTWindow(QMainWindow):
       QMessageBox.information(self, "Textures dumped", message)
     else:
       QMessageBox.warning(self, "Failed to dump textures", failed_dump_message)
-  
-  def dump_all_textures_failed(self, error_message):
-    self.progress_dialog.reset()
-    
-    print(error_message)
-    QMessageBox.critical(
-      self, "Failed to dump textures",
-      error_message
-    )
   
   
   def keyPressEvent(self, event):
