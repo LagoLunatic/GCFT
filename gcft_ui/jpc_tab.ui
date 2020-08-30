@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>JPCTab</class>
+ <widget class="QWidget" name="JPCTab">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>776</width>
+    <height>515</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QPushButton" name="import_jpc">
+       <property name="text">
+        <string>Import JPC</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="export_jpc">
+       <property name="text">
+        <string>Export JPC</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="add_particles_from_folder">
+       <property name="text">
+        <string>Add Particles From Folder</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="export_jpc_folder">
+       <property name="text">
+        <string>Export Folder</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QTreeWidget" name="jpc_particles_tree">
+     <column>
+      <property name="text">
+       <string>Particle ID</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Texture Name</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+  </layout>
+  <action name="actionOpenJPCImage">
+   <property name="text">
+    <string>Open Image</string>
+   </property>
+  </action>
+  <action name="actionReplaceJPCImage">
+   <property name="text">
+    <string>Replace Image</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>GCMTab</class>
+ <widget class="QWidget" name="GCMTab">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>776</width>
+    <height>515</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QPushButton" name="import_gcm">
+       <property name="text">
+        <string>Import GCM</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="export_gcm">
+       <property name="text">
+        <string>Export GCM</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="import_folder_over_gcm">
+       <property name="text">
+        <string>Import Folder Over GCM</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="export_gcm_folder">
+       <property name="text">
+        <string>Export Folder</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="dump_all_gcm_textures">
+       <property name="text">
+        <string>Dump All Textures</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QTreeWidget" name="gcm_files_tree">
+     <column>
+      <property name="text">
+       <string>File Name</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>File Size</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+  </layout>
+  <action name="actionReplaceGCMFile">
+   <property name="text">
+    <string>Replace File</string>
+   </property>
+  </action>
+  <action name="actionExtractGCMFile">
+   <property name="text">
+    <string>Extract File</string>
+   </property>
+  </action>
+  <action name="actionAddGCMFile">
+   <property name="text">
+    <string>Add File</string>
+   </property>
+  </action>
+  <action name="actionDeleteGCMFile">
+   <property name="text">
+    <string>Delete File</string>
+   </property>
+  </action>
+  <action name="actionOpenGCMImage">
+   <property name="text">
+    <string>Open Image</string>
+   </property>
+  </action>
+  <action name="actionReplaceGCMImage">
+   <property name="text">
+    <string>Replace Image</string>
+   </property>
+  </action>
+  <action name="actionReplaceGCMDOL">
+   <property name="text">
+    <string>Replace DOL</string>
+   </property>
+  </action>
+  <action name="actionOpenGCMDOL">
+   <property name="text">
+    <string>Open DOL</string>
+   </property>
+  </action>
+  <action name="actionReplaceGCMJPC">
+   <property name="text">
+    <string>Replace JPC</string>
+   </property>
+  </action>
+  <action name="actionOpenGCMJPC">
+   <property name="text">
+    <string>Open JPC</string>
+   </property>
+  </action>
+  <action name="actionReplaceGCMRARC">
+   <property name="text">
+    <string>Replace RARC</string>
+   </property>
+  </action>
+  <action name="actionOpenGCMRARC">
+   <property name="text">
+    <string>Open RARC</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>RARCTab</class>
+ <widget class="QWidget" name="RARCTab">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>776</width>
+    <height>515</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="import_rarc">
+       <property name="text">
+        <string>Import RARC</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="create_rarc">
+       <property name="text">
+        <string>Create New RARC</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="create_rarc_from_folder">
+       <property name="text">
+        <string>Create New RARC From Folder</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="import_folder_over_rarc">
+       <property name="text">
+        <string>Import Folder Over RARC</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_7">
+     <item>
+      <widget class="QPushButton" name="export_rarc">
+       <property name="text">
+        <string>Export RARC</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="export_rarc_folder">
+       <property name="text">
+        <string>Export Folder</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="dump_all_rarc_textures">
+       <property name="text">
+        <string>Dump All Textures</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="export_rarc_to_c_header">
+       <property name="text">
+        <string>Export File List to C Header</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QTreeWidget" name="rarc_files_tree">
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+     <column>
+      <property name="text">
+       <string>File Name</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Folder Type</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>File Index</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>File ID</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>File Size</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+  </layout>
+  <action name="actionReplaceRARCFile">
+   <property name="text">
+    <string>Replace File</string>
+   </property>
+  </action>
+  <action name="actionExtractRARCFile">
+   <property name="text">
+    <string>Extract File</string>
+   </property>
+  </action>
+  <action name="actionAddRARCFile">
+   <property name="text">
+    <string>Add File</string>
+   </property>
+  </action>
+  <action name="actionDeleteRARCFile">
+   <property name="text">
+    <string>Delete File</string>
+   </property>
+  </action>
+  <action name="actionOpenRARCImage">
+   <property name="text">
+    <string>Open Image</string>
+   </property>
+  </action>
+  <action name="actionOpenRARCJ3D">
+   <property name="text">
+    <string>Open J3D</string>
+   </property>
+  </action>
+  <action name="actionReplaceRARCImage">
+   <property name="text">
+    <string>Replace Image</string>
+   </property>
+  </action>
+  <action name="actionAddRARCFolder">
+   <property name="text">
+    <string>Add Folder</string>
+   </property>
+  </action>
+  <action name="actionDeleteRARCFolder">
+   <property name="text">
+    <string>Delete Folder</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
