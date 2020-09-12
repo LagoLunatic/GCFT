@@ -427,7 +427,7 @@ class RARCTab(QWidget):
   def delete_file_in_rarc(self):
     file_entry = self.ui.actionDeleteRARCFile.data()
     
-    if not self.confirm_delete(file_entry.name):
+    if not self.window().confirm_delete(file_entry.name):
       return
     
     node = file_entry.parent_node
@@ -548,7 +548,7 @@ class RARCTab(QWidget):
   def delete_folder_in_rarc(self):
     node = self.ui.actionDeleteRARCFolder.data()
     
-    if not self.confirm_delete(node.name, is_folder=True):
+    if not self.window().confirm_delete(node.name, is_folder=True):
       return
     
     dir_entry = node.dir_entry

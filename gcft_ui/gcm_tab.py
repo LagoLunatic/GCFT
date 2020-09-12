@@ -336,7 +336,7 @@ class GCMTab(QWidget):
   def delete_file_in_gcm(self):
     file_entry = self.ui.actionDeleteGCMFile.data()
     
-    if not self.confirm_delete(file_entry.name):
+    if not self.window().confirm_delete(file_entry.name):
       return
     
     dir_entry = file_entry.parent
