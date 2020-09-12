@@ -83,6 +83,7 @@ class Ui_GCMTab(object):
 
         self.gcm_files_tree = QTreeWidget(GCMTab)
         self.gcm_files_tree.setObjectName(u"gcm_files_tree")
+        self.gcm_files_tree.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
         self.verticalLayout.addWidget(self.gcm_files_tree)
 

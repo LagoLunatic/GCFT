@@ -40,6 +40,8 @@ class GCMTab(QWidget):
     
     self.ui.gcm_files_tree.setContextMenuPolicy(Qt.CustomContextMenu)
     self.ui.gcm_files_tree.customContextMenuRequested.connect(self.show_gcm_files_tree_context_menu)
+    self.ui.gcm_files_tree.itemDoubleClicked.connect(self.edit_gcm_files_tree_item_text)
+    self.ui.gcm_files_tree.itemChanged.connect(self.gcm_file_tree_item_text_changed)
     self.ui.actionExtractGCMFile.triggered.connect(self.extract_file_from_gcm)
     self.ui.actionReplaceGCMFile.triggered.connect(self.replace_file_in_gcm)
     self.ui.actionDeleteGCMFile.triggered.connect(self.delete_file_in_gcm)
@@ -170,6 +172,7 @@ class GCMTab(QWidget):
       parent_item = self.gcm_file_entry_to_tree_widget_item[file_entry.parent]
     
     item = QTreeWidgetItem([file_entry.name, file_size_str])
+    item.setFlags(item.flags() | Qt.ItemIsEditable)
     parent_item.addChild(item)
     self.gcm_file_entry_to_tree_widget_item[file_entry] = item
     self.gcm_tree_widget_item_to_file_entry[item] = file_entry
@@ -532,6 +535,48 @@ class GCMTab(QWidget):
     dir_entry = self.gcm.add_new_directory(gcm_dir_path)
     
     self.add_gcm_file_entry_to_files_tree(dir_entry)
+  
+  
+  def edit_gcm_files_tree_item_text(self, item, column):
+    if (item.flags() & Qt.ItemIsEditable) == 0:
+      return
+    
+    file = self.get_gcm_file_by_tree_item(item)
+    if file is None:
+      return
+    if file.is_system_file:
+      return
+    
+    # Allow editing only certain columns.
+    if column in [self.gcm_col_name_to_index["File Name"]]: 
+      self.ui.gcm_files_tree.editItem(item, column)
+  
+  def gcm_file_tree_item_text_changed(self, item, column):
+    if column == self.gcm_col_name_to_index["File Name"]:
+      self.change_gcm_file_name(item)
+  
+  def change_gcm_file_name(self, item):
+    file_entry = self.get_gcm_file_by_tree_item(item)
+    new_file_name = item.text(self.gcm_col_name_to_index["File Name"])
+    
+    if len(new_file_name) == 0:
+      QMessageBox.warning(self, "Invalid file name", "File name cannot be empty.")
+      item.setText(self.gcm_col_name_to_index["File Name"], file_entry.name)
+      return
+    
+    other_file_entry = next((fe for fe in file_entry.parent.children if fe.name == new_file_name), None)
+    if other_file_entry == file_entry:
+      # File name not changed
+      return
+    
+    if other_file_entry is not None:
+      QMessageBox.warning(self, "Duplicate file name", "The file name you entered is already used by another file or folder in this directory.")
+      item.setText(self.gcm_col_name_to_index["File Name"], file_entry.name)
+      return
+  
+    file_entry.name = new_file_name
+    
+    item.setText(self.gcm_col_name_to_index["File Name"], new_file_name)
   
   
   def keyPressEvent(self, event):

@@ -55,6 +55,9 @@
    </item>
    <item>
     <widget class="QTreeWidget" name="gcm_files_tree">
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
      <column>
       <property name="text">
        <string>File Name</string>
