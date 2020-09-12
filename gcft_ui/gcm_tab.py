@@ -52,6 +52,8 @@ class GCMTab(QWidget):
     self.ui.actionReplaceGCMJPC.triggered.connect(self.replace_jpc_in_gcm)
     self.ui.actionOpenGCMDOL.triggered.connect(self.open_dol_in_gcm)
     self.ui.actionReplaceGCMDOL.triggered.connect(self.replace_dol_in_gcm)
+    self.ui.actionAddGCMFolder.triggered.connect(self.add_folder_to_gcm)
+    self.ui.actionDeleteGCMFolder.triggered.connect(self.delete_folder_in_gcm)
   
   
   def import_gcm(self):
@@ -120,42 +122,31 @@ class GCMTab(QWidget):
     
     self.gcm.read_entire_disc()
     
+    self.reload_gcm_files_tree()
+  
+  def reload_gcm_files_tree(self):
     self.ui.gcm_files_tree.clear()
     
     self.gcm_file_entry_to_tree_widget_item = {}
     self.gcm_tree_widget_item_to_file_entry = {}
     
+    root_entry = self.gcm.file_entries[0]
+    assert root_entry.file_path == "files"
+    root_item = QTreeWidgetItem(["files", ""])
+    self.ui.gcm_files_tree.addTopLevelItem(root_item)
+    self.gcm_file_entry_to_tree_widget_item[root_entry] = root_item
+    self.gcm_tree_widget_item_to_file_entry[root_item] = root_entry
+    
     # Add data files.
-    for file_entry in self.gcm.file_entries:
-      if file_entry.is_dir:
-        file_size_str = ""
-      else:
-        file_size_str = self.window().stringify_number(file_entry.file_size)
-      
-      if file_entry.parent is None:
-        # Root entry. Add as a top-level item.
-        item = QTreeWidgetItem(["files", file_size_str])
-        self.ui.gcm_files_tree.addTopLevelItem(item)
-        self.gcm_file_entry_to_tree_widget_item[file_entry] = item
-        self.gcm_tree_widget_item_to_file_entry[item] = file_entry
-      else:
-        parent_item = self.gcm_file_entry_to_tree_widget_item[file_entry.parent]
-        item = QTreeWidgetItem([file_entry.name, file_size_str])
-        parent_item.addChild(item)
-        self.gcm_file_entry_to_tree_widget_item[file_entry] = item
-        self.gcm_tree_widget_item_to_file_entry[item] = file_entry
+    for file_entry in self.gcm.file_entries[1:]:
+      self.add_gcm_file_entry_to_files_tree(file_entry)
     
     # Add system files.
     # (Note that the "sys" folder has no corresponding directory file entry because it is not really a directory.)
     sys_item = QTreeWidgetItem(["sys", ""])
     self.ui.gcm_files_tree.addTopLevelItem(sys_item)
     for file_entry in self.gcm.system_files:
-      file_size_str = self.window().stringify_number(file_entry.file_size)
-      parent_item = sys_item
-      item = QTreeWidgetItem([file_entry.name, file_size_str])
-      parent_item.addChild(item)
-      self.gcm_file_entry_to_tree_widget_item[file_entry] = item
-      self.gcm_tree_widget_item_to_file_entry[item] = file_entry
+      self.add_gcm_file_entry_to_files_tree(file_entry)
     
     # Expand the "files" and "sys" root entries by default.
     self.ui.gcm_files_tree.topLevelItem(0).setExpanded(True)
@@ -165,6 +156,23 @@ class GCMTab(QWidget):
     self.ui.import_folder_over_gcm.setDisabled(False)
     self.ui.export_gcm_folder.setDisabled(False)
     self.ui.dump_all_gcm_textures.setDisabled(False)
+  
+  def add_gcm_file_entry_to_files_tree(self, file_entry):
+    if file_entry.is_dir:
+      file_size_str = ""
+    else:
+      file_size_str = self.window().stringify_number(file_entry.file_size)
+    
+    if file_entry.is_system_file:
+      parent_item = self.ui.gcm_files_tree.topLevelItem(1)
+      assert parent_item.text(0) == "sys"
+    else:
+      parent_item = self.gcm_file_entry_to_tree_widget_item[file_entry.parent]
+    
+    item = QTreeWidgetItem([file_entry.name, file_size_str])
+    parent_item.addChild(item)
+    self.gcm_file_entry_to_tree_widget_item[file_entry] = item
+    self.gcm_tree_widget_item_to_file_entry[item] = file_entry
   
   def export_gcm_by_path(self, gcm_path):
     if os.path.realpath(self.gcm.iso_path) == os.path.realpath(gcm_path):
@@ -239,6 +247,11 @@ class GCMTab(QWidget):
       menu = QMenu(self)
       menu.addAction(self.ui.actionAddGCMFile)
       self.ui.actionAddGCMFile.setData(file)
+      menu.addAction(self.ui.actionAddGCMFolder)
+      self.ui.actionAddGCMFolder.setData(file)
+      if file.file_path != "files":
+        menu.addAction(self.ui.actionDeleteGCMFolder)
+        self.ui.actionDeleteGCMFolder.setData(file)
       menu.exec_(self.ui.gcm_files_tree.mapToGlobal(pos))
     else:
       menu = QMenu(self)
@@ -348,6 +361,22 @@ class GCMTab(QWidget):
     dir_item.removeChild(file_item)
     del self.gcm_file_entry_to_tree_widget_item[file_entry]
     del self.gcm_tree_widget_item_to_file_entry[file_item]
+  
+  def delete_folder_in_gcm(self):
+    dir_entry = self.ui.actionDeleteGCMFolder.data()
+    
+    if not self.window().confirm_delete(dir_entry.name):
+      return
+    
+    parent_dir_entry = dir_entry.parent
+    
+    self.gcm.delete_directory(dir_entry)
+    
+    parent_dir_item = self.gcm_file_entry_to_tree_widget_item[parent_dir_entry]
+    dir_item = self.gcm_file_entry_to_tree_widget_item[dir_entry]
+    parent_dir_item.removeChild(dir_item)
+    del self.gcm_file_entry_to_tree_widget_item[dir_entry]
+    del self.gcm_tree_widget_item_to_file_entry[dir_item]
   
   def open_rarc_in_gcm(self):
     file_entry = self.ui.actionOpenGCMRARC.data()
@@ -468,7 +497,7 @@ class GCMTab(QWidget):
     file_size = data_len(file_data)
     file_size_str = self.window().stringify_number(file_size)
     
-    gcm_file_path = dir_entry.dir_path + "/" + file_name
+    gcm_file_path = dir_entry.file_path + "/" + file_name
     if gcm_file_path.lower() in self.gcm.files_by_path_lowercase:
       QMessageBox.warning(self, "File already exists", "Cannot add new file. The selected folder already contains a file named \"%s\".\n\nIf you wish to replace the existing file, right click on it in the files tree and select 'Replace File'." % file_name)
       return
@@ -479,6 +508,30 @@ class GCMTab(QWidget):
     dir_item.addChild(file_item)
     self.gcm_file_entry_to_tree_widget_item[file_entry] = file_item
     self.gcm_tree_widget_item_to_file_entry[file_item] = file_entry
+  
+  def add_folder_to_gcm(self):
+    parent_dir_entry = self.ui.actionAddGCMFolder.data()
+    
+    dir_name, confirmed = QInputDialog.getText(
+      self, "Input Folder Name", "Write the name for the new folder:",
+      flags=Qt.WindowSystemMenuHint | Qt.WindowTitleHint
+    )
+    if not confirmed:
+      return
+    if len(dir_name) == 0:
+      QMessageBox.warning(self, "Invalid folder name", "Folder name cannot be empty.")
+      return
+    if dir_name in [".", ".."]:
+      QMessageBox.warning(self, "Invalid folder name", "You cannot create folders named \".\" or \"..\".")
+      return
+    
+    gcm_dir_path = parent_dir_entry.file_path + "/" + dir_name
+    if gcm_dir_path.lower() in self.gcm.dirs_by_path_lowercase:
+      QMessageBox.warning(self, "Directory already exists", "Cannot add new folder. A folder named \"%s\" already exists in the specified location." % dir_name)
+      return
+    dir_entry = self.gcm.add_new_directory(gcm_dir_path)
+    
+    self.add_gcm_file_entry_to_files_tree(dir_entry)
   
   
   def keyPressEvent(self, event):
