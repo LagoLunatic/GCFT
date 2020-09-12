@@ -481,9 +481,9 @@ class RARCTab(QWidget):
     file_size = data_len(file_data)
     file_size_str = self.window().stringify_number(file_size)
     
-    existing_file_names_in_node = [fe.name for fe in parent_node.files]
-    if file_name in existing_file_names_in_node:
-      QMessageBox.warning(self, "File already exists", "Cannot add new file. The selected folder already contains a file named \"%s\".\n\nIf you wish to replace the existing file, right click on it in the files tree and select 'Replace File'." % file_name)
+    existing_file_names = [fe.name for fe in self.rarc.file_entries if not fe.is_dir]
+    if file_name in existing_file_names:
+      QMessageBox.warning(self, "File already exists", "Cannot add new file. The archive already contains a file named \"%s\".\n\nIf you wish to replace the existing file, right click on it in the files tree and select 'Replace File'." % file_name)
       return
     
     file_entry = self.rarc.add_new_file(file_name, file_data, parent_node)
@@ -604,7 +604,7 @@ class RARCTab(QWidget):
         item.setText(self.rarc_col_name_to_index["File Name"], file_entry.name)
         return
       
-      other_file_entry = next((fe for fe in self.rarc.file_entries if fe.name == new_file_name), None)
+      other_file_entry = next((fe for fe in self.rarc.file_entries if fe.name == new_file_name and not fe.is_dir), None)
       
       if other_file_entry == file_entry:
         # File name not changed
