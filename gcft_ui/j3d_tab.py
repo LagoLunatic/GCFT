@@ -19,6 +19,7 @@ class J3DTab(QWidget):
     
     self.j3d = None
     self.j3d_name = None
+    self.ui.j3d_chunks_tree.setColumnWidth(1, 200)
     
     self.j3d_col_name_to_index = {}
     for col in range(self.ui.j3d_chunks_tree.columnCount()):
@@ -38,8 +39,8 @@ class J3DTab(QWidget):
   
   def import_j3d(self):
     filters = [
-      "Models and material tables (*.bmd *.bdl *.bmt)",
       "All J3D files (*.bmd *.bdl *.bmt *.bls *.btk *.bck *.brk *.bpk *.btp *.bca *.bva *.bla)",
+      "Models and material tables (*.bmd *.bdl *.bmt)",
     ]
     
     self.window().generic_do_gui_file_operation(
@@ -128,6 +129,10 @@ class J3DTab(QWidget):
           
           self.j3d_texture_to_tree_widget_item[texture] = texture_item
           self.j3d_tree_widget_item_to_texture[texture_item] = texture
+    
+    # Expand all items in the tree (for debugging):
+    #for item in self.ui.j3d_chunks_tree.findItems("*", Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive):
+    #  item.setExpanded(True)
   
   def export_j3d_by_path(self, j3d_path):
     self.j3d.save_changes()
