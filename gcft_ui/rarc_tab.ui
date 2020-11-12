@@ -156,6 +156,11 @@
     <string>Delete Folder</string>
    </property>
   </action>
+  <action name="actionReplaceRARCJ3D">
+   <property name="text">
+    <string>Replace J3D</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

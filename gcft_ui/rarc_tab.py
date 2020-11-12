@@ -58,6 +58,7 @@ class RARCTab(QWidget):
     self.ui.actionOpenRARCImage.triggered.connect(self.open_image_in_rarc)
     self.ui.actionReplaceRARCImage.triggered.connect(self.replace_image_in_rarc)
     self.ui.actionOpenRARCJ3D.triggered.connect(self.open_j3d_in_rarc)
+    self.ui.actionReplaceRARCJ3D.triggered.connect(self.replace_j3d_in_rarc)
   
   
   def import_rarc(self):
@@ -395,6 +396,13 @@ class RARCTab(QWidget):
         elif file_ext in [".bdl", ".bmd", ".bmt", ".btk", ".bck", ".brk", ".btp"]:
           menu.addAction(self.ui.actionOpenRARCJ3D)
           self.ui.actionOpenRARCJ3D.setData(file)
+          
+          menu.addAction(self.ui.actionReplaceRARCJ3D)
+          self.ui.actionReplaceRARCJ3D.setData(file)
+          if self.j3d_tab.j3d is None:
+            self.ui.actionReplaceRARCJ3D.setDisabled(True)
+          else:
+            self.ui.actionReplaceRARCJ3D.setDisabled(False)
         
         menu.addAction(self.ui.actionExtractRARCFile)
         self.ui.actionExtractRARCFile.setData(file)
@@ -471,6 +479,18 @@ class RARCTab(QWidget):
     self.j3d_tab.import_j3d_by_data(data, j3d_name)
     
     self.window().set_tab_by_name("J3D Files")
+  
+  def replace_j3d_in_rarc(self):
+    file_entry = self.ui.actionReplaceRARCJ3D.data()
+    
+    self.j3d_tab.j3d.save_changes()
+    
+    file_entry.data = make_copy_data(self.j3d_tab.j3d.data)
+    
+    # Update changed file size
+    file_size_str = self.window().stringify_number(data_len(file_entry.data))
+    item = self.get_rarc_tree_item_by_file(file_entry)
+    item.setText(self.rarc_col_name_to_index["File Size"], file_size_str)
   
   def add_file_to_rarc_by_path(self, file_path):
     parent_node = self.ui.actionAddRARCFile.data()
