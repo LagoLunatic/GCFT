@@ -35,8 +35,8 @@ Extracting, replacing, or deleting a single file can be done by first importing 
 Adding a new file can similarly be done by importing a GCM or RARC, and then right-clicking on the folder you want to add the file to.  
 Editing the file name, folder type, or file ID of RARC files/folders can be done by double clicking on the field you want to edit, and then typing the new value into the text field.
 
-Modifying BTI images can be done by importing a standalone .bti file from the BTI Images tab, or first opening a GCM/RARC/JPC/J3D file that has BTIs inside it, right clicking on the image you want to edit there, and clicking "Open Image".
-Once you're on the BTI Images tab, you can import or export the image as a PNG via the buttons at the top, and modify various attributes of the BTI image via the sidebar on the right.
+Modifying BTI images can be done by importing a standalone .bti file from the BTI Images tab, or first opening a GCM/RARC/JPC/J3D file that has BTIs inside it, right clicking on the image you want to edit there, and clicking "Open Image".  
+Once you're on the BTI Images tab, you can import or export the image as a PNG via the buttons at the top, and modify various attributes of the BTI image via the sidebar on the right.  
 
 Note that compressing Yaz0 is slow and doesn't have a progress bar, so the program might look frozen for a while, but it's actually working.  
 
