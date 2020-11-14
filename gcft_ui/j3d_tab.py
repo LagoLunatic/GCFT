@@ -181,7 +181,7 @@ class J3DTab(QWidget):
     
     return self.j3d_tree_widget_item_to_texture[item]
   
-  def get_jpc_tree_item_by_texture(self, texture):
+  def get_j3d_tree_item_by_texture(self, texture):
     if texture not in self.j3d_texture_to_tree_widget_item:
       return None
     
@@ -262,5 +262,5 @@ class J3DTab(QWidget):
     texture_total_size += data_len(texture.palette_data)
     texture_size_str = self.window().stringify_number(texture_total_size, min_hex_chars=5)
     
-    item = self.get_jpc_tree_item_by_texture(texture)
+    item = self.get_j3d_tree_item_by_texture(texture)
     item.setText(self.j3d_col_name_to_index["Size"], texture_size_str)
