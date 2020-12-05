@@ -8,7 +8,7 @@ from PySide2.QtGui import *
 from PySide2.QtCore import *
 from PySide2.QtWidgets import *
 
-from wwlib.j3d import J3DFile
+from wwlib.j3d import J3DFile, BPRegister, XFRegister
 from gcft_ui.uic.ui_j3d_tab import Ui_J3DTab
 
 class J3DTab(QWidget):
@@ -20,6 +20,7 @@ class J3DTab(QWidget):
     self.j3d = None
     self.j3d_name = None
     self.ui.j3d_chunks_tree.setColumnWidth(1, 200)
+    self.ui.j3d_chunks_tree.setColumnWidth(2, 70)
     
     self.j3d_col_name_to_index = {}
     for col in range(self.ui.j3d_chunks_tree.columnCount()):
@@ -30,6 +31,8 @@ class J3DTab(QWidget):
     
     self.ui.import_j3d.clicked.connect(self.import_j3d)
     self.ui.export_j3d.clicked.connect(self.export_j3d)
+    
+    self.ui.j3d_chunks_tree.itemSelectionChanged.connect(self.widget_item_selected)
     
     self.ui.j3d_chunks_tree.setContextMenuPolicy(Qt.CustomContextMenu)
     self.ui.j3d_chunks_tree.customContextMenuRequested.connect(self.show_j3d_chunks_tree_context_menu)
@@ -89,6 +92,8 @@ class J3DTab(QWidget):
     self.j3d_tree_widget_item_to_chunk = {}
     self.j3d_texture_to_tree_widget_item = {}
     self.j3d_tree_widget_item_to_texture = {}
+    self.j3d_mdl_entry_to_tree_widget_item = {}
+    self.j3d_tree_widget_item_to_mdl_entry = {}
     
     for chunk in self.j3d.chunks:
       chunk_size_str = self.window().stringify_number(chunk.size, min_hex_chars=5)
@@ -129,10 +134,69 @@ class J3DTab(QWidget):
           
           self.j3d_texture_to_tree_widget_item[texture] = texture_item
           self.j3d_tree_widget_item_to_texture[texture_item] = texture
+      elif chunk.magic == "MAT3":
+        for mat_name in chunk.mat_names:
+          mat_item = QTreeWidgetItem(["", mat_name, ""])
+          chunk_item.addChild(mat_item)
+      elif chunk.magic == "MDL3":
+        for i, mdl_entry in enumerate(chunk.entries):
+          mat_name = self.j3d.mat3.mat_names[i]
+          mat_item = QTreeWidgetItem(["", mat_name, ""])
+          chunk_item.addChild(mat_item)
+          
+          self.j3d_mdl_entry_to_tree_widget_item[mdl_entry] = mat_item
+          self.j3d_tree_widget_item_to_mdl_entry[mat_item] = mdl_entry
     
     # Expand all items in the tree (for debugging):
     #for item in self.ui.j3d_chunks_tree.findItems("*", Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive):
     #  item.setExpanded(True)
+  
+  def widget_item_selected(self):
+    layout = self.ui.scrollAreaWidgetContents.layout()
+    while layout.count():
+      item = layout.takeAt(0)
+      widget = item.widget()
+      if widget:
+        widget.deleteLater()
+    self.ui.j3d_sidebar_label.setText("Extra information will be displayed here as necessary.")
+    
+    selected_items = self.ui.j3d_chunks_tree.selectedItems()
+    if not selected_items:
+      return
+    item = selected_items[0]
+    mdl_entry = self.get_j3d_mdl_entry_by_tree_item(item)
+    if mdl_entry is None:
+      return
+    
+    entry_index = self.j3d.mdl3.entries.index(mdl_entry)
+    mat_name = self.j3d.mat3.mat_names[entry_index]
+    self.ui.j3d_sidebar_label.setText("Showing material display list for: %s" % mat_name)
+    
+    label = QLabel()
+    label.setText("BP commands:")
+    layout.addWidget(label)
+    for bp_command in mdl_entry.bp_commands:
+      if bp_command.register in [entry.value for entry in BPRegister]:
+        reg_name = BPRegister(bp_command.register).name
+      else:
+        reg_name = "0x%02X" % bp_command.register
+      command_text = "%s: 0x%08X" % (reg_name, bp_command.value)
+      label = QLabel()
+      label.setText(command_text)
+      layout.addWidget(label)
+    
+    label = QLabel()
+    label.setText("XF commands:")
+    layout.addWidget(label)
+    for xf_command in mdl_entry.xf_commands:
+      if xf_command.register in [entry.value for entry in XFRegister]:
+        reg_name = XFRegister(xf_command.register).name
+      else:
+        reg_name = "0x%04X" % xf_command.register
+      command_text = "%s: %s" % (reg_name, ", ".join(["0x%08X" % arg for arg in xf_command.args]))
+      label = QLabel()
+      label.setText(command_text)
+      layout.addWidget(label)
   
   def export_j3d_by_path(self, j3d_path):
     self.j3d.save_changes()
@@ -186,6 +250,18 @@ class J3DTab(QWidget):
       return None
     
     return self.j3d_texture_to_tree_widget_item[texture]
+  
+  def get_j3d_mdl_entry_by_tree_item(self, item):
+    if item not in self.j3d_tree_widget_item_to_mdl_entry:
+      return None
+    
+    return self.j3d_tree_widget_item_to_mdl_entry[item]
+  
+  def get_j3d_tree_item_by_mdl_entry(self, mdl_entry):
+    if mdl_entry not in self.j3d_mdl_entry_to_tree_widget_item:
+      return None
+    
+    return self.j3d_mdl_entry_to_tree_widget_item[mdl_entry]
   
   def show_j3d_chunks_tree_context_menu(self, pos):
     if self.j3d is None:

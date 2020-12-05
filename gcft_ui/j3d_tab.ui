@@ -33,23 +33,67 @@
     </layout>
    </item>
    <item>
-    <widget class="QTreeWidget" name="j3d_chunks_tree">
-     <column>
-      <property name="text">
-       <string>Chunk Type</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Texture Name</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Size</string>
-      </property>
-     </column>
-    </widget>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QTreeWidget" name="j3d_chunks_tree">
+       <column>
+        <property name="text">
+         <string>Chunk Type</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Name</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Size</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+     <item>
+      <widget class="QWidget" name="j3d_sidebar" native="true">
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="margin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="j3d_sidebar_label">
+          <property name="text">
+           <string>Extra information will be displayed here as necessary.</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QScrollArea" name="scrollArea">
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <widget class="QWidget" name="scrollAreaWidgetContents">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>298</width>
+             <height>443</height>
+            </rect>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_3"/>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
   <action name="actionOpenJ3DImage">
