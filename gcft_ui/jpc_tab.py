@@ -92,25 +92,40 @@ class JPCTab(QWidget):
     
     self.jpc_particle_to_tree_widget_item = {}
     self.jpc_tree_widget_item_to_particle = {}
+    self.jpc_chunk_to_tree_widget_item = {}
+    self.jpc_tree_widget_item_to_chunk = {}
     self.jpc_texture_to_tree_widget_item = {}
     self.jpc_tree_widget_item_to_texture = {}
     
     for particle in self.jpc.particles:
       particle_id_str = self.window().stringify_number(particle.particle_id, min_hex_chars=4)
       
-      particle_item = QTreeWidgetItem([particle_id_str, ""])
+      particle_item = QTreeWidgetItem([particle_id_str, "", ""])
       self.ui.jpc_particles_tree.addTopLevelItem(particle_item)
       
       self.jpc_particle_to_tree_widget_item[particle] = particle_item
       self.jpc_tree_widget_item_to_particle[particle_item] = particle
       
-      for texture_filename in particle.tdb1.texture_filenames:
-        texture_item = QTreeWidgetItem(["", texture_filename])
-        particle_item.addChild(texture_item)
+      for chunk in particle.chunks:
+        #chunk_size_str = self.window().stringify_number(chunk.size, min_hex_chars=5)
         
-        texture = self.jpc.textures_by_filename[texture_filename]
-        self.jpc_texture_to_tree_widget_item[texture] = texture_item
-        self.jpc_tree_widget_item_to_texture[texture_item] = texture
+        chunk_item = QTreeWidgetItem(["", chunk.magic, ""])
+        particle_item.addChild(chunk_item)
+        
+        self.jpc_chunk_to_tree_widget_item[chunk] = chunk_item
+        self.jpc_tree_widget_item_to_chunk[chunk_item] = chunk
+        
+        if chunk.magic == "TDB1":
+          # Expand TDB1 chunks by default.
+          chunk_item.setExpanded(True)
+          
+          for texture_filename in chunk.texture_filenames:
+            texture_item = QTreeWidgetItem(["", "", texture_filename])
+            chunk_item.addChild(texture_item)
+            
+            texture = self.jpc.textures_by_filename[texture_filename]
+            self.jpc_texture_to_tree_widget_item[texture] = texture_item
+            self.jpc_tree_widget_item_to_texture[texture_item] = texture
   
   def export_jpc_by_path(self, jpc_path):
     self.jpc.save_changes()

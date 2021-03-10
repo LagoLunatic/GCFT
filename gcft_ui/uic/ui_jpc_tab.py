@@ -69,7 +69,8 @@ class Ui_JPCTab(object):
         self.add_particles_from_folder.setText(QCoreApplication.translate("JPCTab", u"Add Particles From Folder", None))
         self.export_jpc_folder.setText(QCoreApplication.translate("JPCTab", u"Export Folder", None))
         ___qtreewidgetitem = self.jpc_particles_tree.headerItem()
-        ___qtreewidgetitem.setText(1, QCoreApplication.translate("JPCTab", u"Texture Name", None));
+        ___qtreewidgetitem.setText(2, QCoreApplication.translate("JPCTab", u"Name", None));
+        ___qtreewidgetitem.setText(1, QCoreApplication.translate("JPCTab", u"Chunk Type", None));
         ___qtreewidgetitem.setText(0, QCoreApplication.translate("JPCTab", u"Particle ID", None));
     # retranslateUi
 

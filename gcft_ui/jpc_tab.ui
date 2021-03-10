@@ -55,7 +55,12 @@
      </column>
      <column>
       <property name="text">
-       <string>Texture Name</string>
+       <string>Chunk Type</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Name</string>
       </property>
      </column>
     </widget>
