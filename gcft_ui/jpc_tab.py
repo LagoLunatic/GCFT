@@ -144,17 +144,18 @@ class JPCTab(QWidget):
     item = selected_items[0]
     
     chunk = self.get_jpc_chunk_by_tree_item(item)
-    if chunk.magic == "BSP1":
-      self.bsp1_chunk_selected(chunk)
-      return
-    elif chunk.magic == "SSP1":
-      self.ssp1_chunk_selected(chunk)
-      return
+    if chunk:
+      if chunk.magic == "BSP1":
+        self.bsp1_chunk_selected(chunk)
+        return
+      elif chunk.magic == "SSP1":
+        self.ssp1_chunk_selected(chunk)
+        return
   
   def bsp1_chunk_selected(self, bsp1):
     layout = self.ui.scrollAreaWidgetContents.layout()
     
-    self.ui.j3d_sidebar_label.setText("Showing BSP1 (Base Shape) chunk.")
+    self.ui.jpc_sidebar_label.setText("Showing BSP1 (Base Shape) chunk.")
     
     label = QLabel()
     label.setText("Color PRM: (%d, %d, %d, %d)" % bsp1.color_prm)
@@ -170,7 +171,7 @@ class JPCTab(QWidget):
   def ssp1_chunk_selected(self, ssp1):
     layout = self.ui.scrollAreaWidgetContents.layout()
     
-    self.ui.j3d_sidebar_label.setText("Showing SSP1 (Child Shape) chunk.")
+    self.ui.jpc_sidebar_label.setText("Showing SSP1 (Child Shape) chunk.")
     
     label = QLabel()
     label.setText("Color PRM: (%d, %d, %d, %d)" % ssp1.color_prm)
