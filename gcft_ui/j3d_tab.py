@@ -236,6 +236,8 @@ class J3DTab(QWidget):
   def keyframe_selected(self, keyframe):
     layout = self.ui.scrollAreaWidgetContents.layout()
     
+    self.ui.j3d_sidebar_label.setText("Showing animation keyframe.")
+    
     label = QLabel()
     label.setText("Time: %d" % keyframe.time)
     layout.addWidget(label)
