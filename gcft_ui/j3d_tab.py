@@ -164,9 +164,14 @@ class J3DTab(QWidget):
     if not selected_items:
       return
     item = selected_items[0]
+    
     mdl_entry = self.get_j3d_mdl_entry_by_tree_item(item)
-    if mdl_entry is None:
+    if mdl_entry:
+      self.mdl_entry_selected(mdl_entry)
       return
+  
+  def mdl_entry_selected(self, mdl_entry):
+    layout = self.ui.scrollAreaWidgetContents.layout()
     
     entry_index = self.j3d.mdl3.entries.index(mdl_entry)
     mat_name = self.j3d.mat3.mat_names[entry_index]
