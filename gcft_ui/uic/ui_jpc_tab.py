@@ -49,10 +49,41 @@ class Ui_JPCTab(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_4)
 
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.jpc_particles_tree = QTreeWidget(JPCTab)
         self.jpc_particles_tree.setObjectName(u"jpc_particles_tree")
 
-        self.verticalLayout.addWidget(self.jpc_particles_tree)
+        self.horizontalLayout.addWidget(self.jpc_particles_tree)
+
+        self.jpc_sidebar = QWidget(JPCTab)
+        self.jpc_sidebar.setObjectName(u"jpc_sidebar")
+        self.jpc_sidebar.setMaximumSize(QSize(300, 16777215))
+        self.verticalLayout_3 = QVBoxLayout(self.jpc_sidebar)
+        self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.jpc_sidebar_label = QLabel(self.jpc_sidebar)
+        self.jpc_sidebar_label.setObjectName(u"jpc_sidebar_label")
+
+        self.verticalLayout_3.addWidget(self.jpc_sidebar_label)
+
+        self.scrollArea = QScrollArea(self.jpc_sidebar)
+        self.scrollArea.setObjectName(u"scrollArea")
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollAreaWidgetContents = QWidget()
+        self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 298, 443))
+        self.verticalLayout_2 = QVBoxLayout(self.scrollAreaWidgetContents)
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+
+        self.verticalLayout_3.addWidget(self.scrollArea)
+
+
+        self.horizontalLayout.addWidget(self.jpc_sidebar)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout)
 
 
         self.retranslateUi(JPCTab)
@@ -72,5 +103,6 @@ class Ui_JPCTab(object):
         ___qtreewidgetitem.setText(2, QCoreApplication.translate("JPCTab", u"Name", None));
         ___qtreewidgetitem.setText(1, QCoreApplication.translate("JPCTab", u"Chunk Type", None));
         ___qtreewidgetitem.setText(0, QCoreApplication.translate("JPCTab", u"Particle ID", None));
+        self.jpc_sidebar_label.setText(QCoreApplication.translate("JPCTab", u"Extra information will be displayed here as necessary.", None))
     # retranslateUi
 

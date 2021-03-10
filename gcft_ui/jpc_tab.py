@@ -31,6 +31,8 @@ class JPCTab(QWidget):
     self.ui.add_particles_from_folder.clicked.connect(self.add_particles_from_folder)
     self.ui.export_jpc_folder.clicked.connect(self.export_jpc_folder)
     
+    self.ui.jpc_particles_tree.itemSelectionChanged.connect(self.widget_item_selected)
+    
     self.ui.jpc_particles_tree.setContextMenuPolicy(Qt.CustomContextMenu)
     self.ui.jpc_particles_tree.customContextMenuRequested.connect(self.show_jpc_particles_tree_context_menu)
     self.ui.actionOpenJPCImage.triggered.connect(self.open_image_in_jpc)
@@ -127,6 +129,60 @@ class JPCTab(QWidget):
             self.jpc_texture_to_tree_widget_item[texture] = texture_item
             self.jpc_tree_widget_item_to_texture[texture_item] = texture
   
+  def widget_item_selected(self):
+    layout = self.ui.scrollAreaWidgetContents.layout()
+    while layout.count():
+      item = layout.takeAt(0)
+      widget = item.widget()
+      if widget:
+        widget.deleteLater()
+    self.ui.jpc_sidebar_label.setText("Extra information will be displayed here as necessary.")
+    
+    selected_items = self.ui.jpc_particles_tree.selectedItems()
+    if not selected_items:
+      return
+    item = selected_items[0]
+    
+    chunk = self.get_jpc_chunk_by_tree_item(item)
+    if chunk.magic == "BSP1":
+      self.bsp1_chunk_selected(chunk)
+      return
+    elif chunk.magic == "SSP1":
+      self.ssp1_chunk_selected(chunk)
+      return
+  
+  def bsp1_chunk_selected(self, bsp1):
+    layout = self.ui.scrollAreaWidgetContents.layout()
+    
+    self.ui.j3d_sidebar_label.setText("Showing BSP1 (Base Shape) chunk.")
+    
+    label = QLabel()
+    label.setText("Color PRM: (%d, %d, %d, %d)" % bsp1.color_prm)
+    layout.addWidget(label)
+    
+    label = QLabel()
+    label.setText("Color ENV: (%d, %d, %d, %d)" % bsp1.color_env)
+    layout.addWidget(label)
+    
+    spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+    layout.addItem(spacer)
+  
+  def ssp1_chunk_selected(self, ssp1):
+    layout = self.ui.scrollAreaWidgetContents.layout()
+    
+    self.ui.j3d_sidebar_label.setText("Showing SSP1 (Child Shape) chunk.")
+    
+    label = QLabel()
+    label.setText("Color PRM: (%d, %d, %d, %d)" % ssp1.color_prm)
+    layout.addWidget(label)
+    
+    label = QLabel()
+    label.setText("Color ENV: (%d, %d, %d, %d)" % ssp1.color_env)
+    layout.addWidget(label)
+    
+    spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+    layout.addItem(spacer)
+  
   def export_jpc_by_path(self, jpc_path):
     self.jpc.save_changes()
     
@@ -166,6 +222,18 @@ class JPCTab(QWidget):
       return None
     
     return self.jpc_particle_to_tree_widget_item[particle]
+  
+  def get_jpc_chunk_by_tree_item(self, item):
+    if item not in self.jpc_tree_widget_item_to_chunk:
+      return None
+    
+    return self.jpc_tree_widget_item_to_chunk[item]
+  
+  def get_jpc_tree_item_by_chunk(self, chunk):
+    if chunk not in self.jpc_chunk_to_tree_widget_item:
+      return None
+    
+    return self.jpc_chunk_to_tree_widget_item[chunk]
   
   def get_jpc_texture_by_tree_item(self, item):
     if item not in self.jpc_tree_widget_item_to_texture:
