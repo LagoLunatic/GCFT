@@ -2,6 +2,7 @@
 import os
 import re
 import traceback
+import colorsys
 from io import BytesIO
 from fs_helpers import *
 from PySide2.QtGui import *
@@ -205,6 +206,89 @@ class GCFTWindow(QMainWindow):
       return format_string % num
     else:
       return "%d" % num
+  
+  
+  def make_color_selector_button(self, color_owner_object, color_attribute_name, display_name, layout):
+    row_widget = QWidget()
+    row_layout = QHBoxLayout()
+    row_layout.setContentsMargins(0, 0, 0, 0)
+    row_widget.setLayout(row_layout)
+    layout.addWidget(row_widget)
+    
+    label = QLabel()
+    label.setText(display_name)
+    row_layout.addWidget(label)
+    
+    color_selector_button = QPushButton()
+    color_selector_button.setText("Click to set color")
+    row_layout.addWidget(color_selector_button)
+    
+    color_selector_button.setProperty("color_owner_object", color_owner_object)
+    color_selector_button.setProperty("color_attribute_name", color_attribute_name)
+    
+    color_selector_button.clicked.connect(self.open_color_chooser)
+    
+    color = getattr(color_owner_object, color_attribute_name)
+    self.set_background_for_color_selector_button(color_selector_button, color)
+  
+  def open_color_chooser(self):
+    color_selector_button = self.sender()
+    
+    color_owner_object = color_selector_button.property("color_owner_object")
+    color_attribute_name = color_selector_button.property("color_attribute_name")
+    
+    color = getattr(color_owner_object, color_attribute_name)
+    has_alpha = False
+    if len(color) == 3:
+      r, g, b = color
+      a = 255
+    elif len(color) == 4:
+      r, g, b, a = color
+      has_alpha = True
+    else:
+      QMessageBox.warning(self, "Unknown color format", "Color is neither RGB nor RGBA.")
+      return
+    
+    initial_color = QColor(r, g, b, a)
+    color_dialog_options = 0
+    if has_alpha:
+      color_dialog_options |= QColorDialog.ShowAlphaChannel
+    color = QColorDialog.getColor(initial_color, self, "Select color", options=color_dialog_options)
+    if not color.isValid():
+      return
+    r = color.red()
+    g = color.green()
+    b = color.blue()
+    a = color.alpha()
+    
+    if has_alpha:
+      setattr(color_owner_object, color_attribute_name, (r, g, b, a))
+    else:
+      setattr(color_owner_object, color_attribute_name, (r, g, b))
+    
+    self.set_background_for_color_selector_button(color_selector_button, (r, g, b, a))
+  
+  def set_background_for_color_selector_button(self, color_selector_button, color):
+    if len(color) == 3:
+      r, g, b = color
+      a = 255
+    elif len(color) == 4:
+      r, g, b, a = color
+    else:
+      QMessageBox.warning(self, "Unknown color format", "Color is neither RGB nor RGBA.")
+      return
+    
+    # Depending on the value of the background color of the button, we need to make the text color either black or white for contrast.
+    h, s, v = colorsys.rgb_to_hsv(r/255, g/255, b/255)
+    if v > 0.5:
+      text_color = (0, 0, 0)
+    else:
+      text_color = (255, 255, 255)
+    
+    color_selector_button.setStyleSheet(
+      "background-color: rgb(%d, %d, %d);" % (r, g, b) + \
+      "color: rgb(%d, %d, %d);" % text_color,
+    )
   
   
   def start_progress_thread(self, generator, title, max_val, completed_callback):

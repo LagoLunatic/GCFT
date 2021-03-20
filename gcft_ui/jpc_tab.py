@@ -157,13 +157,8 @@ class JPCTab(QWidget):
     
     self.ui.jpc_sidebar_label.setText("Showing BSP1 (Base Shape) chunk.")
     
-    label = QLabel()
-    label.setText("Color PRM: (%d, %d, %d, %d)" % bsp1.color_prm)
-    layout.addWidget(label)
-    
-    label = QLabel()
-    label.setText("Color ENV: (%d, %d, %d, %d)" % bsp1.color_env)
-    layout.addWidget(label)
+    self.window().make_color_selector_button(bsp1, "color_prm", "Color PRM", layout)
+    self.window().make_color_selector_button(bsp1, "color_env", "Color ENV", layout)
     
     spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
     layout.addItem(spacer)
@@ -173,13 +168,8 @@ class JPCTab(QWidget):
     
     self.ui.jpc_sidebar_label.setText("Showing SSP1 (Child Shape) chunk.")
     
-    label = QLabel()
-    label.setText("Color PRM: (%d, %d, %d, %d)" % ssp1.color_prm)
-    layout.addWidget(label)
-    
-    label = QLabel()
-    label.setText("Color ENV: (%d, %d, %d, %d)" % ssp1.color_env)
-    layout.addWidget(label)
+    self.window().make_color_selector_button(ssp1, "color_prm", "Color PRM", layout)
+    self.window().make_color_selector_button(ssp1, "color_env", "Color ENV", layout)
     
     spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
     layout.addItem(spacer)
