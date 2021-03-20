@@ -96,6 +96,8 @@ class JPCTab(QWidget):
     self.jpc_tree_widget_item_to_particle = {}
     self.jpc_chunk_to_tree_widget_item = {}
     self.jpc_tree_widget_item_to_chunk = {}
+    self.jpc_color_anim_keyframe_to_tree_widget_item = {}
+    self.jpc_tree_widget_item_to_color_anim_keyframe = {}
     self.jpc_texture_to_tree_widget_item = {}
     self.jpc_tree_widget_item_to_texture = {}
     
@@ -117,7 +119,27 @@ class JPCTab(QWidget):
         self.jpc_chunk_to_tree_widget_item[chunk] = chunk_item
         self.jpc_tree_widget_item_to_chunk[chunk_item] = chunk
         
-        if chunk.magic == "TDB1":
+        if chunk.magic == "BSP1":
+          if chunk.color_prm_anm_table:
+            anim_item = QTreeWidgetItem(["", "", "Color PRM Anim"])
+            chunk_item.addChild(anim_item)
+            for keyframe_index, keyframe in enumerate(chunk.color_prm_anm_table):
+              keyframe_item = QTreeWidgetItem(["", "", "0x%02X" % keyframe_index])
+              anim_item.addChild(keyframe_item)
+              
+              self.jpc_color_anim_keyframe_to_tree_widget_item[keyframe] = keyframe_item
+              self.jpc_tree_widget_item_to_color_anim_keyframe[keyframe_item] = keyframe
+          
+          if chunk.color_env_anm_table:
+            anim_item = QTreeWidgetItem(["", "", "Color ENV Anim"])
+            chunk_item.addChild(anim_item)
+            for keyframe_index, keyframe in enumerate(chunk.color_env_anm_table):
+              keyframe_item = QTreeWidgetItem(["", "", "0x%02X" % keyframe_index])
+              anim_item.addChild(keyframe_item)
+              
+              self.jpc_color_anim_keyframe_to_tree_widget_item[keyframe] = keyframe_item
+              self.jpc_tree_widget_item_to_color_anim_keyframe[keyframe_item] = keyframe
+        elif chunk.magic == "TDB1":
           # Expand TDB1 chunks by default.
           chunk_item.setExpanded(True)
           
@@ -151,6 +173,11 @@ class JPCTab(QWidget):
       elif chunk.magic == "SSP1":
         self.ssp1_chunk_selected(chunk)
         return
+    
+    keyframe = self.get_color_anim_keyframe_by_tree_item(item)
+    if keyframe:
+      self.color_anim_keyframe_selected(keyframe)
+      return
   
   def bsp1_chunk_selected(self, bsp1):
     layout = self.ui.scrollAreaWidgetContents.layout()
@@ -170,6 +197,20 @@ class JPCTab(QWidget):
     
     self.window().make_color_selector_button(ssp1, "color_prm", "Color PRM", layout)
     self.window().make_color_selector_button(ssp1, "color_env", "Color ENV", layout)
+    
+    spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+    layout.addItem(spacer)
+  
+  def color_anim_keyframe_selected(self, keyframe):
+    layout = self.ui.scrollAreaWidgetContents.layout()
+    
+    self.ui.jpc_sidebar_label.setText("Showing color animation keyframe.")
+    
+    label = QLabel()
+    label.setText("Time: %d" % keyframe.time)
+    layout.addWidget(label)
+    
+    self.window().make_color_selector_button(keyframe, "color", "Color", layout)
     
     spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
     layout.addItem(spacer)
@@ -225,6 +266,18 @@ class JPCTab(QWidget):
       return None
     
     return self.jpc_chunk_to_tree_widget_item[chunk]
+  
+  def get_color_anim_keyframe_by_tree_item(self, item):
+    if item not in self.jpc_tree_widget_item_to_color_anim_keyframe:
+      return None
+    
+    return self.jpc_tree_widget_item_to_color_anim_keyframe[item]
+  
+  def get_jpc_tree_item_by_color_anim_keyframe(self, keyframe):
+    if keyframe not in self.jpc_color_anim_keyframe_to_tree_widget_item:
+      return None
+    
+    return self.jpc_color_anim_keyframe_to_tree_widget_item[keyframe]
   
   def get_jpc_texture_by_tree_item(self, item):
     if item not in self.jpc_tree_widget_item_to_texture:
