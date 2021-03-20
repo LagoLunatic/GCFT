@@ -221,18 +221,6 @@ class GCMTab(QWidget):
     self.window().start_texture_dumper_thread(asset_dumper, dumper_generator, max_val)
   
   
-  def get_gcm_file_by_tree_item(self, item):
-    if item not in self.gcm_tree_widget_item_to_file_entry:
-      return None
-    
-    return self.gcm_tree_widget_item_to_file_entry[item]
-  
-  def get_gcm_tree_item_by_file(self, file):
-    if file not in self.gcm_file_entry_to_tree_widget_item:
-      return None
-    
-    return self.gcm_file_entry_to_tree_widget_item[file]
-  
   def show_gcm_files_tree_context_menu(self, pos):
     if self.gcm is None:
       return
@@ -241,7 +229,7 @@ class GCMTab(QWidget):
     if item is None:
       return
     
-    file = self.get_gcm_file_by_tree_item(item)
+    file = self.gcm_tree_widget_item_to_file_entry.get(item)
     if file is None:
       return
     
@@ -541,7 +529,7 @@ class GCMTab(QWidget):
     if (item.flags() & Qt.ItemIsEditable) == 0:
       return
     
-    file = self.get_gcm_file_by_tree_item(item)
+    file = self.gcm_tree_widget_item_to_file_entry.get(item)
     if file is None:
       return
     if file.is_system_file:
@@ -556,7 +544,7 @@ class GCMTab(QWidget):
       self.change_gcm_file_name(item)
   
   def change_gcm_file_name(self, item):
-    file_entry = self.get_gcm_file_by_tree_item(item)
+    file_entry = self.gcm_tree_widget_item_to_file_entry.get(item)
     new_file_name = item.text(self.gcm_col_name_to_index["File Name"])
     
     if len(new_file_name) == 0:

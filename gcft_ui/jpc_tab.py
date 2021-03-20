@@ -165,7 +165,7 @@ class JPCTab(QWidget):
       return
     item = selected_items[0]
     
-    chunk = self.get_jpc_chunk_by_tree_item(item)
+    chunk = self.jpc_tree_widget_item_to_chunk.get(item)
     if chunk:
       if chunk.magic == "BSP1":
         self.bsp1_chunk_selected(chunk)
@@ -174,7 +174,7 @@ class JPCTab(QWidget):
         self.ssp1_chunk_selected(chunk)
         return
     
-    keyframe = self.get_color_anim_keyframe_by_tree_item(item)
+    keyframe = self.jpc_tree_widget_item_to_color_anim_keyframe.get(item)
     if keyframe:
       self.color_anim_keyframe_selected(keyframe)
       return
@@ -243,54 +243,6 @@ class JPCTab(QWidget):
     QMessageBox.information(self, "JPC extracted", "Successfully extracted all JPA particles from the JPC to \"%s\"." % folder_path)
   
   
-  def get_jpc_particle_by_tree_item(self, item):
-    if item not in self.jpc_tree_widget_item_to_particle:
-      return None
-    
-    return self.jpc_tree_widget_item_to_particle[item]
-  
-  def get_jpc_tree_item_by_particle(self, particle):
-    if particle not in self.jpc_particle_to_tree_widget_item:
-      return None
-    
-    return self.jpc_particle_to_tree_widget_item[particle]
-  
-  def get_jpc_chunk_by_tree_item(self, item):
-    if item not in self.jpc_tree_widget_item_to_chunk:
-      return None
-    
-    return self.jpc_tree_widget_item_to_chunk[item]
-  
-  def get_jpc_tree_item_by_chunk(self, chunk):
-    if chunk not in self.jpc_chunk_to_tree_widget_item:
-      return None
-    
-    return self.jpc_chunk_to_tree_widget_item[chunk]
-  
-  def get_color_anim_keyframe_by_tree_item(self, item):
-    if item not in self.jpc_tree_widget_item_to_color_anim_keyframe:
-      return None
-    
-    return self.jpc_tree_widget_item_to_color_anim_keyframe[item]
-  
-  def get_jpc_tree_item_by_color_anim_keyframe(self, keyframe):
-    if keyframe not in self.jpc_color_anim_keyframe_to_tree_widget_item:
-      return None
-    
-    return self.jpc_color_anim_keyframe_to_tree_widget_item[keyframe]
-  
-  def get_jpc_texture_by_tree_item(self, item):
-    if item not in self.jpc_tree_widget_item_to_texture:
-      return None
-    
-    return self.jpc_tree_widget_item_to_texture[item]
-  
-  def get_jpc_tree_item_by_texture(self, texture):
-    if texture not in self.jpc_texture_to_tree_widget_item:
-      return None
-    
-    return self.jpc_texture_to_tree_widget_item[texture]
-  
   def show_jpc_particles_tree_context_menu(self, pos):
     if self.jpc is None:
       return
@@ -299,7 +251,7 @@ class JPCTab(QWidget):
     if item is None:
       return
     
-    texture = self.get_jpc_texture_by_tree_item(item)
+    texture = self.jpc_tree_widget_item_to_texture.get(item)
     if texture:
       menu = QMenu(self)
       

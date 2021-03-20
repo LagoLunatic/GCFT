@@ -190,12 +190,12 @@ class J3DTab(QWidget):
       return
     item = selected_items[0]
     
-    mdl_entry = self.get_j3d_mdl_entry_by_tree_item(item)
+    mdl_entry = self.j3d_tree_widget_item_to_mdl_entry.get(item)
     if mdl_entry:
       self.mdl_entry_selected(mdl_entry)
       return
     
-    keyframe = self.get_j3d_keyframe_by_tree_item(item)
+    keyframe = self.j3d_tree_widget_item_to_keyframe.get(item)
     if keyframe:
       self.keyframe_selected(keyframe)
       return
@@ -286,54 +286,6 @@ class J3DTab(QWidget):
     else:
       return None
   
-  def get_j3d_chunk_by_tree_item(self, item):
-    if item not in self.j3d_tree_widget_item_to_chunk:
-      return None
-    
-    return self.j3d_tree_widget_item_to_chunk[item]
-  
-  def get_j3d_tree_item_by_chunk(self, chunk):
-    if chunk not in self.j3d_chunk_to_tree_widget_item:
-      return None
-    
-    return self.j3d_chunk_to_tree_widget_item[chunk]
-  
-  def get_j3d_texture_by_tree_item(self, item):
-    if item not in self.j3d_tree_widget_item_to_texture:
-      return None
-    
-    return self.j3d_tree_widget_item_to_texture[item]
-  
-  def get_j3d_tree_item_by_texture(self, texture):
-    if texture not in self.j3d_texture_to_tree_widget_item:
-      return None
-    
-    return self.j3d_texture_to_tree_widget_item[texture]
-  
-  def get_j3d_mdl_entry_by_tree_item(self, item):
-    if item not in self.j3d_tree_widget_item_to_mdl_entry:
-      return None
-    
-    return self.j3d_tree_widget_item_to_mdl_entry[item]
-  
-  def get_j3d_tree_item_by_mdl_entry(self, mdl_entry):
-    if mdl_entry not in self.j3d_mdl_entry_to_tree_widget_item:
-      return None
-    
-    return self.j3d_mdl_entry_to_tree_widget_item[mdl_entry]
-  
-  def get_j3d_keyframe_by_tree_item(self, item):
-    if item not in self.j3d_tree_widget_item_to_keyframe:
-      return None
-    
-    return self.j3d_tree_widget_item_to_keyframe[item]
-  
-  def get_j3d_tree_item_by_keyframe(self, keyframe):
-    if keyframe not in self.j3d_keyframe_to_tree_widget_item:
-      return None
-    
-    return self.j3d_keyframe_to_tree_widget_item[keyframe]
-  
   def show_j3d_chunks_tree_context_menu(self, pos):
     if self.j3d is None:
       return
@@ -342,7 +294,7 @@ class J3DTab(QWidget):
     if item is None:
       return
     
-    texture = self.get_j3d_texture_by_tree_item(item)
+    texture = self.j3d_tree_widget_item_to_texture.get(item)
     if texture:
       menu = QMenu(self)
       
@@ -409,5 +361,5 @@ class J3DTab(QWidget):
     texture_total_size += data_len(texture.palette_data)
     texture_size_str = self.window().stringify_number(texture_total_size, min_hex_chars=5)
     
-    item = self.get_j3d_tree_item_by_texture(texture)
+    item = self.j3d_texture_to_tree_widget_item.get(texture)
     item.setText(self.j3d_col_name_to_index["Size"], texture_size_str)

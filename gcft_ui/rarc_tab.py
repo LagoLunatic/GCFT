@@ -327,30 +327,6 @@ class RARCTab(QWidget):
       f.write(out_str)
   
   
-  def get_rarc_file_by_tree_item(self, item):
-    if item not in self.rarc_tree_widget_item_to_file_entry:
-      return None
-    
-    return self.rarc_tree_widget_item_to_file_entry[item]
-  
-  def get_rarc_tree_item_by_file(self, file):
-    if file not in self.rarc_file_entry_to_tree_widget_item:
-      return None
-    
-    return self.rarc_file_entry_to_tree_widget_item[file]
-  
-  def get_rarc_node_by_tree_item(self, item):
-    if item not in self.rarc_tree_widget_item_to_node:
-      return None
-    
-    return self.rarc_tree_widget_item_to_node[item]
-  
-  def get_rarc_tree_item_by_node(self, node):
-    if node not in self.rarc_node_to_tree_widget_item:
-      return None
-    
-    return self.rarc_node_to_tree_widget_item[node]
-  
   def show_rarc_files_tree_context_menu(self, pos):
     if self.rarc is None:
       return
@@ -359,7 +335,7 @@ class RARCTab(QWidget):
     if item is None:
       return
     
-    node = self.get_rarc_node_by_tree_item(item)
+    node = self.rarc_tree_widget_item_to_node.get(item)
     if node:
       # TODO: Implement extracting/replacing folders
       menu = QMenu(self)
@@ -372,7 +348,7 @@ class RARCTab(QWidget):
         self.ui.actionDeleteRARCFolder.setData(node)
       menu.exec_(self.ui.rarc_files_tree.mapToGlobal(pos))
     else:
-      file = self.get_rarc_file_by_tree_item(item)
+      file = self.rarc_tree_widget_item_to_file_entry.get(item)
       if file is None:
         return
       
@@ -429,7 +405,7 @@ class RARCTab(QWidget):
     
     # Update changed file size
     file_size_str = self.window().stringify_number(data_len(file.data))
-    item = self.get_rarc_tree_item_by_file(file)
+    item = self.rarc_file_entry_to_tree_widget_item.get(file)
     item.setText(self.rarc_col_name_to_index["File Size"], file_size_str)
   
   def delete_file_in_rarc(self):
@@ -442,8 +418,8 @@ class RARCTab(QWidget):
     
     self.rarc.delete_file(file_entry)
     
-    file_item = self.get_rarc_tree_item_by_file(file_entry)
-    dir_item = self.get_rarc_tree_item_by_node(node)
+    file_item = self.rarc_file_entry_to_tree_widget_item.get(file_entry)
+    dir_item = self.rarc_node_to_tree_widget_item.get(node)
     dir_item.removeChild(file_item)
     del self.rarc_file_entry_to_tree_widget_item[file_entry]
     del self.rarc_tree_widget_item_to_file_entry[file_item]
@@ -467,7 +443,7 @@ class RARCTab(QWidget):
     
     # Update changed file size
     file_size_str = self.window().stringify_number(data_len(file.data))
-    item = self.get_rarc_tree_item_by_file(file)
+    item = self.rarc_file_entry_to_tree_widget_item.get(file)
     item.setText(self.rarc_col_name_to_index["File Size"], file_size_str)
   
   def open_j3d_in_rarc(self):
@@ -489,7 +465,7 @@ class RARCTab(QWidget):
     
     # Update changed file size
     file_size_str = self.window().stringify_number(data_len(file_entry.data))
-    item = self.get_rarc_tree_item_by_file(file_entry)
+    item = self.rarc_file_entry_to_tree_widget_item.get(file_entry)
     item.setText(self.rarc_col_name_to_index["File Size"], file_size_str)
   
   def add_file_to_rarc_by_path(self, file_path):
@@ -512,7 +488,7 @@ class RARCTab(QWidget):
     file_index = self.rarc.file_entries.index(file_entry)
     file_index_str = self.window().stringify_number(file_index, min_hex_chars=4)
     
-    parent_dir_item = self.get_rarc_tree_item_by_node(parent_node)
+    parent_dir_item = self.rarc_node_to_tree_widget_item.get(parent_node)
     file_item = QTreeWidgetItem([file_entry.name, "", file_index_str, file_id_str, file_size_str])
     file_item.setFlags(file_item.flags() | Qt.ItemIsEditable)
     index_of_file_in_dir = parent_node.files.index(file_entry)
@@ -575,8 +551,8 @@ class RARCTab(QWidget):
     
     self.rarc.delete_directory(dir_entry)
     
-    dir_item = self.get_rarc_tree_item_by_file(dir_entry)
-    parent_dir_item = self.get_rarc_tree_item_by_node(dir_entry.parent_node)
+    dir_item = self.rarc_file_entry_to_tree_widget_item.get(dir_entry)
+    parent_dir_item = self.rarc_node_to_tree_widget_item.get(dir_entry.parent_node)
     parent_dir_item.removeChild(dir_item)
     del self.rarc_file_entry_to_tree_widget_item[dir_entry]
     del self.rarc_tree_widget_item_to_file_entry[dir_item]
@@ -586,7 +562,7 @@ class RARCTab(QWidget):
     if (item.flags() & Qt.ItemIsEditable) == 0:
       return
     
-    node = self.get_rarc_node_by_tree_item(item)
+    node = self.rarc_tree_widget_item_to_node.get(item)
     
     # Allow editing only certain columns.
     if node is not None:
@@ -605,8 +581,8 @@ class RARCTab(QWidget):
       self.change_rarc_file_id(item)
   
   def change_rarc_file_name(self, item):
-    node = self.get_rarc_node_by_tree_item(item)
-    file_entry = self.get_rarc_file_by_tree_item(item)
+    node = self.rarc_tree_widget_item_to_node.get(item)
+    file_entry = self.rarc_tree_widget_item_to_file_entry.get(item)
     new_file_name = item.text(self.rarc_col_name_to_index["File Name"])
     
     if node is not None:
@@ -640,7 +616,7 @@ class RARCTab(QWidget):
     item.setText(self.rarc_col_name_to_index["File Name"], new_file_name)
   
   def change_rarc_node_type(self, item):
-    node = self.get_rarc_node_by_tree_item(item)
+    node = self.rarc_tree_widget_item_to_node.get(item)
     new_node_type = item.text(self.rarc_col_name_to_index["Folder Type"])
     
     if len(new_node_type) == 0:
@@ -661,7 +637,7 @@ class RARCTab(QWidget):
     item.setText(self.rarc_col_name_to_index["Folder Type"], new_node_type)
   
   def change_rarc_file_id(self, item):
-    file_entry = self.get_rarc_file_by_tree_item(item)
+    file_entry = self.rarc_tree_widget_item_to_file_entry.get(item)
     new_file_id_str = item.text(self.rarc_col_name_to_index["File ID"])
     
     if self.window().display_hexadecimal_numbers:
