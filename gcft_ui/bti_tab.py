@@ -116,7 +116,20 @@ class BTITab(QWidget):
     self.import_bti_by_data(data, bti_name)
   
   def import_bti_by_data(self, data, bti_name):
+    prev_bti = self.bti
     self.bti = BTIFile(data)
+    
+    try:
+      self.reload_bti_image()
+    except Exception as e:
+      self.bti = prev_bti # Revert back to whatever BTI was already loaded and abort
+      stack_trace = traceback.format_exc()
+      error_message_title = "Failed to render BTI image"
+      error_message = "Failed to render BTI image with error:\n%s\n\n%s" % (str(e), stack_trace)
+      QMessageBox.critical(self, error_message_title, error_message)
+      return
+    
+    self.original_bti_image = self.bti_image
     
     self.bti_name = bti_name
     
@@ -161,9 +174,6 @@ class BTITab(QWidget):
     else:
       self.ui.bti_palette_format.setDisabled(True)
     
-    
-    self.reload_bti_image()
-    self.original_bti_image = self.bti_image
     
     self.ui.export_bti.setDisabled(False)
     self.ui.export_bti_image.setDisabled(False)
