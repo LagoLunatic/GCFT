@@ -339,7 +339,7 @@ class J3DTab(QWidget):
     self.window().set_tab_by_name("BTI Images")
   
   def replace_image_in_j3d(self):
-    texture = self.ui.actionOpenJ3DImage.data()
+    texture = self.ui.actionReplaceJ3DImage.data()
     
     self.bti_tab.bti.save_changes()
     

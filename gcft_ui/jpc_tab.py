@@ -293,7 +293,7 @@ class JPCTab(QWidget):
     self.window().set_tab_by_name("BTI Images")
   
   def replace_image_in_jpc(self):
-    texture = self.ui.actionOpenJPCImage.data()
+    texture = self.ui.actionReplaceJPCImage.data()
     
     self.bti_tab.bti.save_changes()
     
