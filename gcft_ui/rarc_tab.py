@@ -562,13 +562,26 @@ class RARCTab(QWidget):
     
     self.rarc.delete_directory(dir_entry)
     
+    self.remove_folder_from_files_tree(dir_entry)
+    
+    self.update_all_displayed_file_indexes_and_ids()
+  
+  def remove_folder_from_files_tree(self, dir_entry):
     dir_item = self.rarc_file_entry_to_tree_widget_item.get(dir_entry)
     parent_dir_item = self.rarc_node_to_tree_widget_item.get(dir_entry.parent_node)
     parent_dir_item.removeChild(dir_item)
     del self.rarc_file_entry_to_tree_widget_item[dir_entry]
     del self.rarc_tree_widget_item_to_file_entry[dir_item]
     
-    self.update_all_displayed_file_indexes_and_ids()
+    # Recursively delete children from the dictionaries.
+    for child_item in dir_item.takeChildren():
+      child_file_entry = self.rarc_tree_widget_item_to_file_entry[child_item]
+      if child_file_entry.is_dir:
+        self.remove_folder_from_files_tree(child_file_entry)
+      else:
+        dir_item.removeChild(child_item)
+        del self.rarc_file_entry_to_tree_widget_item[child_file_entry]
+        del self.rarc_tree_widget_item_to_file_entry[child_item]
   
   
   def edit_rarc_files_tree_item_text(self, item, column):
