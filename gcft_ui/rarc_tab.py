@@ -257,6 +257,19 @@ class RARCTab(QWidget):
       self.rarc_file_entry_to_tree_widget_item[file_entry] = item
       self.rarc_tree_widget_item_to_file_entry[item] = file_entry
   
+  def update_all_displayed_file_indexes_and_ids(self):
+    # Update all the displayed file indexes in case they got shuffled around by adding/removing files/directories.
+    for file_entry, item in self.rarc_file_entry_to_tree_widget_item.items():
+      if file_entry.is_dir:
+        continue
+      
+      file_index = self.rarc.file_entries.index(file_entry)
+      file_index_str = self.window().stringify_number(file_index, min_hex_chars=4)
+      item.setText(self.rarc_col_name_to_index["File Index"], file_index_str)
+      
+      file_id_str = self.window().stringify_number(file_entry.id, min_hex_chars=4)
+      item.setText(self.rarc_col_name_to_index["File ID"], file_id_str)
+  
   def export_rarc_by_path(self, rarc_path):
     self.rarc.save_changes()
     
@@ -423,6 +436,8 @@ class RARCTab(QWidget):
     dir_item.removeChild(file_item)
     del self.rarc_file_entry_to_tree_widget_item[file_entry]
     del self.rarc_tree_widget_item_to_file_entry[file_item]
+    
+    self.update_all_displayed_file_indexes_and_ids()
   
   def open_image_in_rarc(self):
     file_entry = self.ui.actionOpenRARCImage.data()
@@ -496,6 +511,8 @@ class RARCTab(QWidget):
     
     self.rarc_file_entry_to_tree_widget_item[file_entry] = file_item
     self.rarc_tree_widget_item_to_file_entry[file_item] = file_entry
+    
+    self.update_all_displayed_file_indexes_and_ids()
   
   def add_folder_to_rarc(self):
     parent_node = self.ui.actionAddRARCFolder.data()
@@ -533,13 +550,7 @@ class RARCTab(QWidget):
       # Add the . and .. relative dir entries.
       self.add_rarc_file_entry_to_files_tree(child_file_entry)
     
-    # Update all the displayed file indexes in case they got shuffled around by adding a new directory.
-    for file_entry, item in self.rarc_file_entry_to_tree_widget_item.items():
-      if file_entry.is_dir:
-        continue
-      file_index = self.rarc.file_entries.index(file_entry)
-      file_index_str = self.window().stringify_number(file_index, min_hex_chars=4)
-      item.setText(self.rarc_col_name_to_index["File Index"], file_index_str)
+    self.update_all_displayed_file_indexes_and_ids()
   
   def delete_folder_in_rarc(self):
     node = self.ui.actionDeleteRARCFolder.data()
@@ -556,6 +567,8 @@ class RARCTab(QWidget):
     parent_dir_item.removeChild(dir_item)
     del self.rarc_file_entry_to_tree_widget_item[dir_entry]
     del self.rarc_tree_widget_item_to_file_entry[dir_item]
+    
+    self.update_all_displayed_file_indexes_and_ids()
   
   
   def edit_rarc_files_tree_item_text(self, item, column):
