@@ -591,12 +591,15 @@ class RARCTab(QWidget):
     node = self.rarc_tree_widget_item_to_node.get(item)
     
     # Allow editing only certain columns.
+    allowed_column_indexes = []
+    allowed_column_indexes.append(self.rarc_col_name_to_index["File Name"])
     if node is not None:
-      if column in [self.rarc_col_name_to_index["File Name"], self.rarc_col_name_to_index["Folder Type"]]: 
-        self.ui.rarc_files_tree.editItem(item, column)
+      allowed_column_indexes.append(self.rarc_col_name_to_index["Folder Type"])
     else:
-      if column in [self.rarc_col_name_to_index["File Name"], self.rarc_col_name_to_index["File ID"]]: 
-        self.ui.rarc_files_tree.editItem(item, column)
+      if not self.rarc.keep_file_ids_synced_with_indexes:
+        allowed_column_indexes.append(self.rarc_col_name_to_index["File ID"])
+    if column in allowed_column_indexes: 
+      self.ui.rarc_files_tree.editItem(item, column)
   
   def rarc_file_tree_item_text_changed(self, item, column):
     if column == self.rarc_col_name_to_index["File Name"]:
