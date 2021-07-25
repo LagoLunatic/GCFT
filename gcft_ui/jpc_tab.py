@@ -253,13 +253,16 @@ class JPCTab(QWidget):
     
     texture = self.jpc_tree_widget_item_to_texture.get(item)
     if texture:
+      particle_item = item.parent().parent()
+      particle = self.jpc_tree_widget_item_to_particle.get(particle_item)
+      
       menu = QMenu(self)
       
       menu.addAction(self.ui.actionOpenJPCImage)
       self.ui.actionOpenJPCImage.setData(texture)
         
       menu.addAction(self.ui.actionReplaceJPCImage)
-      self.ui.actionReplaceJPCImage.setData(texture)
+      self.ui.actionReplaceJPCImage.setData((particle, texture))
       if self.bti_tab.bti is None:
         self.ui.actionReplaceJPCImage.setDisabled(True)
       else:
@@ -293,7 +296,26 @@ class JPCTab(QWidget):
     self.window().set_tab_by_name("BTI Images")
   
   def replace_image_in_jpc(self):
-    texture = self.ui.actionReplaceJPCImage.data()
+    particle, texture = self.ui.actionReplaceJPCImage.data()
+    
+    num_particles_sharing_texture = 0
+    for other_particle in self.jpc.particles:
+      for other_texture_id in other_particle.tdb1.texture_ids:
+        other_texture = self.jpc.textures[other_texture_id]
+        if other_texture == texture:
+          num_particles_sharing_texture += 1
+    
+    if num_particles_sharing_texture > 1:
+      # TODO: Add an option to create a new texture for this particle and replace that, so that editing the texture for all particles isn't the only choice.
+      message = "The texture you are about to replace, '%s', is used by %d different particles in this JPC. If you replace it, it will affect all %d of those particles.\n\nAre you sure you want to replace this texture?" % (texture.filename, num_particles_sharing_texture, num_particles_sharing_texture)
+      response = QMessageBox.question(self, 
+        "Texture used by multiple particles",
+        message,
+        QMessageBox.Cancel | QMessageBox.Yes,
+        QMessageBox.Cancel
+      )
+      if response != QMessageBox.Yes:
+        return
     
     self.bti_tab.bti.save_changes()
     
