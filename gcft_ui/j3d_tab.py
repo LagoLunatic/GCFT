@@ -120,10 +120,10 @@ class J3DTab(QWidget):
           # We also don't display the 0x20 byte size of any of the headers.
           texture_total_size = 0
           if texture.image_data_offset+texture.header_offset not in seen_image_data_offsets:
-            texture_total_size += data_len(texture.image_data)
+            texture_total_size += pad_offset_to_nearest(data_len(texture.image_data), 0x20)
             seen_image_data_offsets.append(texture.image_data_offset+texture.header_offset)
           if texture.palette_data_offset+texture.header_offset not in seen_palette_data_offsets:
-            texture_total_size += data_len(texture.palette_data)
+            texture_total_size += pad_offset_to_nearest(data_len(texture.palette_data), 0x20)
             seen_palette_data_offsets.append(texture.palette_data_offset+texture.header_offset)
           
           if texture_total_size == 0:
