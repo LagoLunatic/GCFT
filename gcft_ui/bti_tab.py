@@ -9,7 +9,7 @@ from PySide2.QtCore import *
 from PySide2.QtWidgets import *
 
 from wwlib.bti import BTI, BTIFile, WrapMode, FilterMode
-from wwlib.texture_utils import ImageFormat, PaletteFormat
+from wwlib.texture_utils import ImageFormat, PaletteFormat, MAX_COLORS_FOR_IMAGE_FORMAT
 from gcft_ui.uic.ui_bti_tab import Ui_BTITab
 from gcft_paths import ASSETS_PATH
 from PIL import Image
@@ -44,6 +44,8 @@ class BTITab(QWidget):
     
     self.ui.bti_file_size.setText("")
     self.ui.bti_resolution.setText("")
+    self.ui.bti_num_colors.setText("")
+    self.ui.bti_max_colors.setText("")
     
     checkerboard_path = os.path.join(ASSETS_PATH, "checkerboard.png")
     checkerboard_path = checkerboard_path.replace("\\", "/")
@@ -190,6 +192,12 @@ class BTITab(QWidget):
     resolution_str = "%dx%d" % (self.bti_image.width, self.bti_image.height)
     self.ui.bti_file_size.setText(file_size_str)
     self.ui.bti_resolution.setText(resolution_str)
+    if self.bti.needs_palettes():
+      self.ui.bti_num_colors.setText("%d" % self.bti.num_colors)
+      self.ui.bti_max_colors.setText("%d" % MAX_COLORS_FOR_IMAGE_FORMAT[self.bti.image_format])
+    else:
+      self.ui.bti_num_colors.setText("N/A")
+      self.ui.bti_max_colors.setText("N/A")
     
     self.ui.bti_image_label.setFixedWidth(self.bti_image.width)
     self.ui.bti_image_label.setFixedHeight(self.bti_image.height)

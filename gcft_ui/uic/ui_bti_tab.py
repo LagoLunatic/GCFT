@@ -102,68 +102,68 @@ class Ui_BTITab(object):
         self.label = QLabel(BTITab)
         self.label.setObjectName(u"label")
 
-        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label)
+        self.formLayout.setWidget(4, QFormLayout.LabelRole, self.label)
 
         self.bti_image_format = QComboBox(BTITab)
         self.bti_image_format.setObjectName(u"bti_image_format")
         self.bti_image_format.setMinimumSize(QSize(80, 0))
 
-        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.bti_image_format)
+        self.formLayout.setWidget(4, QFormLayout.FieldRole, self.bti_image_format)
 
         self.label_2 = QLabel(BTITab)
         self.label_2.setObjectName(u"label_2")
 
-        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.label_2)
+        self.formLayout.setWidget(5, QFormLayout.LabelRole, self.label_2)
 
         self.bti_palette_format = QComboBox(BTITab)
         self.bti_palette_format.setObjectName(u"bti_palette_format")
 
-        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.bti_palette_format)
+        self.formLayout.setWidget(5, QFormLayout.FieldRole, self.bti_palette_format)
 
         self.label_3 = QLabel(BTITab)
         self.label_3.setObjectName(u"label_3")
 
-        self.formLayout.setWidget(4, QFormLayout.LabelRole, self.label_3)
+        self.formLayout.setWidget(6, QFormLayout.LabelRole, self.label_3)
 
         self.bti_wrap_s = QComboBox(BTITab)
         self.bti_wrap_s.setObjectName(u"bti_wrap_s")
 
-        self.formLayout.setWidget(4, QFormLayout.FieldRole, self.bti_wrap_s)
+        self.formLayout.setWidget(6, QFormLayout.FieldRole, self.bti_wrap_s)
 
         self.label_4 = QLabel(BTITab)
         self.label_4.setObjectName(u"label_4")
 
-        self.formLayout.setWidget(5, QFormLayout.LabelRole, self.label_4)
+        self.formLayout.setWidget(7, QFormLayout.LabelRole, self.label_4)
 
         self.bti_wrap_t = QComboBox(BTITab)
         self.bti_wrap_t.setObjectName(u"bti_wrap_t")
 
-        self.formLayout.setWidget(5, QFormLayout.FieldRole, self.bti_wrap_t)
+        self.formLayout.setWidget(7, QFormLayout.FieldRole, self.bti_wrap_t)
 
         self.label_5 = QLabel(BTITab)
         self.label_5.setObjectName(u"label_5")
 
-        self.formLayout.setWidget(6, QFormLayout.LabelRole, self.label_5)
+        self.formLayout.setWidget(8, QFormLayout.LabelRole, self.label_5)
 
         self.bti_min_filter = QComboBox(BTITab)
         self.bti_min_filter.setObjectName(u"bti_min_filter")
 
-        self.formLayout.setWidget(6, QFormLayout.FieldRole, self.bti_min_filter)
+        self.formLayout.setWidget(8, QFormLayout.FieldRole, self.bti_min_filter)
 
         self.label_6 = QLabel(BTITab)
         self.label_6.setObjectName(u"label_6")
 
-        self.formLayout.setWidget(7, QFormLayout.LabelRole, self.label_6)
+        self.formLayout.setWidget(9, QFormLayout.LabelRole, self.label_6)
 
         self.bti_mag_filter = QComboBox(BTITab)
         self.bti_mag_filter.setObjectName(u"bti_mag_filter")
 
-        self.formLayout.setWidget(7, QFormLayout.FieldRole, self.bti_mag_filter)
+        self.formLayout.setWidget(9, QFormLayout.FieldRole, self.bti_mag_filter)
 
         self.label_7 = QLabel(BTITab)
         self.label_7.setObjectName(u"label_7")
 
-        self.formLayout.setWidget(8, QFormLayout.LabelRole, self.label_7)
+        self.formLayout.setWidget(10, QFormLayout.LabelRole, self.label_7)
 
         self.bti_alpha_setting = QLineEdit(BTITab)
         self.bti_alpha_setting.setObjectName(u"bti_alpha_setting")
@@ -174,12 +174,12 @@ class Ui_BTITab(object):
         self.bti_alpha_setting.setSizePolicy(sizePolicy1)
         self.bti_alpha_setting.setMaximumSize(QSize(35, 16777215))
 
-        self.formLayout.setWidget(8, QFormLayout.FieldRole, self.bti_alpha_setting)
+        self.formLayout.setWidget(10, QFormLayout.FieldRole, self.bti_alpha_setting)
 
         self.label_8 = QLabel(BTITab)
         self.label_8.setObjectName(u"label_8")
 
-        self.formLayout.setWidget(9, QFormLayout.LabelRole, self.label_8)
+        self.formLayout.setWidget(11, QFormLayout.LabelRole, self.label_8)
 
         self.bti_min_lod = QLineEdit(BTITab)
         self.bti_min_lod.setObjectName(u"bti_min_lod")
@@ -187,12 +187,12 @@ class Ui_BTITab(object):
         self.bti_min_lod.setSizePolicy(sizePolicy1)
         self.bti_min_lod.setMaximumSize(QSize(35, 16777215))
 
-        self.formLayout.setWidget(9, QFormLayout.FieldRole, self.bti_min_lod)
+        self.formLayout.setWidget(11, QFormLayout.FieldRole, self.bti_min_lod)
 
         self.label_9 = QLabel(BTITab)
         self.label_9.setObjectName(u"label_9")
 
-        self.formLayout.setWidget(10, QFormLayout.LabelRole, self.label_9)
+        self.formLayout.setWidget(12, QFormLayout.LabelRole, self.label_9)
 
         self.bti_max_lod = QLineEdit(BTITab)
         self.bti_max_lod.setObjectName(u"bti_max_lod")
@@ -200,12 +200,12 @@ class Ui_BTITab(object):
         self.bti_max_lod.setSizePolicy(sizePolicy1)
         self.bti_max_lod.setMaximumSize(QSize(35, 16777215))
 
-        self.formLayout.setWidget(10, QFormLayout.FieldRole, self.bti_max_lod)
+        self.formLayout.setWidget(12, QFormLayout.FieldRole, self.bti_max_lod)
 
         self.label_10 = QLabel(BTITab)
         self.label_10.setObjectName(u"label_10")
 
-        self.formLayout.setWidget(11, QFormLayout.LabelRole, self.label_10)
+        self.formLayout.setWidget(13, QFormLayout.LabelRole, self.label_10)
 
         self.bti_lod_bias = QLineEdit(BTITab)
         self.bti_lod_bias.setObjectName(u"bti_lod_bias")
@@ -213,7 +213,7 @@ class Ui_BTITab(object):
         self.bti_lod_bias.setSizePolicy(sizePolicy1)
         self.bti_lod_bias.setMaximumSize(QSize(45, 16777215))
 
-        self.formLayout.setWidget(11, QFormLayout.FieldRole, self.bti_lod_bias)
+        self.formLayout.setWidget(13, QFormLayout.FieldRole, self.bti_lod_bias)
 
         self.label_12 = QLabel(BTITab)
         self.label_12.setObjectName(u"label_12")
@@ -229,6 +229,26 @@ class Ui_BTITab(object):
         self.bti_resolution.setObjectName(u"bti_resolution")
 
         self.formLayout.setWidget(1, QFormLayout.FieldRole, self.bti_resolution)
+
+        self.label_13 = QLabel(BTITab)
+        self.label_13.setObjectName(u"label_13")
+
+        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label_13)
+
+        self.bti_num_colors = QLabel(BTITab)
+        self.bti_num_colors.setObjectName(u"bti_num_colors")
+
+        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.bti_num_colors)
+
+        self.label_15 = QLabel(BTITab)
+        self.label_15.setObjectName(u"label_15")
+
+        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.label_15)
+
+        self.bti_max_colors = QLabel(BTITab)
+        self.bti_max_colors.setObjectName(u"bti_max_colors")
+
+        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.bti_max_colors)
 
 
         self.horizontalLayout_8.addLayout(self.formLayout)
@@ -263,5 +283,9 @@ class Ui_BTITab(object):
         self.label_12.setText(QCoreApplication.translate("BTITab", u"Resolution", None))
         self.bti_file_size.setText(QCoreApplication.translate("BTITab", u"123", None))
         self.bti_resolution.setText(QCoreApplication.translate("BTITab", u"123x123", None))
+        self.label_13.setText(QCoreApplication.translate("BTITab", u"Num Colors", None))
+        self.bti_num_colors.setText(QCoreApplication.translate("BTITab", u"123", None))
+        self.label_15.setText(QCoreApplication.translate("BTITab", u"Max Colors", None))
+        self.bti_max_colors.setText(QCoreApplication.translate("BTITab", u"123", None))
     # retranslateUi
 
