@@ -28,4 +28,7 @@ except ImportError:
 
 qApp = QApplication(sys.argv)
 window = GCFTWindow()
+if len(sys.argv) == 2:
+  file_path = sys.argv[1]
+  window.open_file_by_path(file_path)
 sys.exit(qApp.exec_())

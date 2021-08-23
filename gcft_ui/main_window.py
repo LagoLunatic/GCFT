@@ -102,6 +102,30 @@ class GCFTWindow(QMainWindow):
         return
     print("No tab with name %s found." % tab_name)
   
+  def get_open_func_and_tab_name_for_file_path(self, file_path):
+    file_ext = os.path.splitext(file_path)[1]
+    
+    if file_ext in GCM_FILE_EXTS:
+      return (self.gcm_tab.import_gcm_by_path, "GCM ISOs")
+    elif file_ext in RARC_FILE_EXTS:
+      return (self.rarc_tab.import_rarc_by_path, "RARC Archives")
+    elif file_ext in BTI_FILE_EXTS:
+      return (self.bti_tab.import_bti_by_path, "BTI Images")
+    elif file_ext in [".png"]:
+      return (self.bti_tab.import_bti_image_by_path, "BTI Images")
+    elif file_ext in J3D_FILE_EXTS:
+      return (self.j3d_tab.import_j3d_by_path, "J3D Files")
+    elif file_ext in JPC_FILE_EXTS:
+      return (self.jpc_tab.import_jpc_by_path, "JPC Particle Archives")
+  
+  def open_file_by_path(self, file_path):
+    open_action = self.get_open_func_and_tab_name_for_file_path(file_path)
+    if open_action is not None:
+      func_to_call, tab_name = open_action
+      func_to_call(file_path)
+      self.set_tab_by_name(tab_name)
+  
+  
   
   def generic_do_gui_file_operation(self, op_callback, is_opening, is_saving, is_folder, file_type, file_filter="", default_file_name=None):
     if not is_opening and not is_saving:
@@ -350,29 +374,13 @@ class GCFTWindow(QMainWindow):
   def closeEvent(self, event):
     self.save_settings()
   
-  def get_drop_action_for_file_path(self, file_path):
-    file_ext = os.path.splitext(file_path)[1]
-    
-    if file_ext in GCM_FILE_EXTS:
-      return (self.gcm_tab.import_gcm_by_path, "GCM ISOs")
-    elif file_ext in RARC_FILE_EXTS:
-      return (self.rarc_tab.import_rarc_by_path, "RARC Archives")
-    elif file_ext in BTI_FILE_EXTS:
-      return (self.bti_tab.import_bti_by_path, "BTI Images")
-    elif file_ext in [".png"]:
-      return (self.bti_tab.import_bti_image_by_path, "BTI Images")
-    elif file_ext in J3D_FILE_EXTS:
-      return (self.j3d_tab.import_j3d_by_path, "J3D Files")
-    elif file_ext in JPC_FILE_EXTS:
-      return (self.jpc_tab.import_jpc_by_path, "JPC Particle Archives")
-  
   def dragEnterEvent(self, event):
     mime_data = event.mimeData()
     if mime_data.hasUrls:
       url = mime_data.urls()[0]
       file_path = url.toLocalFile()
-      drop_action = self.get_drop_action_for_file_path(file_path)
-      if drop_action is not None:
+      open_action = self.get_open_func_and_tab_name_for_file_path(file_path)
+      if open_action is not None:
         event.acceptProposedAction()
   
   def dropEvent(self, event):
@@ -380,8 +388,4 @@ class GCFTWindow(QMainWindow):
     if mime_data.hasUrls:
       url = mime_data.urls()[0]
       file_path = url.toLocalFile()
-      drop_action = self.get_drop_action_for_file_path(file_path)
-      if drop_action is not None:
-        func_to_call, tab_name = drop_action
-        func_to_call(file_path)
-        self.set_tab_by_name(tab_name)
+      self.open_file_by_path(file_path)
