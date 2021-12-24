@@ -90,6 +90,17 @@ class Ui_RARCTab(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_7)
 
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.sync_file_ids_and_indexes = QCheckBox(RARCTab)
+        self.sync_file_ids_and_indexes.setObjectName(u"sync_file_ids_and_indexes")
+        self.sync_file_ids_and_indexes.setChecked(True)
+
+        self.horizontalLayout_2.addWidget(self.sync_file_ids_and_indexes)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_2)
+
         self.rarc_files_tree = QTreeWidget(RARCTab)
         self.rarc_files_tree.setObjectName(u"rarc_files_tree")
         self.rarc_files_tree.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -122,6 +133,7 @@ class Ui_RARCTab(object):
         self.export_rarc_folder.setText(QCoreApplication.translate("RARCTab", u"Export Folder", None))
         self.dump_all_rarc_textures.setText(QCoreApplication.translate("RARCTab", u"Dump All Textures", None))
         self.export_rarc_to_c_header.setText(QCoreApplication.translate("RARCTab", u"Export File List to C Header", None))
+        self.sync_file_ids_and_indexes.setText(QCoreApplication.translate("RARCTab", u"Sync File IDs and Indexes", None))
         ___qtreewidgetitem = self.rarc_files_tree.headerItem()
         ___qtreewidgetitem.setText(4, QCoreApplication.translate("RARCTab", u"File Size", None));
         ___qtreewidgetitem.setText(3, QCoreApplication.translate("RARCTab", u"File ID", None));

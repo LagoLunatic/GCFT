@@ -79,6 +79,20 @@
     </layout>
    </item>
    <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QCheckBox" name="sync_file_ids_and_indexes">
+       <property name="text">
+        <string>Sync File IDs and Indexes</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <widget class="QTreeWidget" name="rarc_files_tree">
      <property name="editTriggers">
       <set>QAbstractItemView::NoEditTriggers</set>

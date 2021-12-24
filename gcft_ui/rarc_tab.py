@@ -35,6 +35,7 @@ class RARCTab(QWidget):
     self.ui.export_rarc_folder.setDisabled(True)
     self.ui.dump_all_rarc_textures.setDisabled(True)
     self.ui.export_rarc_to_c_header.setDisabled(True)
+    self.ui.sync_file_ids_and_indexes.setDisabled(True)
     
     self.ui.import_rarc.clicked.connect(self.import_rarc)
     self.ui.create_rarc.clicked.connect(self.create_rarc)
@@ -44,6 +45,8 @@ class RARCTab(QWidget):
     self.ui.export_rarc_folder.clicked.connect(self.export_rarc_folder)
     self.ui.dump_all_rarc_textures.clicked.connect(self.dump_all_rarc_textures)
     self.ui.export_rarc_to_c_header.clicked.connect(self.export_rarc_to_c_header)
+    
+    self.ui.sync_file_ids_and_indexes.clicked.connect(self.sync_file_ids_and_indexes_changed)
     
     self.ui.rarc_files_tree.setContextMenuPolicy(Qt.CustomContextMenu)
     self.ui.rarc_files_tree.customContextMenuRequested.connect(self.show_rarc_files_tree_context_menu)
@@ -207,11 +210,14 @@ class RARCTab(QWidget):
     # Expand the root node by default.
     self.ui.rarc_files_tree.topLevelItem(0).setExpanded(True)
     
+    self.ui.sync_file_ids_and_indexes.setChecked(self.rarc.keep_file_ids_synced_with_indexes != 0)
+    
     self.ui.export_rarc.setDisabled(False)
     self.ui.import_folder_over_rarc.setDisabled(False)
     self.ui.export_rarc_folder.setDisabled(False)
     self.ui.dump_all_rarc_textures.setDisabled(False)
     self.ui.export_rarc_to_c_header.setDisabled(False)
+    self.ui.sync_file_ids_and_indexes.setDisabled(False)
   
   def add_rarc_file_entry_to_files_tree(self, file_entry):
     index_of_entry_in_parent_dir = file_entry.parent_node.files.index(file_entry)
@@ -338,6 +344,13 @@ class RARCTab(QWidget):
     
     with open(header_path, "w") as f:
       f.write(out_str)
+  
+  def sync_file_ids_and_indexes_changed(self, checked):
+    self.rarc.keep_file_ids_synced_with_indexes = 1 if checked else 0
+    
+    # Update the displayed file IDs to visually sync them.
+    self.rarc.regenerate_all_file_entries_list()
+    self.update_all_displayed_file_indexes_and_ids()
   
   
   def show_rarc_files_tree_context_menu(self, pos):
