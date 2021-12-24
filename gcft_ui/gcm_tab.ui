@@ -24,16 +24,27 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="export_gcm">
+      <widget class="QPushButton" name="import_folder_over_gcm">
        <property name="text">
-        <string>Export GCM</string>
+        <string>Import Folder Over GCM</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="import_folder_over_gcm">
+      <widget class="QPushButton" name="dump_all_gcm_textures">
        <property name="text">
-        <string>Import Folder Over GCM</string>
+        <string>Dump All Textures</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="export_gcm">
+       <property name="text">
+        <string>Export GCM</string>
        </property>
       </widget>
      </item>
@@ -45,11 +56,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="dump_all_gcm_textures">
-       <property name="text">
-        <string>Dump All Textures</string>
-       </property>
-      </widget>
+      <widget class="QWidget" name="widget" native="true"/>
      </item>
     </layout>
    </item>
