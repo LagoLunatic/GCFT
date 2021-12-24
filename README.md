@@ -46,16 +46,16 @@ Download and install git from here: https://git-scm.com/downloads
 Then clone this repository with git by running this in a command prompt:  
 `git clone --recurse-submodules https://github.com/LagoLunatic/GCFT.git`  
 
-Download and install Python 3.8.2 from here: https://www.python.org/downloads/release/python-382/  
+Download and install Python 3.9.6 from here: https://www.python.org/downloads/release/python-396/  
 "Windows x86-64 executable installer" is the one you want if you're on Windows, "macOS 64-bit installer" if you're on Mac.  
-If you're on Linux, run this command instead: `sudo apt-get install python3.8`  
+If you're on Linux, run this command instead: `sudo apt-get install python3.9`  
 
 Open the GCFT folder in a command prompt and install dependencies by running:  
-`py -3.8 -m pip install -r requirements.txt` (on Windows)  
+`py -3.9 -m pip install -r requirements.txt` (on Windows)  
 `python3 -m pip install -r requirements.txt` (on Mac)  
 `python3 -m pip install $(cat requirements.txt) --user` (on Linux)  
 
 Then run GCFT with:  
-`py -3.8 gcft.py` (on Windows)  
+`py -3.9 gcft.py` (on Windows)  
 `python3 gcft.py` (on Mac)  
 `python3 gcft.py` (on Linux)  
