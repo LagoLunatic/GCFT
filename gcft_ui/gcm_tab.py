@@ -561,8 +561,23 @@ class GCMTab(QWidget):
       QMessageBox.warning(self, "Duplicate file name", "The file name you entered is already used by another file or folder in this directory.")
       item.setText(self.gcm_col_name_to_index["File Name"], file_entry.name)
       return
-  
+    
+    if file_entry.is_dir:
+      del self.gcm.dirs_by_path[file_entry.file_path]
+      del self.gcm.dirs_by_path_lowercase[file_entry.file_path.lower()]
+    else:
+      del self.gcm.files_by_path[file_entry.file_path]
+      del self.gcm.files_by_path_lowercase[file_entry.file_path.lower()]
+    
     file_entry.name = new_file_name
+    file_entry.file_path = file_entry.file_path.rsplit("/", 1)[0] + "/" + new_file_name
+    
+    if file_entry.is_dir:
+      self.gcm.dirs_by_path[file_entry.file_path] = file_entry
+      self.gcm.dirs_by_path_lowercase[file_entry.file_path.lower()] = file_entry
+    else:
+      self.gcm.files_by_path[file_entry.file_path] = file_entry
+      self.gcm.files_by_path_lowercase[file_entry.file_path.lower()] = file_entry
     
     item.setText(self.gcm_col_name_to_index["File Name"], new_file_name)
   
