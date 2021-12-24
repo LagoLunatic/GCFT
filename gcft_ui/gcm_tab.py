@@ -248,7 +248,7 @@ class GCMTab(QWidget):
       menu = QMenu(self)
       
       basename, file_ext = os.path.splitext(file.name)
-      if file_ext == ".bti" or file.file_path == "files/opening.bnr":
+      if file_ext == ".bti" or file_ext == ".bnr":
         menu.addAction(self.ui.actionOpenGCMImage)
         self.ui.actionOpenGCMImage.setData(file)
         
@@ -399,7 +399,8 @@ class GCMTab(QWidget):
     data = self.gcm.get_changed_file_data(file_entry.file_path)
     data = make_copy_data(data)
     
-    if file_entry.file_path == "files/opening.bnr":
+    basename, file_ext = os.path.splitext(file_entry.name)
+    if file_ext == ".bnr":
       image_data = read_bytes(data, 0x20, 0x1800)
       data = BytesIO()
       write_bytes(data, 0x20, image_data)
@@ -409,7 +410,7 @@ class GCMTab(QWidget):
       write_u16(data, 0x04, 32) # Height
       write_u32(data, 0x1C, 0x20) # Image data offset
       
-      bti_name = "opening_bnr"
+      bti_name = basename + "_bnr"
     
     self.bti_tab.import_bti_by_data(data, bti_name)
     
@@ -421,7 +422,8 @@ class GCMTab(QWidget):
     self.bti_tab.bti.save_changes()
     data = make_copy_data(self.bti_tab.bti.data)
     
-    if file_entry.file_path == "files/opening.bnr":
+    basename, file_ext = os.path.splitext(file_entry.name)
+    if file_ext == ".bnr":
       if self.bti_tab.bti.image_format != ImageFormat.RGB5A3 or self.bti_tab.bti.width != 96 or self.bti_tab.bti.height != 32 or data_len(self.bti_tab.bti.image_data) != 0x1800:
         QMessageBox.warning(self, "Invalid banner image", "Invalid banner image. Banner images must be exactly 96x32 pixels in size and use the RGB5A3 image format.")
         return
