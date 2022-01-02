@@ -330,3 +330,5 @@ class JPCTab(QWidget):
     texture.bti.palette_data = make_copy_data(self.bti_tab.bti.palette_data)
     
     texture.bti.save_header_changes()
+    
+    self.window().ui.statusbar.showMessage("Replaced %s." % texture.filename, 3000)

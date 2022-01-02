@@ -363,3 +363,7 @@ class J3DTab(QWidget):
     
     item = self.j3d_texture_to_tree_widget_item.get(texture)
     item.setText(self.j3d_col_name_to_index["Size"], texture_size_str)
+    
+    texture_index = self.j3d.tex1.textures.index(texture)
+    texture_name = self.j3d.tex1.texture_names[texture_index]
+    self.window().ui.statusbar.showMessage("Replaced %s." % texture_name, 3000)

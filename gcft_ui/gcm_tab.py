@@ -390,6 +390,8 @@ class GCMTab(QWidget):
     self.gcm.changed_files[file_entry.file_path] = data
     
     self.update_changed_file_size_in_gcm(file_entry)
+    
+    self.window().ui.statusbar.showMessage("Replaced %s." % file_entry.file_path, 3000)
   
   def open_image_in_gcm(self):
     file_entry = self.ui.actionOpenGCMImage.data()
@@ -436,6 +438,8 @@ class GCMTab(QWidget):
     self.gcm.changed_files[file_entry.file_path] = data
     
     self.update_changed_file_size_in_gcm(file_entry)
+    
+    self.window().ui.statusbar.showMessage("Replaced %s." % file_entry.file_path, 3000)
   
   def open_jpc_in_gcm(self):
     file_entry = self.ui.actionOpenGCMJPC.data()
@@ -458,6 +462,8 @@ class GCMTab(QWidget):
     self.gcm.changed_files[file_entry.file_path] = data
     
     self.update_changed_file_size_in_gcm(file_entry)
+    
+    self.window().ui.statusbar.showMessage("Replaced %s." % file_entry.file_path, 3000)
   
   def open_dol_in_gcm(self):
     file_entry = self.ui.actionOpenGCMDOL.data()
@@ -480,6 +486,8 @@ class GCMTab(QWidget):
     self.gcm.changed_files[file_entry.file_path] = data
     
     self.update_changed_file_size_in_gcm(file_entry)
+    
+    self.window().ui.statusbar.showMessage("Replaced %s." % file_entry.file_path, 3000)
   
   def add_file_to_gcm_by_path(self, file_path):
     dir_entry = self.ui.actionAddGCMFile.data()

@@ -463,16 +463,18 @@ class RARCTab(QWidget):
     self.window().set_tab_by_name("BTI Images")
   
   def replace_image_in_rarc(self):
-    file = self.ui.actionReplaceRARCImage.data()
+    file_entry = self.ui.actionReplaceRARCImage.data()
     
     self.bti_tab.bti.save_changes()
     
-    file.data = make_copy_data(self.bti_tab.bti.data)
+    file_entry.data = make_copy_data(self.bti_tab.bti.data)
     
     # Update changed file size
-    file_size_str = self.window().stringify_number(data_len(file.data))
-    item = self.rarc_file_entry_to_tree_widget_item.get(file)
+    file_size_str = self.window().stringify_number(data_len(file_entry.data))
+    item = self.rarc_file_entry_to_tree_widget_item.get(file_entry)
     item.setText(self.rarc_col_name_to_index["File Size"], file_size_str)
+    
+    self.window().ui.statusbar.showMessage("Replaced %s." % file_entry.name, 3000)
   
   def open_j3d_in_rarc(self):
     file_entry = self.ui.actionOpenRARCJ3D.data()
@@ -495,6 +497,8 @@ class RARCTab(QWidget):
     file_size_str = self.window().stringify_number(data_len(file_entry.data))
     item = self.rarc_file_entry_to_tree_widget_item.get(file_entry)
     item.setText(self.rarc_col_name_to_index["File Size"], file_size_str)
+    
+    self.window().ui.statusbar.showMessage("Replaced %s." % file_entry.name, 3000)
   
   def add_file_to_rarc_by_path(self, file_path):
     parent_node = self.ui.actionAddRARCFile.data()
