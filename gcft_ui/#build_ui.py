@@ -10,7 +10,7 @@ for input_path in glob.glob('*.ui'):
   output_path = "uic/ui_%s.py" % base_name
   
   command = [
-    "pyside2-uic",
+    "pyside6-uic",
     input_path,
     "-o", output_path
   ]

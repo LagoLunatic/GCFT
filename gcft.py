@@ -1,8 +1,8 @@
 #!/usr/bin/python3.9
 
-from PySide2.QtGui import *
-from PySide2.QtCore import *
-from PySide2.QtWidgets import *
+from PySide6.QtGui import *
+from PySide6.QtCore import *
+from PySide6.QtWidgets import *
 
 import sys
 
@@ -42,4 +42,4 @@ window = GCFTWindow()
 if len(sys.argv) == 2:
   file_path = sys.argv[1]
   window.open_file_by_path(file_path)
-sys.exit(qApp.exec_())
+sys.exit(qApp.exec())

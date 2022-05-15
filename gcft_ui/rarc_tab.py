@@ -4,9 +4,9 @@ import re
 import traceback
 from io import BytesIO
 from fs_helpers import *
-from PySide2.QtGui import *
-from PySide2.QtCore import *
-from PySide2.QtWidgets import *
+from PySide6.QtGui import *
+from PySide6.QtCore import *
+from PySide6.QtWidgets import *
 
 from wwlib.rarc import RARC
 from gcft_ui.uic.ui_rarc_tab import Ui_RARCTab
@@ -24,6 +24,9 @@ class RARCTab(QWidget):
     self.display_rarc_dir_indexes = False
     
     self.ui.rarc_files_tree.setColumnWidth(0, 300)
+    
+    # This should be in the .ui file, but PySide6 doesn't compile it correctly.
+    self.ui.rarc_files_tree.setEditTriggers(QAbstractItemView.NoEditTriggers)
     
     self.rarc_col_name_to_index = {}
     for col in range(self.ui.rarc_files_tree.columnCount()):

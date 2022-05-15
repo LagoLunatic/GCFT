@@ -4,9 +4,9 @@ import re
 import traceback
 from io import BytesIO
 from fs_helpers import *
-from PySide2.QtGui import *
-from PySide2.QtCore import *
-from PySide2.QtWidgets import *
+from PySide6.QtGui import *
+from PySide6.QtCore import *
+from PySide6.QtWidgets import *
 
 from wwlib.bti import BTI, BTIFile, WrapMode, FilterMode
 from wwlib.texture_utils import ImageFormat, PaletteFormat, MAX_COLORS_FOR_IMAGE_FORMAT

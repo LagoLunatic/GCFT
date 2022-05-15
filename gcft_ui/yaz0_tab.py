@@ -4,9 +4,9 @@ import re
 import traceback
 from io import BytesIO
 from fs_helpers import *
-from PySide2.QtGui import *
-from PySide2.QtCore import *
-from PySide2.QtWidgets import *
+from PySide6.QtGui import *
+from PySide6.QtCore import *
+from PySide6.QtWidgets import *
 
 from wwlib.yaz0 import Yaz0
 from gcft_ui.uic.ui_yaz0_tab import Ui_Yaz0Tab

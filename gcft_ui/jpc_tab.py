@@ -4,9 +4,9 @@ import re
 import traceback
 from io import BytesIO
 from fs_helpers import *
-from PySide2.QtGui import *
-from PySide2.QtCore import *
-from PySide2.QtWidgets import *
+from PySide6.QtGui import *
+from PySide6.QtCore import *
+from PySide6.QtWidgets import *
 
 from wwlib.jpc import JPC
 from gcft_ui.uic.ui_jpc_tab import Ui_JPCTab

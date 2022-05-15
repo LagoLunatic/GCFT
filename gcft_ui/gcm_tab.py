@@ -4,9 +4,9 @@ import re
 import traceback
 from io import BytesIO
 from fs_helpers import *
-from PySide2.QtGui import *
-from PySide2.QtCore import *
-from PySide2.QtWidgets import *
+from PySide6.QtGui import *
+from PySide6.QtCore import *
+from PySide6.QtWidgets import *
 
 from wwlib.gcm import GCM
 from wwlib.texture_utils import ImageFormat, PaletteFormat
@@ -20,7 +20,11 @@ class GCMTab(QWidget):
     self.ui.setupUi(self)
     
     self.gcm = None
+    
     self.ui.gcm_files_tree.setColumnWidth(0, 300)
+    
+    # This should be in the .ui file, but PySide6 doesn't compile it correctly.
+    self.ui.gcm_files_tree.setEditTriggers(QAbstractItemView.NoEditTriggers)
     
     self.gcm_col_name_to_index = {}
     for col in range(self.ui.gcm_files_tree.columnCount()):

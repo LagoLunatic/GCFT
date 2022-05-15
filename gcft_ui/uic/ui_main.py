@@ -3,23 +3,28 @@
 ################################################################################
 ## Form generated from reading UI file 'main.ui'
 ##
-## Created by: Qt User Interface Compiler version 5.15.2
+## Created by: Qt User Interface Compiler version 6.2.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide2.QtCore import *
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
+from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
+    QMetaObject, QObject, QPoint, QRect,
+    QSize, QTime, QUrl, Qt)
+from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
+    QFont, QFontDatabase, QGradient, QIcon,
+    QImage, QKeySequence, QLinearGradient, QPainter,
+    QPalette, QPixmap, QRadialGradient, QTransform)
+from PySide6.QtWidgets import (QApplication, QMainWindow, QMenuBar, QSizePolicy,
+    QStatusBar, QTabWidget, QVBoxLayout, QWidget)
 
-from gcft_ui.gcm_tab import GCMTab
-from gcft_ui.rarc_tab import RARCTab
 from gcft_ui.bti_tab import BTITab
+from gcft_ui.dol_tab import DOLTab
+from gcft_ui.gcm_tab import GCMTab
 from gcft_ui.j3d_tab import J3DTab
 from gcft_ui.jpc_tab import JPCTab
-from gcft_ui.dol_tab import DOLTab
+from gcft_ui.rarc_tab import RARCTab
 from gcft_ui.yaz0_tab import Yaz0Tab
-
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
