@@ -58,11 +58,7 @@ class Yaz0Tab(QWidget):
       QMessageBox.warning(self, "Already Yaz0 compressed", "The selected file is already Yaz0 compressed. Cannot compress.")
       return
     
-    compression_level = self.ui.compression_level.value()
-    search_depth = compression_level*0x100
-    assert 0 <= search_depth <= 0x1000
-    
-    should_pad_data = self.ui.pad_compressed_files.isChecked()
+    search_depth, should_pad_data = self.get_search_depth_and_should_pad()
     
     # TODO: progress bar?
     comp_data = Yaz0.compress(decomp_data, search_depth=search_depth, should_pad_data=should_pad_data)
@@ -72,3 +68,12 @@ class Yaz0Tab(QWidget):
       f.write(comp_data.read())
     
     QMessageBox.information(self, "Compressed file saved", "Successfully compressed and saved file.")
+  
+  def get_search_depth_and_should_pad(self):
+    compression_level = self.ui.compression_level.value()
+    search_depth = compression_level*0x100
+    assert 0 <= search_depth <= 0x1000
+    
+    should_pad_data = self.ui.pad_compressed_files.isChecked()
+    
+    return (search_depth, should_pad_data)
