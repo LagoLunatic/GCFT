@@ -178,7 +178,7 @@ class RARCTab(QWidget):
     self.rarc_name = os.path.basename(base_dir)
     
     for dir_path, subdir_names, file_names in os.walk(base_dir):
-      # Sort files and folders so they are in the same order (and have the same indexes) as they originally did.
+      # Sort files and folders so they are in the same order as they originally were (and have the same indexes).
       # This is necessary because os.listdir (and os.walk by extension) return names in arbitrary order.
       # Note: We sort these lists in place. This is intentional so the recursion order of os.walk is affected as well.
       file_names.sort()
