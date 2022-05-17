@@ -119,6 +119,11 @@
        <string>File Size</string>
       </property>
      </column>
+     <column>
+      <property name="text">
+       <string>Yaz0 Compressed</string>
+      </property>
+     </column>
     </widget>
    </item>
   </layout>

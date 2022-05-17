@@ -8,7 +8,8 @@ from PySide6.QtGui import *
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 
-from wwlib.rarc import RARC
+from wwlib.rarc import RARC, RARCFileAttrType
+from wwlib.yaz0 import Yaz0
 from gcft_ui.uic.ui_rarc_tab import Ui_RARCTab
 from asset_dumper import AssetDumper
 
@@ -54,7 +55,7 @@ class RARCTab(QWidget):
     self.ui.rarc_files_tree.setContextMenuPolicy(Qt.CustomContextMenu)
     self.ui.rarc_files_tree.customContextMenuRequested.connect(self.show_rarc_files_tree_context_menu)
     self.ui.rarc_files_tree.itemDoubleClicked.connect(self.edit_rarc_files_tree_item_text)
-    self.ui.rarc_files_tree.itemChanged.connect(self.rarc_file_tree_item_text_changed)
+    self.ui.rarc_files_tree.itemChanged.connect(self.rarc_file_tree_item_changed)
     self.ui.actionExtractRARCFile.triggered.connect(self.extract_file_from_rarc)
     self.ui.actionReplaceRARCFile.triggered.connect(self.replace_file_in_rarc)
     self.ui.actionDeleteRARCFile.triggered.connect(self.delete_file_in_rarc)
@@ -207,7 +208,7 @@ class RARCTab(QWidget):
     self.rarc_tree_widget_item_to_file_entry = {}
     
     root_node = self.rarc.nodes[0]
-    root_item = QTreeWidgetItem([root_node.name, root_node.type, "", "", ""])
+    root_item = QTreeWidgetItem([root_node.name, root_node.type, "", "", "", ""])
     root_item.setFlags(root_item.flags() | Qt.ItemIsEditable)
     self.ui.rarc_files_tree.addTopLevelItem(root_item)
     self.rarc_node_to_tree_widget_item[root_node] = root_item
@@ -247,10 +248,10 @@ class RARCTab(QWidget):
         dir_file_index_str = ""
       
       if file_entry.name in [".", ".."]:
-        item = QTreeWidgetItem([file_entry.name, "", dir_file_index_str, "", ""])
+        item = QTreeWidgetItem([file_entry.name, "", dir_file_index_str, "", "", ""])
         parent_item.insertChild(index_of_entry_in_parent_dir, item)
       else:
-        item = QTreeWidgetItem([node.name, node.type, dir_file_index_str, "", ""])
+        item = QTreeWidgetItem([node.name, node.type, dir_file_index_str, "", "", ""])
         item.setFlags(item.flags() | Qt.ItemIsEditable)
         parent_item.insertChild(index_of_entry_in_parent_dir, item)
         
@@ -266,11 +267,31 @@ class RARCTab(QWidget):
       file_index_str = self.window().stringify_number(file_index, min_hex_chars=4)
       
       parent_item = self.rarc_node_to_tree_widget_item[file_entry.parent_node]
-      item = QTreeWidgetItem([file_entry.name, "", file_index_str, file_id_str, file_size_str])
+      item = QTreeWidgetItem([file_entry.name, "", file_index_str, file_id_str, file_size_str, ""])
       item.setFlags(item.flags() | Qt.ItemIsEditable)
       parent_item.insertChild(index_of_entry_in_parent_dir, item)
       self.rarc_file_entry_to_tree_widget_item[file_entry] = item
       self.rarc_tree_widget_item_to_file_entry[item] = file_entry
+      self.update_file_size_and_compression_in_ui(file_entry)
+  
+  def update_file_size_and_compression_in_ui(self, file_entry):
+    item = self.rarc_file_entry_to_tree_widget_item.get(file_entry)
+    
+    self.ui.rarc_files_tree.blockSignals(True)
+    
+    file_size_str = self.window().stringify_number(data_len(file_entry.data))
+    item.setText(self.rarc_col_name_to_index["File Size"], file_size_str)
+    
+    # TODO: Add a Yay0 checkbox and update it here once Yay0 compression is supported.
+    if file_entry.type & RARCFileAttrType.COMPRESSED:
+      if file_entry.type & RARCFileAttrType.YAZ0_COMPRESSED:
+        item.setCheckState(self.rarc_col_name_to_index["Yaz0 Compressed"], Qt.Checked)
+      else:
+        item.setCheckState(self.rarc_col_name_to_index["Yaz0 Compressed"], Qt.Unchecked)
+    else:
+      item.setCheckState(self.rarc_col_name_to_index["Yaz0 Compressed"], Qt.Unchecked)
+    
+    self.ui.rarc_files_tree.blockSignals(False)
   
   def update_all_displayed_file_indexes_and_ids(self):
     # Update all the displayed file indexes in case they got shuffled around by adding/removing files/directories.
@@ -425,23 +446,21 @@ class RARCTab(QWidget):
         menu.exec_(self.ui.rarc_files_tree.mapToGlobal(pos))
   
   def extract_file_from_rarc_by_path(self, file_path):
-    file = self.ui.actionExtractRARCFile.data()
+    file_entry = self.ui.actionExtractRARCFile.data()
     
     with open(file_path, "wb") as f:
-      file.data.seek(0)
-      f.write(file.data.read())
+      file_entry.data.seek(0)
+      f.write(file_entry.data.read())
   
   def replace_file_in_rarc_by_path(self, file_path):
-    file = self.ui.actionReplaceRARCFile.data()
+    file_entry = self.ui.actionReplaceRARCFile.data()
     
     with open(file_path, "rb") as f:
       data = BytesIO(f.read())
-    file.data = data
+    file_entry.data = data
+    file_entry.update_compression_flags_from_data()
     
-    # Update changed file size
-    file_size_str = self.window().stringify_number(data_len(file.data))
-    item = self.rarc_file_entry_to_tree_widget_item.get(file)
-    item.setText(self.rarc_col_name_to_index["File Size"], file_size_str)
+    self.update_file_size_and_compression_in_ui(file_entry)
   
   def delete_file_in_rarc(self):
     file_entry = self.ui.actionDeleteRARCFile.data()
@@ -477,11 +496,9 @@ class RARCTab(QWidget):
     self.bti_tab.bti.save_changes()
     
     file_entry.data = make_copy_data(self.bti_tab.bti.data)
+    file_entry.update_compression_flags_from_data()
     
-    # Update changed file size
-    file_size_str = self.window().stringify_number(data_len(file_entry.data))
-    item = self.rarc_file_entry_to_tree_widget_item.get(file_entry)
-    item.setText(self.rarc_col_name_to_index["File Size"], file_size_str)
+    self.update_file_size_and_compression_in_ui(file_entry)
     
     self.window().ui.statusbar.showMessage("Replaced %s." % file_entry.name, 3000)
   
@@ -501,11 +518,9 @@ class RARCTab(QWidget):
     self.j3d_tab.j3d.save_changes()
     
     file_entry.data = make_copy_data(self.j3d_tab.j3d.data)
+    file_entry.update_compression_flags_from_data()
     
-    # Update changed file size
-    file_size_str = self.window().stringify_number(data_len(file_entry.data))
-    item = self.rarc_file_entry_to_tree_widget_item.get(file_entry)
-    item.setText(self.rarc_col_name_to_index["File Size"], file_size_str)
+    self.update_file_size_and_compression_in_ui(file_entry)
     
     self.window().ui.statusbar.showMessage("Replaced %s." % file_entry.name, 3000)
   
@@ -530,13 +545,15 @@ class RARCTab(QWidget):
     file_index_str = self.window().stringify_number(file_index, min_hex_chars=4)
     
     parent_dir_item = self.rarc_node_to_tree_widget_item.get(parent_node)
-    file_item = QTreeWidgetItem([file_entry.name, "", file_index_str, file_id_str, file_size_str])
+    file_item = QTreeWidgetItem([file_entry.name, "", file_index_str, file_id_str, file_size_str, ""])
     file_item.setFlags(file_item.flags() | Qt.ItemIsEditable)
     index_of_file_in_dir = parent_node.files.index(file_entry)
     parent_dir_item.insertChild(index_of_file_in_dir, file_item)
     
     self.rarc_file_entry_to_tree_widget_item[file_entry] = file_item
     self.rarc_tree_widget_item_to_file_entry[file_item] = file_entry
+    
+    self.update_file_size_and_compression_in_ui(file_entry)
     
     self.update_all_displayed_file_indexes_and_ids()
   
@@ -627,13 +644,15 @@ class RARCTab(QWidget):
     if column in allowed_column_indexes: 
       self.ui.rarc_files_tree.editItem(item, column)
   
-  def rarc_file_tree_item_text_changed(self, item, column):
+  def rarc_file_tree_item_changed(self, item, column):
     if column == self.rarc_col_name_to_index["File Name"]:
       self.change_rarc_file_name(item)
     elif column == self.rarc_col_name_to_index["Folder Type"]:
       self.change_rarc_node_type(item)
     elif column == self.rarc_col_name_to_index["File ID"]:
       self.change_rarc_file_id(item)
+    elif column == self.rarc_col_name_to_index["Yaz0 Compressed"]:
+      self.change_rarc_file_yaz0_compressed(item)
   
   def change_rarc_file_name(self, item):
     node = self.rarc_tree_widget_item_to_node.get(item)
@@ -738,6 +757,36 @@ class RARCTab(QWidget):
     
     file_id_str = self.window().stringify_number(file_entry.id, min_hex_chars=4)
     item.setText(self.rarc_col_name_to_index["File ID"], file_id_str)
+  
+  def change_rarc_file_yaz0_compressed(self, item):
+    file_entry = self.rarc_tree_widget_item_to_file_entry.get(item)
+    checkstate = item.checkState(self.rarc_col_name_to_index["Yaz0 Compressed"])
+    
+    file_entry.update_compression_flags_from_data()
+    if checkstate == Qt.Unchecked:
+      if file_entry.type & RARCFileAttrType.COMPRESSED:
+        if file_entry.type & RARCFileAttrType.YAZ0_COMPRESSED:
+          file_entry.data = Yaz0.decompress(file_entry.data)
+          file_entry.update_compression_flags_from_data()
+        else: # Yay0
+          QMessageBox.warning(self, "Yay0 not supported", "This file is currently Yay0 compressed. GCFT does not currently support decompressing Yay0.")
+      else:
+        # Already uncompressed. Do nothing.
+        pass
+    else: # Checked
+      if file_entry.type & RARCFileAttrType.COMPRESSED:
+        if file_entry.type & RARCFileAttrType.YAZ0_COMPRESSED:
+          # Already Yaz0 compressed. Do nothing.
+          pass
+        else: # Yay0
+          QMessageBox.warning(self, "Yay0 not supported", "This file is currently Yay0 compressed. GCFT does not currently support decompressing Yay0.")
+      else:
+        search_depth, should_pad_data = self.yaz0_tab.get_search_depth_and_should_pad()
+        file_entry.data = Yaz0.compress(file_entry.data, search_depth=search_depth, should_pad_data=should_pad_data)
+        file_entry.update_compression_flags_from_data()
+    
+    # Update the UI to match the file data.
+    self.update_file_size_and_compression_in_ui(file_entry)
   
   
   def keyPressEvent(self, event):
