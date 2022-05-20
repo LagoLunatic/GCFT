@@ -35,8 +35,8 @@ class RARCTab(QWidget):
       self.rarc_col_name_to_index[column_name] = col
     
     self.ui.export_rarc.setDisabled(True)
-    self.ui.import_folder_over_rarc.setDisabled(True)
-    self.ui.export_rarc_folder.setDisabled(True)
+    self.ui.replace_all_files_in_rarc.setDisabled(True)
+    self.ui.extract_all_files_from_rarc.setDisabled(True)
     self.ui.dump_all_rarc_textures.setDisabled(True)
     self.ui.export_rarc_to_c_header.setDisabled(True)
     self.ui.sync_file_ids_and_indexes.setDisabled(True)
@@ -45,8 +45,8 @@ class RARCTab(QWidget):
     self.ui.create_rarc.clicked.connect(self.create_rarc)
     self.ui.create_rarc_from_folder.clicked.connect(self.create_rarc_from_folder)
     self.ui.export_rarc.clicked.connect(self.export_rarc)
-    self.ui.import_folder_over_rarc.clicked.connect(self.import_folder_over_rarc)
-    self.ui.export_rarc_folder.clicked.connect(self.export_rarc_folder)
+    self.ui.replace_all_files_in_rarc.clicked.connect(self.replace_all_files_in_rarc)
+    self.ui.extract_all_files_from_rarc.clicked.connect(self.extract_all_files_from_rarc)
     self.ui.dump_all_rarc_textures.clicked.connect(self.dump_all_rarc_textures)
     self.ui.export_rarc_to_c_header.clicked.connect(self.export_rarc_to_c_header)
     
@@ -62,6 +62,8 @@ class RARCTab(QWidget):
     self.ui.actionAddRARCFile.triggered.connect(self.add_file_to_rarc)
     self.ui.actionAddRARCFolder.triggered.connect(self.add_folder_to_rarc)
     self.ui.actionDeleteRARCFolder.triggered.connect(self.delete_folder_in_rarc)
+    self.ui.actionExtractAllFilesFromRARCFolder.triggered.connect(self.extract_all_files_from_rarc_folder)
+    self.ui.actionReplaceAllFilesInRARCFolder.triggered.connect(self.replace_all_files_in_rarc_folder)
     self.ui.actionOpenRARCImage.triggered.connect(self.open_image_in_rarc)
     self.ui.actionReplaceRARCImage.triggered.connect(self.replace_image_in_rarc)
     self.ui.actionOpenRARCJ3D.triggered.connect(self.open_j3d_in_rarc)
@@ -91,16 +93,34 @@ class RARCTab(QWidget):
       default_file_name=rarc_name
     )
   
-  def import_folder_over_rarc(self):
+  def replace_all_files_in_rarc(self):
+    root_node = self.rarc.nodes[0]
+    self.ui.actionReplaceAllFilesInRARCFolder.setData(root_node)
     self.window().generic_do_gui_file_operation(
-      op_callback=self.import_folder_over_rarc_by_path,
+      op_callback=self.replace_all_files_in_rarc_folder_by_path,
       is_opening=True, is_saving=False, is_folder=True,
       file_type="RARC"
     )
   
-  def export_rarc_folder(self):
+  def replace_all_files_in_rarc_folder(self):
     self.window().generic_do_gui_file_operation(
-      op_callback=self.export_rarc_folder_by_path,
+      op_callback=self.replace_all_files_in_rarc_folder_by_path,
+      is_opening=True, is_saving=False, is_folder=True,
+      file_type="RARC"
+    )
+  
+  def extract_all_files_from_rarc(self):
+    root_node = self.rarc.nodes[0]
+    self.ui.actionExtractAllFilesFromRARCFolder.setData(root_node)
+    self.window().generic_do_gui_file_operation(
+      op_callback=self.extract_all_files_from_rarc_folder_by_path,
+      is_opening=False, is_saving=True, is_folder=True,
+      file_type="RARC"
+    )
+  
+  def extract_all_files_from_rarc_folder(self):
+    self.window().generic_do_gui_file_operation(
+      op_callback=self.extract_all_files_from_rarc_folder_by_path,
       is_opening=False, is_saving=True, is_folder=True,
       file_type="RARC"
     )
@@ -223,8 +243,8 @@ class RARCTab(QWidget):
     self.ui.sync_file_ids_and_indexes.setChecked(self.rarc.keep_file_ids_synced_with_indexes != 0)
     
     self.ui.export_rarc.setDisabled(False)
-    self.ui.import_folder_over_rarc.setDisabled(False)
-    self.ui.export_rarc_folder.setDisabled(False)
+    self.ui.replace_all_files_in_rarc.setDisabled(False)
+    self.ui.extract_all_files_from_rarc.setDisabled(False)
     self.ui.dump_all_rarc_textures.setDisabled(False)
     self.ui.export_rarc_to_c_header.setDisabled(False)
     self.ui.sync_file_ids_and_indexes.setDisabled(False)
@@ -275,6 +295,9 @@ class RARCTab(QWidget):
       self.update_file_size_and_compression_in_ui(file_entry)
   
   def update_file_size_and_compression_in_ui(self, file_entry):
+    if file_entry.is_dir:
+      return
+    
     item = self.rarc_file_entry_to_tree_widget_item.get(file_entry)
     
     self.ui.rarc_files_tree.blockSignals(True)
@@ -317,19 +340,24 @@ class RARCTab(QWidget):
     
     QMessageBox.information(self, "RARC saved", "Successfully saved RARC.")
   
-  def import_folder_over_rarc_by_path(self, folder_path):
-    num_files_overwritten = self.rarc.import_all_files_from_disk(folder_path)
+  def extract_all_files_from_rarc_folder_by_path(self, folder_path):
+    node = self.ui.actionExtractAllFilesFromRARCFolder.data()
+    self.rarc.extract_node_to_disk(node, folder_path)
+    
+    QMessageBox.information(self, "Folder extracted", "Successfully extracted RARC folder contents to \"%s\"." % folder_path)
+  
+  def replace_all_files_in_rarc_folder_by_path(self, folder_path):
+    node = self.ui.actionReplaceAllFilesInRARCFolder.data()
+    num_files_overwritten = self.rarc.import_node_from_disk(node, folder_path)
     
     if num_files_overwritten == 0:
-      QMessageBox.warning(self, "No matching files found", "The selected folder does not contain any files matching the name and directory structure of files in the currently loaded RARC. No files imported.")
+      QMessageBox.warning(self, "No matching files found", "The selected folder does not contain any files matching the name and directory structure of files in the selected RARC folder. No files imported.")
       return
     
-    QMessageBox.information(self, "Folder imported", "Successfully overwrote %d files in the RARC from \"%s\"." % (num_files_overwritten, folder_path))
-  
-  def export_rarc_folder_by_path(self, folder_path):
-    self.rarc.extract_all_files_to_disk(output_directory=folder_path)
+    QMessageBox.information(self, "Folder imported", "Successfully overwrote %d files in the RARC folder from \"%s\"." % (num_files_overwritten, folder_path))
     
-    QMessageBox.information(self, "RARC extracted", "Successfully extracted RARC contents to \"%s\"." % folder_path)
+    for file_entry in self.rarc.file_entries:
+      self.update_file_size_and_compression_in_ui(file_entry)
   
   def dump_all_rarc_textures_by_path(self, folder_path):
     asset_dumper = AssetDumper()
@@ -393,7 +421,6 @@ class RARCTab(QWidget):
     
     node = self.rarc_tree_widget_item_to_node.get(item)
     if node:
-      # TODO: Implement extracting/replacing folders
       menu = QMenu(self)
       menu.addAction(self.ui.actionAddRARCFile)
       self.ui.actionAddRARCFile.setData(node)
@@ -402,6 +429,10 @@ class RARCTab(QWidget):
       if node.dir_entry is not None:
         menu.addAction(self.ui.actionDeleteRARCFolder)
         self.ui.actionDeleteRARCFolder.setData(node)
+      menu.addAction(self.ui.actionExtractAllFilesFromRARCFolder)
+      self.ui.actionExtractAllFilesFromRARCFolder.setData(node)
+      menu.addAction(self.ui.actionReplaceAllFilesInRARCFolder)
+      self.ui.actionReplaceAllFilesInRARCFolder.setData(node)
       menu.exec_(self.ui.rarc_files_tree.mapToGlobal(pos))
     else:
       file = self.rarc_tree_widget_item_to_file_entry.get(item)

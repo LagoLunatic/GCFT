@@ -45,6 +45,10 @@ class Ui_RARCTab(object):
         self.actionDeleteRARCFolder.setObjectName(u"actionDeleteRARCFolder")
         self.actionReplaceRARCJ3D = QAction(RARCTab)
         self.actionReplaceRARCJ3D.setObjectName(u"actionReplaceRARCJ3D")
+        self.actionExtractAllFilesFromRARCFolder = QAction(RARCTab)
+        self.actionExtractAllFilesFromRARCFolder.setObjectName(u"actionExtractAllFilesFromRARCFolder")
+        self.actionReplaceAllFilesInRARCFolder = QAction(RARCTab)
+        self.actionReplaceAllFilesInRARCFolder.setObjectName(u"actionReplaceAllFilesInRARCFolder")
         self.verticalLayout = QVBoxLayout(RARCTab)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout = QHBoxLayout()
@@ -53,6 +57,11 @@ class Ui_RARCTab(object):
         self.import_rarc.setObjectName(u"import_rarc")
 
         self.horizontalLayout.addWidget(self.import_rarc)
+
+        self.replace_all_files_in_rarc = QPushButton(RARCTab)
+        self.replace_all_files_in_rarc.setObjectName(u"replace_all_files_in_rarc")
+
+        self.horizontalLayout.addWidget(self.replace_all_files_in_rarc)
 
         self.create_rarc = QPushButton(RARCTab)
         self.create_rarc.setObjectName(u"create_rarc")
@@ -64,11 +73,6 @@ class Ui_RARCTab(object):
 
         self.horizontalLayout.addWidget(self.create_rarc_from_folder)
 
-        self.import_folder_over_rarc = QPushButton(RARCTab)
-        self.import_folder_over_rarc.setObjectName(u"import_folder_over_rarc")
-
-        self.horizontalLayout.addWidget(self.import_folder_over_rarc)
-
 
         self.verticalLayout.addLayout(self.horizontalLayout)
 
@@ -79,10 +83,10 @@ class Ui_RARCTab(object):
 
         self.horizontalLayout_7.addWidget(self.export_rarc)
 
-        self.export_rarc_folder = QPushButton(RARCTab)
-        self.export_rarc_folder.setObjectName(u"export_rarc_folder")
+        self.extract_all_files_from_rarc = QPushButton(RARCTab)
+        self.extract_all_files_from_rarc.setObjectName(u"extract_all_files_from_rarc")
 
-        self.horizontalLayout_7.addWidget(self.export_rarc_folder)
+        self.horizontalLayout_7.addWidget(self.extract_all_files_from_rarc)
 
         self.dump_all_rarc_textures = QPushButton(RARCTab)
         self.dump_all_rarc_textures.setObjectName(u"dump_all_rarc_textures")
@@ -131,12 +135,14 @@ class Ui_RARCTab(object):
         self.actionAddRARCFolder.setText(QCoreApplication.translate("RARCTab", u"Add Folder", None))
         self.actionDeleteRARCFolder.setText(QCoreApplication.translate("RARCTab", u"Delete Folder", None))
         self.actionReplaceRARCJ3D.setText(QCoreApplication.translate("RARCTab", u"Replace J3D", None))
+        self.actionExtractAllFilesFromRARCFolder.setText(QCoreApplication.translate("RARCTab", u"Extract All Files From Folder", None))
+        self.actionReplaceAllFilesInRARCFolder.setText(QCoreApplication.translate("RARCTab", u"Replace All Files in Folder", None))
         self.import_rarc.setText(QCoreApplication.translate("RARCTab", u"Import RARC", None))
+        self.replace_all_files_in_rarc.setText(QCoreApplication.translate("RARCTab", u"Replace All Files in RARC", None))
         self.create_rarc.setText(QCoreApplication.translate("RARCTab", u"Create New RARC", None))
         self.create_rarc_from_folder.setText(QCoreApplication.translate("RARCTab", u"Create New RARC From Folder", None))
-        self.import_folder_over_rarc.setText(QCoreApplication.translate("RARCTab", u"Import Folder Over RARC", None))
         self.export_rarc.setText(QCoreApplication.translate("RARCTab", u"Export RARC", None))
-        self.export_rarc_folder.setText(QCoreApplication.translate("RARCTab", u"Export Folder", None))
+        self.extract_all_files_from_rarc.setText(QCoreApplication.translate("RARCTab", u"Extract All Files From RARC", None))
         self.dump_all_rarc_textures.setText(QCoreApplication.translate("RARCTab", u"Dump All Textures", None))
         self.export_rarc_to_c_header.setText(QCoreApplication.translate("RARCTab", u"Export File List to C Header", None))
         self.sync_file_ids_and_indexes.setText(QCoreApplication.translate("RARCTab", u"Sync File IDs and Indexes", None))

@@ -24,6 +24,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="replace_all_files_in_rarc">
+       <property name="text">
+        <string>Replace All Files in RARC</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="create_rarc">
        <property name="text">
         <string>Create New RARC</string>
@@ -34,13 +41,6 @@
       <widget class="QPushButton" name="create_rarc_from_folder">
        <property name="text">
         <string>Create New RARC From Folder</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="import_folder_over_rarc">
-       <property name="text">
-        <string>Import Folder Over RARC</string>
        </property>
       </widget>
      </item>
@@ -56,9 +56,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="export_rarc_folder">
+      <widget class="QPushButton" name="extract_all_files_from_rarc">
        <property name="text">
-        <string>Export Folder</string>
+        <string>Extract All Files From RARC</string>
        </property>
       </widget>
      </item>
@@ -175,6 +175,16 @@
   <action name="actionReplaceRARCJ3D">
    <property name="text">
     <string>Replace J3D</string>
+   </property>
+  </action>
+  <action name="actionExtractAllFilesFromRARCFolder">
+   <property name="text">
+    <string>Extract All Files From Folder</string>
+   </property>
+  </action>
+  <action name="actionReplaceAllFilesInRARCFolder">
+   <property name="text">
+    <string>Replace All Files in Folder</string>
    </property>
   </action>
  </widget>
