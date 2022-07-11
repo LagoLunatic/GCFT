@@ -2,15 +2,6 @@
 
 block_cipher = None
 
-from version import VERSION
-build_version = VERSION
-
-import struct
-if (struct.calcsize("P") * 8) == 64:
-  build_version += "_64bit"
-else:
-  build_version += "_32bit"
-
 import os
 import glob
 def build_datas_recursive(paths):
@@ -49,7 +40,7 @@ exe = EXE(pyz,
           a.binaries,
           a.zipfiles,
           a.datas,
-          name='GameCube File Tools ' + build_version,
+          name='GameCube File Tools',
           debug=False,
           strip=False,
           upx=True,
