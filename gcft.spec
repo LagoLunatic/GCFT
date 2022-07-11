@@ -33,6 +33,7 @@ a = Analysis(['gcft.py'],
              binaries=[],
              datas=build_datas_recursive([
                'assets/**/*.*',
+               'version.txt',
              ]),
              hiddenimports=[],
              hookspath=[],
