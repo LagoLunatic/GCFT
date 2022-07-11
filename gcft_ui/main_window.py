@@ -13,6 +13,7 @@ from collections import OrderedDict
 from gcft_ui.uic.ui_main import Ui_MainWindow
 from gcft_ui.gcft_common import GCFTThread, GCFTProgressDialog
 from version import VERSION
+from gcft_paths import ASSETS_PATH
 
 import yaml
 try:
@@ -74,6 +75,9 @@ class GCFTWindow(QMainWindow):
       self.set_tab_by_name(self.settings["last_used_tab_name"])
     
     self.setWindowTitle("GameCube File Tools %s" % VERSION)
+    
+    icon_path = os.path.join(ASSETS_PATH, "icon.ico")
+    self.setWindowIcon(QIcon(icon_path))
     
     self.show()
   
