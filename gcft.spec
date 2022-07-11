@@ -2,6 +2,9 @@
 
 block_cipher = None
 
+from version import VERSION
+build_version = VERSION
+
 import os
 import glob
 def build_datas_recursive(paths):
@@ -46,3 +49,15 @@ exe = EXE(pyz,
           upx=True,
           runtime_tmpdir=None,
           console=False )
+
+app = BUNDLE(exe,
+          name='GameCube File Tools.app',
+          icon="assets/icon.icns",
+          bundle_identifier=None,
+          info_plist={
+              "LSBackgroundOnly": False,
+              "CFBundleDisplayName": "GameCube File Tools",
+              "CFBundleName": "GCFT", # 15 character maximum
+              "CFBundleShortVersionString": build_version,
+          }
+          )
