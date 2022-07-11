@@ -46,13 +46,13 @@ jobs:
         run: |
           echo ${{ steps.vars.outputs.full_version }} > version.txt
       - name: Build Windows App
-        run: python -m PyInstaller --log-level=WARN wwrando.spec
+        run: python -m PyInstaller --log-level=WARN gcft.spec
       - name: Bundle Windows App
         run: python build.py
       - name: Upload Windows App
         uses: actions/upload-artifact@v2
         with:
-          name: wwrando-${{ steps.vars.outputs.full_version }}-windows-${{ steps.archvars.outputs.bitness }}bit
+          name: gcft-${{ steps.vars.outputs.full_version }}-windows-${{ steps.archvars.outputs.bitness }}bit
           path: dist/release_archive_${{ steps.vars.outputs.full_version }}_${{ steps.archvars.outputs.bitness }}bit/*
 
   macos:
@@ -100,14 +100,14 @@ jobs:
         run: |
           echo ${{ steps.vars.outputs.full_version }} > version.txt
       - name: Build MacOS App
-        run: python3 -m PyInstaller --log-level=WARN --onefile --windowed wwrando.spec
+        run: python3 -m PyInstaller --log-level=WARN --onefile --windowed gcft.spec
         shell: bash -l {0}
       - name: Bundle MacOS App
         run: python3 build.py
         shell: bash -l {0}
       - uses: actions/upload-artifact@v2
         with:
-          name: wwrando-${{ steps.vars.outputs.full_version }}-macos-${{ steps.archvars.outputs.bitness }}bit
+          name: gcft-${{ steps.vars.outputs.full_version }}-macos-${{ steps.archvars.outputs.bitness }}bit
           path: dist/release_archive_${{ steps.vars.outputs.full_version }}_${{ steps.archvars.outputs.bitness }}bit.zip
 
   linux:
@@ -148,10 +148,10 @@ jobs:
         run: |
           echo ${{ steps.vars.outputs.full_version }} > version.txt
       - name: Build Linux App
-        run: python -m PyInstaller --log-level=WARN wwrando.spec
+        run: python -m PyInstaller --log-level=WARN gcft.spec
       - name: Bundle Linux App
         run: python build.py
       - uses: actions/upload-artifact@v2
         with:
-          name: wwrando-${{ steps.vars.outputs.full_version }}-linux-${{ steps.archvars.outputs.bitness }}bit
+          name: gcft-${{ steps.vars.outputs.full_version }}-linux-${{ steps.archvars.outputs.bitness }}bit
           path: dist/release_archive_${{ steps.vars.outputs.full_version }}_${{ steps.archvars.outputs.bitness }}bit/*
