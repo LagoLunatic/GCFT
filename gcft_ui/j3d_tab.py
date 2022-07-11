@@ -185,6 +185,9 @@ class J3DTab(QWidget):
         widget.deleteLater()
     self.ui.j3d_sidebar_label.setText("Extra information will be displayed here as necessary.")
     
+    # Re-enable the main sidebar scrollarea by default in case it was disabled previously.
+    self.ui.scrollArea.setWidgetResizable(True)
+    
     selected_items = self.ui.j3d_chunks_tree.selectedItems()
     if not selected_items:
       return
@@ -203,13 +206,31 @@ class J3DTab(QWidget):
   def mdl_entry_selected(self, mdl_entry):
     layout = self.ui.scrollAreaWidgetContents.layout()
     
+    # Disable the main sidebar scrollarea since we will have two tabs with their own scrollareas instead.
+    self.ui.scrollArea.setWidgetResizable(False)
+    
     entry_index = self.j3d.mdl3.entries.index(mdl_entry)
     mat_name = self.j3d.mat3.mat_names[entry_index]
     self.ui.j3d_sidebar_label.setText("Showing material display list for: %s" % mat_name)
     
-    label = QLabel()
-    label.setText("BP commands:")
-    layout.addWidget(label)
+    bp_commands_widget = QWidget()
+    bp_commands_layout = QVBoxLayout(bp_commands_widget)
+    xf_commands_widget = QWidget()
+    xf_commands_layout = QVBoxLayout(xf_commands_widget)
+    
+    bp_commands_scroll_area = QScrollArea()
+    bp_commands_scroll_area.setWidgetResizable(True)
+    bp_commands_scroll_area.setWidget(bp_commands_widget)
+    
+    xf_commands_scroll_area = QScrollArea()
+    xf_commands_scroll_area.setWidgetResizable(True)
+    xf_commands_scroll_area.setWidget(xf_commands_widget)
+    
+    tab_widget = QTabWidget()
+    tab_widget.addTab(bp_commands_scroll_area, "BP Commands")
+    tab_widget.addTab(xf_commands_scroll_area, "XF Commands")
+    layout.addWidget(tab_widget)
+    
     for bp_command in mdl_entry.bp_commands:
       if bp_command.register in [entry.value for entry in BPRegister]:
         reg_name = BPRegister(bp_command.register).name
@@ -218,20 +239,20 @@ class J3DTab(QWidget):
       command_text = "%s: 0x%08X" % (reg_name, bp_command.value)
       label = QLabel()
       label.setText(command_text)
-      layout.addWidget(label)
+      bp_commands_layout.addWidget(label)
     
-    label = QLabel()
-    label.setText("XF commands:")
-    layout.addWidget(label)
     for xf_command in mdl_entry.xf_commands:
       if xf_command.register in [entry.value for entry in XFRegister]:
         reg_name = XFRegister(xf_command.register).name
       else:
         reg_name = "0x%04X" % xf_command.register
-      command_text = "%s: %s" % (reg_name, ", ".join(["0x%08X" % arg for arg in xf_command.args]))
+      command_text = "%s:\n%s" % (reg_name, "\n".join(["0x%08X" % arg for arg in xf_command.args]))
       label = QLabel()
       label.setText(command_text)
-      layout.addWidget(label)
+      xf_commands_layout.addWidget(label)
+    
+    bp_commands_layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+    xf_commands_layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
   
   def keyframe_selected(self, keyframe):
     layout = self.ui.scrollAreaWidgetContents.layout()
