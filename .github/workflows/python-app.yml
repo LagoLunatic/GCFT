@@ -19,6 +19,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: recursive
       - name: Set up Python 3.9
         uses: actions/setup-python@v2
         with:
@@ -67,6 +69,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: recursive
       - name: Set up Miniconda with Python 3.9
         uses: goanpeca/setup-miniconda@v1
         with:
@@ -118,6 +122,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: recursive
       - name: Set up Python 3.9
         uses: actions/setup-python@v2
         with:
