@@ -30,6 +30,8 @@ class DOLTab(QWidget):
     self.ui.export_dol.clicked.connect(self.export_dol)
     self.ui.convert_from_dol_offset.clicked.connect(self.convert_from_dol_offset)
     self.ui.convert_from_dol_address.clicked.connect(self.convert_from_dol_address)
+    self.ui.dol_offset.returnPressed.connect(self.convert_from_dol_offset)
+    self.ui.dol_address.returnPressed.connect(self.convert_from_dol_address)
   
   
   def import_dol(self):
