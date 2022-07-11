@@ -115,7 +115,7 @@ jobs:
           path: dist/release_archive_${{ steps.vars.outputs.full_version }}_${{ steps.archvars.outputs.bitness }}bit.zip
 
   linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         architecture: [ x64 ]
@@ -137,7 +137,7 @@ jobs:
       - name: Install any missing Qt dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y qtbase5-dev
+          sudo apt-get install -y qt6-base-dev
       - name: Set variables
         id: vars
         run: |
