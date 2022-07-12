@@ -115,7 +115,7 @@ jobs:
           path: dist/release_archive_${{ steps.vars.outputs.full_version }}_${{ steps.archvars.outputs.bitness }}bit.zip
 
   linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     strategy:
       matrix:
         architecture: [ x64 ]
