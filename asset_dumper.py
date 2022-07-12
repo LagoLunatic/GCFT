@@ -76,6 +76,10 @@ class AssetDumper:
       rel_dir = file_entry.parent_node.name
       base_name, file_ext = os.path.splitext(file_entry.name)
       display_path = rel_dir + "/" + base_name + file_ext
+      if display_path_prefix is None:
+        full_display_path = display_path
+      else:
+        full_display_path = display_path_prefix + "/" + display_path
       
       try:
         if file_ext == ".bti":
@@ -86,10 +90,13 @@ class AssetDumper:
           out_path = os.path.join(out_dir, rel_dir, base_name + file_ext)
           j3d_file = rarc.get_file(file_entry.name)
           self.dump_all_textures_in_j3d_file(j3d_file, out_path)
+        elif file_ext == ".arc":
+          out_path = os.path.join(out_dir, rel_dir, base_name + file_ext)
+          inner_rarc = rarc.get_file(file_entry.name)
+          for _ in self.dump_all_textures_in_rarc(inner_rarc, out_path, display_path_prefix=full_display_path):
+            continue
       except Exception as e:
-        if display_path_prefix is not None:
-          display_path = display_path_prefix + "/" + display_path
-        self.failed_file_paths.append(display_path)
+        self.failed_file_paths.append(full_display_path)
       
       files_checked += 1
       yield(display_path, files_checked)
