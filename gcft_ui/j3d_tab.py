@@ -9,6 +9,8 @@ from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 
 from wwlib.j3d import J3DFile, BPRegister, XFRegister
+from wwlib.j3d import MDLEntry, AnimationKeyframe
+from wwlib.bti import BTI
 from gcft_ui.uic.ui_j3d_tab import Ui_J3DTab
 
 class J3DTab(QWidget):
@@ -88,14 +90,8 @@ class J3DTab(QWidget):
   def reload_j3d_chunks_tree(self):
     self.ui.j3d_chunks_tree.clear()
     
-    self.j3d_chunk_to_tree_widget_item = {}
-    self.j3d_tree_widget_item_to_chunk = {}
-    self.j3d_texture_to_tree_widget_item = {}
-    self.j3d_tree_widget_item_to_texture = {}
-    self.j3d_mdl_entry_to_tree_widget_item = {}
-    self.j3d_tree_widget_item_to_mdl_entry = {}
-    self.j3d_keyframe_to_tree_widget_item = {}
-    self.j3d_tree_widget_item_to_keyframe = {}
+    self.object_to_tree_widget_item = {}
+    self.tree_widget_item_to_object = {}
     
     for chunk in self.j3d.chunks:
       chunk_size_str = self.window().stringify_number(chunk.size, min_hex_chars=5)
@@ -103,8 +99,8 @@ class J3DTab(QWidget):
       chunk_item = QTreeWidgetItem([chunk.magic, "", chunk_size_str])
       self.ui.j3d_chunks_tree.addTopLevelItem(chunk_item)
       
-      self.j3d_chunk_to_tree_widget_item[chunk] = chunk_item
-      self.j3d_tree_widget_item_to_chunk[chunk_item] = chunk
+      self.object_to_tree_widget_item[chunk] = chunk_item
+      self.tree_widget_item_to_object[chunk_item] = chunk
       
       if chunk.magic == "TEX1":
         # Expand TEX1 chunks by default.
@@ -131,68 +127,54 @@ class J3DTab(QWidget):
           else:
             texture_size_str = self.window().stringify_number(texture_total_size, min_hex_chars=5)
           
-          texture_item = QTreeWidgetItem(["", texture_name, texture_size_str])
-          chunk_item.addChild(texture_item)
-          
-          self.j3d_texture_to_tree_widget_item[texture] = texture_item
-          self.j3d_tree_widget_item_to_texture[texture_item] = texture
+          self.make_tree_widget_item(texture, chunk_item, ["", texture_name, texture_size_str])
       elif chunk.magic == "MAT3":
         for mat_name in chunk.mat_names:
-          mat_item = QTreeWidgetItem(["", mat_name, ""])
-          chunk_item.addChild(mat_item)
+          self.make_tree_widget_item(None, chunk_item, ["", mat_name, ""])
       elif chunk.magic == "MDL3":
         for i, mdl_entry in enumerate(chunk.entries):
           mat_name = self.j3d.mat3.mat_names[i]
-          mat_item = QTreeWidgetItem(["", mat_name, ""])
-          chunk_item.addChild(mat_item)
-          
-          self.j3d_mdl_entry_to_tree_widget_item[mdl_entry] = mat_item
-          self.j3d_tree_widget_item_to_mdl_entry[mat_item] = mdl_entry
+          self.make_tree_widget_item(mdl_entry, chunk_item, ["", mat_name, ""])
       elif chunk.magic == "TRK1":
         chunk_item.setExpanded(True)
         for anim_type_index, anim_type_dict in enumerate([chunk.mat_name_to_reg_anims, chunk.mat_name_to_konst_anims]):
-          anim_type_item = QTreeWidgetItem(["", ["Register", "Konstant"][anim_type_index], ""])
-          chunk_item.addChild(anim_type_item)
-          anim_type_item.setExpanded(True)
+          anim_type = ["Register", "Konstant"][anim_type_index]
+          anim_type_item = self.make_tree_widget_item(None, chunk_item, ["", anim_type, ""], True)
           for mat_name, anims in anim_type_dict.items():
-            mat_item = QTreeWidgetItem(["", mat_name, ""])
-            anim_type_item.addChild(mat_item)
+            mat_item = self.make_tree_widget_item(None, anim_type_item, ["", mat_name, ""])
             for anim_index, anim in enumerate(anims):
-              anim_item = QTreeWidgetItem(["", "0x%02X" % anim_index, ""])
-              mat_item.addChild(anim_item)
+              anim_item = self.make_tree_widget_item(anim, mat_item, ["", "0x%02X" % anim_index, ""])
               for track_name in ["r", "g", "b", "a"]:
+                track_item = self.make_tree_widget_item(None, anim_item, ["", track_name.upper(), ""], True)
                 track = getattr(anim, track_name)
-                track_item = QTreeWidgetItem(["", track_name.upper(), ""])
-                anim_item.addChild(track_item)
-                track_item.setExpanded(True)
                 for keyframe_index, keyframe in enumerate(track.keyframes):
-                  keyframe_item = QTreeWidgetItem(["", "0x%02X" % keyframe_index, ""])
-                  track_item.addChild(keyframe_item)
-                  
-                  self.j3d_keyframe_to_tree_widget_item[keyframe] = keyframe_item
-                  self.j3d_tree_widget_item_to_keyframe[keyframe_item] = keyframe
+                  self.make_tree_widget_item(keyframe, track_item, ["", "0x%02X" % keyframe_index, ""])
       elif chunk.magic == "TTK1":
         chunk_item.setExpanded(True)
         for mat_name, anims in chunk.mat_name_to_anims.items():
-          mat_item = QTreeWidgetItem(["", mat_name, ""])
-          chunk_item.addChild(mat_item)
+          mat_item = self.make_tree_widget_item(None, chunk_item, ["", mat_name, ""])
           for anim_index, anim in enumerate(anims):
-            anim_item = QTreeWidgetItem(["", "0x%02X" % anim_index, ""])
-            mat_item.addChild(anim_item)
+            anim_item = self.make_tree_widget_item(anim, mat_item, ["", "0x%02X" % anim_index, ""])
             for track_name, track in anim.tracks.items():
-              track_item = QTreeWidgetItem(["", track_name.upper(), ""])
-              anim_item.addChild(track_item)
-              track_item.setExpanded(True)
+              track_item = self.make_tree_widget_item(track, anim_item, ["", track_name.upper(), ""], True)
               for keyframe_index, keyframe in enumerate(track.keyframes):
-                keyframe_item = QTreeWidgetItem(["", "0x%02X" % keyframe_index, ""])
-                track_item.addChild(keyframe_item)
-                
-                self.j3d_keyframe_to_tree_widget_item[keyframe] = keyframe_item
-                self.j3d_tree_widget_item_to_keyframe[keyframe_item] = keyframe
+                self.make_tree_widget_item(keyframe, track_item, ["", "0x%02X" % keyframe_index, ""])
     
     # Expand all items in the tree (for debugging):
     #for item in self.ui.j3d_chunks_tree.findItems("*", Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive):
     #  item.setExpanded(True)
+  
+  def make_tree_widget_item(self, obj, parent, item_args, expanded=False):
+    item = QTreeWidgetItem(item_args)
+    parent.addChild(item)
+    item.setExpanded(expanded)
+    
+    if obj is not None:
+      assert obj not in self.object_to_tree_widget_item
+      self.object_to_tree_widget_item[obj] = item
+      self.tree_widget_item_to_object[item] = obj
+    
+    return item
   
   def widget_item_selected(self):
     layout = self.ui.scrollAreaWidgetContents.layout()
@@ -210,16 +192,12 @@ class J3DTab(QWidget):
     if not selected_items:
       return
     item = selected_items[0]
+    obj = self.tree_widget_item_to_object.get(item)
     
-    mdl_entry = self.j3d_tree_widget_item_to_mdl_entry.get(item)
-    if mdl_entry:
-      self.mdl_entry_selected(mdl_entry)
-      return
-    
-    keyframe = self.j3d_tree_widget_item_to_keyframe.get(item)
-    if keyframe:
-      self.keyframe_selected(keyframe)
-      return
+    if isinstance(obj, MDLEntry):
+      self.mdl_entry_selected(obj)
+    elif isinstance(obj, AnimationKeyframe):
+      self.keyframe_selected(obj)
   
   def mdl_entry_selected(self, mdl_entry):
     layout = self.ui.scrollAreaWidgetContents.layout()
@@ -330,11 +308,11 @@ class J3DTab(QWidget):
       return
     
     item = self.ui.j3d_chunks_tree.itemAt(pos)
-    if item is None:
-      return
+    obj = self.tree_widget_item_to_object.get(item)
     
-    texture = self.j3d_tree_widget_item_to_texture.get(item)
-    if texture:
+    if isinstance(obj, BTI):
+      texture = obj
+      
       menu = QMenu(self)
       
       menu.addAction(self.ui.actionOpenJ3DImage)
