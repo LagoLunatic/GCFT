@@ -9,7 +9,7 @@ from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 
 from wwlib.j3d import J3DFile, BPRegister, XFRegister
-from wwlib.j3d import MDLEntry, AnimationKeyframe
+from wwlib.j3d import MDLEntry, AnimationKeyframe, ColorAnimation, UVAnimation
 from wwlib.bti import BTI
 from gcft_ui.uic.ui_j3d_tab import Ui_J3DTab
 
@@ -198,6 +198,10 @@ class J3DTab(QWidget):
       self.mdl_entry_selected(obj)
     elif isinstance(obj, AnimationKeyframe):
       self.keyframe_selected(obj)
+    elif isinstance(obj, UVAnimation):
+      self.uv_anim_selected(obj)
+    elif isinstance(obj, ColorAnimation):
+      self.color_anim_selected(obj)
   
   def mdl_entry_selected(self, mdl_entry):
     layout = self.ui.scrollAreaWidgetContents.layout()
@@ -269,6 +273,34 @@ class J3DTab(QWidget):
     
     label = QLabel()
     label.setText("Tangent out: %f" % keyframe.tangent_out)
+    layout.addWidget(label)
+    
+    spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+    layout.addItem(spacer)
+  
+  def uv_anim_selected(self, uv_anim):
+    layout = self.ui.scrollAreaWidgetContents.layout()
+    
+    self.ui.j3d_sidebar_label.setText("Showing UV animation.")
+    
+    label = QLabel()
+    label.setText("Center: (%f, %f, %f)" % uv_anim.center_coords)
+    layout.addWidget(label)
+    
+    label = QLabel()
+    label.setText("Tex gen index: 0x%02X" % uv_anim.tex_gen_index)
+    layout.addWidget(label)
+    
+    spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+    layout.addItem(spacer)
+  
+  def color_anim_selected(self, color_anim):
+    layout = self.ui.scrollAreaWidgetContents.layout()
+    
+    self.ui.j3d_sidebar_label.setText("Showing color animation.")
+    
+    label = QLabel()
+    label.setText("Color ID: 0x%02X" % color_anim.color_id)
     layout.addWidget(label)
     
     spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
