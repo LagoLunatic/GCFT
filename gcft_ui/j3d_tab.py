@@ -171,6 +171,24 @@ class J3DTab(QWidget):
                   
                   self.j3d_keyframe_to_tree_widget_item[keyframe] = keyframe_item
                   self.j3d_tree_widget_item_to_keyframe[keyframe_item] = keyframe
+      elif chunk.magic == "TTK1":
+        chunk_item.setExpanded(True)
+        for mat_name, anims in chunk.mat_name_to_anims.items():
+          mat_item = QTreeWidgetItem(["", mat_name, ""])
+          chunk_item.addChild(mat_item)
+          for anim_index, anim in enumerate(anims):
+            anim_item = QTreeWidgetItem(["", "0x%02X" % anim_index, ""])
+            mat_item.addChild(anim_item)
+            for track_name, track in anim.tracks.items():
+              track_item = QTreeWidgetItem(["", track_name.upper(), ""])
+              anim_item.addChild(track_item)
+              track_item.setExpanded(True)
+              for keyframe_index, keyframe in enumerate(track.keyframes):
+                keyframe_item = QTreeWidgetItem(["", "0x%02X" % keyframe_index, ""])
+                track_item.addChild(keyframe_item)
+                
+                self.j3d_keyframe_to_tree_widget_item[keyframe] = keyframe_item
+                self.j3d_tree_widget_item_to_keyframe[keyframe_item] = keyframe
     
     # Expand all items in the tree (for debugging):
     #for item in self.ui.j3d_chunks_tree.findItems("*", Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive):
@@ -236,7 +254,7 @@ class J3DTab(QWidget):
         reg_name = BPRegister(bp_command.register).name
       else:
         reg_name = "0x%02X" % bp_command.register
-      command_text = "%s: 0x%08X" % (reg_name, bp_command.value)
+      command_text = "%s: 0x%06X" % (reg_name, bp_command.value)
       label = QLabel()
       label.setText(command_text)
       bp_commands_layout.addWidget(label)
@@ -260,19 +278,19 @@ class J3DTab(QWidget):
     self.ui.j3d_sidebar_label.setText("Showing animation keyframe.")
     
     label = QLabel()
-    label.setText("Time: %d" % keyframe.time)
+    label.setText("Time: %f" % keyframe.time)
     layout.addWidget(label)
     
     label = QLabel()
-    label.setText("Value: %d" % keyframe.value)
+    label.setText("Value: %f" % keyframe.value)
     layout.addWidget(label)
     
     label = QLabel()
-    label.setText("Tangent in: %d" % keyframe.tangent_in)
+    label.setText("Tangent in: %f" % keyframe.tangent_in)
     layout.addWidget(label)
     
     label = QLabel()
-    label.setText("Tangent out: %d" % keyframe.tangent_out)
+    label.setText("Tangent out: %f" % keyframe.tangent_out)
     layout.addWidget(label)
     
     spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
