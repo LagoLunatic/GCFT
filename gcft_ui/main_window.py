@@ -392,4 +392,11 @@ class GCFTWindow(QMainWindow):
     if mime_data.hasUrls:
       url = mime_data.urls()[0]
       file_path = url.toLocalFile()
-      self.open_file_by_path(file_path)
+      try:
+        self.open_file_by_path(file_path)
+      except Exception as e:
+        stack_trace = traceback.format_exc()
+        error_message_title = "Failed to open file"
+        error_message = "%s with error:\n%s\n\n%s" % (error_message_title, str(e), stack_trace)
+        QMessageBox.critical(self, error_message_title, error_message)
+        return
