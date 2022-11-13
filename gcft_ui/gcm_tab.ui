@@ -24,9 +24,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="import_folder_over_gcm">
+      <widget class="QPushButton" name="replace_all_files_in_gcm">
        <property name="text">
-        <string>Import Folder Over GCM</string>
+        <string>Replace All Files in GCM</string>
        </property>
       </widget>
      </item>
@@ -49,9 +49,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="export_gcm_folder">
+      <widget class="QPushButton" name="extract_all_files_from_gcm">
        <property name="text">
-        <string>Export Folder</string>
+        <string>Extract All Files From GCM</string>
        </property>
       </widget>
      </item>

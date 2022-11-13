@@ -32,14 +32,14 @@ class GCMTab(QWidget):
       self.gcm_col_name_to_index[column_name] = col
     
     self.ui.export_gcm.setDisabled(True)
-    self.ui.import_folder_over_gcm.setDisabled(True)
-    self.ui.export_gcm_folder.setDisabled(True)
+    self.ui.replace_all_files_in_gcm.setDisabled(True)
+    self.ui.extract_all_files_from_gcm.setDisabled(True)
     self.ui.dump_all_gcm_textures.setDisabled(True)
     
     self.ui.import_gcm.clicked.connect(self.import_gcm)
     self.ui.export_gcm.clicked.connect(self.export_gcm)
-    self.ui.import_folder_over_gcm.clicked.connect(self.import_folder_over_gcm)
-    self.ui.export_gcm_folder.clicked.connect(self.export_gcm_folder)
+    self.ui.replace_all_files_in_gcm.clicked.connect(self.replace_all_files_in_gcm)
+    self.ui.extract_all_files_from_gcm.clicked.connect(self.extract_all_files_from_gcm)
     self.ui.dump_all_gcm_textures.clicked.connect(self.dump_all_gcm_textures)
     
     self.ui.gcm_files_tree.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -76,16 +76,16 @@ class GCMTab(QWidget):
       file_type="GCM", file_filter="GC ISO Files (*.iso *.gcm)"
     )
   
-  def import_folder_over_gcm(self):
+  def replace_all_files_in_gcm(self):
     self.window().generic_do_gui_file_operation(
-      op_callback=self.import_folder_over_gcm_by_path,
+      op_callback=self.replace_all_files_in_gcm_by_path,
       is_opening=True, is_saving=False, is_folder=True,
       file_type="GCM"
     )
   
-  def export_gcm_folder(self):
+  def extract_all_files_from_gcm(self):
     self.window().generic_do_gui_file_operation(
-      op_callback=self.export_gcm_folder_by_path,
+      op_callback=self.extract_all_files_from_gcm_by_path,
       is_opening=False, is_saving=True, is_folder=True,
       file_type="GCM"
     )
@@ -159,8 +159,8 @@ class GCMTab(QWidget):
     self.ui.gcm_files_tree.topLevelItem(1).setExpanded(True)
     
     self.ui.export_gcm.setDisabled(False)
-    self.ui.import_folder_over_gcm.setDisabled(False)
-    self.ui.export_gcm_folder.setDisabled(False)
+    self.ui.replace_all_files_in_gcm.setDisabled(False)
+    self.ui.extract_all_files_from_gcm.setDisabled(False)
     self.ui.dump_all_gcm_textures.setDisabled(False)
   
   def add_gcm_file_entry_to_files_tree(self, file_entry):
@@ -196,7 +196,7 @@ class GCMTab(QWidget):
   def export_gcm_by_path_complete(self):
     QMessageBox.information(self, "GCM saved", "Successfully saved GCM.")
   
-  def import_folder_over_gcm_by_path(self, folder_path):
+  def replace_all_files_in_gcm_by_path(self, folder_path):
     num_files_overwritten = self.gcm.import_all_files_from_disk(folder_path)
     
     if num_files_overwritten == 0:
@@ -205,16 +205,16 @@ class GCMTab(QWidget):
     
     QMessageBox.information(self, "Folder imported", "Successfully overwrote %d files in the GCM from \"%s\"." % (num_files_overwritten, folder_path))
   
-  def export_gcm_folder_by_path(self, folder_path):
+  def extract_all_files_from_gcm_by_path(self, folder_path):
     generator = self.gcm.export_disc_to_folder_with_changed_files(folder_path)
     max_val = len(self.gcm.files_by_path)
     
     self.window().start_progress_thread(
       generator, "Extracting files", max_val,
-      self.export_gcm_folder_by_path_complete
+      self.extract_all_files_from_gcm_by_path_complete
     )
   
-  def export_gcm_folder_by_path_complete(self):
+  def extract_all_files_from_gcm_by_path_complete(self):
     QMessageBox.information(self, "GCM extracted", "Successfully extracted GCM contents.")
   
   def dump_all_gcm_textures_by_path(self, folder_path):
