@@ -9,9 +9,9 @@ base_name = "GameCube File Tools"
 
 import struct
 if (struct.calcsize("P") * 8) == 64:
-  bitness_suffix = "_64bit"
+  bitness_suffix = "_x64"
 else:
-  bitness_suffix = "_32bit"
+  bitness_suffix = "_x86"
 
 exe_ext = ""
 if platform.system() == "Windows":
@@ -28,6 +28,7 @@ if not (os.path.isfile(exe_path) or os.path.isdir(exe_path)):
   raise Exception("Executable not found: %s" % exe_path)
 
 release_archive_path = os.path.join(".", "dist", "release_archive_" + VERSION_WITHOUT_COMMIT + bitness_suffix)
+print("Writing build to path: %s" % (release_archive_path))
 
 if os.path.exists(release_archive_path) and os.path.isdir(release_archive_path):
   shutil.rmtree(release_archive_path)

@@ -18,11 +18,11 @@ jobs:
         architecture: [ x64 ]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
       - name: Set up Python 3.10
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
           architecture: ${{ matrix.architecture }}
@@ -37,12 +37,8 @@ jobs:
           USER_INPUT_VERSION=${{ github.event.inputs.version }}
           TXT_VERSION=$(cat version.txt)
           GIT_SHA_SHORT=$(git rev-parse --short=7 ${{ github.sha }})
-          echo "::set-output name=full_version::${USER_INPUT_VERSION:-$TXT_VERSION-$GIT_SHA_SHORT}"
+          echo "full_version=${USER_INPUT_VERSION:-$TXT_VERSION-$GIT_SHA_SHORT}" >> $GITHUB_OUTPUT
         shell: bash
-      - name: Set architecture variables
-        id: archvars
-        run: |
-          echo "::set-output name=bitness::$(python -c "import struct; print(struct.calcsize('P') * 8)")"
       - name: Set version
         id: version
         run: |
@@ -52,10 +48,10 @@ jobs:
       - name: Bundle Windows App
         run: python build.py
       - name: Upload Windows App
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          name: gcft-${{ steps.vars.outputs.full_version }}-windows-${{ steps.archvars.outputs.bitness }}bit
-          path: dist/release_archive_${{ steps.vars.outputs.full_version }}_${{ steps.archvars.outputs.bitness }}bit/*
+          name: gcft-${{ steps.vars.outputs.full_version }}-windows-${{ matrix.architecture }}
+          path: dist/release_archive_${{ steps.vars.outputs.full_version }}_${{ matrix.architecture }}/*
 
   macos:
     runs-on: macos-latest
@@ -68,11 +64,11 @@ jobs:
       MACOSX_DEPLOYMENT_TARGET: 10.9
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
       - name: Set up Miniconda with Python 3.10
-        uses: goanpeca/setup-miniconda@v1
+        uses: conda-incubator/setup-miniconda@v2
         with:
           python-version: '3.10'
           architecture: ${{ matrix.architecture }}
@@ -94,11 +90,7 @@ jobs:
           USER_INPUT_VERSION=${{ github.event.inputs.version }}
           TXT_VERSION=$(cat version.txt)
           GIT_SHA_SHORT=$(git rev-parse --short=7 ${{ github.sha }})
-          echo "::set-output name=full_version::${USER_INPUT_VERSION:-$TXT_VERSION-$GIT_SHA_SHORT}"
-      - name: Set architecture variables
-        id: archvars
-        run: |
-          echo "::set-output name=bitness::$(python3 -c "import struct; print(struct.calcsize('P') * 8)")"
+          echo "full_version=${USER_INPUT_VERSION:-$TXT_VERSION-$GIT_SHA_SHORT}" >> $GITHUB_OUTPUT
       - name: Set version
         id: version
         run: |
@@ -109,10 +101,11 @@ jobs:
       - name: Bundle MacOS App
         run: python3 build.py
         shell: bash -l {0}
-      - uses: actions/upload-artifact@v2
+      - name: Upload MacOS App
+        uses: actions/upload-artifact@v3
         with:
-          name: gcft-${{ steps.vars.outputs.full_version }}-macos-${{ steps.archvars.outputs.bitness }}bit
-          path: dist/release_archive_${{ steps.vars.outputs.full_version }}_${{ steps.archvars.outputs.bitness }}bit.zip
+          name: gcft-${{ steps.vars.outputs.full_version }}-macos-${{ matrix.architecture }}
+          path: dist/release_archive_${{ steps.vars.outputs.full_version }}_${{ matrix.architecture }}.zip
 
   linux:
     runs-on: ubuntu-latest
@@ -121,11 +114,11 @@ jobs:
         architecture: [ x64 ]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
       - name: Set up Python 3.10
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
           architecture: ${{ matrix.architecture }}
@@ -144,11 +137,7 @@ jobs:
           USER_INPUT_VERSION=${{ github.event.inputs.version }}
           TXT_VERSION=$(cat version.txt)
           GIT_SHA_SHORT=$(git rev-parse --short=7 ${{ github.sha }})
-          echo "::set-output name=full_version::${USER_INPUT_VERSION:-$TXT_VERSION-$GIT_SHA_SHORT}"
-      - name: Set architecture variables
-        id: archvars
-        run: |
-          echo "::set-output name=bitness::$(python -c "import struct; print(struct.calcsize('P') * 8)")"
+          echo "full_version=${USER_INPUT_VERSION:-$TXT_VERSION-$GIT_SHA_SHORT}" >> $GITHUB_OUTPUT
       - name: Set version
         id: version
         run: |
@@ -157,7 +146,8 @@ jobs:
         run: python -m PyInstaller --log-level=WARN gcft.spec
       - name: Bundle Linux App
         run: python build.py
-      - uses: actions/upload-artifact@v2
+      - name: Upload Linux App
+        uses: actions/upload-artifact@v3
         with:
-          name: gcft-${{ steps.vars.outputs.full_version }}-linux-${{ steps.archvars.outputs.bitness }}bit
-          path: dist/release_archive_${{ steps.vars.outputs.full_version }}_${{ steps.archvars.outputs.bitness }}bit/*
+          name: gcft-${{ steps.vars.outputs.full_version }}-linux-${{ matrix.architecture }}
+          path: dist/release_archive_${{ steps.vars.outputs.full_version }}_${{ matrix.architecture }}/*
