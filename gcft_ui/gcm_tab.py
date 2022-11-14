@@ -204,6 +204,10 @@ class GCMTab(QWidget):
       return
     
     QMessageBox.information(self, "Folder imported", "Successfully overwrote %d files in the GCM from \"%s\"." % (num_files_overwritten, folder_path))
+    
+    for file_path in self.gcm.changed_files:
+      file = self.gcm.files_by_path[file_path]
+      self.update_changed_file_size_in_gcm(file)
   
   def extract_all_files_from_gcm_by_path(self, folder_path):
     generator = self.gcm.export_disc_to_folder_with_changed_files(folder_path)
