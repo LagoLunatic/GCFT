@@ -326,8 +326,8 @@ class GCMTab(QWidget):
       f.write(data)
   
   def update_changed_file_size_in_gcm(self, file):
-    data = self.gcm.get_changed_file_data(file.file_path)
-    file_size_str = self.window().stringify_number(data_len(data))
+    file_size = self.gcm.get_changed_file_size(file.file_path)
+    file_size_str = self.window().stringify_number(file_size)
     item = self.gcm_file_entry_to_tree_widget_item[file]
     item.setText(self.gcm_col_name_to_index["File Size"], file_size_str)
   
