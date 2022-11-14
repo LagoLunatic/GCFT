@@ -67,10 +67,10 @@ class Ui_GCMTab(object):
 
         self.horizontalLayout_3.addWidget(self.replace_all_files_in_gcm)
 
-        self.dump_all_gcm_textures = QPushButton(GCMTab)
-        self.dump_all_gcm_textures.setObjectName(u"dump_all_gcm_textures")
+        self.add_replace_files_from_folder = QPushButton(GCMTab)
+        self.add_replace_files_from_folder.setObjectName(u"add_replace_files_from_folder")
 
-        self.horizontalLayout_3.addWidget(self.dump_all_gcm_textures)
+        self.horizontalLayout_3.addWidget(self.add_replace_files_from_folder)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout_3)
@@ -87,10 +87,10 @@ class Ui_GCMTab(object):
 
         self.horizontalLayout.addWidget(self.extract_all_files_from_gcm)
 
-        self.widget = QWidget(GCMTab)
-        self.widget.setObjectName(u"widget")
+        self.dump_all_gcm_textures = QPushButton(GCMTab)
+        self.dump_all_gcm_textures.setObjectName(u"dump_all_gcm_textures")
 
-        self.horizontalLayout.addWidget(self.widget)
+        self.horizontalLayout.addWidget(self.dump_all_gcm_textures)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -124,9 +124,10 @@ class Ui_GCMTab(object):
         self.actionDeleteGCMFolder.setText(QCoreApplication.translate("GCMTab", u"Delete Folder", None))
         self.import_gcm.setText(QCoreApplication.translate("GCMTab", u"Import GCM", None))
         self.replace_all_files_in_gcm.setText(QCoreApplication.translate("GCMTab", u"Replace All Files in GCM", None))
-        self.dump_all_gcm_textures.setText(QCoreApplication.translate("GCMTab", u"Dump All Textures", None))
+        self.add_replace_files_from_folder.setText(QCoreApplication.translate("GCMTab", u"Add/Replace Files From Folder", None))
         self.export_gcm.setText(QCoreApplication.translate("GCMTab", u"Export GCM", None))
         self.extract_all_files_from_gcm.setText(QCoreApplication.translate("GCMTab", u"Extract All Files From GCM", None))
+        self.dump_all_gcm_textures.setText(QCoreApplication.translate("GCMTab", u"Dump All Textures", None))
         ___qtreewidgetitem = self.gcm_files_tree.headerItem()
         ___qtreewidgetitem.setText(1, QCoreApplication.translate("GCMTab", u"File Size", None));
         ___qtreewidgetitem.setText(0, QCoreApplication.translate("GCMTab", u"File Name", None));

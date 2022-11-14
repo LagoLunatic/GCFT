@@ -31,9 +31,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="dump_all_gcm_textures">
+      <widget class="QPushButton" name="add_replace_files_from_folder">
        <property name="text">
-        <string>Dump All Textures</string>
+        <string>Add/Replace Files From Folder</string>
        </property>
       </widget>
      </item>
@@ -56,7 +56,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QWidget" name="widget" native="true"/>
+      <widget class="QPushButton" name="dump_all_gcm_textures">
+       <property name="text">
+        <string>Dump All Textures</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

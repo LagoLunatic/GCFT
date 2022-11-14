@@ -35,12 +35,14 @@ class GCMTab(QWidget):
     self.ui.replace_all_files_in_gcm.setDisabled(True)
     self.ui.extract_all_files_from_gcm.setDisabled(True)
     self.ui.dump_all_gcm_textures.setDisabled(True)
+    self.ui.add_replace_files_from_folder.setDisabled(True)
     
     self.ui.import_gcm.clicked.connect(self.import_gcm)
     self.ui.export_gcm.clicked.connect(self.export_gcm)
     self.ui.replace_all_files_in_gcm.clicked.connect(self.replace_all_files_in_gcm)
     self.ui.extract_all_files_from_gcm.clicked.connect(self.extract_all_files_from_gcm)
     self.ui.dump_all_gcm_textures.clicked.connect(self.dump_all_gcm_textures)
+    self.ui.add_replace_files_from_folder.clicked.connect(self.add_replace_files_from_folder)
     
     self.ui.gcm_files_tree.setContextMenuPolicy(Qt.CustomContextMenu)
     self.ui.gcm_files_tree.customContextMenuRequested.connect(self.show_gcm_files_tree_context_menu)
@@ -95,6 +97,13 @@ class GCMTab(QWidget):
       op_callback=self.dump_all_gcm_textures_by_path,
       is_opening=False, is_saving=True, is_folder=True,
       file_type="all GCM texture"
+    )
+  
+  def add_replace_files_from_folder(self):
+    self.window().generic_do_gui_file_operation(
+      op_callback=self.add_replace_files_from_folder_by_path,
+      is_opening=True, is_saving=False, is_folder=True,
+      file_type="GCM"
     )
   
   def extract_file_from_gcm(self):
@@ -162,6 +171,7 @@ class GCMTab(QWidget):
     self.ui.replace_all_files_in_gcm.setDisabled(False)
     self.ui.extract_all_files_from_gcm.setDisabled(False)
     self.ui.dump_all_gcm_textures.setDisabled(False)
+    self.ui.add_replace_files_from_folder.setDisabled(False)
   
   def add_gcm_file_entry_to_files_tree(self, file_entry):
     if file_entry.is_dir:
@@ -198,13 +208,32 @@ class GCMTab(QWidget):
     QMessageBox.information(self, "GCM saved", "Successfully saved GCM.")
   
   def replace_all_files_in_gcm_by_path(self, folder_path):
-    num_files_overwritten = self.gcm.import_all_files_from_disk(folder_path)
+    replace_paths, add_paths = self.gcm.collect_files_to_replace_and_add_from_disk(folder_path)
     
-    if num_files_overwritten == 0:
+    if len(replace_paths) == 0:
       QMessageBox.warning(self, "No matching files found", "The selected folder does not contain any files matching the name and directory structure of files in the currently loaded GCM. No files imported.\n\nMake sure you're selecting the correct folder - it should be the folder with 'files' and 'sys' inside of it, not the 'files' folder itself.")
       return
     
-    QMessageBox.information(self, "Folder imported", "Successfully overwrote %d files in the GCM from \"%s\"." % (num_files_overwritten, folder_path))
+    message = "Importing files from this folder will replace %d existing files in the GCM.\n\nAre you sure you want to proceed?" % (len(replace_paths))
+    response = QMessageBox.question(self, 
+      "Confirm replace files",
+      message,
+      QMessageBox.Cancel | QMessageBox.Yes,
+      QMessageBox.Cancel
+    )
+    if response != QMessageBox.Yes:
+      return
+    
+    generator = self.gcm.import_files_from_disk_by_paths(folder_path, replace_paths, [])
+    max_val = len(replace_paths)
+    
+    self.window().start_progress_thread(
+      generator, "Replacing files", max_val,
+      self.replace_all_files_in_gcm_by_path_complete
+    )
+  
+  def replace_all_files_in_gcm_by_path_complete(self):
+    QMessageBox.information(self, "Files replaced", "Successfully overwrote all matching files in the GCM.")
     
     for file_path in self.gcm.changed_files:
       file = self.gcm.files_by_path[file_path]
@@ -228,6 +257,48 @@ class GCMTab(QWidget):
     max_val = len(asset_dumper.get_all_gcm_file_paths(self.gcm))
     
     self.window().start_texture_dumper_thread(asset_dumper, dumper_generator, max_val)
+  
+  def add_replace_files_from_folder_by_path(self, folder_path):
+    # First ensure the input folder's directory structure is correct.
+    root_names = set(os.listdir(folder_path))
+    if len(root_names) == 0:
+      QMessageBox.warning(self, "Invalid folder structure", "Input folder is empty. No files to import.")
+      return
+    if root_names & set(["files", "sys"]) != root_names:
+      QMessageBox.warning(self, "Invalid folder structure", "Input folder contains unknown files or folders in its root directory.\n\nMake sure you're selecting the correct folder - it should be the folder with 'files' and 'sys' inside of it, not the 'files' folder itself.")
+      return
+    if not all(os.path.isdir(os.path.join(folder_path, name)) for name in root_names):
+      QMessageBox.warning(self, "Invalid folder structure", "Input folder contains files in places of folders in its root directory.\n\nMake sure you're selecting the correct folder - it should be the folder with 'files' and 'sys' inside of it, not the 'files' folder itself.")
+      return
+    
+    replace_paths, add_paths = self.gcm.collect_files_to_replace_and_add_from_disk(folder_path)
+    
+    message = "Importing files from this folder will replace %d existing files and add %d new files.\n\nAre you sure you want to proceed?" % (len(replace_paths), len(add_paths))
+    response = QMessageBox.question(self, 
+      "Confirm import files",
+      message,
+      QMessageBox.Cancel | QMessageBox.Yes,
+      QMessageBox.Cancel
+    )
+    if response != QMessageBox.Yes:
+      return
+    
+    generator = self.gcm.import_files_from_disk_by_paths(folder_path, replace_paths, add_paths)
+    max_val = len(replace_paths) + len(add_paths)
+    
+    self.window().start_progress_thread(
+      generator, "Importing files", max_val,
+      self.add_replace_files_from_folder_by_path_complete
+    )
+  
+  def add_replace_files_from_folder_by_path_complete(self):
+    QMessageBox.information(self, "Files imported", "Successfully imported all files from the input folder.\n\nDon't forget to use 'Export GCM' to save the modified GCM.")
+    
+    # Refresh the UI so that new and changed files are reflected visually.
+    # Need to recalculate the file entries list first so any newly added files actually appear in it.
+    self.gcm.recalculate_file_entry_indexes()
+    # Then refresh the tree in the UI.
+    self.reload_gcm_files_tree()
   
   
   def show_gcm_files_tree_context_menu(self, pos):
