@@ -167,7 +167,8 @@ class GCMTab(QWidget):
     if file_entry.is_dir:
       file_size_str = ""
     else:
-      file_size_str = self.window().stringify_number(file_entry.file_size)
+      file_size = self.gcm.get_changed_file_size(file_entry.file_path)
+      file_size_str = self.window().stringify_number(file_size)
     
     if file_entry.is_system_file:
       parent_item = self.ui.gcm_files_tree.topLevelItem(1)
