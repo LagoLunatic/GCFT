@@ -192,6 +192,12 @@ class GCMTab(QWidget):
     self.gcm_file_entry_to_tree_widget_item[file_entry] = item
     self.gcm_tree_widget_item_to_file_entry[item] = file_entry
   
+  def is_banner_filename(self, filename):
+    match = re.search(r"\.bnr(?:$| |\.)", filename, re.I)
+    if match:
+      return True
+    return False
+  
   def export_gcm_by_path(self, gcm_path):
     if os.path.realpath(self.gcm.iso_path) == os.path.realpath(gcm_path):
       raise Exception("Cannot export an ISO over the currently opened ISO. Please choose a different path.")
@@ -328,7 +334,7 @@ class GCMTab(QWidget):
       menu = QMenu(self)
       
       basename, file_ext = os.path.splitext(file.name)
-      if file_ext == ".bti" or file_ext == ".bnr":
+      if file_ext == ".bti" or self.is_banner_filename(file.name):
         menu.addAction(self.ui.actionOpenGCMImage)
         self.ui.actionOpenGCMImage.setData(file)
         
@@ -481,8 +487,7 @@ class GCMTab(QWidget):
     data = self.gcm.get_changed_file_data(file_entry.file_path)
     data = make_copy_data(data)
     
-    basename, file_ext = os.path.splitext(file_entry.name)
-    if file_ext == ".bnr":
+    if self.is_banner_filename(file_entry.name):
       image_data = read_bytes(data, 0x20, 0x1800)
       data = BytesIO()
       write_bytes(data, 0x20, image_data)
@@ -492,7 +497,7 @@ class GCMTab(QWidget):
       write_u16(data, 0x04, 32) # Height
       write_u32(data, 0x1C, 0x20) # Image data offset
       
-      bti_name = basename + "_bnr"
+      bti_name = file_entry.name
     
     self.bti_tab.import_bti_by_data(data, bti_name)
     
@@ -504,8 +509,7 @@ class GCMTab(QWidget):
     self.bti_tab.bti.save_changes()
     data = make_copy_data(self.bti_tab.bti.data)
     
-    basename, file_ext = os.path.splitext(file_entry.name)
-    if file_ext == ".bnr":
+    if self.is_banner_filename(file_entry.name):
       if self.bti_tab.bti.image_format != ImageFormat.RGB5A3 or self.bti_tab.bti.width != 96 or self.bti_tab.bti.height != 32 or data_len(self.bti_tab.bti.image_data) != 0x1800:
         QMessageBox.warning(self, "Invalid banner image", "Invalid banner image. Banner images must be exactly 96x32 pixels in size and use the RGB5A3 image format.")
         return
