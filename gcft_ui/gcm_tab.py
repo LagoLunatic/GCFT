@@ -422,6 +422,8 @@ class GCMTab(QWidget):
     self.gcm.changed_files[file.file_path] = data
     
     self.update_changed_file_size_in_gcm(file)
+    
+    self.window().ui.statusbar.showMessage("Replaced %s." % file.file_path, 3000)
   
   def delete_file_in_gcm(self):
     file_entry = self.ui.actionDeleteGCMFile.data()

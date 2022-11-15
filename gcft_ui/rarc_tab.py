@@ -492,6 +492,8 @@ class RARCTab(QWidget):
     file_entry.update_compression_flags_from_data()
     
     self.update_file_size_and_compression_in_ui(file_entry)
+    
+    self.window().ui.statusbar.showMessage("Replaced %s." % file_entry.name, 3000)
   
   def delete_file_in_rarc(self):
     file_entry = self.ui.actionDeleteRARCFile.data()
