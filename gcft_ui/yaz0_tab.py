@@ -39,7 +39,7 @@ class Yaz0Tab(QWidget):
   def decompress_yaz0_by_paths(self, comp_path, decomp_path):
     with open(comp_path, "rb") as f:
       comp_data = BytesIO(f.read())
-    if try_read_str(comp_data, 0, 4) != "Yaz0":
+    if not Yaz0.check_is_compressed(comp_data):
       QMessageBox.warning(self, "Not Yaz0 compressed", "The selected file is not Yaz0 compressed. Cannot decompress.")
       return
     
@@ -54,7 +54,7 @@ class Yaz0Tab(QWidget):
   def compress_yaz0_by_paths(self, decomp_path, comp_path):
     with open(decomp_path, "rb") as f:
       decomp_data = BytesIO(f.read())
-    if try_read_str(decomp_data, 0, 4) == "Yaz0":
+    if Yaz0.check_is_compressed(decomp_data):
       QMessageBox.warning(self, "Already Yaz0 compressed", "The selected file is already Yaz0 compressed. Cannot compress.")
       return
     
