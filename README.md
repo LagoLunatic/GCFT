@@ -5,6 +5,7 @@ GameCube File Tools (GCFT) is a GUI tool for editing the following common file f
 * GCM (GameCube ISOs)
 * RARC (archives)
 * BTI (images)
+* Various J3D formats (e.g. textures in BDL and BMD models)
 * JPC (particle effect archives) (version 1 only)
 * Yaz0 (compression)
 
@@ -18,6 +19,7 @@ Features:
 * Convert BTI images to PNG and back
 * Dump all BTI images in a GCM or a RARC to a folder as PNG
 * Edit the header attributes of BTI images (e.g. image format, palette format, wrapping, filter mode)
+* View and extract the images contained in GameCube banner files (.bnr)
 * Extract and replace the BTI textures embedded in J3D BDL and BMD models and BMT material tables, and JPC particle archives
 * Import a folder of particle files onto an existing JPC, adding/overwriting all the particles from the folder to the JPC
 * Viewing DOL executable sections, and converting between offsets within the DOL file and RAM addresses in the game's memory
@@ -25,8 +27,7 @@ Features:
 
 It currently cannot create brand new GCMs or JPCs from scratch.  
 
-If you're on Windows, you can download GCFT here: <https://github.com/LagoLunatic/GCFT/releases>  
-If you're on Mac or Linux, executable builds are not provided, so you must run it from the source code instead. See the "Running from source" section at the bottom of this readme.  
+You can download GCFT here: https://github.com/LagoLunatic/GCFT/releases
 
 ### Usage
 
