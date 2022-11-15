@@ -34,23 +34,38 @@ class Ui_BTITab(object):
 
         self.horizontalLayout_5.addWidget(self.import_bti)
 
-        self.export_bti = QPushButton(BTITab)
-        self.export_bti.setObjectName(u"export_bti")
-
-        self.horizontalLayout_5.addWidget(self.export_bti)
-
         self.import_bti_image = QPushButton(BTITab)
         self.import_bti_image.setObjectName(u"import_bti_image")
 
         self.horizontalLayout_5.addWidget(self.import_bti_image)
 
-        self.export_bti_image = QPushButton(BTITab)
-        self.export_bti_image.setObjectName(u"export_bti_image")
+        self.import_bti_from_bnr = QPushButton(BTITab)
+        self.import_bti_from_bnr.setObjectName(u"import_bti_from_bnr")
 
-        self.horizontalLayout_5.addWidget(self.export_bti_image)
+        self.horizontalLayout_5.addWidget(self.import_bti_from_bnr)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout_5)
+
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.export_bti = QPushButton(BTITab)
+        self.export_bti.setObjectName(u"export_bti")
+
+        self.horizontalLayout.addWidget(self.export_bti)
+
+        self.export_bti_image = QPushButton(BTITab)
+        self.export_bti_image.setObjectName(u"export_bti_image")
+
+        self.horizontalLayout.addWidget(self.export_bti_image)
+
+        self.widget = QWidget(BTITab)
+        self.widget.setObjectName(u"widget")
+
+        self.horizontalLayout.addWidget(self.widget)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout)
 
         self.horizontalLayout_8 = QHBoxLayout()
         self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
@@ -77,7 +92,7 @@ class Ui_BTITab(object):
         self.bti_image_scroll_area.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 591, 464))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 591, 433))
         self.gridLayout = QGridLayout(self.scrollAreaWidgetContents)
         self.gridLayout.setObjectName(u"gridLayout")
         self.bti_image_label = QLabel(self.scrollAreaWidgetContents)
@@ -105,6 +120,41 @@ class Ui_BTITab(object):
         self.label_11.setObjectName(u"label_11")
 
         self.formLayout.setWidget(0, QFormLayout.LabelRole, self.label_11)
+
+        self.bti_file_size = QLabel(BTITab)
+        self.bti_file_size.setObjectName(u"bti_file_size")
+
+        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.bti_file_size)
+
+        self.label_12 = QLabel(BTITab)
+        self.label_12.setObjectName(u"label_12")
+
+        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_12)
+
+        self.bti_resolution = QLabel(BTITab)
+        self.bti_resolution.setObjectName(u"bti_resolution")
+
+        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.bti_resolution)
+
+        self.label_13 = QLabel(BTITab)
+        self.label_13.setObjectName(u"label_13")
+
+        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label_13)
+
+        self.bti_num_colors = QLabel(BTITab)
+        self.bti_num_colors.setObjectName(u"bti_num_colors")
+
+        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.bti_num_colors)
+
+        self.label_15 = QLabel(BTITab)
+        self.label_15.setObjectName(u"label_15")
+
+        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.label_15)
+
+        self.bti_max_colors = QLabel(BTITab)
+        self.bti_max_colors.setObjectName(u"bti_max_colors")
+
+        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.bti_max_colors)
 
         self.label = QLabel(BTITab)
         self.label.setObjectName(u"label")
@@ -222,41 +272,6 @@ class Ui_BTITab(object):
 
         self.formLayout.setWidget(13, QFormLayout.FieldRole, self.bti_lod_bias)
 
-        self.label_12 = QLabel(BTITab)
-        self.label_12.setObjectName(u"label_12")
-
-        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_12)
-
-        self.bti_file_size = QLabel(BTITab)
-        self.bti_file_size.setObjectName(u"bti_file_size")
-
-        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.bti_file_size)
-
-        self.bti_resolution = QLabel(BTITab)
-        self.bti_resolution.setObjectName(u"bti_resolution")
-
-        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.bti_resolution)
-
-        self.label_13 = QLabel(BTITab)
-        self.label_13.setObjectName(u"label_13")
-
-        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label_13)
-
-        self.bti_num_colors = QLabel(BTITab)
-        self.bti_num_colors.setObjectName(u"bti_num_colors")
-
-        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.bti_num_colors)
-
-        self.label_15 = QLabel(BTITab)
-        self.label_15.setObjectName(u"label_15")
-
-        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.label_15)
-
-        self.bti_max_colors = QLabel(BTITab)
-        self.bti_max_colors.setObjectName(u"bti_max_colors")
-
-        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.bti_max_colors)
-
 
         self.horizontalLayout_8.addLayout(self.formLayout)
 
@@ -272,11 +287,19 @@ class Ui_BTITab(object):
     def retranslateUi(self, BTITab):
         BTITab.setWindowTitle(QCoreApplication.translate("BTITab", u"Form", None))
         self.import_bti.setText(QCoreApplication.translate("BTITab", u"Import BTI", None))
-        self.export_bti.setText(QCoreApplication.translate("BTITab", u"Export BTI", None))
         self.import_bti_image.setText(QCoreApplication.translate("BTITab", u"Import Image", None))
+        self.import_bti_from_bnr.setText(QCoreApplication.translate("BTITab", u"Import From GameCube Banner (.bnr)", None))
+        self.export_bti.setText(QCoreApplication.translate("BTITab", u"Export BTI", None))
         self.export_bti_image.setText(QCoreApplication.translate("BTITab", u"Export Image", None))
         self.bti_image_label.setText("")
         self.label_11.setText(QCoreApplication.translate("BTITab", u"File Size", None))
+        self.bti_file_size.setText(QCoreApplication.translate("BTITab", u"123", None))
+        self.label_12.setText(QCoreApplication.translate("BTITab", u"Resolution", None))
+        self.bti_resolution.setText(QCoreApplication.translate("BTITab", u"123x123", None))
+        self.label_13.setText(QCoreApplication.translate("BTITab", u"Num Colors", None))
+        self.bti_num_colors.setText(QCoreApplication.translate("BTITab", u"123", None))
+        self.label_15.setText(QCoreApplication.translate("BTITab", u"Max Colors", None))
+        self.bti_max_colors.setText(QCoreApplication.translate("BTITab", u"123", None))
         self.label.setText(QCoreApplication.translate("BTITab", u"Image Format", None))
         self.label_2.setText(QCoreApplication.translate("BTITab", u"Palette Format", None))
         self.label_3.setText(QCoreApplication.translate("BTITab", u"Wrap X", None))
@@ -287,12 +310,5 @@ class Ui_BTITab(object):
         self.label_8.setText(QCoreApplication.translate("BTITab", u"Min LOD", None))
         self.label_9.setText(QCoreApplication.translate("BTITab", u"Max LOD", None))
         self.label_10.setText(QCoreApplication.translate("BTITab", u"LOD Bias", None))
-        self.label_12.setText(QCoreApplication.translate("BTITab", u"Resolution", None))
-        self.bti_file_size.setText(QCoreApplication.translate("BTITab", u"123", None))
-        self.bti_resolution.setText(QCoreApplication.translate("BTITab", u"123x123", None))
-        self.label_13.setText(QCoreApplication.translate("BTITab", u"Num Colors", None))
-        self.bti_num_colors.setText(QCoreApplication.translate("BTITab", u"123", None))
-        self.label_15.setText(QCoreApplication.translate("BTITab", u"Max Colors", None))
-        self.bti_max_colors.setText(QCoreApplication.translate("BTITab", u"123", None))
     # retranslateUi
 

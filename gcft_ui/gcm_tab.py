@@ -482,24 +482,15 @@ class GCMTab(QWidget):
   def open_image_in_gcm(self):
     file_entry = self.ui.actionOpenGCMImage.data()
     
-    bti_name = os.path.splitext(file_entry.name)[0]
-    
     data = self.gcm.get_changed_file_data(file_entry.file_path)
     data = make_copy_data(data)
     
     if self.is_banner_filename(file_entry.name):
-      image_data = read_bytes(data, 0x20, 0x1800)
-      data = BytesIO()
-      write_bytes(data, 0x20, image_data)
-      
-      write_u8(data, 0x00, ImageFormat.RGB5A3.value) # Image format
-      write_u16(data, 0x02, 96) # Width
-      write_u16(data, 0x04, 32) # Height
-      write_u32(data, 0x1C, 0x20) # Image data offset
-      
       bti_name = file_entry.name
-    
-    self.bti_tab.import_bti_by_data(data, bti_name)
+      self.bti_tab.import_bti_from_bnr_by_data(data, bti_name)
+    else:
+      bti_name = os.path.splitext(file_entry.name)[0]
+      self.bti_tab.import_bti_by_data(data, bti_name)
     
     self.window().set_tab_by_name("BTI Images")
   

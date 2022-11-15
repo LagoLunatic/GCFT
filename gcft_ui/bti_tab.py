@@ -56,6 +56,7 @@ class BTITab(QWidget):
     self.ui.export_bti.clicked.connect(self.export_bti)
     self.ui.import_bti_image.clicked.connect(self.import_bti_image)
     self.ui.export_bti_image.clicked.connect(self.export_bti_image)
+    self.ui.import_bti_from_bnr.clicked.connect(self.import_bti_from_bnr)
     
     for field_name, field_enum in BTI_ENUM_FIELDS:
       widget_name = "bti_" + field_name
@@ -106,6 +107,13 @@ class BTITab(QWidget):
       is_opening=False, is_saving=True, is_folder=False,
       file_type="image", file_filter="PNG Files (*.png)",
       default_file_name=png_name
+    )
+  
+  def import_bti_from_bnr(self):
+    self.window().generic_do_gui_file_operation(
+      op_callback=self.import_bti_from_bnr_by_path,
+      is_opening=True, is_saving=False, is_folder=False,
+      file_type="BNR", file_filter="All files (*.*)"
     )
   
   
@@ -254,6 +262,33 @@ class BTITab(QWidget):
     self.bti_image.save(image_path)
     
     QMessageBox.information(self, "BTI saved", "Successfully saved image.")
+  
+  def import_bti_from_bnr_by_path(self, bnr_path):
+    with open(bnr_path, "rb") as f:
+      data = BytesIO(f.read())
+    
+    bti_name = os.path.basename(bnr_path)
+    
+    self.import_bti_from_bnr_by_data(data, bti_name)
+  
+  def import_bti_from_bnr_by_data(self, data, bti_name):
+    if data_len(data) != 0x1960:
+      QMessageBox.warning(self, "Not a banner", "The specified file does not appear to be a GameCube banner.\nGameCube banners must be 0x1960 bytes long, this file is 0x%X bytes long." % data_len(data))
+      return
+    if read_str(data, 0, 4) != "BNR1":
+      QMessageBox.warning(self, "Not a banner", "The specified file does not appear to be a GameCube banner.\nGameCube banners must have the magic bytes 'BNR1', this file has the magic bytes '%s'." % read_str(data, 0, 4))
+      return
+    
+    image_data = read_bytes(data, 0x20, 0x1800)
+    data = BytesIO()
+    write_bytes(data, 0x20, image_data)
+    
+    write_u8(data, 0x00, ImageFormat.RGB5A3.value) # Image format
+    write_u16(data, 0x02, 96) # Width
+    write_u16(data, 0x04, 32) # Height
+    write_u32(data, 0x1C, 0x20) # Image data offset
+    
+    self.import_bti_by_data(data, bti_name)
   
   def bti_header_field_changed(self):
     for field_name, field_enum in BTI_ENUM_FIELDS:

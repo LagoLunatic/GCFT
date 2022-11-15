@@ -24,16 +24,27 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="export_bti">
+      <widget class="QPushButton" name="import_bti_image">
        <property name="text">
-        <string>Export BTI</string>
+        <string>Import Image</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="import_bti_image">
+      <widget class="QPushButton" name="import_bti_from_bnr">
        <property name="text">
-        <string>Import Image</string>
+        <string>Import From GameCube Banner (.bnr)</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="export_bti">
+       <property name="text">
+        <string>Export BTI</string>
        </property>
       </widget>
      </item>
@@ -43,6 +54,9 @@
         <string>Export Image</string>
        </property>
       </widget>
+     </item>
+     <item>
+      <widget class="QWidget" name="widget" native="true"/>
      </item>
     </layout>
    </item>
@@ -132,7 +146,7 @@
              <x>0</x>
              <y>0</y>
              <width>591</width>
-             <height>464</height>
+             <height>433</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout">
@@ -168,6 +182,55 @@
         <widget class="QLabel" name="label_11">
          <property name="text">
           <string>File Size</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLabel" name="bti_file_size">
+         <property name="text">
+          <string>123</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_12">
+         <property name="text">
+          <string>Resolution</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLabel" name="bti_resolution">
+         <property name="text">
+          <string>123x123</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_13">
+         <property name="text">
+          <string>Num Colors</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLabel" name="bti_num_colors">
+         <property name="text">
+          <string>123</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_15">
+         <property name="text">
+          <string>Max Colors</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLabel" name="bti_max_colors">
+         <property name="text">
+          <string>123</string>
          </property>
         </widget>
        </item>
@@ -327,55 +390,6 @@
            <width>45</width>
            <height>16777215</height>
           </size>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_12">
-         <property name="text">
-          <string>Resolution</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLabel" name="bti_file_size">
-         <property name="text">
-          <string>123</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLabel" name="bti_resolution">
-         <property name="text">
-          <string>123x123</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_13">
-         <property name="text">
-          <string>Num Colors</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLabel" name="bti_num_colors">
-         <property name="text">
-          <string>123</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="label_15">
-         <property name="text">
-          <string>Max Colors</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QLabel" name="bti_max_colors">
-         <property name="text">
-          <string>123</string>
          </property>
         </widget>
        </item>
