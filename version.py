@@ -1,5 +1,6 @@
 
 import os
+import re
 
 from gcft_paths import GCFT_ROOT_PATH, IS_RUNNING_FROM_SOURCE
 
