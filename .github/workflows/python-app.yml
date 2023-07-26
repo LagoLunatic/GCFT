@@ -108,7 +108,7 @@ jobs:
           path: dist/release_archive_${{ steps.vars.outputs.full_version }}_${{ matrix.architecture }}.zip
 
   linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         architecture: [ x64 ]
