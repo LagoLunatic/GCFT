@@ -6,8 +6,6 @@ from PySide6.QtWidgets import *
 
 import sys
 
-sys.path.insert(0, "./wwrando")
-
 from gcft_ui.main_window import GCFTWindow
 
 def signal_handler(sig, frame):

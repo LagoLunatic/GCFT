@@ -3,14 +3,14 @@ import os
 import re
 import traceback
 from io import BytesIO
-from fs_helpers import *
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 
-from wwlib.j3d import J3DFile, BPRegister, XFRegister
-from wwlib.j3d import MDLEntry, AnimationKeyframe, ColorAnimation, UVAnimation
-from wwlib.bti import BTI
+from gclib import fs_helpers as fs
+from gclib.j3d import J3DFile, BPRegister, XFRegister
+from gclib.j3d import MDLEntry, AnimationKeyframe, ColorAnimation, UVAnimation
+from gclib.bti import BTI
 from gcft_ui.uic.ui_j3d_tab import Ui_J3DTab
 
 class J3DTab(QWidget):
@@ -116,10 +116,10 @@ class J3DTab(QWidget):
           # We also don't display the 0x20 byte size of any of the headers.
           texture_total_size = 0
           if texture.image_data_offset+texture.header_offset not in seen_image_data_offsets:
-            texture_total_size += pad_offset_to_nearest(data_len(texture.image_data), 0x20)
+            texture_total_size += fs.pad_offset_to_nearest(fs.data_len(texture.image_data), 0x20)
             seen_image_data_offsets.append(texture.image_data_offset+texture.header_offset)
           if texture.palette_data_offset+texture.header_offset not in seen_palette_data_offsets:
-            texture_total_size += pad_offset_to_nearest(data_len(texture.palette_data), 0x20)
+            texture_total_size += fs.pad_offset_to_nearest(fs.data_len(texture.palette_data), 0x20)
             seen_palette_data_offsets.append(texture.palette_data_offset+texture.header_offset)
           
           if texture_total_size == 0:
@@ -364,21 +364,21 @@ class J3DTab(QWidget):
     
     # Need to make a fake standalone BTI texture data so we can load it without it being the TEX1 format.
     data = BytesIO()
-    bti_header_bytes = read_bytes(texture.data, texture.header_offset, 0x20)
-    write_bytes(data, 0x00, bti_header_bytes)
+    bti_header_bytes = fs.read_bytes(texture.data, texture.header_offset, 0x20)
+    fs.write_bytes(data, 0x00, bti_header_bytes)
     
-    bti_image_data = read_all_bytes(texture.image_data)
-    write_bytes(data, 0x20, bti_image_data)
+    bti_image_data = fs.read_all_bytes(texture.image_data)
+    fs.write_bytes(data, 0x20, bti_image_data)
     image_data_offset = 0x20
-    write_u32(data, 0x1C, image_data_offset)
+    fs.write_u32(data, 0x1C, image_data_offset)
     
-    if data_len(texture.palette_data) == 0:
+    if fs.data_len(texture.palette_data) == 0:
       palette_data_offset = 0
     else:
-      bti_palette_data = read_all_bytes(texture.palette_data)
-      write_bytes(data, 0x20 + data_len(texture.image_data), bti_palette_data)
-      palette_data_offset = 0x20 + data_len(texture.image_data)
-    write_u32(data, 0x0C, palette_data_offset)
+      bti_palette_data = fs.read_all_bytes(texture.palette_data)
+      fs.write_bytes(data, 0x20 + fs.data_len(texture.image_data), bti_palette_data)
+      palette_data_offset = 0x20 + fs.data_len(texture.image_data)
+    fs.write_u32(data, 0x0C, palette_data_offset)
     
     texture_index = self.j3d.tex1.textures.index(texture)
     bti_name = self.j3d.tex1.texture_names[texture_index]
@@ -394,20 +394,20 @@ class J3DTab(QWidget):
     
     # Need to make a fake BTI header for it to read from.
     data = BytesIO()
-    bti_header_bytes = read_bytes(self.bti_tab.bti.data, self.bti_tab.bti.header_offset, 0x20)
-    write_bytes(data, 0x00, bti_header_bytes)
+    bti_header_bytes = fs.read_bytes(self.bti_tab.bti.data, self.bti_tab.bti.header_offset, 0x20)
+    fs.write_bytes(data, 0x00, bti_header_bytes)
     
     texture.read_header(data)
     
-    texture.image_data = make_copy_data(self.bti_tab.bti.image_data)
-    texture.palette_data = make_copy_data(self.bti_tab.bti.palette_data)
+    texture.image_data = fs.make_copy_data(self.bti_tab.bti.image_data)
+    texture.palette_data = fs.make_copy_data(self.bti_tab.bti.palette_data)
     
     texture.save_header_changes()
     
     # Update texture size displayed in the UI.
     texture_total_size = 0
-    texture_total_size += data_len(texture.image_data)
-    texture_total_size += data_len(texture.palette_data)
+    texture_total_size += fs.data_len(texture.image_data)
+    texture_total_size += fs.data_len(texture.palette_data)
     texture_size_str = self.window().stringify_number(texture_total_size, min_hex_chars=5)
     
     item = self.j3d_texture_to_tree_widget_item.get(texture)

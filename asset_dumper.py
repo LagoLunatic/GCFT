@@ -2,9 +2,9 @@
 import os
 import re
 
-from wwlib.rarc import RARC
-from wwlib.j3d import J3DFile
-from wwlib.bti import BTIFile
+from gclib.rarc import RARC
+from gclib.j3d import J3DFile
+from gclib.bti import BTIFile
 
 class AssetDumper:
   def __init__(self):

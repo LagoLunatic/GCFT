@@ -3,12 +3,12 @@ import os
 import re
 import traceback
 from io import BytesIO
-from fs_helpers import *
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 
-from wwlib.yaz0 import Yaz0
+from gclib import fs_helpers as fs
+from gclib.yaz0 import Yaz0
 from gcft_ui.uic.ui_yaz0_tab import Ui_Yaz0Tab
 
 class Yaz0Tab(QWidget):

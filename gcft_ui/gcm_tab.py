@@ -3,13 +3,13 @@ import os
 import re
 import traceback
 from io import BytesIO
-from fs_helpers import *
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 
-from wwlib.gcm import GCM
-from wwlib.texture_utils import ImageFormat, PaletteFormat
+from gclib import fs_helpers as fs
+from gclib.gcm import GCM
+from gclib.texture_utils import ImageFormat, PaletteFormat
 from gcft_ui.uic.ui_gcm_tab import Ui_GCMTab
 from asset_dumper import AssetDumper
 
@@ -415,7 +415,7 @@ class GCMTab(QWidget):
     with open(file_path, "rb") as f:
       data = BytesIO(f.read())
     
-    if file.file_path in ["sys/boot.bin", "sys/bi2.bin"] and data_len(data) != file.file_size:
+    if file.file_path in ["sys/boot.bin", "sys/bi2.bin"] and fs.data_len(data) != file.file_size:
       QMessageBox.warning(self, "Cannot change this file's size", "The size of boot.bin and bi2.bin cannot be changed.")
       return
     
@@ -461,7 +461,7 @@ class GCMTab(QWidget):
     file_entry = self.ui.actionOpenGCMRARC.data()
     
     data = self.gcm.get_changed_file_data(file_entry.file_path)
-    data = make_copy_data(data)
+    data = fs.make_copy_data(data)
     
     rarc_name = os.path.splitext(file_entry.name)[0]
     
@@ -473,7 +473,7 @@ class GCMTab(QWidget):
     file_entry = self.ui.actionReplaceGCMRARC.data()
     
     self.rarc_tab.rarc.save_changes()
-    data = make_copy_data(self.rarc_tab.rarc.data)
+    data = fs.make_copy_data(self.rarc_tab.rarc.data)
     
     self.gcm.changed_files[file_entry.file_path] = data
     
@@ -485,7 +485,7 @@ class GCMTab(QWidget):
     file_entry = self.ui.actionOpenGCMImage.data()
     
     data = self.gcm.get_changed_file_data(file_entry.file_path)
-    data = make_copy_data(data)
+    data = fs.make_copy_data(data)
     
     if self.is_banner_filename(file_entry.name):
       bti_name = file_entry.name
@@ -500,17 +500,17 @@ class GCMTab(QWidget):
     file_entry = self.ui.actionReplaceGCMImage.data()
     
     self.bti_tab.bti.save_changes()
-    data = make_copy_data(self.bti_tab.bti.data)
+    data = fs.make_copy_data(self.bti_tab.bti.data)
     
     if self.is_banner_filename(file_entry.name):
-      if self.bti_tab.bti.image_format != ImageFormat.RGB5A3 or self.bti_tab.bti.width != 96 or self.bti_tab.bti.height != 32 or data_len(self.bti_tab.bti.image_data) != 0x1800:
+      if self.bti_tab.bti.image_format != ImageFormat.RGB5A3 or self.bti_tab.bti.width != 96 or self.bti_tab.bti.height != 32 or fs.data_len(self.bti_tab.bti.image_data) != 0x1800:
         QMessageBox.warning(self, "Invalid banner image", "Invalid banner image. Banner images must be exactly 96x32 pixels in size and use the RGB5A3 image format.")
         return
       
       orig_banner_data = self.gcm.get_changed_file_data(file_entry.file_path)
-      image_data_bytes = read_bytes(self.bti_tab.bti.image_data, 0x00, 0x1800)
-      data = make_copy_data(orig_banner_data)
-      write_bytes(data, 0x20, image_data_bytes)
+      image_data_bytes = fs.read_bytes(self.bti_tab.bti.image_data, 0x00, 0x1800)
+      data = fs.make_copy_data(orig_banner_data)
+      fs.write_bytes(data, 0x20, image_data_bytes)
     
     self.gcm.changed_files[file_entry.file_path] = data
     
@@ -522,7 +522,7 @@ class GCMTab(QWidget):
     file_entry = self.ui.actionOpenGCMJPC.data()
     
     data = self.gcm.get_changed_file_data(file_entry.file_path)
-    data = make_copy_data(data)
+    data = fs.make_copy_data(data)
     
     jpc_name = os.path.splitext(file_entry.name)[0]
     
@@ -534,7 +534,7 @@ class GCMTab(QWidget):
     file_entry = self.ui.actionReplaceGCMJPC.data()
     
     self.jpc_tab.jpc.save_changes()
-    data = make_copy_data(self.jpc_tab.jpc.data)
+    data = fs.make_copy_data(self.jpc_tab.jpc.data)
     
     self.gcm.changed_files[file_entry.file_path] = data
     
@@ -546,7 +546,7 @@ class GCMTab(QWidget):
     file_entry = self.ui.actionOpenGCMDOL.data()
     
     data = self.gcm.get_changed_file_data(file_entry.file_path)
-    data = make_copy_data(data)
+    data = fs.make_copy_data(data)
     
     dol_name = os.path.splitext(file_entry.name)[0]
     
@@ -558,7 +558,7 @@ class GCMTab(QWidget):
     file_entry = self.ui.actionReplaceGCMDOL.data()
     
     self.dol_tab.dol.save_changes()
-    data = make_copy_data(self.dol_tab.dol.data)
+    data = fs.make_copy_data(self.dol_tab.dol.data)
     
     self.gcm.changed_files[file_entry.file_path] = data
     
@@ -572,7 +572,7 @@ class GCMTab(QWidget):
     file_name = os.path.basename(file_path)
     with open(file_path, "rb") as f:
       file_data = BytesIO(f.read())
-    file_size = data_len(file_data)
+    file_size = fs.data_len(file_data)
     file_size_str = self.window().stringify_number(file_size)
     
     gcm_file_path = dir_entry.file_path + "/" + file_name

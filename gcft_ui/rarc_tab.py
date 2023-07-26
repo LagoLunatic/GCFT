@@ -3,13 +3,13 @@ import os
 import re
 import traceback
 from io import BytesIO
-from fs_helpers import *
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 
-from wwlib.rarc import RARC, RARCFileAttrType
-from wwlib.yaz0 import Yaz0
+from gclib import fs_helpers as fs
+from gclib.rarc import RARC, RARCFileAttrType
+from gclib.yaz0 import Yaz0
 from gcft_ui.uic.ui_rarc_tab import Ui_RARCTab
 from asset_dumper import AssetDumper
 
@@ -302,7 +302,7 @@ class RARCTab(QWidget):
     
     self.ui.rarc_files_tree.blockSignals(True)
     
-    file_size_str = self.window().stringify_number(data_len(file_entry.data))
+    file_size_str = self.window().stringify_number(fs.data_len(file_entry.data))
     item.setText(self.rarc_col_name_to_index["File Size"], file_size_str)
     
     # TODO: Add a Yay0 checkbox and update it here once Yay0 compression is supported.
@@ -518,7 +518,7 @@ class RARCTab(QWidget):
     
     bti_name = os.path.splitext(file_entry.name)[0]
     
-    data = make_copy_data(file_entry.data)
+    data = fs.make_copy_data(file_entry.data)
     self.bti_tab.import_bti_by_data(data, bti_name)
     
     self.window().set_tab_by_name("BTI Images")
@@ -528,7 +528,7 @@ class RARCTab(QWidget):
     
     self.bti_tab.bti.save_changes()
     
-    file_entry.data = make_copy_data(self.bti_tab.bti.data)
+    file_entry.data = fs.make_copy_data(self.bti_tab.bti.data)
     file_entry.update_compression_flags_from_data()
     
     self.update_file_size_and_compression_in_ui(file_entry)
@@ -540,7 +540,7 @@ class RARCTab(QWidget):
     
     j3d_name = os.path.splitext(file_entry.name)[0]
     
-    data = make_copy_data(file_entry.data)
+    data = fs.make_copy_data(file_entry.data)
     self.j3d_tab.import_j3d_by_data(data, j3d_name)
     
     self.window().set_tab_by_name("J3D Files")
@@ -550,7 +550,7 @@ class RARCTab(QWidget):
     
     self.j3d_tab.j3d.save_changes()
     
-    file_entry.data = make_copy_data(self.j3d_tab.j3d.data)
+    file_entry.data = fs.make_copy_data(self.j3d_tab.j3d.data)
     file_entry.update_compression_flags_from_data()
     
     self.update_file_size_and_compression_in_ui(file_entry)
@@ -563,7 +563,7 @@ class RARCTab(QWidget):
     file_name = os.path.basename(file_path)
     with open(file_path, "rb") as f:
       file_data = BytesIO(f.read())
-    file_size = data_len(file_data)
+    file_size = fs.data_len(file_data)
     file_size_str = self.window().stringify_number(file_size)
     
     existing_file_names = [fe.name for fe in self.rarc.file_entries if not fe.is_dir]

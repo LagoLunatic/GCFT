@@ -4,12 +4,12 @@ import re
 import traceback
 import colorsys
 from io import BytesIO
-from fs_helpers import *
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 
 from collections import OrderedDict
+from gclib import fs_helpers as fs
 from gcft_ui.uic.ui_main import Ui_MainWindow
 from gcft_ui.gcft_common import GCFTThread, GCFTProgressDialog
 from version import VERSION

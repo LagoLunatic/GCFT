@@ -3,13 +3,13 @@ import os
 import re
 import traceback
 from io import BytesIO
-from fs_helpers import *
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 
-from wwlib.bti import BTI, BTIFile, WrapMode, FilterMode
-from wwlib.texture_utils import ImageFormat, PaletteFormat, MAX_COLORS_FOR_IMAGE_FORMAT
+from gclib import fs_helpers as fs
+from gclib.bti import BTI, BTIFile, WrapMode, FilterMode
+from gclib.texture_utils import ImageFormat, PaletteFormat, MAX_COLORS_FOR_IMAGE_FORMAT
 from gcft_ui.uic.ui_bti_tab import Ui_BTITab
 from gcft_paths import ASSETS_PATH
 from PIL import Image
@@ -196,7 +196,7 @@ class BTITab(QWidget):
     pixmap = QPixmap.fromImage(qimage)
     self.ui.bti_image_label.setPixmap(pixmap)
     
-    file_size_str = self.window().stringify_number(data_len(self.bti.data))
+    file_size_str = self.window().stringify_number(fs.data_len(self.bti.data))
     resolution_str = "%dx%d" % (self.bti_image.width, self.bti_image.height)
     self.ui.bti_file_size.setText(file_size_str)
     self.ui.bti_resolution.setText(resolution_str)
@@ -228,17 +228,17 @@ class BTITab(QWidget):
         # No BTI is already loaded. Create a dummy one from scratch to allow importing this image.
         data = BytesIO()
         image_data = b"\0"*0x20
-        write_bytes(data, 0x20, image_data)
+        fs.write_bytes(data, 0x20, image_data)
         palette_data = b"\0"*2
-        write_bytes(data, 0x20+len(image_data), palette_data)
-        write_u8(data,  0x00, ImageFormat.C8.value) # Image format
-        write_u16(data, 0x02, 8) # Width
-        write_u16(data, 0x04, 4) # Height
-        write_u8(data,  0x08, 1) # Palettes enabled
-        write_u8(data,  0x09, PaletteFormat.RGB5A3.value) # Palette format
-        write_u16(data, 0x0A, 1) # Num colors
-        write_u32(data, 0x0C, 0x20+len(image_data)) # Palette data offset
-        write_u32(data, 0x1C, 0x20) # Image data offset
+        fs.write_bytes(data, 0x20+len(image_data), palette_data)
+        fs.write_u8(data,  0x00, ImageFormat.C8.value) # Image format
+        fs.write_u16(data, 0x02, 8) # Width
+        fs.write_u16(data, 0x04, 4) # Height
+        fs.write_u8(data,  0x08, 1) # Palettes enabled
+        fs.write_u8(data,  0x09, PaletteFormat.RGB5A3.value) # Palette format
+        fs.write_u16(data, 0x0A, 1) # Num colors
+        fs.write_u32(data, 0x0C, 0x20+len(image_data)) # Palette data offset
+        fs.write_u32(data, 0x1C, 0x20) # Image data offset
         
         image_name = os.path.splitext(os.path.basename(image_path))[0]
         
@@ -272,21 +272,21 @@ class BTITab(QWidget):
     self.import_bti_from_bnr_by_data(data, bti_name)
   
   def import_bti_from_bnr_by_data(self, data, bti_name):
-    if data_len(data) != 0x1960:
-      QMessageBox.warning(self, "Not a banner", "The specified file does not appear to be a GameCube banner.\nGameCube banners must be 0x1960 bytes long, this file is 0x%X bytes long." % data_len(data))
+    if fs.data_len(data) != 0x1960:
+      QMessageBox.warning(self, "Not a banner", "The specified file does not appear to be a GameCube banner.\nGameCube banners must be 0x1960 bytes long, this file is 0x%X bytes long." % fs.data_len(data))
       return
-    if read_str(data, 0, 4) != "BNR1":
-      QMessageBox.warning(self, "Not a banner", "The specified file does not appear to be a GameCube banner.\nGameCube banners must have the magic bytes 'BNR1', this file has the magic bytes '%s'." % read_str(data, 0, 4))
+    if fs.read_str(data, 0, 4) != "BNR1":
+      QMessageBox.warning(self, "Not a banner", "The specified file does not appear to be a GameCube banner.\nGameCube banners must have the magic bytes 'BNR1', this file has the magic bytes '%s'." % fs.read_str(data, 0, 4))
       return
     
-    image_data = read_bytes(data, 0x20, 0x1800)
+    image_data = fs.read_bytes(data, 0x20, 0x1800)
     data = BytesIO()
-    write_bytes(data, 0x20, image_data)
+    fs.write_bytes(data, 0x20, image_data)
     
-    write_u8(data, 0x00, ImageFormat.RGB5A3.value) # Image format
-    write_u16(data, 0x02, 96) # Width
-    write_u16(data, 0x04, 32) # Height
-    write_u32(data, 0x1C, 0x20) # Image data offset
+    fs.write_u8(data, 0x00, ImageFormat.RGB5A3.value) # Image format
+    fs.write_u16(data, 0x02, 96) # Width
+    fs.write_u16(data, 0x04, 32) # Height
+    fs.write_u32(data, 0x1C, 0x20) # Image data offset
     
     self.import_bti_by_data(data, bti_name)
   

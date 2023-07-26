@@ -3,12 +3,12 @@ import os
 import re
 import traceback
 from io import BytesIO
-from fs_helpers import *
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 
-from wwlib.jpc import JPC
+from gclib import fs_helpers as fs
+from gclib.jpc import JPC
 from gcft_ui.uic.ui_jpc_tab import Ui_JPCTab
 
 class JPCTab(QWidget):
@@ -275,21 +275,21 @@ class JPCTab(QWidget):
     
     # Need to make a fake standalone BTI texture data so we can load it without it being the TEX1 format.
     data = BytesIO()
-    bti_header_bytes = read_bytes(texture.bti.data, texture.bti.header_offset, 0x20)
-    write_bytes(data, 0x00, bti_header_bytes)
+    bti_header_bytes = fs.read_bytes(texture.bti.data, texture.bti.header_offset, 0x20)
+    fs.write_bytes(data, 0x00, bti_header_bytes)
     
-    bti_image_data = read_all_bytes(texture.bti.image_data)
-    write_bytes(data, 0x20, bti_image_data)
+    bti_image_data = fs.read_all_bytes(texture.bti.image_data)
+    fs.write_bytes(data, 0x20, bti_image_data)
     image_data_offset = 0x20
-    write_u32(data, 0x1C, image_data_offset)
+    fs.write_u32(data, 0x1C, image_data_offset)
     
-    if data_len(texture.bti.palette_data) == 0:
+    if fs.data_len(texture.bti.palette_data) == 0:
       palette_data_offset = 0
     else:
-      bti_palette_data = read_all_bytes(texture.bti.palette_data)
-      write_bytes(data, 0x20 + data_len(texture.bti.image_data), bti_palette_data)
-      palette_data_offset = 0x20 + data_len(texture.bti.image_data)
-    write_u32(data, 0x0C, palette_data_offset)
+      bti_palette_data = fs.read_all_bytes(texture.bti.palette_data)
+      fs.write_bytes(data, 0x20 + fs.data_len(texture.bti.image_data), bti_palette_data)
+      palette_data_offset = 0x20 + fs.data_len(texture.bti.image_data)
+    fs.write_u32(data, 0x0C, palette_data_offset)
     
     self.bti_tab.import_bti_by_data(data, texture.filename)
     
@@ -321,13 +321,13 @@ class JPCTab(QWidget):
     
     # Need to make a fake BTI header for it to read from.
     data = BytesIO()
-    bti_header_bytes = read_bytes(self.bti_tab.bti.data, self.bti_tab.bti.header_offset, 0x20)
-    write_bytes(data, 0x00, bti_header_bytes)
+    bti_header_bytes = fs.read_bytes(self.bti_tab.bti.data, self.bti_tab.bti.header_offset, 0x20)
+    fs.write_bytes(data, 0x00, bti_header_bytes)
     
     texture.bti.read_header(data)
     
-    texture.bti.image_data = make_copy_data(self.bti_tab.bti.image_data)
-    texture.bti.palette_data = make_copy_data(self.bti_tab.bti.palette_data)
+    texture.bti.image_data = fs.make_copy_data(self.bti_tab.bti.image_data)
+    texture.bti.palette_data = fs.make_copy_data(self.bti_tab.bti.palette_data)
     
     texture.bti.save_header_changes()
     

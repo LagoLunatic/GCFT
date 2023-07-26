@@ -1,4 +1,3 @@
-[submodule "wwrando"]
-	path = wwrando
-	url = https://github.com/LagoLunatic/wwrando.git
-	branch = master
+[submodule "gclib"]
+	path = gclib
+	url = https://github.com/LagoLunatic/gclib.git

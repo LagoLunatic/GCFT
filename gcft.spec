@@ -22,14 +22,26 @@ def build_datas_recursive(paths):
   
   return datas
 
+import sys
+def get_hidden_imports():
+  import_modules = []
+
+  sys.path.insert(0, "./gclib")
+  import gclib
+  for module_name in gclib.__all__:
+    import_modules.append(f"gclib.{module_name}")
+
+  return import_modules
+
+
 a = Analysis(['gcft.py'],
-             pathex=["./wwrando"],
+             pathex=[],
              binaries=[],
              datas=build_datas_recursive([
                'assets/**/*.*',
                'version.txt',
              ]),
-             hiddenimports=[],
+             hiddenimports=get_hidden_imports(),
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
