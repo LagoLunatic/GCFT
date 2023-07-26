@@ -2,7 +2,7 @@
 import os
 
 try:
-  from sys import _MEIPASS
+  from sys import _MEIPASS # @IgnoreException
   GCFT_ROOT_PATH = _MEIPASS
   IS_RUNNING_FROM_SOURCE = False
 except ImportError:
