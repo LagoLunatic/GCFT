@@ -6,7 +6,7 @@ GameCube File Tools (GCFT) is a GUI tool for editing the following common file f
 * RARC (archives)
 * BTI (images)
 * Various J3D formats (e.g. textures in BDL and BMD models)
-* JPC (particle effect archives) (version 1 only)
+* JPC (particle effect archives) (versions 1-00 and 2-10)
 * Yaz0 (compression)
 
 Features:
