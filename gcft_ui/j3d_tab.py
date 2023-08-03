@@ -410,7 +410,7 @@ class J3DTab(QWidget):
     texture_total_size += fs.data_len(texture.palette_data)
     texture_size_str = self.window().stringify_number(texture_total_size, min_hex_chars=5)
     
-    item = self.j3d_texture_to_tree_widget_item.get(texture)
+    item = self.object_to_tree_widget_item.get(texture)
     item.setText(self.j3d_col_name_to_index["Size"], texture_size_str)
     
     texture_index = self.j3d.tex1.textures.index(texture)
