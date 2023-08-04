@@ -219,6 +219,9 @@ class J3DViewer(QOpenGLWidget):
       dist_atten = [1, 1, 1]
       light = J3DLight(light_pos, light_dir, light_col, angle_atten, dist_atten)
       self.lights.append(light)
+      
+      for i in range(2, 8):
+        self.lights.append(light)
     
     for i, light in enumerate(self.lights):
       assert 0 <= i <= 7
