@@ -11,7 +11,9 @@ from gclib import fs_helpers as fs
 from gclib.j3d import J3DFile, BPRegister, XFRegister
 from gclib.j3d import MDLEntry, AnimationKeyframe, ColorAnimation, UVAnimation
 from gclib.bti import BTI
+from gcft_paths import ASSETS_PATH
 from gcft_ui.uic.ui_j3d_tab import Ui_J3DTab
+from gcft_ui.j3d_viewer import J3DULTRA_INSTALLED
 
 class J3DTab(QWidget):
   def __init__(self):
@@ -40,7 +42,8 @@ class J3DTab(QWidget):
     self.ui.j3d_chunks_tree.customContextMenuRequested.connect(self.show_j3d_chunks_tree_context_menu)
     self.ui.actionOpenJ3DImage.triggered.connect(self.open_image_in_j3d)
     self.ui.actionReplaceJ3DImage.triggered.connect(self.replace_image_in_j3d)
-  
+    
+    self.ui.j3d_viewer.hide()
   
   def import_j3d(self):
     filters = [
@@ -84,6 +87,8 @@ class J3DTab(QWidget):
     self.j3d_name = j3d_name
     
     self.reload_j3d_chunks_tree()
+    
+    self.try_show_model_preview(True)
     
     self.ui.export_j3d.setDisabled(False)
   
@@ -413,6 +418,67 @@ class J3DTab(QWidget):
     item = self.object_to_tree_widget_item.get(texture)
     item.setText(self.j3d_col_name_to_index["Size"], texture_size_str)
     
+    self.try_show_model_preview(False)
+    
     texture_index = self.j3d.tex1.textures.index(texture)
     texture_name = self.j3d.tex1.texture_names[texture_index]
     self.window().ui.statusbar.showMessage("Replaced %s." % texture_name, 3000)
+  
+  def try_show_model_preview(self, reset_camera=False):
+    if not J3DULTRA_INSTALLED:
+      return
+    
+    if self.j3d.file_type not in ["bmd3", "bdl4"]:
+      # Not a 3D model, or an older unsupported version like BMD2.
+      self.ui.j3d_viewer.hide()
+      return
+    
+    self.ui.j3d_viewer.show()
+    
+    preview_compatible_j3d = self.get_preview_compatible_j3d()
+    
+    self.ui.j3d_viewer.load_model(preview_compatible_j3d, reset_camera)
+  
+  def get_preview_compatible_j3d(self):
+    # First save any changes to the J3D to ensure its binary data is up to date.
+    self.j3d.save_changes()
+    
+    hack_j3d = J3DFile(fs.make_copy_data(self.j3d.data))
+    any_changes_made = False
+    
+    # Wind Waker has a hardcoded system where the textures that control toon shading are dynamically
+    # replaced at runtime so they don't have to be packed into each model individually.
+    # Any texture with a name starting with "ZA" gets replaced with: files/res/System.arc/toon.bti
+    # Any texture with a name starting with "ZB" gets replaced with: files/res/System.arc/toonex.bti
+    # We need to replace these textures or else the lighting will appear messed up in the preview.
+    for texture_name, textures in hack_j3d.tex1.textures_by_name.items():
+      replacement_filename = None
+      if texture_name.startswith("ZA"):
+        replacement_filename = "toon.bti"
+      elif texture_name.startswith("ZB"):
+        replacement_filename = "toonex.bti"
+      if replacement_filename is None:
+        continue
+      
+      with open(os.path.join(ASSETS_PATH, replacement_filename), "rb") as f:
+        replacement_data = BytesIO(f.read())
+      replacement_bti = BTI(replacement_data)
+      
+      for texture in textures:
+        if fs.data_len(texture.image_data) != 0x20:
+          # If the length of the image data doesn't exactly match the placeholder, then this might
+          # not actually be a Wind Waker placeholder texture. It could be a different game that just
+          # happens to have a texture starting with "ZA" or "ZB". So skip replacing the texutre.
+          continue
+        texture.read_header(replacement_bti.data)
+        texture.image_data = fs.make_copy_data(replacement_bti.image_data)
+        texture.palette_data = fs.make_copy_data(replacement_bti.palette_data)
+        texture.save_header_changes()
+        any_changes_made = True
+    
+    if any_changes_made:
+      hack_j3d.save_changes()
+      return hack_j3d
+    else:
+      return self.j3d
+  

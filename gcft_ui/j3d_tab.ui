@@ -55,16 +55,29 @@
      </item>
      <item>
       <widget class="QWidget" name="j3d_sidebar" native="true">
-       <property name="maximumSize">
-        <size>
-         <width>300</width>
-         <height>16777215</height>
-        </size>
-       </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">
-        <property name="margin">
+        <property name="margin" stdset="0">
          <number>0</number>
         </property>
+        <item>
+         <widget class="J3DViewer" name="j3d_viewer">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>300</width>
+            <height>300</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::ClickFocus</enum>
+          </property>
+         </widget>
+        </item>
         <item>
          <widget class="QLabel" name="j3d_sidebar_label">
           <property name="text">
@@ -82,8 +95,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>298</width>
-             <height>443</height>
+             <width>373</width>
+             <height>133</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_3"/>
@@ -107,6 +120,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>J3DViewer</class>
+   <extends>QOpenGLWidget</extends>
+   <header>gcft_ui.j3d_viewer</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -20,6 +20,8 @@ from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QLabel,
     QPushButton, QScrollArea, QSizePolicy, QTreeWidget,
     QTreeWidgetItem, QVBoxLayout, QWidget)
 
+from gcft_ui.j3d_viewer import J3DViewer
+
 class Ui_J3DTab(object):
     def setupUi(self, J3DTab):
         if not J3DTab.objectName():
@@ -55,10 +57,21 @@ class Ui_J3DTab(object):
 
         self.j3d_sidebar = QWidget(J3DTab)
         self.j3d_sidebar.setObjectName(u"j3d_sidebar")
-        self.j3d_sidebar.setMaximumSize(QSize(300, 16777215))
         self.verticalLayout_2 = QVBoxLayout(self.j3d_sidebar)
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.j3d_viewer = J3DViewer(self.j3d_sidebar)
+        self.j3d_viewer.setObjectName(u"j3d_viewer")
+        sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.j3d_viewer.sizePolicy().hasHeightForWidth())
+        self.j3d_viewer.setSizePolicy(sizePolicy)
+        self.j3d_viewer.setMinimumSize(QSize(300, 300))
+        self.j3d_viewer.setFocusPolicy(Qt.ClickFocus)
+
+        self.verticalLayout_2.addWidget(self.j3d_viewer)
+
         self.j3d_sidebar_label = QLabel(self.j3d_sidebar)
         self.j3d_sidebar_label.setObjectName(u"j3d_sidebar_label")
 
@@ -69,7 +82,7 @@ class Ui_J3DTab(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 298, 443))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 373, 133))
         self.verticalLayout_3 = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
