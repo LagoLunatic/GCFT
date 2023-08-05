@@ -26,14 +26,14 @@ jobs:
         uses: microsoft/setup-msbuild@v1.1
       - name: Install zlib
         run: |
+          cmake --version
           curl -L https://www.zlib.net/zlib1213.zip -o zlib.zip
           7z x zlib.zip
           mv zlib-1.2.13 zlib
           cd zlib
           cmake .
-          msbuild zlib.sln /t:Build /property:Configuration=Release
-          mv Release lib
-          cd lib
+          msbuild zlib.sln /t:Build /property:Configuration=Debug
+          cd debug
           ls
           cd ../../
       - name: Install libpng
@@ -42,7 +42,8 @@ jobs:
           7z x libpng.tar.gz -so | 7z x -si -ttar > nul
           move libpng-1.6.40 libpng
           cd libpng
-          cmake . -DZLIB_INCLUDE_DIR=..\zlib -DZLIB_LIBRARY=..\zlib\lib\zlibstatic.lib
+          ls
+          cmake . -DZLIB_INCLUDE_DIR=..\zlib -DZLIB_LIBRARY=..\zlib\lib\zlibstaticd.lib
           cmake --build .
       - name: Build PyJ3DUltra
         run: |
