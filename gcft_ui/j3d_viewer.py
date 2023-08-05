@@ -14,12 +14,7 @@ try:
   from J3DUltra import J3DLight # type: ignore
   J3DULTRA_INSTALLED = True
 except ImportError:
-  try:
-    import J3DUltraPy as ultra # type: ignore
-    from J3DUltraPy import J3DLight # type: ignore
-    J3DULTRA_INSTALLED = True
-  except ImportError:
-    J3DULTRA_INSTALLED = False
+  J3DULTRA_INSTALLED = False
 
 import numpy as np
 from pyrr import matrix44

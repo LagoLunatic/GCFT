@@ -49,6 +49,7 @@ jobs:
           cd ../
           set PNG_ROOT=%cd%/libpng
       - name: Build PyJ3DUltra
+        shell: cmd
         run: |
           echo %cd%
           cd PyJ3DUltra
@@ -61,7 +62,8 @@ jobs:
           cd ../
           cmake .
           msbuild J3DUltraPy.sln /t:Build /property:Configuration=Release
-        shell: cmd
+          cd Release
+          ren J3DUltraPy.* J3DUltra.*
       - uses: actions/checkout@v3
         with:
           submodules: recursive

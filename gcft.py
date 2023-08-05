@@ -7,6 +7,7 @@ from PySide6.QtWidgets import *
 import sys
 
 sys.path.insert(0, "./gclib")
+sys.path.insert(0, "./PyJ3DUltra/Release")
 
 from gcft_ui.main_window import GCFTWindow
 
