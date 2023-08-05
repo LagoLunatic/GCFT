@@ -22,6 +22,8 @@ jobs:
         run: |
           git config --global url.https://github.com/.insteadOf git@github.com:
           git clone --recursive https://github.com/LagoLunatic/PyJ3DUltra.git
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
       - name: Install J3DUltra Dependencies
         run: |
           curl -L https://www.zlib.net/zlib1213.zip -o zlib.zip
@@ -41,8 +43,6 @@ jobs:
           cd ../
           set ZLIB_ROOT=%cd%/zlib-1.2.13
           set PNG_ROOT=%cd%/libpng-1.6.40
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.1
       - name: Build PyJ3DUltra
         run: |
           cd PyJ3DUltra
