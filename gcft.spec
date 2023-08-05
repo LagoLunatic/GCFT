@@ -35,7 +35,9 @@ def get_hidden_imports():
 
 
 a = Analysis(['gcft.py'],
-             pathex=[],
+             pathex=[
+              os.path.join(os.path.abspath(SPECPATH), "PyJ3DUltra", "Release")
+             ],
              binaries=[],
              datas=build_datas_recursive([
                'assets/**/*.*',
