@@ -28,9 +28,9 @@ jobs:
         run: |
           cd PyJ3DUltra
           ls
-          cmake .
+          cmake -DCMAKE_CXX_STANDARD=17 .
           ls
-          msbuild J3DUltraPy.sln /t:Build /property:Configuration=Release -verbosity=detailed
+          msbuild J3DUltraPy.sln /t:Build /property:Configuration=Release -verbosity:detailed
       - uses: actions/checkout@v3
         with:
           submodules: recursive
@@ -80,7 +80,7 @@ jobs:
       - name: Build PyJ3DUltra
         run: |
           cd PyJ3DUltra
-          cmake .
+          cmake -DCMAKE_CXX_STANDARD=17 .
           make
       - uses: actions/checkout@v3
         with:
