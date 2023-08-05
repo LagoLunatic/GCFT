@@ -28,31 +28,22 @@ jobs:
         run: |
           curl -L https://www.zlib.net/zlib1213.zip -o zlib.zip
           7z x zlib.zip
-          cd ./zlib-1.2.13
+          mv zlib-1.2.13 zlib
+          cd zlib
           cmake .
           msbuild zlib.sln /t:Build /property:Configuration=Release
           mv Release lib
           cd lib
           ls
           cd ../../
-          set ZLIB_ROOT=%cd%/zlib-1.2.13
       - name: Install libpng
         run: |
-          curl -L http://prdownloads.sourceforge.net/libpng/lpng1640.zip?download -o libpng.zip
-          7z x libpng.zip
-          cd ./lpng1640
-          ls
-          echo %ZLIB_LIBRARY%
-          set ZLIB_LIBRARY=../zlib-1.2.13/lib/zlib
-          echo %ZLIB_LIBRARY%
-          cmake . && msbuild libpng.sln /t:Build /property:Configuration=Release
-          ls
-          mv Release lib
-          cd lib
-          ls
-          ren libpng16.lib libpng.lib
-          cd ../../
-          set PNG_ROOT=%cd%/lpng1640
+          curl -fsSL http://prdownloads.sourceforge.net/libpng/libpng-1.6.40.tar.gz?download -o libpng.tar.gz
+          7z x libpng.tar.gz -so | 7z x -si -ttar > nul
+          move libpng-1.6.40 libpng
+          cd libpng
+          cmake . -DZLIB_INCLUDE_DIR=..\zlib -DZLIB_LIBRARY=..\zlib\lib\zlibstatic.lib
+          cmake --build .
       - name: Build PyJ3DUltra
         run: |
           cd PyJ3DUltra
