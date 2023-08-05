@@ -34,11 +34,14 @@ jobs:
           cmake .
           msbuild zlib.sln /t:Build /property:Configuration=Release
           mv Release lib
+          cd lib
+          ls
+          cd ../
           cd ../lpng1640
           ls
           set ZLIB_INCLUDE_DIR=../zlib-1.2.13
           set ZLIB_LIBRARY=../zlib-1.2.13/lib/zlib
-          cmake . -DPNG_BUILD_ZLIB=0 -DZLIB_INCLUDE_DIR=../zlib-1.2.13 -DZLIB_LIBRARY=../zlib-1.2.13/lib/zlib
+          cmake . -DPNG_BUILD_ZLIB=0 -DZLIB_INCLUDE_DIR=../zlib-1.2.13 -DZLIB_LIBRARY=../zlib-1.2.13/lib/zlibstatic.lib
           msbuild libpng.sln /t:Build /property:Configuration=Release
           mv Release lib
           cd lib
