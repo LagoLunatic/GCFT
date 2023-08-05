@@ -36,6 +36,8 @@ jobs:
           mv Release lib
           cd ../lpng1640
           ls
+          set ZLIB_INCLUDE_DIR=../zlib-1.2.13
+          set ZLIB_LIBRARY=../zlib-1.2.13/lib/zlib
           cmake . -DZLIB_INCLUDE_DIR=../zlib-1.2.13 -DZLIB_LIBRARY=../zlib-1.2.13/lib/zlib
           msbuild libpng.sln /t:Build /property:Configuration=Release
           mv Release lib
