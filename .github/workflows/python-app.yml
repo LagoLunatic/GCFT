@@ -35,10 +35,6 @@ jobs:
           cmake .
           msbuild zlib.sln /t:Build /property:Configuration=Release
           move Release lib
-          cd ../
-          set ZLIB_ROOT=%cd%/zlib
-          set ZLIB_INCLUDE_DIR=%cd%/zlib
-          set ZLIB_LIBRARY=%cd%/zlib/lib/zlib
       - name: Install libpng
         shell: cmd
         run: |
@@ -55,7 +51,11 @@ jobs:
       - name: Build PyJ3DUltra
         run: |
           echo %cd%
-          cd PyJ3DUltra/J3DUltra
+          cd PyJ3DUltra
+          set ZLIB_ROOT=%cd%/zlib
+          set ZLIB_INCLUDE_DIR=%cd%/zlib
+          set ZLIB_LIBRARY=%cd%/zlib/lib/zlib
+          cd J3DUltra
           cmake .
           msbuild J3DUltra.sln /t:Build /property:Configuration=Release
           cd ../
