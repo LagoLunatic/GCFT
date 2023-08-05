@@ -27,25 +27,31 @@ jobs:
         uses: microsoft/setup-msbuild@v1.1
       - name: Install J3DUltra Dependencies
         run: |
-          curl -L https://www.zlib.net/zlib-1.2.13.tar.gz | tar xz
-          curl -L https://downloads.sourceforge.net/project/libpng/libpng16/1.6.40/libpng-1.6.40.tar.xz | tar xJ
+          curl -L https://www.zlib.net/zlib1213.zip -o zlib.zip
+          7z x zlib.zip
           mv zlib-1.2.13 zlib
-          mv libpng-1.6.40 libpng
           cd zlib
           cmake .
           msbuild zlib.sln /t:Build /property:Configuration=Release
-          mv Release lib
-          cd ../libpng
+          move Release lib
+          cd ../
+          curl -L http://prdownloads.sourceforge.net/libpng/lpng1640.zip?download -o libpng.zip
+          7z x libpng.zip
+          mv libpng-1.6.40 libpng
+          cd libpng
           cmake . -DZLIB_INCLUDE_DIR=../zlib -DZLIB_LIBRARY=../zlib/Release/zlib
           msbuild libpng.sln /t:Build /property:Configuration=Release
-          mv Release lib
+          move Release lib
           cd ../
           set ZLIB_ROOT=%cd%/zlib-1.2.13
           set PNG_ROOT=%cd%/libpng-1.6.40
         shell: cmd
       - name: Build PyJ3DUltra
         run: |
-          cd PyJ3DUltra
+          cd J3DUltra
+          cmake .
+          msbuild J3DUltra.sln /t:Build /property:Configuration=Release
+          cd ../
           cmake .
           msbuild J3DUltraPy.sln /t:Build /property:Configuration=Release
         shell: cmd
