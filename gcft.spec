@@ -62,7 +62,7 @@ exe = EXE(pyz,
           strip=False,
           upx=True,
           runtime_tmpdir=None,
-          console=False,
+          console=True,
           icon="assets/icon.ico" )
 
 app = BUNDLE(exe,
