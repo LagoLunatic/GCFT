@@ -2,7 +2,7 @@ name: Build
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, j3dultra-actions ]
   pull_request:
     branches: [ master ]
   workflow_dispatch:
@@ -21,6 +21,15 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+      - name: Clone PyJ3DUltra
+        run: git clone --recursive https://github.com/Astral-C/PyJ3DUltra.git
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
+      - name: Build PyJ3DUltra
+        run: |
+          cd PyJ3DUltra
+          cmake .
+          msbuild J3DUltraPy.sln /t:Build /property:Configuration=Release
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
