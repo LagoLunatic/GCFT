@@ -24,31 +24,34 @@ jobs:
           git clone --recursive https://github.com/LagoLunatic/PyJ3DUltra.git
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.1
-      - name: Install J3DUltra Dependencies
+      - name: Install zlib
         run: |
           curl -L https://www.zlib.net/zlib1213.zip -o zlib.zip
           7z x zlib.zip
-          curl -L http://prdownloads.sourceforge.net/libpng/lpng1640.zip?download -o libpng.zip
-          7z x libpng.zip
-          cd zlib-1.2.13
+          cd ./zlib-1.2.13
           cmake .
           msbuild zlib.sln /t:Build /property:Configuration=Release
           mv Release lib
           cd lib
           ls
-          cd ../
-          cd ../lpng1640
+          cd ../../
+          set ZLIB_ROOT=%cd%/zlib-1.2.13
+      - name: Install libpng
+        run: |
+          curl -L http://prdownloads.sourceforge.net/libpng/lpng1640.zip?download -o libpng.zip
+          7z x libpng.zip
+          cd ./lpng1640
           ls
           set ZLIB_INCLUDE_DIR=../zlib-1.2.13
           set ZLIB_LIBRARY=../zlib-1.2.13/lib/zlib
-          cmake . -DPNG_BUILD_ZLIB=0 -DZLIB_INCLUDE_DIR=../zlib-1.2.13 -DZLIB_LIBRARY=../zlib-1.2.13/lib/zlibstatic.lib
+          cmake . -DPNG_BUILD_ZLIB=0 -DZLIB_INCLUDE_DIR=../zlib-1.2.13 -DZLIB_LIBRARY=../zlib-1.2.13/lib/zlibstatic
           msbuild libpng.sln /t:Build /property:Configuration=Release
+          ls
           mv Release lib
           cd lib
           ls
           ren libpng16.lib libpng.lib
           cd ../../
-          set ZLIB_ROOT=%cd%/zlib-1.2.13
           set PNG_ROOT=%cd%/lpng1640
       - name: Build PyJ3DUltra
         run: |
