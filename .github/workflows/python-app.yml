@@ -23,6 +23,7 @@ jobs:
           git config --global url.https://github.com/.insteadOf git@github.com:
           git clone --recursive https://github.com/LagoLunatic/PyJ3DUltra.git
           cd PyJ3DUltra
+        shell: cmd
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.1
       - name: Install zlib
@@ -38,6 +39,7 @@ jobs:
           cd lib
           ls
           cd ../../
+        shell: cmd
       - name: Install libpng
         run: |
           echo %cd%
@@ -53,6 +55,7 @@ jobs:
           cd ../
           set ZLIB_ROOT=%cd%/zlib
           set PNG_ROOT=%cd%/lpng
+        shell: cmd
       - name: Build PyJ3DUltra
         run: |
           echo %cd%
@@ -62,6 +65,7 @@ jobs:
           cd ../
           cmake .
           msbuild J3DUltraPy.sln /t:Build /property:Configuration=Release
+        shell: cmd
       - uses: actions/checkout@v3
         with:
           submodules: recursive
