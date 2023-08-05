@@ -33,12 +33,19 @@ def get_hidden_imports():
 
   return import_modules
 
+import platform
+def get_binaries():
+  if platform.system() == "Windows":
+    return [('./PyJ3DUltra/Release/J3DUltra*.pyd', '.')]
+  if platform.system() == "Darwin":
+    return [('./PyJ3DUltra/J3DUltra*.so', '.')]
+  if platform.system() == "Linux":
+    return [('./PyJ3DUltra/J3DUltra*.so', '.')]
+
 
 a = Analysis(['gcft.py'],
-             pathex=[
-              os.path.join(os.path.abspath(SPECPATH), "PyJ3DUltra", "Release")
-             ],
-             binaries=[('./PyJ3DUltra/Release/J3DUltra*.pyd', '.')],
+             pathex=[],
+             binaries=get_binaries(),
              datas=build_datas_recursive([
                'assets/**/*.*',
                'version.txt',

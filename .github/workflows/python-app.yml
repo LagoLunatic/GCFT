@@ -188,6 +188,7 @@ jobs:
           cd PyJ3DUltra
           cmake -DCMAKE_CXX_STANDARD=17 .
           make
+          ls
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
