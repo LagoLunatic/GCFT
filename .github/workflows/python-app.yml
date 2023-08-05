@@ -126,15 +126,16 @@ jobs:
           architecture: ${{ matrix.architecture }}
           miniconda-version: latest
           auto-update-conda: true
-      - name: Build PyJ3DUltra
-        run: |
-          cd PyJ3DUltra
-          cmake -DCMAKE_CXX_STANDARD=17 .
-          make
       - run: |
           conda create -qyf -n py310 python=3.10 wheel -c anaconda
           conda activate py310
         shell: bash -l {0}
+      - name: Build PyJ3DUltra
+        run: |
+          clang --version
+          cd PyJ3DUltra
+          cmake -DCMAKE_CXX_STANDARD=17 .
+          make
       - name: Install dependencies
         run: |
           conda install pip
@@ -188,7 +189,6 @@ jobs:
           cd PyJ3DUltra
           cmake -DCMAKE_CXX_STANDARD=17 .
           make
-          ls
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
