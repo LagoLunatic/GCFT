@@ -22,7 +22,9 @@ jobs:
         with:
           submodules: recursive
       - name: Clone PyJ3DUltra
-        run: git clone --recursive https://github.com/Astral-C/PyJ3DUltra.git
+        run: |
+          git config --global url.https://github.com/.insteadOf git@github.com:
+          git clone --recursive https://github.com/Astral-C/PyJ3DUltra.git
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.1
       - name: Build PyJ3DUltra
