@@ -132,12 +132,9 @@ jobs:
         shell: bash -l {0}
       - name: Build PyJ3DUltra
         run: |
-          ls
-          cmake --version
           clang --version
-          gcc --version
           cd PyJ3DUltra
-          cmake -DCMAKE_CXX_STANDARD=20 .
+          cmake -DCMAKE_CXX_STANDARD=17 .
           make
       - name: Install dependencies
         run: |
