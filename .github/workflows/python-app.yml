@@ -42,7 +42,10 @@ jobs:
           7z x libpng.zip
           cd ./lpng1640
           ls
-          cmake . -DZLIB_INCLUDE_DIR=../zlib-1.2.13 -DZLIB_LIBRARY=../zlib-1.2.13/lib/zlibstatic && msbuild libpng.sln /t:Build /property:Configuration=Release
+          echo %ZLIB_LIBRARY%
+          set ZLIB_LIBRARY=../zlib-1.2.13/lib/zlib
+          echo %ZLIB_LIBRARY%
+          cmake . && msbuild libpng.sln /t:Build /property:Configuration=Release
           ls
           mv Release lib
           cd lib
