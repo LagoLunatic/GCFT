@@ -37,7 +37,7 @@ jobs:
           cd ../
           curl -L http://prdownloads.sourceforge.net/libpng/lpng1640.zip?download -o libpng.zip
           7z x libpng.zip
-          mv libpng-1.6.40 libpng
+          mv lpng1640 libpng
           cd libpng
           cmake . -DZLIB_INCLUDE_DIR=../zlib -DZLIB_LIBRARY=../zlib/Release/zlib
           msbuild libpng.sln /t:Build /property:Configuration=Release
