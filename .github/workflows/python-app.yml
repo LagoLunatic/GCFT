@@ -34,13 +34,15 @@ jobs:
           cmake .
           msbuild zlib.sln /t:Build /property:Configuration=Release
           mv Release lib
-          cd lib
+          cd ../lpng1640
           ls
-          cd ../../lpng1640
-          cmake . -DZLIB_INCLUDE_DIR=../zlib-1.2.13 -DZLIB_LIBRARY=../zlib-1.2.13/Release/zlib
+          cmake . -DZLIB_INCLUDE_DIR=../zlib-1.2.13 -DZLIB_LIBRARY=../zlib-1.2.13/lib/zlib
           msbuild libpng.sln /t:Build /property:Configuration=Release
           mv Release lib
-          cd ../
+          cd lib
+          ls
+          ren libpng16.lib libpng.lib
+          cd ../../
           set ZLIB_ROOT=%cd%/zlib-1.2.13
           set PNG_ROOT=%cd%/lpng1640
       - name: Build PyJ3DUltra
