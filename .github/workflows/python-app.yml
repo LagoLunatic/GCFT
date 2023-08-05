@@ -32,8 +32,9 @@ jobs:
           mv zlib-1.2.13 zlib
           cd zlib
           cmake .
-          msbuild zlib.sln /t:Build /property:Configuration=Debug
-          cd debug
+          msbuild zlib.sln /t:Build /property:Configuration=Release
+          mv Release lib
+          cd lib
           ls
           cd ../../
       - name: Install libpng
@@ -43,11 +44,19 @@ jobs:
           move libpng-1.6.40 libpng
           cd libpng
           ls
-          cmake . -DZLIB_INCLUDE_DIR=..\zlib -DZLIB_LIBRARY=..\zlib\lib\zlibstaticd.lib
+          cmake . -DZLIB_INCLUDE_DIR=..\zlib -DZLIB_LIBRARY=..\zlib\lib\zlibstatic.lib
+          ls
           cmake --build .
+          mv Debug lib
+          cd ../
+          set ZLIB_ROOT=%cd%/zlib
+          set PNG_ROOT=%cd%/lpng
       - name: Build PyJ3DUltra
         run: |
-          cd PyJ3DUltra
+          cd J3DUltra
+          cmake .
+          msbuild J3DUltra.sln /t:Build /property:Configuration=Release
+          cd ../
           cmake .
           msbuild J3DUltraPy.sln /t:Build /property:Configuration=Release
       - uses: actions/checkout@v3
