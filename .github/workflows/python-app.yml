@@ -118,7 +118,7 @@ jobs:
       - name: Clone PyJ3DUltra
         run: |
           git config --global url.https://github.com/.insteadOf git@github.com:
-          git clone --recursive https://github.com/Astral-C/PyJ3DUltra.git
+          git clone --recursive https://github.com/LagoLunatic/PyJ3DUltra.git
       - name: Set up Miniconda with Python 3.10
         uses: conda-incubator/setup-miniconda@v2
         with:
