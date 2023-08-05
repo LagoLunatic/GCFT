@@ -84,6 +84,8 @@ class J3DViewer(QOpenGLWidget):
     if not J3DULTRA_INSTALLED:
       return
     
+    print("init start")
+    
     if not ultra.init():
       raise Exception("Failed to initialize J3DUltra.")
     
@@ -96,25 +98,39 @@ class J3DViewer(QOpenGLWidget):
     self.aspect = width / height
     
     glViewport(0, 0, width, height)
+    
+    print("init end")
   
   def resizeGL(self, width: int, height: int):
+    print("resize start")
     glViewport(0, 0, width, height)
     self.aspect = self.width() / self.height()
     self.update()
+    print("resize end")
   
   def paintGL(self):
     self.clear()
     
+    print("paint start")
+    
     if self.show_widgets:
       self.draw_grid_widget()
     
+    print("before draw model")
+    
     self.draw_model()
+    
+    print("before draw view widget")
     
     if self.show_widgets:
       self.draw_viewport_orientation_widget()
     
+    print("before draw light widget")
+    
     if self.show_widgets:
       self.draw_light_widget()
+    
+    print("paint end")
   
   def clear(self):
     glClearColor(0.25, 0.3, 0.4, 1.0)
@@ -124,7 +140,9 @@ class J3DViewer(QOpenGLWidget):
     if not J3DULTRA_INSTALLED:
       return
     
+    print("before loadmodel")
     self.model = ultra.loadModel(data=fs.read_all_bytes(j3d_model.data))
+    print("after loadmodel")
     self.elapsed_timer.restart()
     
     if reset_camera:
@@ -139,6 +157,7 @@ class J3DViewer(QOpenGLWidget):
       
       self.reset_camera()
     
+    print("before update")
     self.update()
   
   def guesstimate_model_bbox(self, j3d_model: J3DFile) -> tuple[np.ndarray, np.ndarray]:
@@ -360,6 +379,8 @@ class J3DViewer(QOpenGLWidget):
     if not J3DULTRA_INSTALLED:
       return
     
+    print("update start")
+    
     # Automatically calculate near and far planes so that models of any size will be visible.
     self.far_plane = self.camera.distance * 10
     self.far_plane = max(self.far_plane, 40000.0)
@@ -371,10 +392,12 @@ class J3DViewer(QOpenGLWidget):
       self.near_plane, self.far_plane
     )
     # TODO: This might sometimes divide by zero when looking straight down.
+    print("before set camera")
     ultra.setCamera(
       proj.ravel().tolist(),
       self.camera.view_matrix.ravel().tolist()
     )
+    print("after set camera")
     
     super().update()
   
