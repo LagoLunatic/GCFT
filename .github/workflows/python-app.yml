@@ -22,11 +22,11 @@ jobs:
         run: |
           git config --global url.https://github.com/.insteadOf git@github.com:
           git clone --recursive https://github.com/LagoLunatic/PyJ3DUltra.git
-          cd PyJ3DUltra
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.1
       - name: Install J3DUltra Dependencies
         run: |
+          cd PyJ3DUltra
           curl -L https://www.zlib.net/zlib1213.zip -o zlib.zip
           7z x zlib.zip
           mv zlib-1.2.13 zlib
@@ -39,16 +39,17 @@ jobs:
           7z x libpng.zip
           mv lpng1640 libpng
           cd libpng
-          cmake . -DZLIB_INCLUDE_DIR=../zlib -DZLIB_LIBRARY=../zlib/Release/zlib
+          cmake . -DZLIB_INCLUDE_DIR=../zlib -DZLIB_LIBRARY=../zlib/lib/zlib
           msbuild libpng.sln /t:Build /property:Configuration=Release
           move Release lib
           cd ../
-          set ZLIB_ROOT=%cd%/zlib-1.2.13
-          set PNG_ROOT=%cd%/libpng-1.6.40
+          set ZLIB_ROOT=%cd%/zlib
+          set PNG_ROOT=%cd%/libpng
         shell: cmd
       - name: Build PyJ3DUltra
         run: |
-          cd J3DUltra
+          echo %cd%
+          cd PyJ3DUltra/J3DUltra
           cmake .
           msbuild J3DUltra.sln /t:Build /property:Configuration=Release
           cd ../
