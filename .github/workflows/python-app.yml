@@ -35,7 +35,7 @@ jobs:
           msbuild zlib.sln /t:Build /property:Configuration=Release
           mv Release lib
           cd lib
-          ren libpng16.lib libpng.lib
+          ls
           cd ../../libpng-1.6.40
           cmake . -DZLIB_INCLUDE_DIR=../zlib-1.2.13 -DZLIB_LIBRARY=../zlib-1.2.13/Release/zlib
           msbuild libpng.sln /t:Build /property:Configuration=Release
