@@ -9,6 +9,8 @@ import sys
 sys.path.insert(0, "./gclib")
 sys.path.insert(0, "./PyJ3DUltra/Release")
 
+print("Path:", sys.path)
+
 from gcft_ui.main_window import GCFTWindow
 
 def signal_handler(sig, frame):

@@ -38,7 +38,7 @@ a = Analysis(['gcft.py'],
              pathex=[
               os.path.join(os.path.abspath(SPECPATH), "PyJ3DUltra", "Release")
              ],
-             binaries=[],
+             binaries=[('./PyJ3DUltra/Release/J3DUltra*.pyd', '.')],
              datas=build_datas_recursive([
                'assets/**/*.*',
                'version.txt',

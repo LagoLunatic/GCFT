@@ -10,10 +10,12 @@ from gclib.gx_enums import GXAttr
 from gclib import fs_helpers as fs
 
 try:
+  print("j3dultra is installed")
   import J3DUltra as ultra # type: ignore
   from J3DUltra import J3DLight # type: ignore
   J3DULTRA_INSTALLED = True
 except ImportError:
+  print("j3dultra not installed")
   J3DULTRA_INSTALLED = False
 
 import numpy as np
