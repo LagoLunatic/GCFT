@@ -38,7 +38,7 @@ def get_binaries():
   if platform.system() == "Windows":
     return [('./PyJ3DUltra/Release/J3DUltra*.pyd', '.')]
   if platform.system() == "Darwin":
-    return [('./PyJ3DUltra/J3DUltra*.so', '.'), ('./PyJ3DUltra/J3DUltra*.dylib', '.')]
+    return [('./PyJ3DUltra/J3DUltra*.so', '.')]
   if platform.system() == "Linux":
     return [('./PyJ3DUltra/J3DUltra*.so', '.')]
 
