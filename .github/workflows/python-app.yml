@@ -40,22 +40,22 @@ jobs:
           cd PyJ3DUltra
           curl -L https://www.zlib.net/zlib1213.zip -o zlib.zip
           7z x zlib.zip
-          move zlib-1.2.13 zlib
+          mv zlib-1.2.13 zlib
           cd zlib
           cmake .
           msbuild zlib.sln /t:Build /property:Configuration=Release
-          move Release lib
+          mv Release lib
       - name: Install libpng
         shell: cmd
         run: |
           cd PyJ3DUltra
           curl -L http://prdownloads.sourceforge.net/libpng/lpng1640.zip?download -o libpng.zip
           7z x libpng.zip
-          move lpng1640 libpng
+          mv lpng1640 libpng
           cd libpng
           cmake . -DZLIB_INCLUDE_DIR=../zlib -DZLIB_LIBRARY=../zlib/lib/zlib
           msbuild libpng.sln /t:Build /property:Configuration=Release
-          move Release lib
+          mv Release lib
           cd ../
           set PNG_ROOT=%cd%/libpng
       - name: Build PyJ3DUltra
@@ -140,9 +140,7 @@ jobs:
           cd PyJ3DUltra
           cmake -DCMAKE_CXX_STANDARD=17 .
           make
-          ls
           for f in J3DUltraPy.*.so; do mv "$f" "${f/J3DUltraPy/J3DUltra}"; done
-          ls
       - name: Install dependencies
         run: |
           conda install pip
