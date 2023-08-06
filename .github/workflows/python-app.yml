@@ -141,7 +141,7 @@ jobs:
           cmake -DCMAKE_CXX_STANDARD=17 .
           make
           ls
-          mv J3DUltraPy.* J3DUltra.*
+          for f in J3DUltraPy.*.so; do mv "$f" "${f/J3DUltraPy/J3DUltra}"; done
           ls
       - name: Install dependencies
         run: |
