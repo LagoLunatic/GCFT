@@ -141,7 +141,7 @@ jobs:
           cmake -DCMAKE_CXX_STANDARD=17 .
           make
           ls
-          move J3DUltraPy.* J3DUltra.*
+          mv J3DUltraPy.* J3DUltra.*
           ls
       - name: Install dependencies
         run: |
