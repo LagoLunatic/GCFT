@@ -1,13 +1,22 @@
 
+import os
+from io import BytesIO
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 from PySide6.QtOpenGLWidgets import *
 
+from gcft_paths import ASSETS_PATH
 from gcft_ui.nav_camera import Camera
 from gclib.j3d import J3DFile
+from gclib.bti import BTI
 from gclib.gx_enums import GXAttr
 from gclib import fs_helpers as fs
+
+import numpy as np
+from pyrr import matrix44
+from OpenGL.GL import *
+from OpenGL.GLU import *
 
 try:
   import J3DUltra as ultra # type: ignore
@@ -16,14 +25,13 @@ try:
 except ImportError:
   J3DULTRA_INSTALLED = False
 
-import numpy as np
-from pyrr import matrix44
-from OpenGL.GL import *
-from OpenGL.GLU import *
+REQUIRED_OPENGL_VERSION = (4, 6)
 
 class J3DViewer(QOpenGLWidget):
+  error_showing_preview = Signal(str)
+  
   DESIRED_FPS = 30
-  DELAY_BETWEEN_FRAMES = 1000 // 30
+  DELAY_BETWEEN_FRAMES = 1000 // DESIRED_FPS
   
   KEY_TO_MOVE_DIR = {
     Qt.Key_W: [0, 0, -1],
@@ -42,6 +50,10 @@ class J3DViewer(QOpenGLWidget):
   def __init__(self, parent):
     super().__init__(parent)
     
+    # Start off assuming J3DUltra isn't supported.
+    # Once OpenGL has been initialized we can check if it's actually supported or not.
+    self.enable_j3dultra = False
+    
     self.should_update_render = False
     self.animate_light = True
     self.show_debug_light_widget = True
@@ -55,6 +67,8 @@ class J3DViewer(QOpenGLWidget):
     
     self.base_cam_move_speed = self.BASE_CAMERA_MOVE_SPEED
     self.fovy = 45.0
+    self.near_plane = 0.1
+    self.far_plane = 1000.0
     self.base_cam_dist = 1000.0
     self.base_pitch = 30.0
     self.base_yaw = 35.0
@@ -79,9 +93,9 @@ class J3DViewer(QOpenGLWidget):
     self.elapsed_timer.start()
   
   def initializeGL(self):
-    if not J3DULTRA_INSTALLED:
+    self.enable_j3dultra = self.check_should_j3dultra_be_enabled()
+    if not self.enable_j3dultra:
       return
-    
     if not ultra.init():
       raise Exception("Failed to initialize J3DUltra.")
     
@@ -114,13 +128,56 @@ class J3DViewer(QOpenGLWidget):
     if self.show_widgets:
       self.draw_light_widget()
   
+  def check_should_j3dultra_be_enabled(self) -> bool:
+    # This function must only be called after OpenGL is initialized.
+    if not J3DULTRA_INSTALLED:
+      return False
+    
+    opengl_version = self.get_supported_opengl_version()
+    if opengl_version < REQUIRED_OPENGL_VERSION:
+      curr_version_str = f"{opengl_version[0]}.{opengl_version[1]}"
+      req_version_str = f"{REQUIRED_OPENGL_VERSION[0]}.{REQUIRED_OPENGL_VERSION[1]}"
+      error_msg = f"Your graphics driver only supports OpenGL {curr_version_str}.\n" + \
+        f"At least OpenGL {req_version_str} is required to show J3D previews."
+      self.error_showing_preview.emit(error_msg)
+      return False
+    else:
+      return True
+  
+  def get_supported_opengl_version(self) -> tuple[int, int]:
+    # This function must only be called after OpenGL is initialized.
+    major_ver = glGetIntegerv(GL_MAJOR_VERSION)
+    minor_ver = glGetIntegerv(GL_MINOR_VERSION)
+    return (major_ver, minor_ver)
+  
   def clear(self):
     glClearColor(0.25, 0.3, 0.4, 1.0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
   
-  def load_model(self, j3d_model, reset_camera=False):
-    if not J3DULTRA_INSTALLED:
+  def load_model(self, j3d_model: J3DFile, reset_camera=False):
+    if j3d_model.file_type not in ["bmd3", "bdl4"]:
+      # Not a 3D model, or an older unsupported version like BMD2.
+      error_msg = f"The current J3D file is of type {j3d_model.file_type!r}, " + \
+        "which GCFT does not currently support showing previews for."
+      self.error_showing_preview.emit(error_msg)
       return
+    
+    if self.context() is None:
+      # OpenGL has not yet been initialized.
+      # The QOpenGLWidget must be shown before we load the model in order to initialize OpenGL.
+      # If we don't, J3DUltra will return None instead of a model we can render.
+      # We also can't check if this computer supports the required OpenGL version until it's enabled.
+      self.show()
+    else:
+      # If OpenGL has already been initialized, recheck if J3DUltra is supported by the drivers.
+      # It generally should be the same result, but there might be some cases where it can change.
+      # And either way, we want to send out any error messages each time a model is loaded.
+      self.check_should_j3dultra_be_enabled()
+    
+    if not self.enable_j3dultra:
+      return
+    
+    j3d_model = self.get_preview_compatible_j3d(j3d_model)
     
     self.model = ultra.loadModel(data=fs.read_all_bytes(j3d_model.data))
     self.elapsed_timer.restart()
@@ -138,6 +195,7 @@ class J3DViewer(QOpenGLWidget):
       self.reset_camera()
     
     self.update()
+    self.show()
   
   def guesstimate_model_bbox(self, j3d_model: J3DFile) -> tuple[np.ndarray, np.ndarray]:
     # Estimate the model's size based on its visual shape bounding boxes.
@@ -175,6 +233,46 @@ class J3DViewer(QOpenGLWidget):
       # print('vtx1', aabb_diag_len)
     
     return bbox_min, bbox_max
+  
+  def get_preview_compatible_j3d(self, orig_j3d: J3DFile) -> J3DFile:
+    hack_j3d = J3DFile(fs.make_copy_data(orig_j3d.data))
+    any_changes_made = False
+    
+    # Wind Waker has a hardcoded system where the textures that control toon shading are dynamically
+    # replaced at runtime so they don't have to be packed into each model individually.
+    # Any texture with a name starting with "ZA" gets replaced with: files/res/System.arc/toon.bti
+    # Any texture with a name starting with "ZB" gets replaced with: files/res/System.arc/toonex.bti
+    # We need to replace these textures or else the lighting will appear messed up in the preview.
+    for texture_name, textures in hack_j3d.tex1.textures_by_name.items():
+      replacement_filename = None
+      if texture_name.startswith("ZA"):
+        replacement_filename = "toon.bti"
+      elif texture_name.startswith("ZB"):
+        replacement_filename = "toonex.bti"
+      if replacement_filename is None:
+        continue
+      
+      with open(os.path.join(ASSETS_PATH, replacement_filename), "rb") as f:
+        replacement_data = BytesIO(f.read())
+      replacement_bti = BTI(replacement_data)
+      
+      for texture in textures:
+        if fs.data_len(texture.image_data) != 0x20:
+          # If the length of the image data doesn't exactly match the placeholder, then this might
+          # not actually be a Wind Waker placeholder texture. It could be a different game that just
+          # happens to have a texture starting with "ZA" or "ZB". So skip replacing the texutre.
+          continue
+        texture.read_header(replacement_bti.data)
+        texture.image_data = fs.make_copy_data(replacement_bti.image_data)
+        texture.palette_data = fs.make_copy_data(replacement_bti.palette_data)
+        texture.save_header_changes()
+        any_changes_made = True
+    
+    if any_changes_made:
+      hack_j3d.save_changes()
+      return hack_j3d
+    else:
+      return orig_j3d
   
   def calculate_light_pos(self):
     angle = ((self.elapsed_timer.elapsed() / 5000) % 1.0) * np.pi*2
@@ -228,10 +326,9 @@ class J3DViewer(QOpenGLWidget):
       ultra.setLight(light, i)
   
   def update_lights(self):
-    if not self.lights:
+    if not self.enable_j3dultra:
       return
-    
-    if not J3DULTRA_INSTALLED:
+    if not self.lights:
       return
     
     x, z = self.calculate_light_pos()
@@ -319,6 +416,8 @@ class J3DViewer(QOpenGLWidget):
     if not self.show_debug_light_widget:
       # Light debugging function, don't show to the user.
       return
+    if not self.lights:
+      return
   
     glViewport(0, 0, self.width(), self.height())
     
@@ -355,7 +454,7 @@ class J3DViewer(QOpenGLWidget):
     ultra.render(0.0, self.camera.position)
   
   def update(self):
-    if not J3DULTRA_INSTALLED:
+    if not self.enable_j3dultra:
       return
     
     # Automatically calculate near and far planes so that models of any size will be visible.
@@ -483,7 +582,7 @@ class J3DViewer(QOpenGLWidget):
     super().focusOutEvent(event)
   
   def closeEvent(self, event):
-    if not J3DULTRA_INSTALLED:
+    if not self.enable_j3dultra:
       return
     
     ultra.cleanup()
