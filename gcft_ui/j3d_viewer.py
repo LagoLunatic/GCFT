@@ -286,7 +286,7 @@ class J3DViewer(QOpenGLWidget):
     self.lights = []
     
     use_ww_toon_lighting = False
-    if self.j3d is not None and any(re.search("^(?:Z[AB])?toon", texname) for texname in self.j3d.tex1.texture_names):
+    if self.j3d is not None and any(re.search("^(?:Z[AB]|V_)?toon", texname) for texname in self.j3d.tex1.texture_names):
       # TODO: Hack to try to detect Wind Waker models. Not perfectly accurate.
       use_ww_toon_lighting = True
     
