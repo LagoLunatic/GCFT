@@ -5,4 +5,10 @@
   "qtForPython.uic.options": [
     "-o", "${resourceDirname}${pathSeparator}uic${pathSeparator}ui_${resourceBasenameNoExtension}.py",
   ],
+  "git.ignoredRepositories": [
+    "PyJ3DUltra",
+  ],
+  "search.exclude": {
+    "PyJ3DUltra": true,
+  },
 }
