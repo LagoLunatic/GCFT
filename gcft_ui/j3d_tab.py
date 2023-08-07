@@ -209,9 +209,6 @@ class J3DTab(QWidget):
   def mdl_entry_selected(self, mdl_entry):
     layout = self.ui.scrollAreaWidgetContents.layout()
     
-    # Disable the main sidebar scrollarea since we will have two tabs with their own scrollareas instead.
-    self.ui.scrollArea.setWidgetResizable(False)
-    
     entry_index = self.j3d.mdl3.entries.index(mdl_entry)
     mat_name = self.j3d.mat3.mat_names[entry_index]
     self.ui.j3d_sidebar_label.setText("Showing material display list for: %s" % mat_name)
