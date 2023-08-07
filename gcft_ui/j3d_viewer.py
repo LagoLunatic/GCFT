@@ -1,5 +1,6 @@
 
 import os
+import re
 from io import BytesIO
 from PySide6.QtGui import *
 from PySide6.QtCore import *
@@ -54,6 +55,7 @@ class J3DViewer(QOpenGLWidget):
     # Once OpenGL has been initialized we can check if it's actually supported or not.
     self.enable_j3dultra = False
     
+    self.j3d = None
     self.should_update_render = False
     self.animate_light = True
     self.show_debug_light_widget = True
@@ -177,13 +179,15 @@ class J3DViewer(QOpenGLWidget):
     if not self.enable_j3dultra:
       return
     
-    j3d_model = self.get_preview_compatible_j3d(j3d_model)
+    self.j3d = self.get_preview_compatible_j3d(j3d_model)
     
-    self.model = ultra.loadModel(data=fs.read_all_bytes(j3d_model.data))
+    self.model = ultra.loadModel(data=fs.read_all_bytes(self.j3d.data))
     self.elapsed_timer.restart()
     
+    self.init_lights()
+    
     if reset_camera:
-      bbox_min, bbox_max = self.guesstimate_model_bbox(j3d_model)
+      bbox_min, bbox_max = self.guesstimate_model_bbox(self.j3d)
       self.base_center = (bbox_min + bbox_max) / 2
       aabb_diag_len = np.linalg.norm(bbox_max - bbox_min)
       if aabb_diag_len < 10.0:
@@ -274,25 +278,30 @@ class J3DViewer(QOpenGLWidget):
     else:
       return orig_j3d
   
-  def calculate_light_pos(self):
-    angle = ((self.elapsed_timer.elapsed() / 5000) % 1.0) * np.pi*2
+  def calculate_light_pos(self, frac):
+    angle = (frac % 1.0) * np.pi*2
     return np.cos(angle), np.sin(angle)
   
   def init_lights(self):
-    x, z = self.calculate_light_pos()
+    self.lights = []
     
-    if False:
+    use_ww_toon_lighting = False
+    if self.j3d is not None and any(re.search("^(?:Z[AB])?toon", texname) for texname in self.j3d.tex1.texture_names):
+      # TODO: Hack to try to detect Wind Waker models. Not perfectly accurate.
+      use_ww_toon_lighting = True
+    
+    if use_ww_toon_lighting:
       # Wind Waker lighting.
-      # TODO: either detect WW materials automatically, or allow the user to change lighting mode
+      x, z = self.calculate_light_pos(self.elapsed_timer.elapsed() / 5000)
       light_pos = [-5000*x, 4000, 5000*z]
       light_dir = -(light_pos / np.linalg.norm(light_pos))
-      light_col = [1, 0, 1, 1]
+      light_col = [1, 0, 0, 0]
       angle_atten = [1.075, 0, 0]
       dist_atten = [1.075, 0, 0]
       light = J3DLight(light_pos, light_dir, light_col, angle_atten, dist_atten)
       self.lights.append(light)
       
-      light_pos = [5000, 4000, -5000]
+      light_pos = [5000, -4000, -5000]
       light_dir = -(light_pos / np.linalg.norm(light_pos))
       light_col = [0, 0, 1, 1]
       angle_atten = [1.075, 0, 0]
@@ -301,24 +310,29 @@ class J3DViewer(QOpenGLWidget):
       self.lights.append(light)
     else:
       # Plain default lighting.
-      # TODO: improve this
+      x, z = self.calculate_light_pos(self.elapsed_timer.elapsed() / 5000)
       light_pos = [-5000*x, 4000, 5000*z]
       light_dir = -(light_pos / np.linalg.norm(light_pos))
       light_col = [1, 1, 1, 1]
-      angle_atten = [1, 1, 1]
-      dist_atten = [1, 1, 1]
+      light_col = [x*0.3 for x in light_col]
+      angle_atten = [1, 0, 0]
+      angle_atten = [x*0.5 for x in angle_atten]
+      dist_atten = [1, 0, 0]
+      dist_atten = [x*0.8 for x in dist_atten]
       light = J3DLight(light_pos, light_dir, light_col, angle_atten, dist_atten)
       self.lights.append(light)
       
-      light_pos = [5000, 4000, -5000]
-      light_dir = -(light_pos / np.linalg.norm(light_pos))
-      light_col = [1, 1, 1, 1]
-      angle_atten = [1, 1, 1]
-      dist_atten = [1, 1, 1]
-      light = J3DLight(light_pos, light_dir, light_col, angle_atten, dist_atten)
-      self.lights.append(light)
-      
-      for i in range(2, 8):
+      for i in range(1, 8):
+        x, z = self.calculate_light_pos((i - 1)/7)
+        light_pos = [5000*x, -3000*x, -5000*z]
+        light_dir = -(light_pos / np.linalg.norm(light_pos))
+        light_col = [1, 1, 1, 1]
+        light_col = [x*0.15 for x in light_col]
+        angle_atten = [1, 0, 0]
+        angle_atten = [x*0.5 for x in angle_atten]
+        dist_atten = [1, 0, 0]
+        dist_atten = [x*0.8 for x in dist_atten]
+        light = J3DLight(light_pos, light_dir, light_col, angle_atten, dist_atten)
         self.lights.append(light)
     
     for i, light in enumerate(self.lights):
@@ -331,10 +345,16 @@ class J3DViewer(QOpenGLWidget):
     if not self.lights:
       return
     
-    x, z = self.calculate_light_pos()
+    x, z = self.calculate_light_pos(self.elapsed_timer.elapsed() / 5000)
     self.lights[0].position.x = -5000*x
     self.lights[0].position.z = 5000*z
     ultra.setLight(self.lights[0], 0)
+    
+    # for i in range(1, len(self.lights)):
+    #   x, z = self.calculate_light_pos(self.elapsed_timer.elapsed() / 3000)
+    #   self.lights[i].position.x = 5000*x
+    #   self.lights[i].position.z = -5000*z
+    #   ultra.setLight(self.lights[i], i)
     
     self.should_update_render = True
   
@@ -434,16 +454,13 @@ class J3DViewer(QOpenGLWidget):
     
     glBegin(GL_LINES)
     
-    glColor3f(1.0, 1.0, 0.0) # Yellow
-    
-    # Draw a line from the origin to the rotating primary light.
-    pos = (
-      self.lights[0].position.x,
-      self.lights[0].position.y,
-      self.lights[0].position.z,
-    )
-    glVertex3f(0, 0, 0)
-    glVertex3f(*pos)
+    # Draw a colored line from the origin to each light.
+    for light in self.lights:
+      col = light.color
+      glColor3f(col.x, col.y, col.z)
+      pos = light.position
+      glVertex3f(0, 0, 0)
+      glVertex3f(pos.x, pos.y, pos.z)
     
     glEnd()
   
