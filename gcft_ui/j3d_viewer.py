@@ -295,17 +295,17 @@ class J3DViewer(QOpenGLWidget):
       x, z = self.calculate_light_pos(self.elapsed_timer.elapsed() / 5000)
       light_pos = [-5000*x, 4000, 5000*z]
       light_dir = -(light_pos / np.linalg.norm(light_pos))
-      light_col = [1, 0, 0, 0]
-      angle_atten = [1.075, 0, 0]
-      dist_atten = [1.075, 0, 0]
+      light_col = [1, 0, 0, 1]
+      angle_atten = [1, 0, 0]
+      dist_atten = [1, 0, 0]
       light = J3DLight(light_pos, light_dir, light_col, angle_atten, dist_atten)
       self.lights.append(light)
       
       light_pos = [5000, -4000, -5000]
       light_dir = -(light_pos / np.linalg.norm(light_pos))
       light_col = [0, 0, 1, 1]
-      angle_atten = [1.075, 0, 0]
-      dist_atten = [1.075, 0, 0]
+      angle_atten = [1, 0, 0]
+      dist_atten = [1, 0, 0]
       light = J3DLight(light_pos, light_dir, light_col, angle_atten, dist_atten)
       self.lights.append(light)
     else:
