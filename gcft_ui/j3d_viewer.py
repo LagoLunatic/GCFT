@@ -58,6 +58,7 @@ class J3DViewer(QOpenGLWidget):
     self.enable_j3dultra = False
     
     self.j3d = None
+    self.load_model_is_queued = False
     self.should_update_render = False
     self.animate_light = True
     self.show_debug_light_widget = True
@@ -112,6 +113,9 @@ class J3DViewer(QOpenGLWidget):
     self.aspect = width / height
     
     glViewport(0, 0, width, height)
+    
+    if self.load_model_is_queued:
+      self.load_queued_model()
   
   def resizeGL(self, width: int, height: int):
     glViewport(0, 0, width, height)
@@ -175,27 +179,7 @@ class J3DViewer(QOpenGLWidget):
       self.error_showing_preview.emit(error_msg)
       return
     
-    if self.context() is None:
-      # OpenGL has not yet been initialized.
-      # The QOpenGLWidget must be shown before we load the model in order to initialize OpenGL.
-      # If we don't, J3DUltra will return None instead of a model we can render.
-      # We also can't check if this computer supports the required OpenGL version until it's enabled.
-      self.show()
-    else:
-      # If OpenGL has already been initialized, recheck if J3DUltra is supported by the drivers.
-      # It generally should be the same result, but there might be some cases where it can change.
-      # And either way, we want to send out any error messages each time a model is loaded.
-      self.check_should_j3dultra_be_enabled()
-    
-    if not self.enable_j3dultra:
-      return
-    
     self.j3d = self.get_preview_compatible_j3d(j3d_model)
-    
-    self.model = ultra.loadModel(data=fs.read_all_bytes(self.j3d.data))
-    self.elapsed_timer.restart()
-    
-    self.init_lights()
     
     if reset_camera:
       bbox_min, bbox_max = self.guesstimate_model_bbox(self.j3d)
@@ -208,6 +192,42 @@ class J3DViewer(QOpenGLWidget):
       # print(self.base_center, self.base_cam_dist)
       
       self.reset_camera()
+    
+    # Display the preview widget.
+    self.show()
+    
+    if self.context() is None:
+      # OpenGL has not yet been initialized.
+      # It will be initialized whenever the widget actually gets shown on the users screen, so just
+      # queue the model to load whenever initializeGL gets called.
+      self.load_model_is_queued = True
+    else:
+      # OpenGL is already initialized, so we can immediately load the model.
+      self.load_queued_model()
+  
+  def load_queued_model(self):
+    self.load_model_is_queued = False
+    
+    if self.context() is None:
+      error_msg = "OpenGL context was not properly initialized. Cannot show J3D model preview."
+      self.error_showing_preview.emit(error_msg)
+      self.hide()
+      return
+    
+    self.check_should_j3dultra_be_enabled()
+    if not self.enable_j3dultra:
+      return
+    
+    self.model = ultra.loadModel(data=fs.read_all_bytes(self.j3d.data))
+    if self.model is None:
+      error_msg = "Failed to load J3D model preview."
+      self.error_showing_preview.emit(error_msg)
+      self.hide()
+      return
+    
+    self.elapsed_timer.restart()
+    
+    self.init_lights()
     
     self.update()
     self.show()
@@ -297,7 +317,7 @@ class J3DViewer(QOpenGLWidget):
     self.lights = []
     
     use_ww_toon_lighting = False
-    if self.j3d is not None and any(re.search("^(?:Z[AB])?toon", texname) for texname in self.j3d.tex1.texture_names):
+    if self.j3d is not None and any(re.search("^(?:Z[AB]|V_)?toon", texname) for texname in self.j3d.tex1.texture_names):
       # TODO: Hack to try to detect Wind Waker models. Not perfectly accurate.
       use_ww_toon_lighting = True
     
@@ -306,17 +326,17 @@ class J3DViewer(QOpenGLWidget):
       x, z = self.calculate_light_pos(self.elapsed_timer.elapsed() / 5000)
       light_pos = [-5000*x, 4000, 5000*z]
       light_dir = -(light_pos / np.linalg.norm(light_pos))
-      light_col = [1, 0, 0, 0]
-      angle_atten = [1.075, 0, 0]
-      dist_atten = [1.075, 0, 0]
+      light_col = [1, 0, 0, 1]
+      angle_atten = [1, 0, 0]
+      dist_atten = [1, 0, 0]
       light = J3DLight(light_pos, light_dir, light_col, angle_atten, dist_atten)
       self.lights.append(light)
       
       light_pos = [5000, -4000, -5000]
       light_dir = -(light_pos / np.linalg.norm(light_pos))
       light_col = [0, 0, 1, 1]
-      angle_atten = [1.075, 0, 0]
-      dist_atten = [1.075, 0, 0]
+      angle_atten = [1, 0, 0]
+      dist_atten = [1, 0, 0]
       light = J3DLight(light_pos, light_dir, light_col, angle_atten, dist_atten)
       self.lights.append(light)
     else:
@@ -504,6 +524,10 @@ class J3DViewer(QOpenGLWidget):
     super().update()
   
   def process_frame(self):
+    if self.context() is None:
+      # Not yet initialized.
+      return
+    
     self.process_camera_movement()
     
     if self.animate_light:
