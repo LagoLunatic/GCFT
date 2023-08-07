@@ -13,7 +13,7 @@ from gclib import fs_helpers as fs
 from gcft_ui.uic.ui_main import Ui_MainWindow
 from gcft_ui.gcft_common import GCFTThread, GCFTProgressDialog
 from version import VERSION
-from gcft_paths import ASSETS_PATH
+from gcft_paths import ASSETS_PATH, IS_RUNNING_FROM_SOURCE
 
 import yaml
 try:
@@ -372,7 +372,9 @@ class GCFTWindow(QMainWindow):
   
   
   def keyPressEvent(self, event):
-    if event.key() == Qt.Key_Escape:
+    if event.key() == Qt.Key_Escape and IS_RUNNING_FROM_SOURCE:
+      # Dev shortcut to quickly close the program.
+      # Not enabled for executable builds as end users might accidentally lose their work.
       self.close()
   
   def closeEvent(self, event):

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>776</width>
-    <height>515</height>
+    <height>528</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,6 +36,12 @@
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QTreeWidget" name="j3d_chunks_tree">
+       <property name="minimumSize">
+        <size>
+         <width>300</width>
+         <height>0</height>
+        </size>
+       </property>
        <column>
         <property name="text">
          <string>Chunk Type</string>
@@ -64,7 +70,7 @@
           <property name="sizePolicy">
            <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
             <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
+            <verstretch>5</verstretch>
            </sizepolicy>
           </property>
           <property name="minimumSize">
@@ -79,7 +85,57 @@
          </widget>
         </item>
         <item>
+         <widget class="QScrollArea" name="j3dultra_error_area">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <widget class="QWidget" name="scrollAreaWidgetContents_2">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>373</width>
+             <height>69</height>
+            </rect>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_4">
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="j3dultra_error_label">
+              <property name="text">
+               <string>No errors to display.</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+              <property name="textInteractionFlags">
+               <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+        <item>
          <widget class="QLabel" name="j3d_sidebar_label">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="text">
            <string>Extra information will be displayed here as necessary.</string>
           </property>
@@ -87,6 +143,12 @@
         </item>
         <item>
          <widget class="QScrollArea" name="scrollArea">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>5</verstretch>
+           </sizepolicy>
+          </property>
           <property name="widgetResizable">
            <bool>true</bool>
           </property>
@@ -96,7 +158,7 @@
              <x>0</x>
              <y>0</y>
              <width>373</width>
-             <height>133</height>
+             <height>69</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_3"/>

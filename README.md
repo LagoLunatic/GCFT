@@ -27,7 +27,8 @@ Features:
 
 It currently cannot create brand new GCMs or JPCs from scratch.  
 
-You can download GCFT here: https://github.com/LagoLunatic/GCFT/releases
+You can download GCFT here: https://github.com/LagoLunatic/GCFT/releases  
+You can also try out the latest development build here (may have bugs): https://nightly.link/LagoLunatic/GCFT/workflows/python-app/master  
 
 ### Usage
 
