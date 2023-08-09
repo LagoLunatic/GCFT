@@ -278,7 +278,7 @@ class GCFTWindow(QMainWindow):
       return
     
     initial_color = QColor(r, g, b, a)
-    color_dialog_options = 0
+    color_dialog_options = QColorDialog.ColorDialogOption(0)
     if has_alpha:
       color_dialog_options |= QColorDialog.ShowAlphaChannel
     color = QColorDialog.getColor(initial_color, self, "Select color", options=color_dialog_options)
