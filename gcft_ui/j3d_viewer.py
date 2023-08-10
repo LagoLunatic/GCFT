@@ -161,6 +161,9 @@ class J3DViewer(QOpenGLWidget):
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
   
   def load_model(self, j3d_model: J3DFile, reset_camera=False):
+    if not J3DULTRA_INSTALLED:
+      return
+    
     if j3d_model.file_type not in ["bmd3", "bdl4"]:
       # Not a 3D model, or an older unsupported version like BMD2.
       error_msg = f"The current J3D file is of type {j3d_model.file_type!r}, " + \
@@ -303,6 +306,9 @@ class J3DViewer(QOpenGLWidget):
     return np.cos(angle), np.sin(angle)
   
   def init_lights(self):
+    if not self.enable_j3dultra:
+      return
+    
     self.lights = []
     
     use_ww_toon_lighting = False
@@ -485,6 +491,9 @@ class J3DViewer(QOpenGLWidget):
     glEnd()
   
   def draw_model(self):
+    if not self.enable_j3dultra:
+      return
+    
     glViewport(0, 0, self.width(), self.height())
     if self.model is not None:
       self.model.render()
