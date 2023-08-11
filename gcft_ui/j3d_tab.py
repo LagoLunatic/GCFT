@@ -6,7 +6,7 @@ from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 
 from gclib import fs_helpers as fs
-from gclib.j3d import J3DFile, BPRegister, XFRegister
+from gclib.j3d import J3D, BPRegister, XFRegister
 from gclib.j3d import MDLEntry, AnimationKeyframe, ColorAnimation, UVAnimation
 from gclib.bti import BTI
 from gcft_ui.uic.ui_j3d_tab import Ui_J3DTab
@@ -80,7 +80,7 @@ class J3DTab(QWidget):
     self.import_j3d_by_data(data, j3d_name)
   
   def import_j3d_by_data(self, data, j3d_name):
-    self.j3d = J3DFile(data)
+    self.j3d = J3D(data)
     
     self.j3d_name = j3d_name
     

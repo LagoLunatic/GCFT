@@ -9,7 +9,7 @@ from PySide6.QtOpenGLWidgets import *
 
 from gcft_paths import ASSETS_PATH
 from gcft_ui.nav_camera import Camera
-from gclib.j3d import J3DFile
+from gclib.j3d import J3D
 from gclib.bti import BTI
 from gclib.gx_enums import GXAttr
 from gclib import fs_helpers as fs
@@ -160,7 +160,7 @@ class J3DViewer(QOpenGLWidget):
     glClearColor(0.25, 0.3, 0.4, 1.0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
   
-  def load_model(self, j3d_model: J3DFile, reset_camera=False):
+  def load_model(self, j3d_model: J3D, reset_camera=False):
     if not J3DULTRA_INSTALLED:
       return
     
@@ -227,7 +227,7 @@ class J3DViewer(QOpenGLWidget):
     self.update()
     self.show()
   
-  def guesstimate_model_bbox(self, j3d_model: J3DFile) -> tuple[np.ndarray, np.ndarray]:
+  def guesstimate_model_bbox(self, j3d_model: J3D) -> tuple[np.ndarray, np.ndarray]:
     # Estimate the model's size based on its visual shape bounding boxes.
     points = []
     for shape in j3d_model.shp1.shapes:
@@ -264,11 +264,11 @@ class J3DViewer(QOpenGLWidget):
     
     return bbox_min, bbox_max
   
-  def get_preview_compatible_j3d(self, orig_j3d: J3DFile) -> J3DFile:
+  def get_preview_compatible_j3d(self, orig_j3d: J3D) -> J3D:
     # We have to save the original J3D for the chunks to its chunks to be reflected properly.
     # Simply copying orig_j3d.data is not sufficient on its own.
     orig_j3d.save_changes()
-    hack_j3d = J3DFile(fs.make_copy_data(orig_j3d.data))
+    hack_j3d = J3D(fs.make_copy_data(orig_j3d.data))
     any_changes_made = False
     
     # Wind Waker has a hardcoded system where the textures that control toon shading are dynamically

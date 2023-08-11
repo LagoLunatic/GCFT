@@ -8,7 +8,7 @@ from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 
 from gclib import fs_helpers as fs
-from gclib.bti import BTI, BTIFile, WrapMode, FilterMode
+from gclib.bti import BTI, WrapMode, FilterMode
 from gclib.texture_utils import ImageFormat, PaletteFormat, MAX_COLORS_FOR_IMAGE_FORMAT
 from gcft_ui.uic.ui_bti_tab import Ui_BTITab
 from gcft_paths import ASSETS_PATH
@@ -127,7 +127,7 @@ class BTITab(QWidget):
   
   def import_bti_by_data(self, data, bti_name):
     prev_bti = self.bti
-    self.bti = BTIFile(data)
+    self.bti = BTI(data)
     
     try:
       self.reload_bti_image()

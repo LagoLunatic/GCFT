@@ -176,8 +176,8 @@ class RARCTab(QWidget):
     self.import_rarc_by_data(data, rarc_name)
   
   def import_rarc_by_data(self, data, rarc_name):
-    self.rarc = RARC()
-    self.rarc.read(data)
+    self.rarc = RARC(data)
+    self.rarc.read()
     
     self.rarc_name = rarc_name
     
