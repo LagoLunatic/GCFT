@@ -200,6 +200,9 @@ class J3DViewer(QOpenGLWidget):
   def load_queued_model(self):
     self.load_model_is_queued = False
     
+    if self.j3d is None:
+      return
+    
     if self.context() is None:
       error_msg = "OpenGL context was not properly initialized. Cannot show J3D model preview."
       self.error_showing_preview.emit(error_msg)
@@ -262,6 +265,9 @@ class J3DViewer(QOpenGLWidget):
     return bbox_min, bbox_max
   
   def get_preview_compatible_j3d(self, orig_j3d: J3DFile) -> J3DFile:
+    # We have to save the original J3D for the chunks to its chunks to be reflected properly.
+    # Simply copying orig_j3d.data is not sufficient on its own.
+    orig_j3d.save_changes()
     hack_j3d = J3DFile(fs.make_copy_data(orig_j3d.data))
     any_changes_made = False
     
