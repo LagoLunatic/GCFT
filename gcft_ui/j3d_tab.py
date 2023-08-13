@@ -42,6 +42,9 @@ class J3DTab(QWidget):
     self.ui.j3d_viewer.error_showing_preview.connect(self.display_j3d_preview_error)
     self.ui.j3d_viewer.hide()
     self.ui.j3dultra_error_area.hide()
+    
+    self.ui.update_j3d_preview.clicked.connect(self.update_j3d_preview)
+    self.ui.update_j3d_preview.setIcon(self.style().standardIcon(QStyle.SP_BrowserReload))
   
   def import_j3d(self):
     filters = [
@@ -188,8 +191,6 @@ class J3DTab(QWidget):
         widget.deleteLater()
     self.ui.j3d_sidebar_label.setText("Extra information will be displayed here as necessary.")
     
-    # Re-enable the main sidebar scrollarea by default in case it was disabled previously.
-    self.ui.scrollArea.setWidgetResizable(True)
     
     selected_items = self.ui.j3d_chunks_tree.selectedItems()
     if not selected_items:
@@ -424,6 +425,10 @@ class J3DTab(QWidget):
     self.ui.j3dultra_error_area.hide()
     
     self.ui.j3d_viewer.load_model(self.j3d, reset_camera)
+  
+  def update_j3d_preview(self):
+    self.j3d.save_changes()
+    self.try_show_model_preview(False)
   
   def display_j3d_preview_error(self, error: str):
     self.ui.j3dultra_error_area.show()

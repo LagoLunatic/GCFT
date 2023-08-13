@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'j3d_tab.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.0
+## Created by: Qt User Interface Compiler version 6.5.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -26,7 +26,7 @@ class Ui_J3DTab(object):
     def setupUi(self, J3DTab):
         if not J3DTab.objectName():
             J3DTab.setObjectName(u"J3DTab")
-        J3DTab.resize(776, 528)
+        J3DTab.resize(776, 538)
         self.actionOpenJ3DImage = QAction(J3DTab)
         self.actionOpenJ3DImage.setObjectName(u"actionOpenJ3DImage")
         self.actionReplaceJ3DImage = QAction(J3DTab)
@@ -52,7 +52,7 @@ class Ui_J3DTab(object):
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.j3d_chunks_tree = QTreeWidget(J3DTab)
         self.j3d_chunks_tree.setObjectName(u"j3d_chunks_tree")
-        self.j3d_chunks_tree.setMinimumSize(QSize(300, 0))
+        self.j3d_chunks_tree.setMinimumSize(QSize(370, 0))
 
         self.horizontalLayout.addWidget(self.j3d_chunks_tree)
 
@@ -83,7 +83,7 @@ class Ui_J3DTab(object):
         self.j3dultra_error_area.setWidgetResizable(True)
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 373, 69))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 378, 69))
         self.verticalLayout_4 = QVBoxLayout(self.scrollAreaWidgetContents_2)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.verticalLayout_4.setContentsMargins(-1, 0, -1, 0)
@@ -98,6 +98,8 @@ class Ui_J3DTab(object):
 
         self.verticalLayout_2.addWidget(self.j3dultra_error_area)
 
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.j3d_sidebar_label = QLabel(self.j3d_sidebar)
         self.j3d_sidebar_label.setObjectName(u"j3d_sidebar_label")
         sizePolicy2 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
@@ -106,16 +108,30 @@ class Ui_J3DTab(object):
         sizePolicy2.setHeightForWidth(self.j3d_sidebar_label.sizePolicy().hasHeightForWidth())
         self.j3d_sidebar_label.setSizePolicy(sizePolicy2)
 
-        self.verticalLayout_2.addWidget(self.j3d_sidebar_label)
+        self.horizontalLayout_2.addWidget(self.j3d_sidebar_label)
+
+        self.update_j3d_preview = QPushButton(self.j3d_sidebar)
+        self.update_j3d_preview.setObjectName(u"update_j3d_preview")
+        sizePolicy3 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.update_j3d_preview.sizePolicy().hasHeightForWidth())
+        self.update_j3d_preview.setSizePolicy(sizePolicy3)
+        self.update_j3d_preview.setMaximumSize(QSize(40, 16777215))
+
+        self.horizontalLayout_2.addWidget(self.update_j3d_preview)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_2)
 
         self.scrollArea = QScrollArea(self.j3d_sidebar)
         self.scrollArea.setObjectName(u"scrollArea")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(5)
-        sizePolicy3.setHeightForWidth(self.scrollArea.sizePolicy().hasHeightForWidth())
-        self.scrollArea.setSizePolicy(sizePolicy3)
-        self.scrollArea.setWidgetResizable(True)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(5)
+        sizePolicy4.setHeightForWidth(self.scrollArea.sizePolicy().hasHeightForWidth())
+        self.scrollArea.setSizePolicy(sizePolicy4)
+        self.scrollArea.setWidgetResizable(False)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
         self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 373, 69))
@@ -128,6 +144,8 @@ class Ui_J3DTab(object):
 
         self.horizontalLayout.addWidget(self.j3d_sidebar)
 
+        self.horizontalLayout.setStretch(0, 1)
+        self.horizontalLayout.setStretch(1, 2)
 
         self.verticalLayout.addLayout(self.horizontalLayout)
 
