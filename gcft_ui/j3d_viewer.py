@@ -231,8 +231,8 @@ class J3DViewer(QOpenGLWidget):
     # Estimate the model's size based on its visual shape bounding boxes.
     points = []
     for shape in j3d_model.shp1.shapes:
-      points.append(shape.bbox_min)
-      points.append(shape.bbox_max)
+      points.append(shape.bounding_box_min)
+      points.append(shape.bounding_box_max)
     bbox_min = np.min(points, axis=0)
     bbox_max = np.max(points, axis=0)
     aabb_diag_len = np.linalg.norm(bbox_max - bbox_min)
@@ -244,8 +244,8 @@ class J3DViewer(QOpenGLWidget):
       points = []
       for joint in j3d_model.jnt1.joints:
         points.append(joint.position)
-        points.append(joint.bbox_min)
-        points.append(joint.bbox_max)
+        points.append(joint.bounding_box_min)
+        points.append(joint.bounding_box_max)
       bbox_min = np.min(points, axis=0)
       bbox_max = np.max(points, axis=0)
       aabb_diag_len = np.linalg.norm(bbox_max - bbox_min)
@@ -267,7 +267,7 @@ class J3DViewer(QOpenGLWidget):
   def get_preview_compatible_j3d(self, orig_j3d: J3D) -> J3D:
     # We have to save the original J3D for the chunks to its chunks to be reflected properly.
     # Simply copying orig_j3d.data is not sufficient on its own.
-    orig_j3d.save_changes()
+    orig_j3d.save()
     hack_j3d = J3D(fs.make_copy_data(orig_j3d.data))
     any_changes_made = False
     
@@ -302,7 +302,7 @@ class J3DViewer(QOpenGLWidget):
         any_changes_made = True
     
     if any_changes_made:
-      hack_j3d.save_changes()
+      hack_j3d.save()
       return hack_j3d
     else:
       return orig_j3d

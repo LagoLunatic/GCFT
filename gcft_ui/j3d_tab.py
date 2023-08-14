@@ -93,7 +93,7 @@ class J3DTab(QWidget):
     
     self.reload_j3d_chunks_tree()
     
-    self.try_show_model_preview(True)
+    # self.try_show_model_preview(True)
     
     self.ui.export_j3d.setDisabled(False)
   
@@ -109,7 +109,7 @@ class J3DTab(QWidget):
   
   def try_save_j3d(self):
     try:
-      self.j3d.save_changes()
+      self.j3d.save()
       return True
     except Exception as e:
       stack_trace = traceback.format_exc()
