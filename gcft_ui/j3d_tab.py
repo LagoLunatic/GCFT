@@ -7,12 +7,16 @@ from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 
 from gclib import fs_helpers as fs
-from gclib.j3d import J3D, BPRegister, XFRegister
+from gclib.bunfoe import BUNFOE
+from gclib.gx_enums import GXAttr, GXCompTypeColor, GXCompTypeNumber
+from gclib.j3d import J3D, Joint, Material, Shape, BPRegister, VertexFormat, XFRegister
 from gclib.j3d import MDLEntry, AnimationKeyframe, ColorAnimation, UVAnimation
 from gclib.bti import BTI
-from gcft_ui.uic.ui_j3d_tab import Ui_J3DTab
 
-class J3DTab(QWidget):
+from gcft_ui.uic.ui_j3d_tab import Ui_J3DTab
+from gcft_ui.bunfoe_editor import BunfoeEditor
+
+class J3DTab(BunfoeEditor):
   def __init__(self):
     super().__init__()
     self.ui = Ui_J3DTab()
@@ -160,8 +164,10 @@ class J3DTab(QWidget):
           
           self.make_tree_widget_item(texture, chunk_item, ["", texture_name, texture_size_str])
       elif chunk.magic == "MAT3":
-        for mat_name in chunk.mat_names:
-          self.make_tree_widget_item(None, chunk_item, ["", mat_name, ""])
+        chunk_item.setExpanded(True)
+        for mat_index, material in enumerate(chunk.materials):
+          mat_name = chunk.mat_names[mat_index]
+          self.make_tree_widget_item(material, chunk_item, ["", mat_name, ""])
       elif chunk.magic == "MDL3":
         for i, mdl_entry in enumerate(chunk.entries):
           mat_name = self.j3d.mat3.mat_names[i]
@@ -190,6 +196,27 @@ class J3DTab(QWidget):
               track_item = self.make_tree_widget_item(track, anim_item, ["", track_name.upper(), ""], True)
               for keyframe_index, keyframe in enumerate(track.keyframes):
                 self.make_tree_widget_item(keyframe, track_item, ["", "0x%02X" % keyframe_index, ""])
+      elif chunk.magic == "JNT1":
+        for joint_index, joint in enumerate(chunk.joints):
+          joint_index_str = self.window().stringify_number(joint_index, min_hex_chars=2)
+          joint_name = chunk.joint_names[joint_index]
+          self.make_tree_widget_item(joint, chunk_item, ["", f"{joint_index_str}: {joint_name}", ""])
+      elif chunk.magic == "SHP1":
+        for shape_index, shape in enumerate(chunk.shapes):
+          shape_index_str = self.window().stringify_number(shape_index, min_hex_chars=2)
+          self.make_tree_widget_item(shape, chunk_item, ["", shape_index_str, ""])
+      elif chunk.magic == "VTX1":
+        for vtx_fmt in chunk.vertex_formats:
+          if vtx_fmt.attribute_type == GXAttr.NULL:
+            vtx_fmt_size_str = ""
+          else:
+            vtx_fmt_size = vtx_fmt.component_size * vtx_fmt.component_count * len(chunk.attributes[vtx_fmt.attribute_type])
+            vtx_fmt_size_str = self.window().stringify_number(vtx_fmt_size, min_hex_chars=2)
+          self.make_tree_widget_item(vtx_fmt, chunk_item, ["", vtx_fmt.attribute_type.name, vtx_fmt_size_str])
+      elif chunk.magic == "INF1":
+        for node_index, inf1_node in enumerate(chunk.flat_hierarchy):
+          node_index_str = self.window().stringify_number(node_index, min_hex_chars=2)
+          self.make_tree_widget_item(inf1_node, chunk_item, ["", node_index_str, ""])
     
     # Expand all items in the tree (for debugging):
     #for item in self.ui.j3d_chunks_tree.findItems("*", Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive):
@@ -209,11 +236,8 @@ class J3DTab(QWidget):
   
   def widget_item_selected(self):
     layout = self.ui.scrollAreaWidgetContents.layout()
-    while layout.count():
-      item = layout.takeAt(0)
-      widget = item.widget()
-      if widget:
-        widget.deleteLater()
+    self.clear_layout_recursive(layout)
+    
     self.ui.j3d_sidebar_label.setText("Extra information will be displayed here as necessary.")
     
     
@@ -231,6 +255,16 @@ class J3DTab(QWidget):
       self.uv_anim_selected(obj)
     elif isinstance(obj, ColorAnimation):
       self.color_anim_selected(obj)
+    elif isinstance(obj, VertexFormat):
+      self.vertex_format_selected(obj)
+    elif isinstance(obj, Joint):
+      self.bunfoe_instance_selected(obj, "joint")
+    elif isinstance(obj, Shape):
+      self.bunfoe_instance_selected(obj, "shape")
+    elif isinstance(obj, Material):
+      self.bunfoe_instance_selected(obj, "material")
+    elif isinstance(obj, BUNFOE):
+      self.bunfoe_instance_selected(obj)
   
   def mdl_entry_selected(self, mdl_entry):
     layout = self.ui.scrollAreaWidgetContents.layout()
@@ -331,6 +365,39 @@ class J3DTab(QWidget):
     
     spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
     layout.addItem(spacer)
+  
+  def vertex_format_selected(self, vtx_fmt: VertexFormat):
+    layout: QBoxLayout = self.ui.scrollAreaWidgetContents.layout()
+    
+    # TODO: j3dultra segfaults if you try changing, say, an attribute type from tex0 to tex1 for
+    # example (many other cases too). need to disable editing these.
+    
+    form_layout = self.bunfoe_instance_selected(vtx_fmt, "vertex format")
+    
+    # Need to fix the component type combobox as it can be two different enum types.
+    # TODO: also remake this every time vtx_fmt.is_color_attr gets changed
+    if vtx_fmt.is_color_attr:
+      comp_type = GXCompTypeColor
+    else:
+      comp_type = GXCompTypeNumber
+    new_combobox = self.make_widget_for_type(vtx_fmt, comp_type, [('attr', 'component_type')])
+    for i in range(form_layout.rowCount()):
+      field_item = form_layout.itemAt(i, QFormLayout.ItemRole.FieldRole)
+      old_widget = field_item.widget()
+      if old_widget.property('access_path') == [('attr', '_component_type')]:
+        label_text = form_layout.itemAt(i, QFormLayout.ItemRole.LabelRole).widget().text()
+        form_layout.removeRow(i)
+        form_layout.insertRow(i, label_text, new_combobox)
+        break
+    
+    if vtx_fmt.attribute_type == GXAttr.NULL:
+      return
+    
+    # attribute_list = self.j3d.vtx1.attributes[vtx_fmt.attribute_type]
+    # for attr in attribute_list:
+    #   layout.addWidget(QPushButton())
+  
+  
   
   def export_j3d_by_path(self, j3d_path):
     success = self.try_save_j3d()
