@@ -170,14 +170,14 @@
            </sizepolicy>
           </property>
           <property name="widgetResizable">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <widget class="QWidget" name="scrollAreaWidgetContents">
            <property name="geometry">
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>373</width>
+             <width>378</width>
              <height>69</height>
             </rect>
            </property>

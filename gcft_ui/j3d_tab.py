@@ -1,6 +1,7 @@
 
 import os
 from io import BytesIO
+import traceback
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
@@ -83,7 +84,10 @@ class J3DTab(QWidget):
     self.import_j3d_by_data(data, j3d_name)
   
   def import_j3d_by_data(self, data, j3d_name):
-    self.j3d = J3D(data)
+    j3d = self.try_read_j3d(data)
+    if j3d is None:
+      return
+    self.j3d = j3d
     
     self.j3d_name = j3d_name
     
@@ -92,6 +96,27 @@ class J3DTab(QWidget):
     self.try_show_model_preview(True)
     
     self.ui.export_j3d.setDisabled(False)
+  
+  def try_read_j3d(self, data):
+    try:
+      return J3D(data)
+    except Exception as e:
+      stack_trace = traceback.format_exc()
+      error_message_title = "Failed to load J3D"
+      error_message = "Failed to load J3D with error:\n%s\n\n%s" % (str(e), stack_trace)
+      QMessageBox.critical(self, error_message_title, error_message)
+      return None
+  
+  def try_save_j3d(self):
+    try:
+      self.j3d.save_changes()
+      return True
+    except Exception as e:
+      stack_trace = traceback.format_exc()
+      error_message_title = "Failed to save J3D"
+      error_message = "Failed to save J3D with error:\n%s\n\n%s" % (str(e), stack_trace)
+      QMessageBox.critical(self, error_message_title, error_message)
+      return False
   
   def reload_j3d_chunks_tree(self):
     self.ui.j3d_chunks_tree.clear()
@@ -308,7 +333,9 @@ class J3DTab(QWidget):
     layout.addItem(spacer)
   
   def export_j3d_by_path(self, j3d_path):
-    self.j3d.save_changes()
+    success = self.try_save_j3d()
+    if not success:
+      return
     
     with open(j3d_path, "wb") as f:
       self.j3d.data.seek(0)
@@ -427,7 +454,9 @@ class J3DTab(QWidget):
     self.ui.j3d_viewer.load_model(self.j3d, reset_camera)
   
   def update_j3d_preview(self):
-    self.j3d.save_changes()
+    success = self.try_save_j3d()
+    if not success:
+      return
     self.try_show_model_preview(False)
   
   def display_j3d_preview_error(self, error: str):
