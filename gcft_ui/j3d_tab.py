@@ -48,8 +48,12 @@ class J3DTab(BunfoeEditor):
     self.ui.j3d_viewer.hide()
     self.ui.j3dultra_error_area.hide()
     
+    self.field_value_changed.connect(self.update_j3d_preview)
     self.ui.update_j3d_preview.clicked.connect(self.update_j3d_preview)
     self.ui.update_j3d_preview.setIcon(self.style().standardIcon(QStyle.SP_BrowserReload))
+    
+    # Make the splitter start out evenly split between all three widgets.
+    self.ui.splitter.setSizes([2**30, 2**30, 2**30])
   
   def import_j3d(self):
     filters = [

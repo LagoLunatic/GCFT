@@ -170,6 +170,7 @@ class J3DViewer(QOpenGLWidget):
       return
     
     self.j3d = self.get_preview_compatible_j3d(j3d_model)
+    # self.j3d = j3d_model
     
     self.last_render_time = time.monotonic()
     
@@ -242,8 +243,8 @@ class J3DViewer(QOpenGLWidget):
     # Estimate the model's size based on its visual shape bounding boxes.
     points = []
     for shape in j3d_model.shp1.shapes:
-      points.append(shape.bounding_box_min)
-      points.append(shape.bounding_box_max)
+      points.append(shape.bounding_box_min.xyz)
+      points.append(shape.bounding_box_max.xyz)
     bbox_min = np.min(points, axis=0)
     bbox_max = np.max(points, axis=0)
     aabb_diag_len = np.linalg.norm(bbox_max - bbox_min)
@@ -254,9 +255,9 @@ class J3DViewer(QOpenGLWidget):
       # positions and bounding boxes instead.
       points = []
       for joint in j3d_model.jnt1.joints:
-        points.append(joint.position)
-        points.append(joint.bounding_box_min)
-        points.append(joint.bounding_box_max)
+        points.append(joint.translation.xyz)
+        points.append(joint.bounding_box_min.xyz)
+        points.append(joint.bounding_box_max.xyz)
       bbox_min = np.min(points, axis=0)
       bbox_max = np.max(points, axis=0)
       aabb_diag_len = np.linalg.norm(bbox_max - bbox_min)

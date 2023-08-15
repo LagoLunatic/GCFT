@@ -10,7 +10,7 @@ from gclib import fs_helpers as fs
 from gclib.bunfoe import BUNFOE, Field, fields
 
 from gcft_ui.custom_widgets import BigIntSpinbox
-from gclib.j3d import RGBA32
+from gclib.j3d import RGBA, TevStage
 
 class BunfoeEditor(QWidget):
   field_value_changed = Signal()
@@ -47,33 +47,92 @@ class BunfoeEditor(QWidget):
     
     layout: QBoxLayout = self.ui.scrollAreaWidgetContents.layout()
     
-    return self.add_all_widget_fields_to_layout(instance, layout, disabled=disabled)
-  
-  def add_all_widget_fields_to_layout(self, instance, layout: QBoxLayout, disabled=False):
-    form_layout = QFormLayout()
+    form_layout = self.add_all_bunfoe_fields_to_new_form_layout(instance, disabled=disabled)
     layout.addLayout(form_layout)
+    return form_layout
+  
+  def add_all_bunfoe_fields_to_new_form_layout(self, instance, disabled=False):
+    form_layout = QFormLayout()
     
     for field in fields(instance):
-      self.add_field_widget_to_form_layout(instance, field, form_layout, disabled=disabled)
+      field_widget = self.make_widget_for_field(instance, field, disabled=disabled)
+      if field_widget is None:
+        continue
+      pretty_field_name = self.prettify_name(field.name)
+      form_layout.addRow(pretty_field_name, field_widget)
     
     return form_layout
   
-  def add_field_widget_to_form_layout(self, instance, field: Field, form_layout: QFormLayout, disabled=False):
+  def add_all_bunfoe_fields_to_new_box_layout(self, instance, disabled=False):
+    if isinstance(instance, TevStage): # TODO hack, maybe check number of fields instead??
+      box_layout = QVBoxLayout()
+    else:
+      box_layout = QHBoxLayout()
+    
+    for field in fields(instance):
+      field_widget = self.make_widget_for_field(instance, field, disabled=disabled)
+      if field_widget is None:
+        continue
+      
+      field_layout = QHBoxLayout()
+      box_layout.addLayout(field_layout)
+      
+      pretty_field_name = self.prettify_name(field.name)
+      field_label = QLabel(pretty_field_name)
+      # field_label.setMinimumWidth(100)
+      field_layout.addWidget(field_label)
+      
+      if isinstance(field_widget, QWidget):
+        field_layout.addWidget(field_widget)
+      elif isinstance(field_widget, QLayout):
+        field_layout.addLayout(field_widget)
+      else:
+        raise NotImplementedError
+      
+      field_layout.setStretch(0, 0)
+      field_layout.setStretch(1, 1)
+    
+    return box_layout
+  
+  def add_all_sequence_elements_to_new_layout(self, instance, field_type, access_path, disabled=False):
+    # box_layout = QVBoxLayout()
+    
+    # for i, arg_type in enumerate(typing.get_args(field_type)):
+    #   arg_widget = self.make_widget_for_type(instance, arg_type, access_path + [('item', i)])
+    #   if isinstance(arg_widget, QWidget):
+    #     box_layout.addWidget(arg_widget)
+    #   elif isinstance(arg_widget, QLayout):
+    #     box_layout.addLayout(arg_widget)
+    #   else:
+    #     raise NotImplementedError
+    
+    # return box_layout
+  
+    form_layout = QFormLayout()
+    
+    for i, arg_type in enumerate(typing.get_args(field_type)):
+      arg_widget = self.make_widget_for_type(instance, arg_type, access_path + [('item', i)])
+      index_str = self.window().stringify_number(i, min_hex_chars=1)
+      form_layout.addRow(index_str, arg_widget)
+    
+    return form_layout
+  
+  def make_widget_for_field(self, instance, field: Field, disabled=False):
     if field.name.startswith('_padding'):
       # No need to show these.
-      return
+      return None
     
-    field_widget = self.make_widget_for_type(instance, field.type, [('attr', field.name)], disabled=disabled)
-    if field_widget is None:
-      # Field is not implemented.
-      return
-    
-    pretty_field_name = self.prettify_name(field.name)
-    
-    form_layout.addRow(pretty_field_name, field_widget)
+    return self.make_widget_for_type(instance, field.type, [('attr', field.name)], disabled=disabled)
   
   def make_widget_for_type(self, instance, field_type: typing.Type, access_path: list[tuple], disabled=False):
     value = self.get_value(instance, access_path)
+    
+    if value is None:
+      # TODO: we need to add some kind of placeholder button that, when clicked, creates a new
+      # instance of the correct field type and adds it to the object.
+      placeholder = QPushButton()
+      placeholder.setText("(Blank)")
+      return placeholder
     
     if issubclass(field_type, int) and field_type in fs.PRIMITIVE_TYPE_TO_BYTE_SIZE:
       widget = self.make_spinbox_for_int(field_type, value)
@@ -88,22 +147,11 @@ class BunfoeEditor(QWidget):
     elif issubclass(field_type, Enum):
       widget = self.make_combobox_for_enum(field_type, value)
     elif isinstance(field_type, typing.GenericAlias) and field_type.__origin__ in [tuple, list]:
-      tuple_layout = QHBoxLayout()
-      for i, arg_type in enumerate(typing.get_args(field_type)):
-        arg_widget = self.make_widget_for_type(instance, arg_type, access_path + [('item', i)])
-        if isinstance(arg_widget, QWidget):
-          tuple_layout.addWidget(arg_widget)
-        elif isinstance(arg_widget, QLayout):
-          tuple_layout.addLayout(arg_widget)
-        else:
-          raise NotImplementedError
-      widget = tuple_layout
-    elif issubclass(field_type, RGBA32):
+      widget = self.add_all_sequence_elements_to_new_layout(instance, field_type, access_path, disabled=disabled)
+    elif issubclass(field_type, RGBA):
       widget = self.make_button_for_color(field_type, value)
     elif issubclass(field_type, BUNFOE):
-      sublayout = QVBoxLayout()
-      widget = self.add_all_widget_fields_to_layout(value, sublayout, disabled=disabled)
-      widget = sublayout
+      widget = self.add_all_bunfoe_fields_to_new_box_layout(value, disabled=disabled)
     else:
       print(f"Field type not implemented: {field_type}")
       raise NotImplementedError
@@ -184,9 +232,9 @@ class BunfoeEditor(QWidget):
     self.field_value_changed.emit()
   
   def make_spinbox_for_int(self, field_type, value):
-    spinbox = BigIntSpinbox()
     assert field_type in fs.PRIMITIVE_TYPE_TO_BYTE_SIZE
     assert issubclass(field_type, int)
+    spinbox = BigIntSpinbox()
     min_val = 0
     byte_size = fs.PRIMITIVE_TYPE_TO_BYTE_SIZE[field_type]
     max_val = (1 << byte_size*8) - 1
@@ -195,6 +243,7 @@ class BunfoeEditor(QWidget):
       max_val -= 1 << (byte_size*8 - 1)
     spinbox.setRange(min_val, max_val)
     spinbox.setWrapping(True)
+    spinbox.setMinimumWidth(40)
     spinbox.setValue(value)
     spinbox.valueChanged.connect(self.spinbox_value_changed)
     return spinbox
@@ -203,6 +252,7 @@ class BunfoeEditor(QWidget):
     spinbox = QDoubleSpinBox()
     assert field_type == float
     spinbox.setRange(float('-inf'), float('inf'))
+    spinbox.setMinimumWidth(40)
     spinbox.setValue(value)
     spinbox.valueChanged.connect(self.spinbox_value_changed)
     return spinbox
@@ -235,7 +285,7 @@ class BunfoeEditor(QWidget):
     self.set_value(field_owner, access_path, new_value)
     self.field_value_changed.emit()
   
-  def make_button_for_color(self, field_type, value: RGBA32):
+  def make_button_for_color(self, field_type, value: RGBA):
     button = QPushButton()
     button.setText("Click to set color")
     button.clicked.connect(self.open_color_chooser)
@@ -244,7 +294,7 @@ class BunfoeEditor(QWidget):
     self.set_background_for_color_button(button, value)
     return button
   
-  def set_background_for_color_button(self, button: QPushButton, color: RGBA32):
+  def set_background_for_color_button(self, button: QPushButton, color: RGBA):
     # TODO: RGB support
     # if len(color) == 3:
     #   r, g, b = color
@@ -272,6 +322,7 @@ class BunfoeEditor(QWidget):
   def open_color_chooser(self):
     button: QPushButton = self.sender()
     field_owner: object = button.property('field_owner')
+    field_type = button.property('field_type')
     access_path = button.property('access_path')
     
     color = self.get_value(field_owner, access_path)

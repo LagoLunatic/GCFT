@@ -79,7 +79,7 @@ class GCFTWindow(QMainWindow):
     icon_path = os.path.join(ASSETS_PATH, "icon.ico")
     self.setWindowIcon(QIcon(icon_path))
     
-    self.show()
+    self.showMaximized()
   
   def load_settings(self):
     self.settings_path = "settings.txt"
@@ -236,6 +236,7 @@ class GCFTWindow(QMainWindow):
       return "%d" % num
   
   
+  # TODO: remove all this color button stuff and use FieldEditor instead
   def make_color_selector_button(self, color_owner_object, color_attribute_name, display_name, layout):
     row_widget = QWidget()
     row_layout = QHBoxLayout()
