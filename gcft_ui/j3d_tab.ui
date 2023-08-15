@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>776</width>
-    <height>528</height>
+    <height>538</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,12 +33,12 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,2">
      <item>
       <widget class="QTreeWidget" name="j3d_chunks_tree">
        <property name="minimumSize">
         <size>
-         <width>300</width>
+         <width>370</width>
          <height>0</height>
         </size>
        </property>
@@ -61,7 +61,7 @@
      </item>
      <item>
       <widget class="QWidget" name="j3d_sidebar" native="true">
-       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,0,0,2">
         <property name="margin" stdset="0">
          <number>0</number>
         </property>
@@ -100,7 +100,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>373</width>
+             <width>378</width>
              <height>69</height>
             </rect>
            </property>
@@ -129,17 +129,37 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="j3d_sidebar_label">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Extra information will be displayed here as necessary.</string>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QLabel" name="j3d_sidebar_label">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Extra information will be displayed here as necessary.</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="update_j3d_preview">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>40</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <widget class="QScrollArea" name="scrollArea">
@@ -157,7 +177,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>373</width>
+             <width>378</width>
              <height>69</height>
             </rect>
            </property>

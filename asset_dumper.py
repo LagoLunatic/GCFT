@@ -3,8 +3,8 @@ import os
 import re
 
 from gclib.rarc import RARC
-from gclib.j3d import J3DFile
-from gclib.bti import BTIFile
+from gclib.j3d import J3D
+from gclib.bti import BTI
 
 class AssetDumper:
   def __init__(self):
@@ -44,17 +44,17 @@ class AssetDumper:
       try:
         if file_ext == ".arc":
           out_path = os.path.join(out_dir, rel_dir, base_name)
-          rarc = RARC()
-          rarc.read(gcm.get_changed_file_data(file_path))
+          rarc = RARC(gcm.get_changed_file_data(file_path))
+          rarc.read()
           for _ in self.dump_all_textures_in_rarc(rarc, out_path, display_path_prefix=file_path):
             continue
         elif file_ext == ".bti":
           out_path = os.path.join(out_dir, rel_dir, base_name + ".png")
-          bti = BTIFile(gcm.get_changed_file_data(file_path))
+          bti = BTI(gcm.get_changed_file_data(file_path))
           self.dump_texture(bti, out_path)
         elif file_ext in [".bmd", ".bdl", ".bmt"]:
           out_path = os.path.join(out_dir, rel_dir, base_name + file_ext)
-          j3d_file = J3DFile(gcm.get_changed_file_data(file_path))
+          j3d_file = J3D(gcm.get_changed_file_data(file_path))
           self.dump_all_textures_in_j3d_file(j3d_file, out_path)
       except Exception as e:
         display_path = file_path
@@ -65,7 +65,7 @@ class AssetDumper:
     
     yield("Done", -1)
   
-  def dump_all_textures_in_rarc(self, rarc, out_dir, display_path_prefix=None):
+  def dump_all_textures_in_rarc(self, rarc: RARC, out_dir, display_path_prefix=None):
     files_checked = 0
     yield("Initializing...", files_checked)
     
@@ -84,15 +84,15 @@ class AssetDumper:
       try:
         if file_ext == ".bti":
           out_path = os.path.join(out_dir, rel_dir, base_name + ".png")
-          bti = rarc.get_file(file_entry.name)
+          bti = rarc.get_file(file_entry.name, BTI)
           self.dump_texture(bti, out_path)
         elif file_ext in [".bmd", ".bdl", ".bmt"]:
           out_path = os.path.join(out_dir, rel_dir, base_name + file_ext)
-          j3d_file = rarc.get_file(file_entry.name)
+          j3d_file = rarc.get_file(file_entry.name, J3D)
           self.dump_all_textures_in_j3d_file(j3d_file, out_path)
         elif file_ext == ".arc":
           out_path = os.path.join(out_dir, rel_dir, base_name + file_ext)
-          inner_rarc = rarc.get_file(file_entry.name)
+          inner_rarc = rarc.get_file(file_entry.name, RARC)
           for _ in self.dump_all_textures_in_rarc(inner_rarc, out_path, display_path_prefix=full_display_path):
             continue
       except Exception as e:

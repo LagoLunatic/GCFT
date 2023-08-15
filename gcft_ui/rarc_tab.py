@@ -176,8 +176,8 @@ class RARCTab(QWidget):
     self.import_rarc_by_data(data, rarc_name)
   
   def import_rarc_by_data(self, data, rarc_name):
-    self.rarc = RARC()
-    self.rarc.read(data)
+    self.rarc = RARC(data)
+    self.rarc.read()
     
     self.rarc_name = rarc_name
     
@@ -548,7 +548,7 @@ class RARCTab(QWidget):
   def replace_j3d_in_rarc(self):
     file_entry = self.ui.actionReplaceRARCJ3D.data()
     
-    self.j3d_tab.j3d.save_changes()
+    self.j3d_tab.j3d.save()
     
     file_entry.data = fs.make_copy_data(self.j3d_tab.j3d.data)
     file_entry.update_compression_flags_from_data()

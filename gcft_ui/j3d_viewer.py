@@ -2,6 +2,7 @@
 import os
 import re
 from io import BytesIO
+import time
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
@@ -9,7 +10,7 @@ from PySide6.QtOpenGLWidgets import *
 
 from gcft_paths import ASSETS_PATH
 from gcft_ui.nav_camera import Camera
-from gclib.j3d import J3DFile
+from gclib.j3d import J3D
 from gclib.bti import BTI
 from gclib.gx_enums import GXAttr
 from gclib import fs_helpers as fs
@@ -28,7 +29,7 @@ except ImportError:
   J3DULTRA_INSTALLED = False
   print("j3dultra not installed")
 
-REQUIRED_OPENGL_VERSION = (4, 6)
+REQUIRED_OPENGL_VERSION = (4, 5)
 
 class J3DViewer(QOpenGLWidget):
   error_showing_preview = Signal(str)
@@ -68,7 +69,7 @@ class J3DViewer(QOpenGLWidget):
       self.key_is_held[key] = False
     for key in self.KEY_TO_SPEED_MULTIPLIER:
       self.key_is_held[key] = False
-    self.show_widgets = True
+    self.show_widgets = False # TODO remove or rewrite widgets
     
     self.base_cam_move_speed = self.BASE_CAMERA_MOVE_SPEED
     self.fovy = 45.0
@@ -92,10 +93,10 @@ class J3DViewer(QOpenGLWidget):
     self.frame_timer.setInterval(self.DELAY_BETWEEN_FRAMES)
     self.frame_timer.timeout.connect(self.process_frame)
     
-    self.elapsed_timer= QElapsedTimer()
+    self.last_render_time = time.monotonic()
+    self.total_time_elapsed = 0.0
     
     self.frame_timer.start()
-    self.elapsed_timer.start()
   
   def initializeGL(self):
     self.enable_j3dultra = self.check_should_j3dultra_be_enabled()
@@ -112,14 +113,11 @@ class J3DViewer(QOpenGLWidget):
     height = self.height()
     self.aspect = width / height
     
-    glViewport(0, 0, width, height)
-    
     if self.load_model_is_queued:
       self.load_queued_model()
   
   def resizeGL(self, width: int, height: int):
-    glViewport(0, 0, width, height)
-    self.aspect = self.width() / self.height()
+    self.aspect = width / height
     self.update()
   
   def paintGL(self):
@@ -171,15 +169,20 @@ class J3DViewer(QOpenGLWidget):
     glClearColor(0.25, 0.3, 0.4, 1.0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
   
-  def load_model(self, j3d_model: J3DFile, reset_camera=False):
-    if j3d_model.file_type not in ["bmd3", "bdl4"]:
-      # Not a 3D model, or an older unsupported version like BMD2.
+  def load_model(self, j3d_model: J3D, reset_camera=False):
+    if not J3DULTRA_INSTALLED:
+      return
+    
+    if j3d_model.file_type not in ["bmd3", "bdl4", "bmd2"]:
+      # Not a 3D model, or an older unsupported version.
       error_msg = f"The current J3D file is of type {j3d_model.file_type!r}, " + \
         "which GCFT does not currently support showing previews for."
       self.error_showing_preview.emit(error_msg)
       return
     
     self.j3d = self.get_preview_compatible_j3d(j3d_model)
+    
+    self.last_render_time = time.monotonic()
     
     if reset_camera:
       bbox_min, bbox_max = self.guesstimate_model_bbox(self.j3d)
@@ -192,6 +195,8 @@ class J3DViewer(QOpenGLWidget):
       # print(self.base_center, self.base_cam_dist)
       
       self.reset_camera()
+      
+      self.total_time_elapsed = 0.0
     
     # Display the preview widget.
     self.show()
@@ -207,6 +212,9 @@ class J3DViewer(QOpenGLWidget):
   
   def load_queued_model(self):
     self.load_model_is_queued = False
+    
+    if self.j3d is None:
+      return
     
     if self.context() is None:
       error_msg = "OpenGL context was not properly initialized. Cannot show J3D model preview."
@@ -225,19 +233,28 @@ class J3DViewer(QOpenGLWidget):
       self.hide()
       return
     
-    self.elapsed_timer.restart()
+    error_codes = []
+    while (err := glGetError()) and err != GL_NO_ERROR:
+      error_codes.append(err)
+    if error_codes:
+      self.model = None
+      self.hide()
+      error_msg = f"Encountered OpenGL error(s) when trying to render a J3D preview:\n"
+      error_msg += "\n".join(f"Error code {err}: {gluErrorString(err).decode('ansi')}" for err in error_codes)
+      self.error_showing_preview.emit(error_msg)
+      return
     
     self.init_lights()
     
     self.update()
     self.show()
   
-  def guesstimate_model_bbox(self, j3d_model: J3DFile) -> tuple[np.ndarray, np.ndarray]:
+  def guesstimate_model_bbox(self, j3d_model: J3D) -> tuple[np.ndarray, np.ndarray]:
     # Estimate the model's size based on its visual shape bounding boxes.
     points = []
     for shape in j3d_model.shp1.shapes:
-      points.append(shape.bbox_min)
-      points.append(shape.bbox_max)
+      points.append(shape.bounding_box_min)
+      points.append(shape.bounding_box_max)
     bbox_min = np.min(points, axis=0)
     bbox_max = np.max(points, axis=0)
     aabb_diag_len = np.linalg.norm(bbox_max - bbox_min)
@@ -249,8 +266,8 @@ class J3DViewer(QOpenGLWidget):
       points = []
       for joint in j3d_model.jnt1.joints:
         points.append(joint.position)
-        points.append(joint.bbox_min)
-        points.append(joint.bbox_max)
+        points.append(joint.bounding_box_min)
+        points.append(joint.bounding_box_max)
       bbox_min = np.min(points, axis=0)
       bbox_max = np.max(points, axis=0)
       aabb_diag_len = np.linalg.norm(bbox_max - bbox_min)
@@ -269,8 +286,11 @@ class J3DViewer(QOpenGLWidget):
     
     return bbox_min, bbox_max
   
-  def get_preview_compatible_j3d(self, orig_j3d: J3DFile) -> J3DFile:
-    hack_j3d = J3DFile(fs.make_copy_data(orig_j3d.data))
+  def get_preview_compatible_j3d(self, orig_j3d: J3D) -> J3D:
+    # We have to save the original J3D for the chunks to its chunks to be reflected properly.
+    # Simply copying orig_j3d.data is not sufficient on its own.
+    orig_j3d.save()
+    hack_j3d = J3D(fs.make_copy_data(orig_j3d.data))
     any_changes_made = False
     
     # Wind Waker has a hardcoded system where the textures that control toon shading are dynamically
@@ -304,7 +324,7 @@ class J3DViewer(QOpenGLWidget):
         any_changes_made = True
     
     if any_changes_made:
-      hack_j3d.save_changes()
+      hack_j3d.save()
       return hack_j3d
     else:
       return orig_j3d
@@ -314,6 +334,11 @@ class J3DViewer(QOpenGLWidget):
     return np.cos(angle), np.sin(angle)
   
   def init_lights(self):
+    if not self.enable_j3dultra:
+      return
+    if not self.model:
+      return
+    
     self.lights = []
     
     use_ww_toon_lighting = False
@@ -323,7 +348,7 @@ class J3DViewer(QOpenGLWidget):
     
     if use_ww_toon_lighting:
       # Wind Waker lighting.
-      x, z = self.calculate_light_pos(self.elapsed_timer.elapsed() / 5000)
+      x, z = self.calculate_light_pos(self.total_time_elapsed / 5)
       light_pos = [-5000*x, 4000, 5000*z]
       light_dir = -(light_pos / np.linalg.norm(light_pos))
       light_col = [1, 0, 0, 1]
@@ -332,16 +357,17 @@ class J3DViewer(QOpenGLWidget):
       light = J3DLight(light_pos, light_dir, light_col, angle_atten, dist_atten)
       self.lights.append(light)
       
-      light_pos = [5000, -4000, -5000]
-      light_dir = -(light_pos / np.linalg.norm(light_pos))
-      light_col = [0, 0, 1, 1]
-      angle_atten = [1, 0, 0]
-      dist_atten = [1, 0, 0]
-      light = J3DLight(light_pos, light_dir, light_col, angle_atten, dist_atten)
-      self.lights.append(light)
+      for i in range(1, 8):
+        light_pos = [5000, -4000, -5000]
+        light_dir = -(light_pos / np.linalg.norm(light_pos))
+        light_col = [0, 0, 1, 0]
+        angle_atten = [1, 0, 0]
+        dist_atten = [1, 0, 0]
+        light = J3DLight(light_pos, light_dir, light_col, angle_atten, dist_atten)
+        self.lights.append(light)
     else:
       # Plain default lighting.
-      x, z = self.calculate_light_pos(self.elapsed_timer.elapsed() / 5000)
+      x, z = self.calculate_light_pos(self.total_time_elapsed / 5)
       light_pos = [-5000*x, 4000, 5000*z]
       light_dir = -(light_pos / np.linalg.norm(light_pos))
       light_col = [1, 1, 1, 1]
@@ -368,24 +394,20 @@ class J3DViewer(QOpenGLWidget):
     
     for i, light in enumerate(self.lights):
       assert 0 <= i <= 7
-      ultra.setLight(light, i)
+      self.model.setLight(light, i)
   
   def update_lights(self):
     if not self.enable_j3dultra:
       return
     if not self.lights:
       return
+    if not self.model:
+      return
     
-    x, z = self.calculate_light_pos(self.elapsed_timer.elapsed() / 5000)
+    x, z = self.calculate_light_pos(self.total_time_elapsed / 5)
     self.lights[0].position.x = -5000*x
     self.lights[0].position.z = 5000*z
-    ultra.setLight(self.lights[0], 0)
-    
-    # for i in range(1, len(self.lights)):
-    #   x, z = self.calculate_light_pos(self.elapsed_timer.elapsed() / 3000)
-    #   self.lights[i].position.x = 5000*x
-    #   self.lights[i].position.z = -5000*z
-    #   ultra.setLight(self.lights[i], i)
+    self.model.setLight(self.lights[0], 0)
     
     self.should_update_render = True
   
@@ -433,7 +455,6 @@ class J3DViewer(QOpenGLWidget):
     height = self.height()//5
     width = min(width, height)
     height = width
-    glViewport(0, 0, width, width)
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     gluPerspective(self.fovy, 1, 0.01, 10.0)
@@ -470,8 +491,6 @@ class J3DViewer(QOpenGLWidget):
     if not self.lights:
       return
   
-    glViewport(0, 0, self.width(), self.height())
-    
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     gluPerspective(self.fovy, self.aspect, self.near_plane, self.far_plane)
@@ -496,7 +515,9 @@ class J3DViewer(QOpenGLWidget):
     glEnd()
   
   def draw_model(self):
-    glViewport(0, 0, self.width(), self.height())
+    if not self.enable_j3dultra:
+      return
+    
     if self.model is not None:
       self.model.render()
     ultra.render(0.0, self.camera.position)
@@ -524,6 +545,10 @@ class J3DViewer(QOpenGLWidget):
     super().update()
   
   def process_frame(self):
+    current_time = time.monotonic()
+    self.total_time_elapsed += (current_time - self.last_render_time)
+    self.last_render_time = current_time
+    
     if self.context() is None:
       # Not yet initialized.
       return

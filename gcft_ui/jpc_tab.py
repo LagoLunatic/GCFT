@@ -216,7 +216,7 @@ class JPCTab(QWidget):
     layout.addItem(spacer)
   
   def export_jpc_by_path(self, jpc_path):
-    self.jpc.save_changes()
+    self.jpc.save()
     
     with open(jpc_path, "wb") as f:
       self.jpc.data.seek(0)
