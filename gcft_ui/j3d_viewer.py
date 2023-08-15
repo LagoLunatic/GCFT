@@ -314,6 +314,8 @@ class J3DViewer(QOpenGLWidget):
   def init_lights(self):
     if not self.enable_j3dultra:
       return
+    if not self.model:
+      return
     
     self.lights = []
     
@@ -370,18 +372,20 @@ class J3DViewer(QOpenGLWidget):
     
     for i, light in enumerate(self.lights):
       assert 0 <= i <= 7
-      ultra.setLight(light, i)
+      self.model.setLight(light, i)
   
   def update_lights(self):
     if not self.enable_j3dultra:
       return
     if not self.lights:
       return
+    if not self.model:
+      return
     
     x, z = self.calculate_light_pos(self.total_time_elapsed / 5)
     self.lights[0].position.x = -5000*x
     self.lights[0].position.z = 5000*z
-    ultra.setLight(self.lights[0], 0)
+    self.model.setLight(self.lights[0], 0)
     
     self.should_update_render = True
   
