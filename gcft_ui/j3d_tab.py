@@ -97,7 +97,7 @@ class J3DTab(BunfoeEditor):
     
     self.reload_j3d_chunks_tree()
     
-    # self.try_show_model_preview(True)
+    self.try_show_model_preview(True)
     
     self.ui.export_j3d.setDisabled(False)
   

@@ -61,7 +61,7 @@
      </item>
      <item>
       <widget class="QWidget" name="j3d_sidebar" native="true">
-       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,0,0,2">
         <property name="margin" stdset="0">
          <number>0</number>
         </property>

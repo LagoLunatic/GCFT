@@ -10,7 +10,7 @@ from gclib import fs_helpers as fs
 from gclib.bunfoe import BUNFOE, Field, fields
 
 from gcft_ui.custom_widgets import BigIntSpinbox
-from gclib.fs_helpers import RGBA32
+from gclib.j3d import RGBA32
 
 class BunfoeEditor(QWidget):
   field_value_changed = Signal()
@@ -297,15 +297,15 @@ class BunfoeEditor(QWidget):
     color_dialog_options = QColorDialog.ColorDialogOption(0)
     if has_alpha:
       color_dialog_options |= QColorDialog.ShowAlphaChannel
-    color = QColorDialog.getColor(initial_color, self, "Select color", options=color_dialog_options)
-    if not color.isValid():
+    qcolor = QColorDialog.getColor(initial_color, self, "Select color", options=color_dialog_options)
+    if not qcolor.isValid():
       return
     
-    color.r = color.red()
-    color.g = color.green()
-    color.b = color.blue()
+    color.r = qcolor.red()
+    color.g = qcolor.green()
+    color.b = qcolor.blue()
     if has_alpha:
-      color.a = color.alpha()
+      color.a = qcolor.alpha()
     
     self.set_background_for_color_button(button, color)
     self.field_value_changed.emit()

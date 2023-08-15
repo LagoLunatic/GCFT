@@ -141,6 +141,8 @@ class Ui_J3DTab(object):
 
         self.verticalLayout_2.addWidget(self.scrollArea)
 
+        self.verticalLayout_2.setStretch(0, 1)
+        self.verticalLayout_2.setStretch(3, 2)
 
         self.horizontalLayout.addWidget(self.j3d_sidebar)
 
