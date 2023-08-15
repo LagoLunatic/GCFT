@@ -162,8 +162,8 @@ class J3DViewer(QOpenGLWidget):
     if not J3DULTRA_INSTALLED:
       return
     
-    if j3d_model.file_type not in ["bmd3", "bdl4"]:
-      # Not a 3D model, or an older unsupported version like BMD2.
+    if j3d_model.file_type not in ["bmd3", "bdl4", "bmd2"]:
+      # Not a 3D model, or an older unsupported version.
       error_msg = f"The current J3D file is of type {j3d_model.file_type!r}, " + \
         "which GCFT does not currently support showing previews for."
       self.error_showing_preview.emit(error_msg)
