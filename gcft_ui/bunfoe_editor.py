@@ -10,7 +10,7 @@ from gclib import fs_helpers as fs
 from gclib.bunfoe import BUNFOE, Field, fields
 
 from gcft_ui.custom_widgets import BigIntSpinbox
-from gclib.j3d import RGBA, TevStage
+from gclib.j3d import RGBA, Vector, Matrix4x4
 
 class BunfoeEditor(QWidget):
   field_value_changed = Signal()
@@ -52,7 +52,11 @@ class BunfoeEditor(QWidget):
     return form_layout
   
   def add_all_bunfoe_fields_to_new_form_layout(self, instance, disabled=False):
+    if isinstance(instance, Vector):
+      return self.add_all_bunfoe_fields_to_new_box_layout(instance, disabled=disabled)
+    
     form_layout = QFormLayout()
+    # form_layout.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
     
     for field in fields(instance):
       field_widget = self.make_widget_for_field(instance, field, disabled=disabled)
@@ -64,10 +68,7 @@ class BunfoeEditor(QWidget):
     return form_layout
   
   def add_all_bunfoe_fields_to_new_box_layout(self, instance, disabled=False):
-    if isinstance(instance, TevStage): # TODO hack, maybe check number of fields instead??
-      box_layout = QVBoxLayout()
-    else:
-      box_layout = QHBoxLayout()
+    box_layout = QHBoxLayout()
     
     for field in fields(instance):
       field_widget = self.make_widget_for_field(instance, field, disabled=disabled)
@@ -80,42 +81,71 @@ class BunfoeEditor(QWidget):
       pretty_field_name = self.prettify_name(field.name)
       field_label = QLabel(pretty_field_name)
       # field_label.setMinimumWidth(100)
+      # field_label.setSizePolicy(QSizePolicy.Policy.Maximum, field_label.sizePolicy().verticalPolicy())
       field_layout.addWidget(field_label)
       
       if isinstance(field_widget, QWidget):
-        field_layout.addWidget(field_widget)
+        field_layout.addWidget(field_widget)#, alignment=Qt.AlignmentFlag.AlignLeft)
       elif isinstance(field_widget, QLayout):
-        field_layout.addLayout(field_widget)
+        field_layout.addLayout(field_widget)#, alignment=Qt.AlignmentFlag.AlignLeft)
       else:
         raise NotImplementedError
       
-      field_layout.setStretch(0, 0)
-      field_layout.setStretch(1, 1)
+      # field_layout.setStretch(0, 0)
+      # field_layout.setStretch(1, 1)
     
     return box_layout
   
   def add_all_sequence_elements_to_new_layout(self, instance, field_type, access_path, disabled=False):
     # box_layout = QVBoxLayout()
+    box_layout = QHBoxLayout()
     
-    # for i, arg_type in enumerate(typing.get_args(field_type)):
-    #   arg_widget = self.make_widget_for_type(instance, arg_type, access_path + [('item', i)])
-    #   if isinstance(arg_widget, QWidget):
-    #     box_layout.addWidget(arg_widget)
-    #   elif isinstance(arg_widget, QLayout):
-    #     box_layout.addLayout(arg_widget)
-    #   else:
-    #     raise NotImplementedError
+    show_indexes = True
+    if isinstance(instance, Matrix4x4):
+      show_indexes = False
     
-    # return box_layout
-  
-    form_layout = QFormLayout()
-    
-    for i, arg_type in enumerate(typing.get_args(field_type)):
+    type_args = typing.get_args(field_type)
+    for i, arg_type in enumerate(type_args):
+      column_layout = QVBoxLayout()
+      box_layout.addLayout(column_layout)
+      
+      if show_indexes:
+        if len(type_args) > 10:
+          index_str = self.window().stringify_number(i, min_hex_chars=1)
+        else:
+          # Force decimal for small numbers to avoid taking up space.
+          index_str = str(i)
+        column_header_label = QLabel(index_str)
+        column_header_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        column_layout.addWidget(column_header_label, stretch=0)
+      
       arg_widget = self.make_widget_for_type(instance, arg_type, access_path + [('item', i)])
-      index_str = self.window().stringify_number(i, min_hex_chars=1)
-      form_layout.addRow(index_str, arg_widget)
+      
+      if isinstance(arg_widget, QWidget):
+        column_layout.addWidget(arg_widget)
+      elif isinstance(arg_widget, QLayout):
+        column_layout.addLayout(arg_widget)
+      else:
+        raise NotImplementedError
+      
+      column_layout.addStretch()
     
-    return form_layout
+    return box_layout
+  
+  
+    # form_layout = QFormLayout()
+    
+    # type_args = typing.get_args(field_type)
+    # for i, arg_type in enumerate(type_args):
+    #   arg_widget = self.make_widget_for_type(instance, arg_type, access_path + [('item', i)])
+    #   if len(type_args) >= 10:
+    #     index_str = self.window().stringify_number(i, min_hex_chars=1)
+    #   else:
+    #     # Force decimal for small numbers to avoid taking up space.
+    #     index_str = str(i)
+    #   form_layout.addRow(index_str, arg_widget)
+    
+    # return form_layout
   
   def make_widget_for_field(self, instance, field: Field, disabled=False):
     if field.name.startswith('_padding'):
@@ -130,8 +160,8 @@ class BunfoeEditor(QWidget):
     if value is None:
       # TODO: we need to add some kind of placeholder button that, when clicked, creates a new
       # instance of the correct field type and adds it to the object.
-      placeholder = QPushButton()
-      placeholder.setText("(Blank)")
+      placeholder = QPushButton("…")
+      placeholder.setMinimumWidth(5)
       return placeholder
     
     if issubclass(field_type, int) and field_type in fs.PRIMITIVE_TYPE_TO_BYTE_SIZE:
@@ -151,7 +181,7 @@ class BunfoeEditor(QWidget):
     elif issubclass(field_type, RGBA):
       widget = self.make_button_for_color(field_type, value)
     elif issubclass(field_type, BUNFOE):
-      widget = self.add_all_bunfoe_fields_to_new_box_layout(value, disabled=disabled)
+      widget = self.add_all_bunfoe_fields_to_new_form_layout(value, disabled=disabled)
     else:
       print(f"Field type not implemented: {field_type}")
       raise NotImplementedError
@@ -161,6 +191,8 @@ class BunfoeEditor(QWidget):
     widget.setProperty('access_path', access_path)
     if isinstance(widget, QWidget):
       widget.setDisabled(disabled)
+      # Prevent widgets from expanding to take up the full width of the scroll area.
+      widget.setSizePolicy(QSizePolicy.Policy.Maximum, widget.sizePolicy().verticalPolicy())
     elif isinstance(widget, QLayout):
       self.set_layout_disabled_recursive(widget, disabled=disabled)
     else:
@@ -243,7 +275,7 @@ class BunfoeEditor(QWidget):
       max_val -= 1 << (byte_size*8 - 1)
     spinbox.setRange(min_val, max_val)
     spinbox.setWrapping(True)
-    spinbox.setMinimumWidth(40)
+    spinbox.setMinimumWidth(60)
     spinbox.setValue(value)
     spinbox.valueChanged.connect(self.spinbox_value_changed)
     return spinbox
@@ -252,7 +284,7 @@ class BunfoeEditor(QWidget):
     spinbox = QDoubleSpinBox()
     assert field_type == float
     spinbox.setRange(float('-inf'), float('inf'))
-    spinbox.setMinimumWidth(40)
+    spinbox.setMinimumWidth(60)
     spinbox.setValue(value)
     spinbox.valueChanged.connect(self.spinbox_value_changed)
     return spinbox

@@ -9,7 +9,7 @@ from PySide6.QtWidgets import *
 from gclib import fs_helpers as fs
 from gclib.bunfoe import BUNFOE
 from gclib.gx_enums import GXAttr, GXCompTypeColor, GXCompTypeNumber
-from gclib.j3d import J3D, Joint, Material, Shape, BPRegister, VertexFormat, XFRegister
+from gclib.j3d import J3D, J3DChunk, Joint, Material, Shape, BPRegister, VertexFormat, XFRegister
 from gclib.j3d import MDLEntry, AnimationKeyframe, ColorAnimation, UVAnimation
 from gclib.bti import BTI
 
@@ -32,12 +32,21 @@ class J3DTab(BunfoeEditor):
       column_name = self.ui.j3d_chunks_tree.headerItem().text(col)
       self.j3d_col_name_to_index[column_name] = col
     
+    # TODO: save to settings file?
+    self.chunk_type_is_expanded = {
+      "TEX1": True,
+      "MAT3": True,
+      "TRK1": True,
+    }
+    
     self.ui.export_j3d.setDisabled(True)
     
     self.ui.import_j3d.clicked.connect(self.import_j3d)
     self.ui.export_j3d.clicked.connect(self.export_j3d)
     
     self.ui.j3d_chunks_tree.itemSelectionChanged.connect(self.widget_item_selected)
+    self.ui.j3d_chunks_tree.itemExpanded.connect(self.item_expanded)
+    self.ui.j3d_chunks_tree.itemCollapsed.connect(self.item_collapsed)
     
     self.ui.j3d_chunks_tree.setContextMenuPolicy(Qt.CustomContextMenu)
     self.ui.j3d_chunks_tree.customContextMenuRequested.connect(self.show_j3d_chunks_tree_context_menu)
@@ -129,7 +138,6 @@ class J3DTab(BunfoeEditor):
   def reload_j3d_chunks_tree(self):
     self.ui.j3d_chunks_tree.clear()
     
-    self.object_to_tree_widget_item = {}
     self.tree_widget_item_to_object = {}
     
     for chunk in self.j3d.chunks:
@@ -138,13 +146,11 @@ class J3DTab(BunfoeEditor):
       chunk_item = QTreeWidgetItem([chunk.magic, "", chunk_size_str])
       self.ui.j3d_chunks_tree.addTopLevelItem(chunk_item)
       
-      self.object_to_tree_widget_item[chunk] = chunk_item
       self.tree_widget_item_to_object[chunk_item] = chunk
       
+      chunk_item.setExpanded(self.chunk_type_is_expanded.get(chunk.magic, False))
+      
       if chunk.magic == "TEX1":
-        # Expand TEX1 chunks by default.
-        chunk_item.setExpanded(True)
-        
         seen_image_data_offsets = []
         seen_palette_data_offsets = []
         
@@ -168,7 +174,6 @@ class J3DTab(BunfoeEditor):
           
           self.make_tree_widget_item(texture, chunk_item, ["", texture_name, texture_size_str])
       elif chunk.magic == "MAT3":
-        chunk_item.setExpanded(True)
         for mat_index, material in enumerate(chunk.materials):
           mat_name = chunk.mat_names[mat_index]
           self.make_tree_widget_item(material, chunk_item, ["", mat_name, ""])
@@ -177,7 +182,6 @@ class J3DTab(BunfoeEditor):
           mat_name = self.j3d.mat3.mat_names[i]
           self.make_tree_widget_item(mdl_entry, chunk_item, ["", mat_name, ""])
       elif chunk.magic == "TRK1":
-        chunk_item.setExpanded(True)
         for anim_type_index, anim_type_dict in enumerate([chunk.mat_name_to_reg_anims, chunk.mat_name_to_konst_anims]):
           anim_type = ["Register", "Konstant"][anim_type_index]
           anim_type_item = self.make_tree_widget_item(None, chunk_item, ["", anim_type, ""], True)
@@ -232,11 +236,19 @@ class J3DTab(BunfoeEditor):
     item.setExpanded(expanded)
     
     if obj is not None:
-      assert obj not in self.object_to_tree_widget_item
-      self.object_to_tree_widget_item[obj] = item
       self.tree_widget_item_to_object[item] = obj
     
     return item
+  
+  def item_expanded(self, item):
+    obj = self.tree_widget_item_to_object.get(item)
+    if isinstance(obj, J3DChunk):
+      self.chunk_type_is_expanded[obj.magic] = True
+  
+  def item_collapsed(self, item):
+    obj = self.tree_widget_item_to_object.get(item)
+    if isinstance(obj, J3DChunk):
+      self.chunk_type_is_expanded[obj.magic] = False
   
   def widget_item_selected(self):
     layout = self.ui.scrollAreaWidgetContents.layout()
@@ -503,14 +515,8 @@ class J3DTab(BunfoeEditor):
     
     texture.save_header_changes()
     
-    # Update texture size displayed in the UI.
-    texture_total_size = 0
-    texture_total_size += fs.data_len(texture.image_data)
-    texture_total_size += fs.data_len(texture.palette_data)
-    texture_size_str = self.window().stringify_number(texture_total_size, min_hex_chars=5)
-    
-    item = self.object_to_tree_widget_item.get(texture)
-    item.setText(self.j3d_col_name_to_index["Size"], texture_size_str)
+    # Do a full reload in order to update texture size displayed in the UI.
+    self.reload_j3d_chunks_tree()
     
     self.try_show_model_preview(False)
     
