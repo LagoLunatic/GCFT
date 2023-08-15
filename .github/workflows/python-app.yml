@@ -45,7 +45,7 @@ jobs:
           cd PyJ3DUltra
           vcpkg integrate install
           cmake . -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake"
-          msbuild J3DUltra.sln /t:Build /property:Configuration=Release
+          msbuild J3DUltraPy.sln /t:Build /property:Configuration=Release
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
