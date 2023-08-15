@@ -222,6 +222,17 @@ class J3DViewer(QOpenGLWidget):
       self.hide()
       return
     
+    error_codes = []
+    while (err := glGetError()) and err != GL_NO_ERROR:
+      error_codes.append(err)
+    if error_codes:
+      self.model = None
+      self.hide()
+      error_msg = f"Encountered OpenGL error(s) when trying to render a J3D preview:\n"
+      error_msg += "\n".join(f"Error code {err}: {gluErrorString(err).decode('ansi')}" for err in error_codes)
+      self.error_showing_preview.emit(error_msg)
+      return
+    
     self.init_lights()
     
     self.update()
