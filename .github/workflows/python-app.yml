@@ -150,7 +150,7 @@ jobs:
           submodules: recursive
       - name: Clone PyJ3DUltra
         run: |
-          git clone --recursive https://github.com/Astral-C/PyJ3DUltra.git
+          git clone --recursive https://github.com/LagoLunatic/PyJ3DUltra.git
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
