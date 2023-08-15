@@ -521,6 +521,8 @@ class J3DTab(BunfoeEditor):
     self.ui.j3d_viewer.load_model(self.j3d, reset_camera)
   
   def update_j3d_preview(self):
+    if self.j3d is None:
+      return
     success = self.try_save_j3d()
     if not success:
       return
