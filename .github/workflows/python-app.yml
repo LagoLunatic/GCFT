@@ -22,9 +22,7 @@ jobs:
         with:
           submodules: recursive
       - name: Clone PyJ3DUltra
-        shell: cmd
         run: |
-          echo %cd%
           git clone --recursive https://github.com/LagoLunatic/PyJ3DUltra.git
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
@@ -41,7 +39,6 @@ jobs:
       - name: Build PyJ3DUltra
         shell: cmd
         run: |
-          echo %cd%
           cd PyJ3DUltra
           vcpkg integrate install
           cmake . -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake"
@@ -88,10 +85,13 @@ jobs:
         with:
           submodules: recursive
       - name: Clone PyJ3DUltra
-        shell: cmd
         run: |
-          echo %cd%
           git clone --recursive https://github.com/LagoLunatic/PyJ3DUltra.git
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          architecture: ${{ matrix.architecture }}
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -148,9 +148,7 @@ jobs:
         with:
           submodules: recursive
       - name: Clone PyJ3DUltra
-        shell: cmd
         run: |
-          echo %cd%
           git clone --recursive https://github.com/LagoLunatic/PyJ3DUltra.git
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
