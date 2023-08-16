@@ -88,13 +88,10 @@ jobs:
         with:
           submodules: recursive
       - name: Clone PyJ3DUltra
+        shell: cmd
         run: |
+          echo %cd%
           git clone --recursive https://github.com/LagoLunatic/PyJ3DUltra.git
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-          architecture: ${{ matrix.architecture }}
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -151,7 +148,9 @@ jobs:
         with:
           submodules: recursive
       - name: Clone PyJ3DUltra
+        shell: cmd
         run: |
+          echo %cd%
           git clone --recursive https://github.com/LagoLunatic/PyJ3DUltra.git
       - name: Set up Python 3.11
         uses: actions/setup-python@v4

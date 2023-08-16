@@ -17,8 +17,8 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QLabel,
-    QPushButton, QScrollArea, QSizePolicy, QTreeWidget,
-    QTreeWidgetItem, QVBoxLayout, QWidget)
+    QPushButton, QScrollArea, QSizePolicy, QSplitter,
+    QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
 
 from gcft_ui.j3d_viewer import J3DViewer
 
@@ -26,7 +26,7 @@ class Ui_J3DTab(object):
     def setupUi(self, J3DTab):
         if not J3DTab.objectName():
             J3DTab.setObjectName(u"J3DTab")
-        J3DTab.resize(776, 538)
+        J3DTab.resize(1095, 702)
         self.actionOpenJ3DImage = QAction(J3DTab)
         self.actionOpenJ3DImage.setObjectName(u"actionOpenJ3DImage")
         self.actionReplaceJ3DImage = QAction(J3DTab)
@@ -48,42 +48,94 @@ class Ui_J3DTab(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_6)
 
-        self.horizontalLayout = QHBoxLayout()
-        self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.j3d_chunks_tree = QTreeWidget(J3DTab)
+        self.splitter = QSplitter(J3DTab)
+        self.splitter.setObjectName(u"splitter")
+        self.splitter.setOrientation(Qt.Horizontal)
+        self.verticalLayoutWidget_2 = QWidget(self.splitter)
+        self.verticalLayoutWidget_2.setObjectName(u"verticalLayoutWidget_2")
+        self.verticalLayout_6 = QVBoxLayout(self.verticalLayoutWidget_2)
+        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
+        self.verticalLayout_6.setContentsMargins(0, 0, 0, 0)
+        self.j3d_chunks_tree = QTreeWidget(self.verticalLayoutWidget_2)
         self.j3d_chunks_tree.setObjectName(u"j3d_chunks_tree")
         self.j3d_chunks_tree.setMinimumSize(QSize(370, 0))
 
-        self.horizontalLayout.addWidget(self.j3d_chunks_tree)
+        self.verticalLayout_6.addWidget(self.j3d_chunks_tree)
 
-        self.j3d_sidebar = QWidget(J3DTab)
+        self.splitter.addWidget(self.verticalLayoutWidget_2)
+        self.j3d_sidebar = QWidget(self.splitter)
         self.j3d_sidebar.setObjectName(u"j3d_sidebar")
         self.verticalLayout_2 = QVBoxLayout(self.j3d_sidebar)
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.j3d_viewer = J3DViewer(self.j3d_sidebar)
-        self.j3d_viewer.setObjectName(u"j3d_viewer")
-        sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.j3d_sidebar_label = QLabel(self.j3d_sidebar)
+        self.j3d_sidebar_label.setObjectName(u"j3d_sidebar_label")
+        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(5)
-        sizePolicy.setHeightForWidth(self.j3d_viewer.sizePolicy().hasHeightForWidth())
-        self.j3d_viewer.setSizePolicy(sizePolicy)
-        self.j3d_viewer.setMinimumSize(QSize(300, 300))
-        self.j3d_viewer.setFocusPolicy(Qt.ClickFocus)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.j3d_sidebar_label.sizePolicy().hasHeightForWidth())
+        self.j3d_sidebar_label.setSizePolicy(sizePolicy)
 
-        self.verticalLayout_2.addWidget(self.j3d_viewer)
+        self.horizontalLayout_2.addWidget(self.j3d_sidebar_label)
 
-        self.j3dultra_error_area = QScrollArea(self.j3d_sidebar)
-        self.j3dultra_error_area.setObjectName(u"j3dultra_error_area")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        self.toggle_visibility = QPushButton(self.j3d_sidebar)
+        self.toggle_visibility.setObjectName(u"toggle_visibility")
+        self.toggle_visibility.setMaximumSize(QSize(60, 16777215))
+
+        self.horizontalLayout_2.addWidget(self.toggle_visibility)
+
+        self.update_j3d_preview = QPushButton(self.j3d_sidebar)
+        self.update_j3d_preview.setObjectName(u"update_j3d_preview")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.j3dultra_error_area.sizePolicy().hasHeightForWidth())
-        self.j3dultra_error_area.setSizePolicy(sizePolicy1)
+        sizePolicy1.setHeightForWidth(self.update_j3d_preview.sizePolicy().hasHeightForWidth())
+        self.update_j3d_preview.setSizePolicy(sizePolicy1)
+        self.update_j3d_preview.setMaximumSize(QSize(30, 16777215))
+
+        self.horizontalLayout_2.addWidget(self.update_j3d_preview)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_2)
+
+        self.scrollArea = QScrollArea(self.j3d_sidebar)
+        self.scrollArea.setObjectName(u"scrollArea")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(5)
+        sizePolicy2.setHeightForWidth(self.scrollArea.sizePolicy().hasHeightForWidth())
+        self.scrollArea.setSizePolicy(sizePolicy2)
+        self.scrollArea.setMinimumSize(QSize(250, 0))
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollAreaWidgetContents = QWidget()
+        self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 357, 618))
+        self.verticalLayout_3 = QVBoxLayout(self.scrollAreaWidgetContents)
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+
+        self.verticalLayout_2.addWidget(self.scrollArea)
+
+        self.verticalLayout_2.setStretch(1, 1)
+        self.splitter.addWidget(self.j3d_sidebar)
+        self.verticalLayoutWidget = QWidget(self.splitter)
+        self.verticalLayoutWidget.setObjectName(u"verticalLayoutWidget")
+        self.verticalLayout_5 = QVBoxLayout(self.verticalLayoutWidget)
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
+        self.verticalLayout_5.setContentsMargins(0, 0, 0, 0)
+        self.j3dultra_error_area = QScrollArea(self.verticalLayoutWidget)
+        self.j3dultra_error_area.setObjectName(u"j3dultra_error_area")
+        sizePolicy3 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.j3dultra_error_area.sizePolicy().hasHeightForWidth())
+        self.j3dultra_error_area.setSizePolicy(sizePolicy3)
         self.j3dultra_error_area.setWidgetResizable(True)
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 378, 69))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 313, 69))
         self.verticalLayout_4 = QVBoxLayout(self.scrollAreaWidgetContents_2)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.verticalLayout_4.setContentsMargins(-1, 0, -1, 0)
@@ -96,61 +148,25 @@ class Ui_J3DTab(object):
 
         self.j3dultra_error_area.setWidget(self.scrollAreaWidgetContents_2)
 
-        self.verticalLayout_2.addWidget(self.j3dultra_error_area)
+        self.verticalLayout_5.addWidget(self.j3dultra_error_area)
 
-        self.horizontalLayout_2 = QHBoxLayout()
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.j3d_sidebar_label = QLabel(self.j3d_sidebar)
-        self.j3d_sidebar_label.setObjectName(u"j3d_sidebar_label")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.j3d_sidebar_label.sizePolicy().hasHeightForWidth())
-        self.j3d_sidebar_label.setSizePolicy(sizePolicy2)
-
-        self.horizontalLayout_2.addWidget(self.j3d_sidebar_label)
-
-        self.update_j3d_preview = QPushButton(self.j3d_sidebar)
-        self.update_j3d_preview.setObjectName(u"update_j3d_preview")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.update_j3d_preview.sizePolicy().hasHeightForWidth())
-        self.update_j3d_preview.setSizePolicy(sizePolicy3)
-        self.update_j3d_preview.setMaximumSize(QSize(40, 16777215))
-
-        self.horizontalLayout_2.addWidget(self.update_j3d_preview)
-
-
-        self.verticalLayout_2.addLayout(self.horizontalLayout_2)
-
-        self.scrollArea = QScrollArea(self.j3d_sidebar)
-        self.scrollArea.setObjectName(u"scrollArea")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.j3d_viewer = J3DViewer(self.verticalLayoutWidget)
+        self.j3d_viewer.setObjectName(u"j3d_viewer")
+        sizePolicy4 = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
         sizePolicy4.setHorizontalStretch(0)
         sizePolicy4.setVerticalStretch(5)
-        sizePolicy4.setHeightForWidth(self.scrollArea.sizePolicy().hasHeightForWidth())
-        self.scrollArea.setSizePolicy(sizePolicy4)
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollAreaWidgetContents = QWidget()
-        self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 378, 69))
-        self.verticalLayout_3 = QVBoxLayout(self.scrollAreaWidgetContents)
-        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        sizePolicy4.setHeightForWidth(self.j3d_viewer.sizePolicy().hasHeightForWidth())
+        self.j3d_viewer.setSizePolicy(sizePolicy4)
+        self.j3d_viewer.setMinimumSize(QSize(300, 300))
+        self.j3d_viewer.setFocusPolicy(Qt.ClickFocus)
 
-        self.verticalLayout_2.addWidget(self.scrollArea)
+        self.verticalLayout_5.addWidget(self.j3d_viewer)
 
-        self.verticalLayout_2.setStretch(0, 1)
-        self.verticalLayout_2.setStretch(3, 2)
+        self.splitter.addWidget(self.verticalLayoutWidget)
 
-        self.horizontalLayout.addWidget(self.j3d_sidebar)
+        self.verticalLayout.addWidget(self.splitter)
 
-        self.horizontalLayout.setStretch(0, 1)
-        self.horizontalLayout.setStretch(1, 2)
-
-        self.verticalLayout.addLayout(self.horizontalLayout)
-
+        self.verticalLayout.setStretch(1, 1)
 
         self.retranslateUi(J3DTab)
 
@@ -167,7 +183,8 @@ class Ui_J3DTab(object):
         ___qtreewidgetitem.setText(2, QCoreApplication.translate("J3DTab", u"Size", None));
         ___qtreewidgetitem.setText(1, QCoreApplication.translate("J3DTab", u"Name", None));
         ___qtreewidgetitem.setText(0, QCoreApplication.translate("J3DTab", u"Chunk Type", None));
-        self.j3dultra_error_label.setText(QCoreApplication.translate("J3DTab", u"No errors to display.", None))
         self.j3d_sidebar_label.setText(QCoreApplication.translate("J3DTab", u"Extra information will be displayed here as necessary.", None))
+        self.toggle_visibility.setText("")
+        self.j3dultra_error_label.setText(QCoreApplication.translate("J3DTab", u"No errors to display.", None))
     # retranslateUi
 

@@ -68,7 +68,6 @@ class BigIntSpinbox(QAbstractSpinBox):
     self._singleStep = abs(singleStep)
   
   def stepBy(self, steps: int):
-    print(f"step {steps}")
     new_val = self._value + steps*self._singleStep
     new_val = max(self._minimum, new_val)
     new_val = min(self._maximum, new_val)
