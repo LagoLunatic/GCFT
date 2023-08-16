@@ -24,10 +24,8 @@ try:
   import J3DUltra as ultra # type: ignore
   from J3DUltra import J3DLight # type: ignore
   J3DULTRA_INSTALLED = True
-  print("j3dultra is installed")
 except ImportError:
   J3DULTRA_INSTALLED = False
-  print("j3dultra not installed")
 
 REQUIRED_OPENGL_VERSION = (4, 5)
 
@@ -189,8 +187,6 @@ class J3DViewer(QOpenGLWidget):
     # TODO: preview hack edits should be made and saved in a seperate process (via multiprocessing).
     # that process can also try loading the model into j3dultra to check if it segfaults.
     self.j3d = self.get_preview_compatible_j3d(j3d_model)
-    
-    self.last_render_time = time.monotonic()
     
     if reset_camera:
       bbox_min, bbox_max = self.guesstimate_model_bbox(self.j3d)
