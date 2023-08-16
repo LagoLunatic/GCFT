@@ -80,6 +80,12 @@ class Ui_J3DTab(object):
 
         self.horizontalLayout_2.addWidget(self.j3d_sidebar_label)
 
+        self.toggle_visibility = QPushButton(self.j3d_sidebar)
+        self.toggle_visibility.setObjectName(u"toggle_visibility")
+        self.toggle_visibility.setMaximumSize(QSize(60, 16777215))
+
+        self.horizontalLayout_2.addWidget(self.toggle_visibility)
+
         self.update_j3d_preview = QPushButton(self.j3d_sidebar)
         self.update_j3d_preview.setObjectName(u"update_j3d_preview")
         sizePolicy1 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
@@ -87,7 +93,7 @@ class Ui_J3DTab(object):
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.update_j3d_preview.sizePolicy().hasHeightForWidth())
         self.update_j3d_preview.setSizePolicy(sizePolicy1)
-        self.update_j3d_preview.setMaximumSize(QSize(40, 16777215))
+        self.update_j3d_preview.setMaximumSize(QSize(30, 16777215))
 
         self.horizontalLayout_2.addWidget(self.update_j3d_preview)
 
@@ -105,7 +111,7 @@ class Ui_J3DTab(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 344, 618))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 357, 618))
         self.verticalLayout_3 = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
@@ -129,7 +135,7 @@ class Ui_J3DTab(object):
         self.j3dultra_error_area.setWidgetResizable(True)
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 319, 69))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 313, 69))
         self.verticalLayout_4 = QVBoxLayout(self.scrollAreaWidgetContents_2)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.verticalLayout_4.setContentsMargins(-1, 0, -1, 0)
@@ -178,6 +184,7 @@ class Ui_J3DTab(object):
         ___qtreewidgetitem.setText(1, QCoreApplication.translate("J3DTab", u"Name", None));
         ___qtreewidgetitem.setText(0, QCoreApplication.translate("J3DTab", u"Chunk Type", None));
         self.j3d_sidebar_label.setText(QCoreApplication.translate("J3DTab", u"Extra information will be displayed here as necessary.", None))
+        self.toggle_visibility.setText("")
         self.j3dultra_error_label.setText(QCoreApplication.translate("J3DTab", u"No errors to display.", None))
     # retranslateUi
 

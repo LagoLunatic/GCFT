@@ -5,6 +5,7 @@ import traceback
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
+from gcft_paths import ASSETS_PATH
 
 from gclib import fs_helpers as fs
 from gclib.bunfoe import BUNFOE
@@ -39,6 +40,8 @@ class J3DTab(BunfoeEditor):
       "TRK1": True,
     }
     
+    self.isolated_visibility = False
+    
     self.ui.export_j3d.setDisabled(True)
     
     self.ui.import_j3d.clicked.connect(self.import_j3d)
@@ -60,8 +63,15 @@ class J3DTab(BunfoeEditor):
     self.field_value_changed.connect(self.update_j3d_preview)
     self.ui.update_j3d_preview.clicked.connect(self.update_j3d_preview)
     self.ui.update_j3d_preview.setIcon(self.style().standardIcon(QStyle.SP_BrowserReload))
+    self.ui.toggle_visibility.clicked.connect(self.toggle_isolated_visibility)
+    self.icon_visible_all = QIcon(os.path.join(ASSETS_PATH, "visible_all.png"))
+    self.icon_visible_isolated = QIcon(os.path.join(ASSETS_PATH, "visible_isolated.png"))
+    self.ui.toggle_visibility.setIcon(self.icon_visible_all)
+    # This is just the max size, doesn't need to be exact.
+    self.ui.toggle_visibility.setIconSize(QSize(32, 8))
     
     # Make the splitter start out evenly split between all three widgets.
+    # TODO: the J3D preview column should be collapsed whenever the preview is not visible
     self.ui.splitter.setSizes([2**30, 2**30, 2**30])
   
   def import_j3d(self):
@@ -110,6 +120,7 @@ class J3DTab(BunfoeEditor):
     
     self.reload_j3d_chunks_tree()
     
+    self.hide_j3d_preview()
     self.try_show_model_preview(True)
     
     self.ui.export_j3d.setDisabled(False)
@@ -137,6 +148,9 @@ class J3DTab(BunfoeEditor):
   
   def reload_j3d_chunks_tree(self):
     self.ui.j3d_chunks_tree.clear()
+    
+    if self.isolated_visibility:
+      self.toggle_isolated_visibility(update_preview=False)
     
     self.tree_widget_item_to_object = {}
     
@@ -176,7 +190,9 @@ class J3DTab(BunfoeEditor):
       elif chunk.magic == "MAT3":
         for mat_index, material in enumerate(chunk.materials):
           mat_name = chunk.mat_names[mat_index]
-          self.make_tree_widget_item(material, chunk_item, ["", mat_name, ""])
+          mat_item = self.make_tree_widget_item(material, chunk_item, ["", mat_name, ""])
+          indirect = chunk.indirects[mat_index]
+          self.make_tree_widget_item(indirect, mat_item, ["", f"Indirect Texturing", ""])
       elif chunk.magic == "MDL3":
         for i, mdl_entry in enumerate(chunk.entries):
           mat_name = self.j3d.mat3.mat_names[i]
@@ -281,6 +297,9 @@ class J3DTab(BunfoeEditor):
       self.bunfoe_instance_selected(obj, "material")
     elif isinstance(obj, BUNFOE):
       self.bunfoe_instance_selected(obj)
+    
+    if self.isolated_visibility:
+      self.update_j3d_preview()
   
   def mdl_entry_selected(self, mdl_entry):
     layout = self.ui.scrollAreaWidgetContents.layout()
@@ -518,27 +537,68 @@ class J3DTab(BunfoeEditor):
     # Do a full reload in order to update texture size displayed in the UI.
     self.reload_j3d_chunks_tree()
     
-    self.try_show_model_preview(False)
+    self.update_j3d_preview()
     
     texture_index = self.j3d.tex1.textures.index(texture)
     texture_name = self.j3d.tex1.texture_names[texture_index]
     self.window().ui.statusbar.showMessage("Replaced %s." % texture_name, 3000)
   
   def try_show_model_preview(self, reset_camera=False):
-    self.ui.j3d_viewer.hide()
-    self.ui.j3dultra_error_area.hide()
-    
-    self.ui.j3d_viewer.load_model(self.j3d, reset_camera)
+    self.hide_j3d_preview()
+    self.ui.j3d_viewer.load_model(self.j3d, reset_camera, self.get_hidden_material_indexes())
   
   def update_j3d_preview(self):
     if self.j3d is None:
       return
+    
+    # TODO: implement copying just the instance, without having to serialize and deserialize it here.
+    # import cProfile, pstats
+    # profiler = cProfile.Profile()
+    # profiler.enable()
+    # profiler.disable()
     success = self.try_save_j3d()
+    # with open("profileresults.txt", "w") as f:
+    #   ps = pstats.Stats(profiler, stream=f).sort_stats("cumulative")
+    #   ps.print_stats()
     if not success:
       return
+    
     self.try_show_model_preview(False)
+  
+  def hide_j3d_preview(self):
+    self.ui.j3d_viewer.hide()
+    self.ui.j3dultra_error_area.hide()
   
   def display_j3d_preview_error(self, error: str):
     self.ui.j3dultra_error_area.show()
     self.ui.j3dultra_error_label.setText(error)
     self.ui.j3d_viewer.hide()
+  
+  def toggle_isolated_visibility(self, checked=None, update_preview=True):
+    self.isolated_visibility = not self.isolated_visibility
+    if self.isolated_visibility:
+      self.ui.toggle_visibility.setIcon(self.icon_visible_isolated)
+    else:
+      self.ui.toggle_visibility.setIcon(self.icon_visible_all)
+    if update_preview:
+      self.update_j3d_preview()
+  
+  def get_hidden_material_indexes(self):
+    indexes = []
+    if not self.isolated_visibility:
+      return indexes
+    
+    selected_items = self.ui.j3d_chunks_tree.selectedItems()
+    selected_mat_indexes = []
+    for item in selected_items:
+      if not isinstance(self.tree_widget_item_to_object.get(item), Material):
+        continue
+      mat_index = self.ui.j3d_chunks_tree.indexFromItem(item).row()
+      selected_mat_indexes.append(mat_index)
+    if not selected_mat_indexes:
+      return indexes
+    
+    for mat_index in range(len(self.j3d.mat3.materials)):
+      if mat_index not in selected_mat_indexes:
+        indexes.append(mat_index)
+    return indexes

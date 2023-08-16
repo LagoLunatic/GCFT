@@ -10,7 +10,7 @@ from gclib import fs_helpers as fs
 from gclib.bunfoe import BUNFOE, Field, fields
 
 from gcft_ui.custom_widgets import BigIntSpinbox
-from gclib.j3d import RGBA, Vector, Matrix4x4
+from gclib.j3d import RGBA, Vector, Matrix
 
 class BunfoeEditor(QWidget):
   field_value_changed = Signal()
@@ -49,6 +49,7 @@ class BunfoeEditor(QWidget):
     
     form_layout = self.add_all_bunfoe_fields_to_new_form_layout(instance, disabled=disabled)
     layout.addLayout(form_layout)
+    layout.addStretch(1)
     return form_layout
   
   def add_all_bunfoe_fields_to_new_form_layout(self, instance, disabled=False):
@@ -56,7 +57,6 @@ class BunfoeEditor(QWidget):
       return self.add_all_bunfoe_fields_to_new_box_layout(instance, disabled=disabled)
     
     form_layout = QFormLayout()
-    # form_layout.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
     
     for field in fields(instance):
       field_widget = self.make_widget_for_field(instance, field, disabled=disabled)
@@ -80,19 +80,18 @@ class BunfoeEditor(QWidget):
       
       pretty_field_name = self.prettify_name(field.name)
       field_label = QLabel(pretty_field_name)
-      # field_label.setMinimumWidth(100)
-      # field_label.setSizePolicy(QSizePolicy.Policy.Maximum, field_label.sizePolicy().verticalPolicy())
       field_layout.addWidget(field_label)
       
       if isinstance(field_widget, QWidget):
-        field_layout.addWidget(field_widget)#, alignment=Qt.AlignmentFlag.AlignLeft)
+        field_layout.addWidget(field_widget)
       elif isinstance(field_widget, QLayout):
-        field_layout.addLayout(field_widget)#, alignment=Qt.AlignmentFlag.AlignLeft)
+        field_layout.addLayout(field_widget)
       else:
         raise NotImplementedError
       
-      # field_layout.setStretch(0, 0)
-      # field_layout.setStretch(1, 1)
+      field_layout.addStretch(1)
+    
+    box_layout.addStretch(1)
     
     return box_layout
   
@@ -101,11 +100,16 @@ class BunfoeEditor(QWidget):
     box_layout = QHBoxLayout()
     
     show_indexes = True
-    if isinstance(instance, Matrix4x4):
+    if isinstance(instance, Matrix):
       show_indexes = False
     
     type_args = typing.get_args(field_type)
     for i, arg_type in enumerate(type_args):
+      arg_widget = self.make_widget_for_type(instance, arg_type, access_path + [('item', i)])
+      if arg_widget is None:
+        # TODO: placeholder "New" button
+        continue
+      
       column_layout = QVBoxLayout()
       box_layout.addLayout(column_layout)
       
@@ -119,8 +123,6 @@ class BunfoeEditor(QWidget):
         column_header_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         column_layout.addWidget(column_header_label, stretch=0)
       
-      arg_widget = self.make_widget_for_type(instance, arg_type, access_path + [('item', i)])
-      
       if isinstance(arg_widget, QWidget):
         column_layout.addWidget(arg_widget)
       elif isinstance(arg_widget, QLayout):
@@ -128,7 +130,9 @@ class BunfoeEditor(QWidget):
       else:
         raise NotImplementedError
       
-      column_layout.addStretch()
+      column_layout.addStretch(1)
+    
+    box_layout.addStretch(1)
     
     return box_layout
   
@@ -160,9 +164,9 @@ class BunfoeEditor(QWidget):
     if value is None:
       # TODO: we need to add some kind of placeholder button that, when clicked, creates a new
       # instance of the correct field type and adds it to the object.
-      placeholder = QPushButton("…")
-      placeholder.setMinimumWidth(5)
-      return placeholder
+      # placeholder = QPushButton("…")
+      # placeholder.setMinimumWidth(5)
+      return None
     
     if issubclass(field_type, int) and field_type in fs.PRIMITIVE_TYPE_TO_BYTE_SIZE:
       widget = self.make_spinbox_for_int(field_type, value)
@@ -275,7 +279,13 @@ class BunfoeEditor(QWidget):
       max_val -= 1 << (byte_size*8 - 1)
     spinbox.setRange(min_val, max_val)
     spinbox.setWrapping(True)
-    spinbox.setMinimumWidth(60)
+    
+    fm = QFontMetrics(QFont())
+    min_val_width = fm.horizontalAdvance(str(min_val))
+    max_val_width = fm.horizontalAdvance(str(max_val))
+    max_width = max(min_val_width, max_val_width)
+    spinbox.setMinimumWidth(max_width+23)
+    
     spinbox.setValue(value)
     spinbox.valueChanged.connect(self.spinbox_value_changed)
     return spinbox

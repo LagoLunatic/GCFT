@@ -87,6 +87,19 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="toggle_visibility">
+           <property name="maximumSize">
+            <size>
+             <width>60</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="update_j3d_preview">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -96,7 +109,7 @@
            </property>
            <property name="maximumSize">
             <size>
-             <width>40</width>
+             <width>30</width>
              <height>16777215</height>
             </size>
            </property>
@@ -126,7 +139,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>344</width>
+            <width>357</width>
             <height>618</height>
            </rect>
           </property>
@@ -154,7 +167,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>319</width>
+            <width>313</width>
             <height>69</height>
            </rect>
           </property>

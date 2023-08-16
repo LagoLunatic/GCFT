@@ -10,7 +10,7 @@ from PySide6.QtOpenGLWidgets import *
 
 from gcft_paths import ASSETS_PATH
 from gcft_ui.nav_camera import Camera
-from gclib.j3d import J3D
+from gclib.j3d import J3D, CullMode
 from gclib.bti import BTI
 from gclib.gx_enums import GXAttr
 from gclib import fs_helpers as fs
@@ -68,6 +68,7 @@ class J3DViewer(QOpenGLWidget):
     for key in self.KEY_TO_SPEED_MULTIPLIER:
       self.key_is_held[key] = False
     self.show_widgets = False # TODO remove or rewrite widgets
+    self.hidden_material_indexes = []
     
     self.base_cam_move_speed = self.BASE_CAMERA_MOVE_SPEED
     self.fovy = 45.0
@@ -158,7 +159,7 @@ class J3DViewer(QOpenGLWidget):
     glClearColor(0.25, 0.3, 0.4, 1.0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
   
-  def load_model(self, j3d_model: J3D, reset_camera=False):
+  def load_model(self, j3d_model: J3D, reset_camera=False, hidden_material_indexes=None):
     if not J3DULTRA_INSTALLED:
       return
     
@@ -169,10 +170,14 @@ class J3DViewer(QOpenGLWidget):
       self.error_showing_preview.emit(error_msg)
       return
     
-    self.j3d = self.get_preview_compatible_j3d(j3d_model)
-    # self.j3d = j3d_model
+    if hidden_material_indexes is None:
+      self.hidden_material_indexes = []
+    else:
+      self.hidden_material_indexes = hidden_material_indexes
     
-    self.last_render_time = time.monotonic()
+    # TODO: preview hack edits should be made and saved in a seperate process (via multiprocessing).
+    # that process can also try loading the model into j3dultra to check if it segfaults.
+    self.j3d = self.get_preview_compatible_j3d(j3d_model)
     
     if reset_camera:
       bbox_min, bbox_max = self.guesstimate_model_bbox(self.j3d)
@@ -222,6 +227,8 @@ class J3DViewer(QOpenGLWidget):
       self.error_showing_preview.emit(error_msg)
       self.hide()
       return
+    
+    self.last_render_time = time.monotonic()
     
     error_codes = []
     while (err := glGetError()) and err != GL_NO_ERROR:
@@ -277,11 +284,12 @@ class J3DViewer(QOpenGLWidget):
     return bbox_min, bbox_max
   
   def get_preview_compatible_j3d(self, orig_j3d: J3D) -> J3D:
-    # We have to save the original J3D for the chunks to its chunks to be reflected properly.
-    # Simply copying orig_j3d.data is not sufficient on its own.
-    orig_j3d.save()
+    # # We have to save the original J3D for the changes to its chunks to be reflected properly.
+    # # Simply copying orig_j3d.data is not sufficient on its own.
+    # orig_j3d.save()
+    # TODO: implement copying just the instance, without having to serialize and deserialize it here.
     hack_j3d = J3D(fs.make_copy_data(orig_j3d.data))
-    any_changes_made = False
+    chunks_modified = set()
     
     # Wind Waker has a hardcoded system where the textures that control toon shading are dynamically
     # replaced at runtime so they don't have to be packed into each model individually.
@@ -311,10 +319,23 @@ class J3DViewer(QOpenGLWidget):
         texture.image_data = fs.make_copy_data(replacement_bti.image_data)
         texture.palette_data = fs.make_copy_data(replacement_bti.palette_data)
         texture.save_header_changes()
-        any_changes_made = True
+        chunks_modified.add("TEX1")
     
-    if any_changes_made:
-      hack_j3d.save()
+    # Hack to simulate hiding certain materials.
+    # We simply set the cull mode for all materials we want to hide to "Cull All".
+    for mat_index in self.hidden_material_indexes:
+    # self.hidden_material_indexes.sort()
+    # for mat_index in reversed(self.hidden_material_indexes):
+      if "MAT3" not in hack_j3d.chunk_by_type:
+        continue
+      if mat_index >= len(hack_j3d.mat3.materials):
+        continue
+      hack_j3d.mat3.materials[mat_index].cull_mode = CullMode.Cull_All
+      # del hack_j3d.mat3.materials[mat_index]
+      chunks_modified.add("MAT3")
+    
+    if chunks_modified:
+      hack_j3d.save(only_chunks=chunks_modified)
       return hack_j3d
     else:
       return orig_j3d
