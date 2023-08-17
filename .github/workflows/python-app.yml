@@ -36,10 +36,9 @@ jobs:
       - name: Build PyJ3DUltra
         shell: cmd
         run: |
-          cd PyJ3DUltra
           vcpkg integrate install
-          cmake . -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake"
-          msbuild J3DUltraPy.sln /t:Build /property:Configuration=Release
+          cmake PyJ3DUltra -BPyJ3DUltra/build -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          msbuild PyJ3DUltra/build/J3DUltraPy.sln /t:Build /property:Configuration=Release
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -99,9 +98,8 @@ jobs:
         shell: bash -l {0}
       - name: Build PyJ3DUltra
         run: |
-          cd PyJ3DUltra
-          cmake .
-          make
+          cmake PyJ3DUltra -BPyJ3DUltra/build
+          make -C PyJ3DUltra/build
       - name: Install dependencies
         run: |
           conda install pip
@@ -148,9 +146,8 @@ jobs:
           architecture: ${{ matrix.architecture }}
       - name: Build PyJ3DUltra
         run: |
-          cd PyJ3DUltra
-          cmake .
-          make
+          cmake PyJ3DUltra -BPyJ3DUltra/build
+          make -C PyJ3DUltra/build
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
