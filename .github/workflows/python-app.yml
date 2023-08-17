@@ -38,7 +38,6 @@ jobs:
         shell: bash
     
     env:
-      CMAKE_TOOLCHAIN_FILE: ${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
       ACTIONS_ALLOW_UNSECURE_COMMANDS: true
       MACOSX_DEPLOYMENT_TARGET: 10.15
     
