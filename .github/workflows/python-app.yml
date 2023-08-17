@@ -11,108 +11,36 @@ on:
         description: Version
 
 jobs:
-  windows:
-    runs-on: windows-latest
+  build:
     strategy:
       matrix:
-        architecture: [ x64 ]
-
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-          architecture: ${{ matrix.architecture }}
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
-          pip install PyInstaller
-      - name: Set variables
-        id: vars
-        run: |
-          USER_INPUT_VERSION=${{ github.event.inputs.version }}
-          TXT_VERSION=$(cat version.txt)
-          GIT_SHA_SHORT=$(git rev-parse --short=7 ${{ github.sha }})
-          echo "full_version=${USER_INPUT_VERSION:-$TXT_VERSION-$GIT_SHA_SHORT}" >> $GITHUB_OUTPUT
+        include:
+          - name: Windows Build
+            architecture: x64
+            os: windows-latest
+            artifact: windows
+            upload_path_suffix: '/*'
+          - name: MacOS Build
+            os: macos-latest
+            architecture: x64
+            artifact: macos
+            upload_path_suffix: '.zip'
+          - name: Linux Build
+            os: ubuntu-20.04
+            architecture: x64
+            artifact: linux
+            upload_path_suffix: '/*'
+    
+    runs-on: ${{ matrix.os }}
+    
+    defaults:
+      run:
         shell: bash
-      - name: Set version
-        id: version
-        run: |
-          echo ${{ steps.vars.outputs.full_version }} > version.txt
-      - name: Build Windows App
-        run: python -m PyInstaller --log-level=WARN gcft.spec
-      - name: Bundle Windows App
-        run: python build.py
-      - name: Upload Windows App
-        uses: actions/upload-artifact@v3
-        with:
-          name: gcft-${{ steps.vars.outputs.full_version }}-windows-${{ matrix.architecture }}
-          path: dist/release_archive_${{ steps.vars.outputs.full_version }}_${{ matrix.architecture }}/*
-
-  macos:
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        architecture: [ x64 ]
-
+    
     env:
       ACTIONS_ALLOW_UNSECURE_COMMANDS: true
-      MACOSX_DEPLOYMENT_TARGET: 10.9
-
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-      - name: Set up Miniconda
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          python-version: '3.11'
-          architecture: ${{ matrix.architecture }}
-          miniconda-version: latest
-          auto-update-conda: true
-      - run: |
-          conda create -qyf -n py311 python=3.11 wheel -c anaconda
-          conda activate py311
-        shell: bash -l {0}
-      - name: Install dependencies
-        run: |
-          conda install pip
-          python3 -m pip install -r requirements.txt
-          pip install PyInstaller
-        shell: bash -l {0}
-      - name: Set variables
-        id: vars
-        run: |
-          USER_INPUT_VERSION=${{ github.event.inputs.version }}
-          TXT_VERSION=$(cat version.txt)
-          GIT_SHA_SHORT=$(git rev-parse --short=7 ${{ github.sha }})
-          echo "full_version=${USER_INPUT_VERSION:-$TXT_VERSION-$GIT_SHA_SHORT}" >> $GITHUB_OUTPUT
-      - name: Set version
-        id: version
-        run: |
-          echo ${{ steps.vars.outputs.full_version }} > version.txt
-      - name: Build MacOS App
-        run: python3 -m PyInstaller --log-level=WARN gcft.spec
-        shell: bash -l {0}
-      - name: Bundle MacOS App
-        run: python3 build.py
-        shell: bash -l {0}
-      - name: Upload MacOS App
-        uses: actions/upload-artifact@v3
-        with:
-          name: gcft-${{ steps.vars.outputs.full_version }}-macos-${{ matrix.architecture }}
-          path: dist/release_archive_${{ steps.vars.outputs.full_version }}_${{ matrix.architecture }}.zip
-
-  linux:
-    runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        architecture: [ x64 ]
-
+      MACOSX_DEPLOYMENT_TARGET: 10.15
+    
     steps:
       - uses: actions/checkout@v3
         with:
@@ -122,15 +50,42 @@ jobs:
         with:
           python-version: '3.11'
           architecture: ${{ matrix.architecture }}
+          cache: 'pip' # Cache all pip dependencies
+      - name: Add msbuild to PATH
+        if: runner.os == 'Windows'
+        uses: microsoft/setup-msbuild@v1.1
+      - name: Setup cmake
+        uses: lukka/get-cmake@latest
+      - name: Setup vcpkg
+        if: runner.os == 'Windows'
+        uses: lukka/run-vcpkg@v11.1
+        with:
+          vcpkgGitCommitId: 'ad46340bfce415333d6a2139592c22a499fb0df0'
+          vcpkgDirectory: '${{ github.workspace }}/vcpkg'
+          vcpkgJsonGlob: '**/PyJ3DUltra/vcpkg.json'
+      - name: Integrate vcpkg and install dependencies
+        if: runner.os == 'Windows'
+        run: |
+          vcpkg integrate install
+      - name: Run CMake
+        uses: lukka/run-cmake@v3
+        with:
+          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+          cmakeListsTxtPath: '${{ github.workspace }}/PyJ3DUltra/CMakeLists.txt'
+          buildDirectory: '${{ github.workspace }}/PyJ3DUltra/build'
+          useVcpkgToolchainFile: true
+          buildWithCMakeArgs: --config Release
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
-          pip install PyInstaller
+          python -m pip install PyInstaller
       - name: Install any missing Qt dependencies
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y qtbase5-dev
+          sudo apt-get install -y libxcb-cursor0
       - name: Set variables
         id: vars
         run: |
@@ -142,12 +97,12 @@ jobs:
         id: version
         run: |
           echo ${{ steps.vars.outputs.full_version }} > version.txt
-      - name: Build Linux App
+      - name: Build Python App
         run: python -m PyInstaller --log-level=WARN gcft.spec
-      - name: Bundle Linux App
+      - name: Bundle Python App
         run: python build.py
-      - name: Upload Linux App
+      - name: Upload Python App
         uses: actions/upload-artifact@v3
         with:
-          name: gcft-${{ steps.vars.outputs.full_version }}-linux-${{ matrix.architecture }}
-          path: dist/release_archive_${{ steps.vars.outputs.full_version }}_${{ matrix.architecture }}/*
+          name: gcft-${{ steps.vars.outputs.full_version }}-${{ matrix.artifact }}-${{ matrix.architecture }}
+          path: dist/release_archive_${{ steps.vars.outputs.full_version }}_${{ matrix.architecture }}${{ matrix.upload_path_suffix }}

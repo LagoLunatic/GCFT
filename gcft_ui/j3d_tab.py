@@ -569,6 +569,14 @@ class J3DTab(BunfoeEditor):
     self.ui.j3d_viewer.hide()
     self.ui.j3dultra_error_area.hide()
   
+  def update_j3d_preview(self):
+    if self.j3d is None:
+      return
+    success = self.try_save_j3d()
+    if not success:
+      return
+    self.try_show_model_preview(False)
+  
   def display_j3d_preview_error(self, error: str):
     self.ui.j3dultra_error_area.show()
     self.ui.j3dultra_error_label.setText(error)

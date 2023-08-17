@@ -138,8 +138,17 @@ class J3DViewer(QOpenGLWidget):
     if not J3DULTRA_INSTALLED:
       return False
     
-    opengl_version = self.get_supported_opengl_version()
-    if opengl_version < REQUIRED_OPENGL_VERSION:
+    try:
+      opengl_version = self.get_supported_opengl_version()
+    except GLError as e:
+      opengl_version = None
+    
+    if opengl_version is None:
+      error_msg = "Cannot show J3D previews, there was an error when checking your " + \
+        "graphics driver's supported OpenGL version."
+      self.error_showing_preview.emit(error_msg)
+      return False
+    elif opengl_version < REQUIRED_OPENGL_VERSION:
       curr_version_str = f"{opengl_version[0]}.{opengl_version[1]}"
       req_version_str = f"{REQUIRED_OPENGL_VERSION[0]}.{REQUIRED_OPENGL_VERSION[1]}"
       error_msg = f"Your graphics driver only supports OpenGL {curr_version_str}.\n" + \
