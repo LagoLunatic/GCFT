@@ -2,7 +2,7 @@ name: Build
 
 on:
   push:
-    branches: [ master, j3dultra-actions ]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
   workflow_dispatch:
@@ -37,7 +37,7 @@ jobs:
         shell: cmd
         run: |
           vcpkg integrate install
-          cmake PyJ3DUltra -BPyJ3DUltra/build -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          cmake PyJ3DUltra -BPyJ3DUltra/build -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
           msbuild PyJ3DUltra/build/J3DUltraPy.sln /t:Build /property:Configuration=Release
       - name: Install dependencies
         run: |
