@@ -33,6 +33,7 @@ jobs:
         with:
           vcpkgGitCommitId: 'ad46340bfce415333d6a2139592c22a499fb0df0'
           vcpkgDirectory: '${{ github.workspace }}/vcpkg'
+          vcpkgJsonGlob: '**/PyJ3DUltra/vcpkg.json'
       - name: Build PyJ3DUltra
         shell: cmd
         run: |
