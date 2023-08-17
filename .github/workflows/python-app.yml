@@ -35,6 +35,11 @@ jobs:
           vcpkgGitCommitId: 'ad46340bfce415333d6a2139592c22a499fb0df0'
           vcpkgDirectory: '${{ github.workspace }}/vcpkg'
           vcpkgJsonGlob: '**/PyJ3DUltra/vcpkg.json'
+      - name: Cache PyJ3DUltra build
+        uses: actions/cache@v3
+        with:
+          path: PyJ3DUltra/build
+          key: ${{ runner.os }}-${{ matrix.architecture }}
       - name: Build PyJ3DUltra
         shell: cmd
         run: |
@@ -99,6 +104,11 @@ jobs:
           conda create -qyf -n py311 python=3.11 wheel -c anaconda
           conda activate py311
         shell: bash -l {0}
+      - name: Cache PyJ3DUltra build
+        uses: actions/cache@v3
+        with:
+          path: PyJ3DUltra/build
+          key: ${{ runner.os }}-${{ matrix.architecture }}
       - name: Build PyJ3DUltra
         run: |
           cmake PyJ3DUltra -BPyJ3DUltra/build
@@ -148,6 +158,11 @@ jobs:
           python-version: '3.11'
           architecture: ${{ matrix.architecture }}
           cache: 'pip' # Cache all pip dependencies
+      - name: Cache PyJ3DUltra build
+        uses: actions/cache@v3
+        with:
+          path: PyJ3DUltra/build
+          key: ${{ runner.os }}-${{ matrix.architecture }}
       - name: Build PyJ3DUltra
         run: |
           cmake PyJ3DUltra -BPyJ3DUltra/build
