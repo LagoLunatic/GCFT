@@ -16,7 +16,11 @@ jobs:
     strategy:
       matrix:
         architecture: [ x64 ]
-
+    
+    defaults:
+      run:
+        shell: bash
+    
     steps:
       - uses: actions/checkout@v3
         with:
@@ -41,7 +45,6 @@ jobs:
           path: PyJ3DUltra/build
           key: ${{ runner.os }}-${{ matrix.architecture }}
       - name: Build PyJ3DUltra
-        shell: cmd
         run: |
           vcpkg integrate install
           cmake PyJ3DUltra -BPyJ3DUltra/build -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
@@ -59,7 +62,6 @@ jobs:
           GIT_SHA_SHORT=$(git rev-parse --short=7 ${{ github.sha }})
           echo "full_version=${USER_INPUT_VERSION:-$TXT_VERSION-$GIT_SHA_SHORT}" >> $GITHUB_OUTPUT
           echo "lowercase_os=${${{ runner.os }},,}" >> $GITHUB_OUTPUT
-        shell: bash
       - name: Set version
         id: version
         run: |
@@ -73,17 +75,21 @@ jobs:
         with:
           name: gcft-${{ steps.vars.outputs.full_version }}-${{ steps.vars.outputs.lowercase_os }}-${{ matrix.architecture }}
           path: dist/release_archive_${{ steps.vars.outputs.full_version }}_${{ matrix.architecture }}/*
-
+  
   macos:
     runs-on: macos-latest
     strategy:
       matrix:
         architecture: [ x64 ]
-
+    
+    defaults:
+      run:
+        shell: bash
+    
     env:
       ACTIONS_ALLOW_UNSECURE_COMMANDS: true
       MACOSX_DEPLOYMENT_TARGET: 10.15
-
+    
     steps:
       - uses: actions/checkout@v3
         with:
@@ -129,13 +135,17 @@ jobs:
         with:
           name: gcft-${{ steps.vars.outputs.full_version }}-${{ steps.vars.outputs.lowercase_os }}-${{ matrix.architecture }}
           path: dist/release_archive_${{ steps.vars.outputs.full_version }}_${{ matrix.architecture }}.zip
-
+  
   linux:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
         architecture: [ x64 ]
-
+  
+    defaults:
+      run:
+        shell: bash
+    
     steps:
       - uses: actions/checkout@v3
         with:
