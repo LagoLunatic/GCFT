@@ -58,19 +58,20 @@ jobs:
           TXT_VERSION=$(cat version.txt)
           GIT_SHA_SHORT=$(git rev-parse --short=7 ${{ github.sha }})
           echo "full_version=${USER_INPUT_VERSION:-$TXT_VERSION-$GIT_SHA_SHORT}" >> $GITHUB_OUTPUT
+          echo "lowercase_os=${${{ runner.os }},,}" >> $GITHUB_OUTPUT
         shell: bash
       - name: Set version
         id: version
         run: |
           echo ${{ steps.vars.outputs.full_version }} > version.txt
-      - name: Build Windows App
+      - name: Build Python App
         run: python -m PyInstaller --log-level=WARN gcft.spec
-      - name: Bundle Windows App
+      - name: Bundle Python App
         run: python build.py
-      - name: Upload Windows App
+      - name: Upload Python App
         uses: actions/upload-artifact@v3
         with:
-          name: gcft-${{ steps.vars.outputs.full_version }}-windows-${{ matrix.architecture }}
+          name: gcft-${{ steps.vars.outputs.full_version }}-${{ steps.vars.outputs.lowercase_os }}-${{ matrix.architecture }}
           path: dist/release_archive_${{ steps.vars.outputs.full_version }}_${{ matrix.architecture }}/*
 
   macos:
@@ -93,6 +94,10 @@ jobs:
           python-version: '3.11'
           architecture: ${{ matrix.architecture }}
           cache: 'pip' # Cache all pip dependencies
+      - name: Alias Python
+        run: |
+          echo "alias python='python3'" >>~/.bash_profile
+        if: runner.os == 'macOS'
       - name: Cache PyJ3DUltra build
         uses: actions/cache@v3
         with:
@@ -104,9 +109,9 @@ jobs:
           make -C PyJ3DUltra/build
       - name: Install dependencies
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install -r requirements.txt
-          python3 -m pip install PyInstaller
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install PyInstaller
         shell: bash -l {0}
       - name: Set variables
         id: vars
@@ -115,20 +120,21 @@ jobs:
           TXT_VERSION=$(cat version.txt)
           GIT_SHA_SHORT=$(git rev-parse --short=7 ${{ github.sha }})
           echo "full_version=${USER_INPUT_VERSION:-$TXT_VERSION-$GIT_SHA_SHORT}" >> $GITHUB_OUTPUT
+          echo "lowercase_os=${${{ runner.os }},,}" >> $GITHUB_OUTPUT
       - name: Set version
         id: version
         run: |
           echo ${{ steps.vars.outputs.full_version }} > version.txt
-      - name: Build MacOS App
-        run: python3 -m PyInstaller --log-level=WARN gcft.spec
+      - name: Build Python App
+        run: python -m PyInstaller --log-level=WARN gcft.spec
         shell: bash -l {0}
-      - name: Bundle MacOS App
-        run: python3 build.py
+      - name: Bundle Python App
+        run: python build.py
         shell: bash -l {0}
-      - name: Upload MacOS App
+      - name: Upload Python App
         uses: actions/upload-artifact@v3
         with:
-          name: gcft-${{ steps.vars.outputs.full_version }}-macos-${{ matrix.architecture }}
+          name: gcft-${{ steps.vars.outputs.full_version }}-${{ steps.vars.outputs.lowercase_os }}-${{ matrix.architecture }}
           path: dist/release_archive_${{ steps.vars.outputs.full_version }}_${{ matrix.architecture }}.zip
 
   linux:
@@ -158,14 +164,15 @@ jobs:
           make -C PyJ3DUltra/build
       - name: Install dependencies
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install -r requirements.txt
-          python3 -m pip install PyInstaller
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install PyInstaller
       - name: Install any missing Qt dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y qtbase5-dev
           sudo apt-get install -y libxcb-cursor0
+        if: runner.os == 'Linux'
       - name: Set variables
         id: vars
         run: |
@@ -173,16 +180,17 @@ jobs:
           TXT_VERSION=$(cat version.txt)
           GIT_SHA_SHORT=$(git rev-parse --short=7 ${{ github.sha }})
           echo "full_version=${USER_INPUT_VERSION:-$TXT_VERSION-$GIT_SHA_SHORT}" >> $GITHUB_OUTPUT
+          echo "lowercase_os=${${{ runner.os }},,}" >> $GITHUB_OUTPUT
       - name: Set version
         id: version
         run: |
           echo ${{ steps.vars.outputs.full_version }} > version.txt
-      - name: Build Linux App
-        run: python3 -m PyInstaller --log-level=WARN gcft.spec
-      - name: Bundle Linux App
-        run: python3 build.py
-      - name: Upload Linux App
+      - name: Build Python App
+        run: python -m PyInstaller --log-level=WARN gcft.spec
+      - name: Bundle Python App
+        run: python build.py
+      - name: Upload Python App
         uses: actions/upload-artifact@v3
         with:
-          name: gcft-${{ steps.vars.outputs.full_version }}-linux-${{ matrix.architecture }}
+          name: gcft-${{ steps.vars.outputs.full_version }}-${{ steps.vars.outputs.lowercase_os }}-${{ matrix.architecture }}
           path: dist/release_archive_${{ steps.vars.outputs.full_version }}_${{ matrix.architecture }}/*
