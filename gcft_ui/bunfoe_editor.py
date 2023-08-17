@@ -1,7 +1,7 @@
-
 import typing
 from enum import Enum
 import colorsys
+from collections import defaultdict
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
@@ -15,12 +15,34 @@ from gclib.j3d import RGBA, Vector, Matrix
 class BunfoeEditor(QWidget):
   field_value_changed = Signal()
   
+  def __init__(self):
+    super().__init__()
+    
+    # Cache automatically created widgets so they can be reused after the first time, which saves
+    # time compared to repeatedly calling the constructors to get new widgets.
+    self.unused_widgets_by_field_type: dict[type, list[QWidget]] = defaultdict(list)
+  
   def clear_layout_recursive(self, layout: QLayout):
     while layout.count():
       item = layout.takeAt(0)
+      
       widget = item.widget()
       if widget:
-        widget.deleteLater()
+        if isinstance(widget, QComboBox) or isinstance(widget, BigIntSpinbox) or isinstance(widget, QDoubleSpinBox):
+          field_type = widget.property('field_type')
+          widget.setProperty('field_owner', None)
+          widget.setProperty('access_path', None)
+          if isinstance(widget, QComboBox):
+            widget.currentIndexChanged.disconnect(self.combobox_value_changed)
+          elif isinstance(widget, BigIntSpinbox) or isinstance(widget, QDoubleSpinBox):
+            widget.valueChanged.disconnect(self.spinbox_value_changed)
+          else:
+            raise NotImplementedError
+          widget.hide()
+          self.unused_widgets_by_field_type[field_type].append(widget)
+        else:
+          widget.deleteLater()
+      
       sublayout = item.layout()
       if sublayout:
         self.clear_layout_recursive(sublayout)
@@ -244,16 +266,22 @@ class BunfoeEditor(QWidget):
     self.field_value_changed.emit()
   
   def make_combobox_for_enum(self, field_type: typing.Type, value):
-    combobox = QComboBox()
-    
-    for i, enum_value in enumerate(field_type):
-      pretty_name = self.prettify_name(enum_value.name, title=False)
-      combobox.addItem(pretty_name)
-      combobox.setItemData(i, enum_value)
+    unused_comboboxes_for_type = self.unused_widgets_by_field_type[field_type]
+    if unused_comboboxes_for_type:
+      combobox = unused_comboboxes_for_type.pop()
+      combobox.show()
+    else:
+      combobox = QComboBox()
+      for i, enum_value in enumerate(field_type):
+        pretty_name = self.prettify_name(enum_value.name, title=False)
+        combobox.addItem(pretty_name)
+        combobox.setItemData(i, enum_value)
     
     if len(field_type) > 0:
       index_of_value = list(field_type).index(value)
       combobox.setCurrentIndex(index_of_value)
+    else:
+      combobox.setCurrentIndex(-1)
     
     combobox.currentIndexChanged.connect(self.combobox_value_changed)
     
@@ -268,33 +296,44 @@ class BunfoeEditor(QWidget):
     self.field_value_changed.emit()
   
   def make_spinbox_for_int(self, field_type, value):
-    assert field_type in fs.PRIMITIVE_TYPE_TO_BYTE_SIZE
-    assert issubclass(field_type, int)
-    spinbox = BigIntSpinbox()
-    min_val = 0
-    byte_size = fs.PRIMITIVE_TYPE_TO_BYTE_SIZE[field_type]
-    max_val = (1 << byte_size*8) - 1
-    if fs.PRIMITIVE_TYPE_IS_SIGNED[field_type]:
-      min_val -= 1 << (byte_size*8 - 1)
-      max_val -= 1 << (byte_size*8 - 1)
-    spinbox.setRange(min_val, max_val)
-    spinbox.setWrapping(True)
-    
-    fm = QFontMetrics(QFont())
-    min_val_width = fm.horizontalAdvance(str(min_val))
-    max_val_width = fm.horizontalAdvance(str(max_val))
-    max_width = max(min_val_width, max_val_width)
-    spinbox.setMinimumWidth(max_width+23)
+    unused_spinboxes_for_type = self.unused_widgets_by_field_type[field_type]
+    if unused_spinboxes_for_type:
+      spinbox = unused_spinboxes_for_type.pop()
+      spinbox.show()
+    else:
+      assert field_type in fs.PRIMITIVE_TYPE_TO_BYTE_SIZE
+      assert issubclass(field_type, int)
+      spinbox = BigIntSpinbox()
+      min_val = 0
+      byte_size = fs.PRIMITIVE_TYPE_TO_BYTE_SIZE[field_type]
+      max_val = (1 << byte_size*8) - 1
+      if fs.PRIMITIVE_TYPE_IS_SIGNED[field_type]:
+        min_val -= 1 << (byte_size*8 - 1)
+        max_val -= 1 << (byte_size*8 - 1)
+      spinbox.setRange(min_val, max_val)
+      spinbox.setWrapping(True)
+      
+      fm = QFontMetrics(QFont())
+      min_val_width = fm.horizontalAdvance(str(min_val))
+      max_val_width = fm.horizontalAdvance(str(max_val))
+      max_width = max(min_val_width, max_val_width)
+      spinbox.setMinimumWidth(max_width+23)
     
     spinbox.setValue(value)
     spinbox.valueChanged.connect(self.spinbox_value_changed)
     return spinbox
   
   def make_spinbox_for_float(self, field_type, value):
-    spinbox = QDoubleSpinBox()
-    assert field_type == float
-    spinbox.setRange(float('-inf'), float('inf'))
-    spinbox.setMinimumWidth(60)
+    unused_spinboxes_for_type = self.unused_widgets_by_field_type[field_type]
+    if unused_spinboxes_for_type:
+      spinbox = unused_spinboxes_for_type.pop()
+      spinbox.show()
+    else:
+      spinbox = QDoubleSpinBox()
+      assert field_type == float
+      spinbox.setRange(float('-inf'), float('inf'))
+      spinbox.setMinimumWidth(60)
+    
     spinbox.setValue(value)
     spinbox.valueChanged.connect(self.spinbox_value_changed)
     return spinbox

@@ -279,6 +279,10 @@ class J3DTab(BunfoeEditor):
     item = selected_items[0]
     obj = self.tree_widget_item_to_object.get(item)
     
+    # import cProfile, pstats
+    # profiler = cProfile.Profile()
+    # profiler.enable()
+    
     if isinstance(obj, MDLEntry):
       self.mdl_entry_selected(obj)
     elif isinstance(obj, AnimationKeyframe):
@@ -297,6 +301,11 @@ class J3DTab(BunfoeEditor):
       self.bunfoe_instance_selected(obj, "material")
     elif isinstance(obj, BUNFOE):
       self.bunfoe_instance_selected(obj)
+    
+    # profiler.disable()
+    # with open("profileresults.txt", "w") as f:
+    #   ps = pstats.Stats(profiler, stream=f).sort_stats("cumulative")
+    #   ps.print_stats()
     
     if self.isolated_visibility:
       self.update_j3d_preview()
@@ -552,14 +561,7 @@ class J3DTab(BunfoeEditor):
       return
     
     # TODO: implement copying just the instance, without having to serialize and deserialize it here.
-    # import cProfile, pstats
-    # profiler = cProfile.Profile()
-    # profiler.enable()
-    # profiler.disable()
     success = self.try_save_j3d()
-    # with open("profileresults.txt", "w") as f:
-    #   ps = pstats.Stats(profiler, stream=f).sort_stats("cumulative")
-    #   ps.print_stats()
     if not success:
       return
     
