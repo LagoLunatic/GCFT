@@ -18,17 +18,17 @@ jobs:
           - name: Windows Build
             architecture: x64
             os: windows-latest
-            artifact: windows-x64
+            artifact: windows
             upload_path_suffix: '/*'
           - name: MacOS Build
             os: macos-latest
             architecture: x64
-            artifact: macos-x64
+            artifact: macos
             upload_path_suffix: '.zip'
           - name: Linux Build
             os: ubuntu-20.04
             architecture: x64
-            artifact: linux-x64
+            artifact: linux
             upload_path_suffix: '/*'
     
     runs-on: ${{ matrix.os }}
