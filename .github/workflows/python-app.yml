@@ -50,7 +50,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
-          pip install PyInstaller
+          python -m pip install PyInstaller
       - name: Set variables
         id: vars
         run: |
@@ -104,8 +104,9 @@ jobs:
           make -C PyJ3DUltra/build
       - name: Install dependencies
         run: |
+          python3 -m pip install --upgrade pip
           python3 -m pip install -r requirements.txt
-          pip install PyInstaller
+          python3 -m pip install PyInstaller
         shell: bash -l {0}
       - name: Set variables
         id: vars
@@ -157,9 +158,9 @@ jobs:
           make -C PyJ3DUltra/build
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
-          pip install PyInstaller
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt
+          python3 -m pip install PyInstaller
       - name: Install any missing Qt dependencies
         run: |
           sudo apt-get update
@@ -177,9 +178,9 @@ jobs:
         run: |
           echo ${{ steps.vars.outputs.full_version }} > version.txt
       - name: Build Linux App
-        run: python -m PyInstaller --log-level=WARN gcft.spec
+        run: python3 -m PyInstaller --log-level=WARN gcft.spec
       - name: Bundle Linux App
-        run: python build.py
+        run: python3 build.py
       - name: Upload Linux App
         uses: actions/upload-artifact@v3
         with:
