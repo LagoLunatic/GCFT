@@ -62,8 +62,6 @@ class AssetDumper:
       
       files_checked += 1
       yield(file_path, files_checked)
-    
-    yield("Done", -1)
   
   def dump_all_textures_in_rarc(self, rarc: RARC, out_dir, display_path_prefix=None):
     files_checked = 0
@@ -100,8 +98,6 @@ class AssetDumper:
       
       files_checked += 1
       yield(display_path, files_checked)
-    
-    yield("Done", -1)
   
   def dump_all_textures_in_j3d_file(self, j3d_file, out_dir):
     if not hasattr(j3d_file, "tex1"):
