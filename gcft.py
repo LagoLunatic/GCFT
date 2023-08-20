@@ -33,16 +33,17 @@ except ImportError:
     # Versions of Windows before Windows 7 don't support SetCurrentProcessExplicitAppUserModelID, so just swallow the error.
     pass
 
-qApp = QApplication(sys.argv)
-
-# Have a timer updated frequently so keyboard interrupts always work.
-# 499 milliseconds seems to be the maximum value that works here, but use 100 to be safe.
-timer = QTimer()
-timer.start(100)
-timer.timeout.connect(lambda: None)
-
-window = GCFTWindow()
-if len(sys.argv) == 2:
-  file_path = sys.argv[1]
-  window.open_file_by_path(file_path)
-sys.exit(qApp.exec())
+if __name__ == "__main__":
+  qApp = QApplication(sys.argv)
+  
+  # Have a timer updated frequently so keyboard interrupts always work.
+  # 499 milliseconds seems to be the maximum value that works here, but use 100 to be safe.
+  timer = QTimer()
+  timer.start(100)
+  timer.timeout.connect(lambda: None)
+  
+  window = GCFTWindow()
+  if len(sys.argv) == 2:
+    file_path = sys.argv[1]
+    window.open_file_by_path(file_path)
+  sys.exit(qApp.exec())
