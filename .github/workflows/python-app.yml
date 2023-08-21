@@ -97,6 +97,9 @@ jobs:
       - name: Activate venv
         run: |
           source ./.venv/bin/activate || source ./.venv/Scripts/activate
+          which python
+          which pip
+          pip list -v
       - name: Install venv dependencies
         if: steps.cache-venv.outputs.cache-hit != 'true'
         run: |
