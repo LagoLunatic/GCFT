@@ -36,7 +36,7 @@ def get_hidden_imports():
 import platform
 def get_binaries():
   if platform.system() == "Windows":
-    return [('./PyJ3DUltra/build/Release/J3DUltra*.pyd', '.')]
+    return [('./PyJ3DUltra/build/J3DUltra*.pyd', '.')]
   if platform.system() == "Darwin":
     return [('./PyJ3DUltra/build/J3DUltra*.so', '.')]
   if platform.system() == "Linux":
