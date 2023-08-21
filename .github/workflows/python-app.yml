@@ -38,7 +38,6 @@ jobs:
         shell: bash
     
     env:
-      SCCACHE_GHA_ENABLED: "true"
       ACTIONS_ALLOW_UNSECURE_COMMANDS: true
       MACOSX_DEPLOYMENT_TARGET: 10.15
     
@@ -46,8 +45,11 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
-      - name: Run sccache-cache
-        uses: mozilla-actions/sccache-action@v0.0.3
+      - name: Load PyJ3DUltra ccache
+        uses: hendrikmuhs/ccache-action@main
+        with:
+          variant: sccache
+          key: ${{ matrix.os }}
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
