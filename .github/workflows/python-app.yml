@@ -97,6 +97,7 @@ jobs:
       - name: Activate venv
         run: |
           source ./.venv/bin/activate || source ./.venv/Scripts/activate
+          echo "PATH=$PATH" >> $GITHUB_ENV
           which python
           which pip
           pip list -v
