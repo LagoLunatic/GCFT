@@ -96,7 +96,7 @@ jobs:
           python -m venv ./.venv
       - name: Activate venv
         run: |
-          source ./.venv/Scripts/activate || source ./.venv/bin/activate
+          source ./.venv/bin/activate || source ./.venv/Scripts/activate
       - name: Install venv dependencies
         if: steps.cache-venv.outputs.cache-hit != 'true'
         run: |
