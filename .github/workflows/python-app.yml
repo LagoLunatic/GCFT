@@ -51,6 +51,7 @@ jobs:
         with:
           variant: sccache
           key: ${{ matrix.os }}
+          append-timestamp: false
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
