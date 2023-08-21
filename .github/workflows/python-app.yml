@@ -84,14 +84,21 @@ jobs:
           useVcpkgToolchainFile: true
           cmakeAppendedArgs: '-G Ninja'
           buildWithCMakeArgs: --config Release
-      - name: Cache Python dependency installs
-        id: cache-python
+      - name: Cache venv
+        id: cache-venv
         uses: actions/cache@v3
         with:
-          path: ${{ env.pythonLocation }}
-          key: ${{ runner.os }}-${{ env.pythonLocation }}-${{ hashFiles('**/requirements*.txt') }}
-      - name: Install Python dependencies
-        if: steps.cache-python.outputs.cache-hit != 'true'
+          path: ./.venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements*.txt') }}
+      - name: Create venv
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        run: |
+          python -m venv ./.venv
+      - name: Activate venv
+        run: |
+          source ./.venv/Scripts/activate || source ./.venv/bin/activate
+      - name: Install venv dependencies
+        if: steps.cache-venv.outputs.cache-hit != 'true'
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements_full.txt
