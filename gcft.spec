@@ -34,13 +34,18 @@ def get_hidden_imports():
   return import_modules
 
 import platform
+import glob
 def get_binaries():
-  if platform.system() == "Windows":
-    return [('./PyJ3DUltra/build/J3DUltra*.pyd', '.')]
-  if platform.system() == "Darwin":
+  if platform.system() in ["Darwin", "Linux"]:
     return [('./PyJ3DUltra/build/J3DUltra*.so', '.')]
-  if platform.system() == "Linux":
-    return [('./PyJ3DUltra/build/J3DUltra*.so', '.')]
+  assert platform.system() == "Windows"
+  for glob_pattern in [
+    './PyJ3DUltra/build/J3DUltra*.pyd',
+    './PyJ3DUltra/build/Debug/J3DUltra*.pyd',
+    './PyJ3DUltra/build/Release/J3DUltra*.pyd',
+  ]:
+    if glob.glob(glob_pattern):
+      return [(glob_pattern, '.')]
 
 
 a = Analysis(['gcft.py'],
