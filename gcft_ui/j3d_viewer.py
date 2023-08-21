@@ -293,9 +293,9 @@ class J3DViewer(QOpenGLWidget):
     return bbox_min, bbox_max
   
   def get_preview_compatible_j3d(self, orig_j3d: J3D) -> J3D:
-    # # We have to save the original J3D for the changes to its chunks to be reflected properly.
-    # # Simply copying orig_j3d.data is not sufficient on its own.
-    # orig_j3d.save()
+    # We have to save the original J3D for the changes to its chunks to be reflected properly.
+    # Simply copying orig_j3d.data is not sufficient on its own.
+    orig_j3d.save()
     # TODO: implement copying just the instance, without having to serialize and deserialize it here.
     hack_j3d = J3D(fs.make_copy_data(orig_j3d.data))
     chunks_modified = set()

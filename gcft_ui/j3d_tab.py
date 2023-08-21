@@ -9,13 +9,14 @@ from gcft_paths import ASSETS_PATH
 
 from gclib import fs_helpers as fs
 from gclib.bunfoe import BUNFOE
-from gclib.gx_enums import GXAttr, GXCompTypeColor, GXCompTypeNumber
+from gclib import gx_enums as GX
+from gclib.gx_enums import GXAttr
 from gclib.j3d import J3D, J3DChunk, Joint, Material, Shape, BPRegister, VertexFormat, XFRegister
 from gclib.j3d import MDLEntry, AnimationKeyframe, ColorAnimation, UVAnimation
 from gclib.bti import BTI
 
 from gcft_ui.uic.ui_j3d_tab import Ui_J3DTab
-from gcft_ui.bunfoe_editor import BunfoeEditor
+from gcft_ui.bunfoe_editor import BunfoeEditor, BunfoeWidget
 
 class J3DTab(BunfoeEditor):
   def __init__(self):
@@ -120,7 +121,6 @@ class J3DTab(BunfoeEditor):
     
     self.reload_j3d_chunks_tree()
     
-    self.hide_j3d_preview()
     self.try_show_model_preview(True)
     
     self.ui.export_j3d.setDisabled(False)
@@ -302,13 +302,26 @@ class J3DTab(BunfoeEditor):
     elif isinstance(obj, BUNFOE):
       self.bunfoe_instance_selected(obj)
     
+    if self.isolated_visibility:
+      self.update_j3d_preview()
+    
     # profiler.disable()
     # with open("profileresults.txt", "w") as f:
     #   ps = pstats.Stats(profiler, stream=f).sort_stats("cumulative")
     #   ps.print_stats()
+  
+  def bunfoe_instance_selected(self, instance, text=None, disabled=False):
+    if text:
+      self.ui.j3d_sidebar_label.setText(f"Showing {text}.")
     
-    if self.isolated_visibility:
-      self.update_j3d_preview()
+    layout: QBoxLayout = self.ui.scrollAreaWidgetContents.layout()
+    
+    bunfoe_editor_widget = super().setup_editor_widget_for_bunfoe_instance(instance, disabled=disabled)
+    
+    layout.addWidget(bunfoe_editor_widget)
+    layout.addStretch(1)
+    
+    return bunfoe_editor_widget
   
   def mdl_entry_selected(self, mdl_entry):
     layout = self.ui.scrollAreaWidgetContents.layout()
@@ -411,36 +424,54 @@ class J3DTab(BunfoeEditor):
     layout.addItem(spacer)
   
   def vertex_format_selected(self, vtx_fmt: VertexFormat):
-    layout: QBoxLayout = self.ui.scrollAreaWidgetContents.layout()
-    
     # TODO: j3dultra segfaults if you try changing, say, an attribute type from tex0 to tex1 for
     # example (many other cases too). need to disable editing these.
     
-    form_layout = self.bunfoe_instance_selected(vtx_fmt, "vertex format")
+    widget = self.bunfoe_instance_selected(vtx_fmt, "vertex format")
     
-    # Need to fix the component type combobox as it can be two different enum types.
-    # TODO: also remake this every time vtx_fmt.is_color_attr gets changed
-    if vtx_fmt.is_color_attr:
-      comp_type = GXCompTypeColor
-    else:
-      comp_type = GXCompTypeNumber
-    new_combobox = self.make_widget_for_type(vtx_fmt, comp_type, [('attr', 'component_type')])
-    for i in range(form_layout.rowCount()):
-      field_item = form_layout.itemAt(i, QFormLayout.ItemRole.FieldRole)
-      old_widget = field_item.widget()
-      if old_widget.property('access_path') == [('attr', '_component_type')]:
-        label_text = form_layout.itemAt(i, QFormLayout.ItemRole.LabelRole).widget().text()
-        form_layout.removeRow(i)
-        form_layout.insertRow(i, label_text, new_combobox)
-        break
+    for i in range(widget.layout().rowCount()):
+      field_item = widget.layout().itemAt(i, QFormLayout.ItemRole.FieldRole)
+      field_widget = field_item.widget()
+      if field_widget.property('access_path') == [('attr', 'attribute_type')]:
+        combobox: QComboBox = field_widget
+        combobox.currentIndexChanged.connect(self.update_vertex_format_component_type_combobox)
     
-    if vtx_fmt.attribute_type == GXAttr.NULL:
+    self.update_vertex_format_component_type_combobox()
+  
+  def update_vertex_format_component_type_combobox(self):
+    # The component type combobox needs to have the text of its items updated dynamically depending
+    # on what the currently selected attribute type is.
+    # If a color attribute type is selected, display the duplicate enum names for color types.
+    # Otherwise, display the duplicate enum names for number types.
+    
+    layout = self.ui.scrollAreaWidgetContents.layout()
+    if layout.count() <= 0:
+      return
+    bunfoe_widget = layout.itemAt(0).widget()
+    if not isinstance(bunfoe_widget, BunfoeWidget):
       return
     
-    # attribute_list = self.j3d.vtx1.attributes[vtx_fmt.attribute_type]
-    # for attr in attribute_list:
-    #   layout.addWidget(QPushButton())
-  
+    vtx_fmt = bunfoe_widget.property('field_owner')
+    assert isinstance(vtx_fmt, VertexFormat)
+    
+    if vtx_fmt.is_color_attr:
+      # Colors are at the end of GX.CompType's members, so go through the list forwards, so that the
+      # later members overwrite the earlier ones in the dict.
+      enum_value_order = {v: k for k, v in GX.CompType.__members__.items()}
+    else:
+      # Numbers are at the start of GX.CompType's members, so go through the list backwards, so that
+      # the earlier members overwrite the later ones in the dict.
+      enum_value_order = {v: k for k, v in reversed(GX.CompType.__members__.items())}
+    
+    for i in range(bunfoe_widget.layout().rowCount()):
+      field_item = bunfoe_widget.layout().itemAt(i, QFormLayout.ItemRole.FieldRole)
+      field_widget = field_item.widget()
+      if field_widget.property('access_path') == [('attr', 'component_type')]:
+        combobox = field_widget
+        for i in range(combobox.count()):
+          enum_value = combobox.itemData(i)
+          pretty_name = self.prettify_name(enum_value_order[enum_value], title=False)
+          combobox.setItemText(i, pretty_name)
   
   
   def export_j3d_by_path(self, j3d_path):
@@ -553,7 +584,7 @@ class J3DTab(BunfoeEditor):
     self.window().ui.statusbar.showMessage("Replaced %s." % texture_name, 3000)
   
   def try_show_model_preview(self, reset_camera=False):
-    self.hide_j3d_preview()
+    self.ui.j3dultra_error_area.hide()
     self.ui.j3d_viewer.load_model(self.j3d, reset_camera, self.get_hidden_material_indexes())
   
   def update_j3d_preview(self):
@@ -567,15 +598,8 @@ class J3DTab(BunfoeEditor):
     
     self.try_show_model_preview(False)
   
-  def hide_j3d_preview(self):
-    self.ui.j3d_viewer.hide()
-    self.ui.j3dultra_error_area.hide()
-  
   def update_j3d_preview(self):
     if self.j3d is None:
-      return
-    success = self.try_save_j3d()
-    if not success:
       return
     self.try_show_model_preview(False)
   
