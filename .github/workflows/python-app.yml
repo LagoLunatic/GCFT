@@ -50,7 +50,7 @@ jobs:
         with:
           python-version: '3.11'
           architecture: ${{ matrix.architecture }}
-          cache: 'pip' # Cache all pip dependencies
+          cache: 'pip' # Cache all pip dependency downloads
       - name: Get PyJ3DUltra submodule status for cache
         run: |
           git submodule status ./PyJ3DUltra > pyj3dultra_submodule_status.txt
@@ -84,11 +84,17 @@ jobs:
           useVcpkgToolchainFile: true
           cmakeAppendedArgs: '-G Ninja'
           buildWithCMakeArgs: --config Release
+      - name: Cache Python dependency installs
+        id: cache-python
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.os }}-${{ env.pythonLocation }}-${{ hashFiles('**/requirements*.txt') }}
       - name: Install Python dependencies
+        if: steps.cache-python.outputs.cache-hit != 'true'
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
-          python -m pip install PyInstaller
       - name: Install any missing Qt dependencies
         if: runner.os == 'Linux'
         run: |
