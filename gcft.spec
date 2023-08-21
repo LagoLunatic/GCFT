@@ -46,6 +46,7 @@ def get_binaries():
   ]:
     if glob.glob(glob_pattern):
       return [(glob_pattern, '.')]
+  raise Exception("Could not find Windows PyJ3DUltra executable")
 
 
 a = Analysis(['gcft.py'],

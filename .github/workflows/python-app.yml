@@ -45,6 +45,10 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+      - name: Update ccache and ninja
+        if: runner.os == 'Windows'
+        run: |
+          choco upgrade ccache ninja
       - name: Load PyJ3DUltra ccache
         uses: hendrikmuhs/ccache-action@main
         with:
