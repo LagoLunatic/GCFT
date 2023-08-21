@@ -38,6 +38,7 @@ jobs:
         shell: bash
     
     env:
+      SCCACHE_GHA_ENABLED: "true"
       ACTIONS_ALLOW_UNSECURE_COMMANDS: true
       MACOSX_DEPLOYMENT_TARGET: 10.15
     
@@ -45,10 +46,8 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
-      - name: Load PyJ3DUltra ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ${{ matrix.os }}
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.3
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
@@ -78,7 +77,7 @@ jobs:
           cmakeListsTxtPath: '${{ github.workspace }}/PyJ3DUltra/CMakeLists.txt'
           buildDirectory: '${{ github.workspace }}/PyJ3DUltra/build'
           useVcpkgToolchainFile: true
-          cmakeAppendedArgs: '-D CMAKE_C_COMPILER_LAUNCHER=ccache -D CMAKE_CXX_COMPILER_LAUNCHER=ccache'
+          cmakeAppendedArgs: '-D CMAKE_C_COMPILER_LAUNCHER=sccache -D CMAKE_CXX_COMPILER_LAUNCHER=sccache'
           buildWithCMakeArgs: --config Release
       - name: Install Python dependencies
         run: |
