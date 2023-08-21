@@ -45,42 +45,44 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
-      - name: Update ccache
-        if: runner.os == 'Windows'
-        run: |
-          choco upgrade ccache
-      - name: Load PyJ3DUltra ccache
-        uses: hendrikmuhs/ccache-action@main
-        with:
-          key: ${{ matrix.os }}
-          append-timestamp: false
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
           architecture: ${{ matrix.architecture }}
           cache: 'pip' # Cache all pip dependencies
+      - name: Get PyJ3DUltra submodule status for cache
+        run: |
+          git submodule status ./PyJ3DUltra > pyj3dultra_submodule_status.txt
+      - name: Load PyJ3DUltra ccache
+        id: cache-pyj3dultra
+        uses: actions/cache@v3
+        with:
+          path: '${{ github.workspace }}/PyJ3DUltra/build'
+          key: pyj3dultra-${{ runner.os }}-${{ hashFiles('pyj3dultra_submodule_status.txt') }}
       - name: Setup cmake
+        if: steps.cache-pyj3dultra.outputs.cache-hit != 'true'
         uses: lukka/get-cmake@latest
       - name: Setup vcpkg
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && steps.cache-pyj3dultra.outputs.cache-hit != 'true'
         uses: lukka/run-vcpkg@v11.1
         with:
           vcpkgGitCommitId: 'ad46340bfce415333d6a2139592c22a499fb0df0'
           vcpkgDirectory: '${{ github.workspace }}/vcpkg'
           vcpkgJsonGlob: '**/PyJ3DUltra/vcpkg.json'
       - name: Integrate vcpkg
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && steps.cache-pyj3dultra.outputs.cache-hit != 'true'
         run: |
           vcpkg integrate install
       - name: Run CMake
+        if: steps.cache-pyj3dultra.outputs.cache-hit != 'true'
         uses: lukka/run-cmake@v3
         with:
           cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
           cmakeListsTxtPath: '${{ github.workspace }}/PyJ3DUltra/CMakeLists.txt'
           buildDirectory: '${{ github.workspace }}/PyJ3DUltra/build'
           useVcpkgToolchainFile: true
-          cmakeAppendedArgs: '-G Ninja -D CMAKE_C_COMPILER_LAUNCHER=ccache -D CMAKE_CXX_COMPILER_LAUNCHER=ccache'
+          cmakeAppendedArgs: '-G Ninja'
           buildWithCMakeArgs: --config Release
       - name: Install Python dependencies
         run: |
