@@ -16,8 +16,8 @@ jobs:
       matrix:
         include:
           - name: Windows Build
-            architecture: x64
             os: windows-latest
+            architecture: x64
             artifact: windows
             upload_path_suffix: '/*'
           - name: MacOS Build
@@ -45,6 +45,10 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+      - name: Load PyJ3DUltra ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ matrix.os }}
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
@@ -74,8 +78,9 @@ jobs:
           cmakeListsTxtPath: '${{ github.workspace }}/PyJ3DUltra/CMakeLists.txt'
           buildDirectory: '${{ github.workspace }}/PyJ3DUltra/build'
           useVcpkgToolchainFile: true
+          cmakeAppendedArgs: '-D CMAKE_C_COMPILER_LAUNCHER=ccache -D CMAKE_CXX_COMPILER_LAUNCHER=ccache'
           buildWithCMakeArgs: --config Release
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
