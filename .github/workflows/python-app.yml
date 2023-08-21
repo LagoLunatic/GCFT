@@ -54,7 +54,6 @@ jobs:
         with:
           key: ${{ matrix.os }}
           append-timestamp: false
-          verbose: 2
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
