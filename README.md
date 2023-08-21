@@ -67,10 +67,10 @@ On Windows, you should first [install vcpkg](https://vcpkg.io/en/getting-started
 Then run the following commands from the GCFT directory (assuming you installed vcpkg to `C:/vcpkg`):  
 ```
 cmake PyJ3DUltra -BPyJ3DUltra/build -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
-msbuild PyJ3DUltra/build/J3DUltraPy.sln /t:Build /property:Configuration=Debug
+cmake --build PyJ3DUltra/build
 ```
 On Mac or Linux, instead run the following commands from the GCFT directory:  
 ```
 cmake PyJ3DUltra -BPyJ3DUltra/build
-make -C PyJ3DUltra/build
+cmake --build PyJ3DUltra/build
 ```
