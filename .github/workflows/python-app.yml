@@ -38,6 +38,7 @@ jobs:
         shell: bash
     
     env:
+      SCCACHE_GHA_ENABLED: true
       ACTIONS_ALLOW_UNSECURE_COMMANDS: true
       MACOSX_DEPLOYMENT_TARGET: 10.15
     
