@@ -1,5 +1,6 @@
 #!/usr/bin/python3.11
 
+import traceback
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
@@ -35,6 +36,16 @@ except ImportError:
 
 if __name__ == "__main__":
   qApp = QApplication(sys.argv)
+  
+  def show_unhandled_exception(excepttype, exception, tb):
+    sys.__excepthook__(excepttype, exception, tb)
+    error_message_title = "Encountered an unhandled error"
+    stack_trace = traceback.format_exception(excepttype, exception, tb)
+    error_message = "GCFT encountered an unhandled error.\n"
+    error_message += "Please report this issue with a screenshot of this message.\n"
+    error_message += "\n".join(stack_trace)
+    QMessageBox.critical(None, error_message_title, error_message)
+  sys.excepthook = show_unhandled_exception
   
   # Have a timer updated frequently so keyboard interrupts always work.
   # 499 milliseconds seems to be the maximum value that works here, but use 100 to be safe.
