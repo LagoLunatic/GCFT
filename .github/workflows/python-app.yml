@@ -54,7 +54,7 @@ jobs:
       - name: Get PyJ3DUltra submodule status for cache
         run: |
           git submodule status ./PyJ3DUltra > pyj3dultra_submodule_status.txt
-      - name: Load PyJ3DUltra ccache
+      - name: Cache PyJ3DUltra
         id: cache-pyj3dultra
         uses: actions/cache@v3
         with:
