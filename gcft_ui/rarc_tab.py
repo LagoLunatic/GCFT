@@ -584,7 +584,7 @@ class RARCTab(QWidget):
     j3d_name = os.path.splitext(file_entry.name)[0]
     
     data = fs.make_copy_data(file_entry.data)
-    self.j3d_tab.load_j3d_anim_by_data(data, j3d_name)
+    self.j3d_tab.load_anim_by_data(data, j3d_name)
     
     self.window().set_tab_by_name("J3D Files")
   
