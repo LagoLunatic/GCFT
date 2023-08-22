@@ -10,9 +10,16 @@ from gcft_paths import ASSETS_PATH
 from gclib import fs_helpers as fs
 from gclib.bunfoe import BUNFOE
 from gclib import gx_enums as GX
-from gclib.gx_enums import GXAttr
-from gclib.j3d import J3D, J3DChunk, Joint, Material, Shape, BPRegister, VertexFormat, XFRegister
-from gclib.j3d import MDLEntry, AnimationKeyframe, ColorAnimation, UVAnimation
+from gclib.j3d import J3D
+from gclib.jchunk import JChunk
+from gclib.j3d_chunks.vtx1 import VertexFormat
+from gclib.j3d_chunks.jnt1 import Joint
+from gclib.j3d_chunks.shp1 import Shape
+from gclib.j3d_chunks.mat3 import Material
+from gclib.animation import AnimationKeyframe
+from gclib.j3d_chunks.mdl3 import MDLEntry, BPRegister, XFRegister
+from gclib.j3d_chunks.trk1 import ColorAnimation
+from gclib.j3d_chunks.ttk1 import UVAnimation
 from gclib.bti import BTI
 
 from gcft_ui.uic.ui_j3d_tab import Ui_J3DTab
@@ -231,7 +238,7 @@ class J3DTab(BunfoeEditor):
           self.make_tree_widget_item(shape, chunk_item, ["", shape_index_str, ""])
       elif chunk.magic == "VTX1":
         for vtx_fmt in chunk.vertex_formats:
-          if vtx_fmt.attribute_type == GXAttr.NULL:
+          if vtx_fmt.attribute_type == GX.Attr.NULL:
             vtx_fmt_size_str = ""
           else:
             vtx_fmt_size = vtx_fmt.component_size * vtx_fmt.component_count * len(chunk.attributes[vtx_fmt.attribute_type])
@@ -258,12 +265,12 @@ class J3DTab(BunfoeEditor):
   
   def item_expanded(self, item):
     obj = self.tree_widget_item_to_object.get(item)
-    if isinstance(obj, J3DChunk):
+    if isinstance(obj, JChunk):
       self.chunk_type_is_expanded[obj.magic] = True
   
   def item_collapsed(self, item):
     obj = self.tree_widget_item_to_object.get(item)
-    if isinstance(obj, J3DChunk):
+    if isinstance(obj, JChunk):
       self.chunk_type_is_expanded[obj.magic] = False
   
   def widget_item_selected(self):
@@ -455,13 +462,13 @@ class J3DTab(BunfoeEditor):
     assert isinstance(vtx_fmt, VertexFormat)
     
     if vtx_fmt.is_color_attr:
-      # Colors are at the end of GX.CompType's members, so go through the list forwards, so that the
+      # Colors are at the end of GX.ComponentType's members, so go through the list forwards, so that the
       # later members overwrite the earlier ones in the dict.
-      enum_value_order = {v: k for k, v in GX.CompType.__members__.items()}
+      enum_value_order = {v: k for k, v in GX.ComponentType.__members__.items()}
     else:
-      # Numbers are at the start of GX.CompType's members, so go through the list backwards, so that
+      # Numbers are at the start of GX.ComponentType's members, so go through the list backwards, so that
       # the earlier members overwrite the later ones in the dict.
-      enum_value_order = {v: k for k, v in reversed(GX.CompType.__members__.items())}
+      enum_value_order = {v: k for k, v in reversed(GX.ComponentType.__members__.items())}
     
     for i in range(bunfoe_widget.layout().rowCount()):
       field_item = bunfoe_widget.layout().itemAt(i, QFormLayout.ItemRole.FieldRole)

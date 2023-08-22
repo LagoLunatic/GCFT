@@ -9,7 +9,7 @@ from gclib import fs_helpers as fs
 from gclib.bunfoe import BUNFOE, Field, fields
 
 from gcft_ui.custom_widgets import BigIntSpinbox
-from gclib.j3d import RGBA, Vector, Matrix
+from gclib.bunfoe_types import Vector, Matrix, RGBA
 
 class BunfoeWidget(QWidget):
   pass

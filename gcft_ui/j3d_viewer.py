@@ -10,9 +10,9 @@ from PySide6.QtOpenGLWidgets import *
 
 from gcft_paths import ASSETS_PATH
 from gcft_ui.nav_camera import Camera
-from gclib.j3d import J3D, CullMode
+from gclib.j3d import J3D
 from gclib.bti import BTI
-from gclib.gx_enums import GXAttr
+import gclib.gx_enums as GX
 from gclib import fs_helpers as fs
 
 import numpy as np
@@ -284,7 +284,7 @@ class J3DViewer(QOpenGLWidget):
       # vertex coordinates. This is hacky and inaccurate because it doesn't take rigging into
       # account, so certain vertices will appear near the origin instead of near their joints.
       # TODO: Try to improve this hack in the future by looking at rigging.
-      vertices = j3d_model.vtx1.attributes[GXAttr.Position]
+      vertices = j3d_model.vtx1.attributes[GX.Attr.Position]
       bbox_min = np.min(vertices, axis=0)
       bbox_max = np.max(vertices, axis=0)
       aabb_diag_len = np.linalg.norm(bbox_max - bbox_min)
@@ -339,7 +339,7 @@ class J3DViewer(QOpenGLWidget):
         continue
       if mat_index >= len(hack_j3d.mat3.materials):
         continue
-      hack_j3d.mat3.materials[mat_index].cull_mode = CullMode.Cull_All
+      hack_j3d.mat3.materials[mat_index].cull_mode = GX.CullMode.Cull_All
       # del hack_j3d.mat3.materials[mat_index]
       chunks_modified.add("MAT3")
     
