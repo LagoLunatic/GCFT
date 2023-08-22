@@ -374,7 +374,8 @@ class J3DViewer(QOpenGLWidget):
       light_col = [1, 0, 0, 1]
       angle_atten = [1, 0, 0]
       dist_atten = [1, 0, 0]
-      light = J3DLight(light_pos, light_dir, light_col, angle_atten, dist_atten)
+      follow_camera = False
+      light = J3DLight(light_pos, light_dir, light_col, angle_atten, dist_atten, follow_camera)
       self.lights.append(light)
       
       for i in range(1, 8):
@@ -383,7 +384,8 @@ class J3DViewer(QOpenGLWidget):
         light_col = [0, 0, 1, 0]
         angle_atten = [1, 0, 0]
         dist_atten = [1, 0, 0]
-        light = J3DLight(light_pos, light_dir, light_col, angle_atten, dist_atten)
+        follow_camera = False
+        light = J3DLight(light_pos, light_dir, light_col, angle_atten, dist_atten, follow_camera)
         self.lights.append(light)
     else:
       # Plain default lighting.
@@ -396,7 +398,8 @@ class J3DViewer(QOpenGLWidget):
       angle_atten = [x*0.5 for x in angle_atten]
       dist_atten = [1, 0, 0]
       dist_atten = [x*0.8 for x in dist_atten]
-      light = J3DLight(light_pos, light_dir, light_col, angle_atten, dist_atten)
+      follow_camera = False
+      light = J3DLight(light_pos, light_dir, light_col, angle_atten, dist_atten, follow_camera)
       self.lights.append(light)
       
       for i in range(1, 8):
@@ -409,7 +412,8 @@ class J3DViewer(QOpenGLWidget):
         angle_atten = [x*0.5 for x in angle_atten]
         dist_atten = [1, 0, 0]
         dist_atten = [x*0.8 for x in dist_atten]
-        light = J3DLight(light_pos, light_dir, light_col, angle_atten, dist_atten)
+        follow_camera = False
+        light = J3DLight(light_pos, light_dir, light_col, angle_atten, dist_atten, follow_camera)
         self.lights.append(light)
     
     for i, light in enumerate(self.lights):

@@ -6,7 +6,8 @@
     "-o", "${resourceDirname}${pathSeparator}uic${pathSeparator}ui_${resourceBasenameNoExtension}.py",
   ],
   "git.ignoredRepositories": [
-    "PyJ3DUltra",
+    "PyJ3DUltra/J3DUltra",
+    "PyJ3DUltra/pybind11",
   ],
   "search.exclude": {
     "PyJ3DUltra": true,
