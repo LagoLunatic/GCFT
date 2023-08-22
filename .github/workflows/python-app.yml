@@ -84,12 +84,6 @@ jobs:
           useVcpkgToolchainFile: true
           cmakeAppendedArgs: '-G Ninja'
           buildWithCMakeArgs: --config Release
-      - name: Cache PyInstaller build
-        id: cache-pyinstaller
-        uses: actions/cache@v3
-        with:
-          path: ./build
-          key: ${{ runner.os }}-pyinstaller-build
       - name: Cache venv
         id: cache-venv
         uses: actions/cache@v3
