@@ -68,6 +68,7 @@ class RARCTab(QWidget):
     self.ui.actionReplaceRARCImage.triggered.connect(self.replace_image_in_rarc)
     self.ui.actionOpenRARCJ3D.triggered.connect(self.open_j3d_in_rarc)
     self.ui.actionReplaceRARCJ3D.triggered.connect(self.replace_j3d_in_rarc)
+    self.ui.actionLoadJ3DAnim.triggered.connect(self.load_j3d_anim)
   
   
   def import_rarc(self):
@@ -446,7 +447,18 @@ class RARCTab(QWidget):
         menu = QMenu(self)
         
         basename, file_ext = os.path.splitext(file.name)
+        image_selected = False
+        j3d_selected = False
+        j3d_anim_selected = False
         if file_ext == ".bti":
+          image_selected = True
+        elif file_ext in [".bdl", ".bmd"]:
+          j3d_selected = True
+        elif file_ext in [".bmt", ".btk", ".bck", ".brk", ".btp"]:
+          j3d_selected = True
+          j3d_anim_selected = True
+        
+        if image_selected:
           menu.addAction(self.ui.actionOpenRARCImage)
           self.ui.actionOpenRARCImage.setData(file)
           
@@ -456,7 +468,16 @@ class RARCTab(QWidget):
             self.ui.actionReplaceRARCImage.setDisabled(True)
           else:
             self.ui.actionReplaceRARCImage.setDisabled(False)
-        elif file_ext in [".bdl", ".bmd", ".bmt", ".btk", ".bck", ".brk", ".btp"]:
+        
+        if j3d_anim_selected:
+          menu.addAction(self.ui.actionLoadJ3DAnim)
+          self.ui.actionLoadJ3DAnim.setData(file)
+          if not self.j3d_tab.model_loaded:
+            self.ui.actionLoadJ3DAnim.setDisabled(True)
+          else:
+            self.ui.actionLoadJ3DAnim.setDisabled(False)
+        
+        if j3d_selected:
           menu.addAction(self.ui.actionOpenRARCJ3D)
           self.ui.actionOpenRARCJ3D.setData(file)
           
@@ -556,6 +577,16 @@ class RARCTab(QWidget):
     self.update_file_size_and_compression_in_ui(file_entry)
     
     self.window().ui.statusbar.showMessage("Replaced %s." % file_entry.name, 3000)
+  
+  def load_j3d_anim(self):
+    file_entry = self.ui.actionLoadJ3DAnim.data()
+    
+    j3d_name = os.path.splitext(file_entry.name)[0]
+    
+    data = fs.make_copy_data(file_entry.data)
+    self.j3d_tab.load_j3d_anim_by_data(data, j3d_name)
+    
+    self.window().set_tab_by_name("J3D Files")
   
   def add_file_to_rarc_by_path(self, file_path):
     parent_node = self.ui.actionAddRARCFile.data()

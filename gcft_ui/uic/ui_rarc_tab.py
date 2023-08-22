@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'rarc_tab.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.0
+## Created by: Qt User Interface Compiler version 6.5.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -49,6 +49,9 @@ class Ui_RARCTab(object):
         self.actionExtractAllFilesFromRARCFolder.setObjectName(u"actionExtractAllFilesFromRARCFolder")
         self.actionReplaceAllFilesInRARCFolder = QAction(RARCTab)
         self.actionReplaceAllFilesInRARCFolder.setObjectName(u"actionReplaceAllFilesInRARCFolder")
+        self.actionLoadJ3DAnim = QAction(RARCTab)
+        self.actionLoadJ3DAnim.setObjectName(u"actionLoadJ3DAnim")
+        self.actionLoadJ3DAnim.setMenuRole(QAction.NoRole)
         self.verticalLayout = QVBoxLayout(RARCTab)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout = QHBoxLayout()
@@ -137,6 +140,7 @@ class Ui_RARCTab(object):
         self.actionReplaceRARCJ3D.setText(QCoreApplication.translate("RARCTab", u"Replace J3D", None))
         self.actionExtractAllFilesFromRARCFolder.setText(QCoreApplication.translate("RARCTab", u"Extract All Files From Folder", None))
         self.actionReplaceAllFilesInRARCFolder.setText(QCoreApplication.translate("RARCTab", u"Replace All Files in Folder", None))
+        self.actionLoadJ3DAnim.setText(QCoreApplication.translate("RARCTab", u"Load J3D Animation", None))
         self.import_rarc.setText(QCoreApplication.translate("RARCTab", u"Import RARC", None))
         self.replace_all_files_in_rarc.setText(QCoreApplication.translate("RARCTab", u"Replace All Files in RARC", None))
         self.create_rarc.setText(QCoreApplication.translate("RARCTab", u"Create New RARC", None))

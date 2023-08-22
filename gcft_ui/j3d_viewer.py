@@ -80,6 +80,7 @@ class J3DViewer(QOpenGLWidget):
     self.base_center = np.zeros(3)
     self.aspect = 1.0
     self.model = None
+    self.color_anim = None
     self.camera = Camera(
       distance=self.base_cam_dist,
       pitch=self.base_pitch, yaw=self.base_yaw,
@@ -230,6 +231,7 @@ class J3DViewer(QOpenGLWidget):
     if not self.enable_j3dultra:
       return
     
+    self.unload_anims()
     self.model = ultra.loadModel(data=fs.read_all_bytes(self.j3d.data))
     if self.model is None:
       error_msg = "Failed to load J3D model preview."
@@ -243,8 +245,8 @@ class J3DViewer(QOpenGLWidget):
     while (err := glGetError()) and err != GL_NO_ERROR:
       error_codes.append(err)
     if error_codes:
-      self.model = None
-      self.hide()
+      # TODO: make this a separate func called reset
+      self.unload_model()
       error_msg = f"Encountered OpenGL error(s) when trying to render a J3D preview:\n"
       error_msg += "\n".join(f"Error code {err}: {gluErrorString(err).decode('ansi')}" for err in error_codes)
       self.error_showing_preview.emit(error_msg)
@@ -254,6 +256,14 @@ class J3DViewer(QOpenGLWidget):
     
     self.update()
     self.show()
+  
+  def unload_model(self):
+    self.model = None
+    self.unload_anims()
+    self.hide()
+  
+  def unload_anims(self):
+    self.color_anim = None
   
   def guesstimate_model_bbox(self, j3d_model: J3D) -> tuple[np.ndarray, np.ndarray]:
     # Estimate the model's size based on its visual shape bounding boxes.
@@ -348,6 +358,27 @@ class J3DViewer(QOpenGLWidget):
       return hack_j3d
     else:
       return orig_j3d
+  
+  def load_brk(self, brk: J3D):
+    self.brk = brk
+    
+    if self.model is None:
+      return
+    
+    # NOTE: Loading a new brk does not reset the registers to how they originally were
+    # this means loading several brks can have them all visible at once, depending on how
+    # they're set up.
+    self.model.attachBrk(data=fs.read_all_bytes(self.brk.data))
+    self.color_anim = self.model.getBrk()
+    
+    # TODO: when reloading the model due to different isolated visibility, we need to re-attach the
+    # brk. maybe make a separate func: load_model vs reload_model
+  
+  def set_anim_frame(self, frame: int):
+    if self.color_anim is None:
+      return
+    
+    self.color_anim.setFrame(frame, True)
   
   def calculate_light_pos(self, frac):
     angle = (frac % 1.0) * np.pi*2

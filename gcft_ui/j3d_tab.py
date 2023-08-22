@@ -33,6 +33,7 @@ class J3DTab(BunfoeEditor):
     
     self.j3d = None
     self.j3d_name = None
+    self.model_loaded = False
     self.ui.j3d_chunks_tree.setColumnWidth(1, 200)
     self.ui.j3d_chunks_tree.setColumnWidth(2, 70)
     
@@ -81,6 +82,10 @@ class J3DTab(BunfoeEditor):
     # Make the splitter start out evenly split between all three widgets.
     # TODO: the J3D preview column should be collapsed whenever the preview is not visible
     self.ui.splitter.setSizes([2**30, 2**30, 2**30])
+    
+    # self.ui.anim_pause_button.setIcon(self.style().standardIcon(QStyle.SP_MediaPause))
+    self.ui.anim_pause_button.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
+    self.ui.anim_slider.valueChanged.connect(self.update_anim_frame)
   
   def import_j3d(self):
     filters = [
@@ -126,11 +131,30 @@ class J3DTab(BunfoeEditor):
     
     self.j3d_name = j3d_name
     
+    self.model_loaded = False
+    if self.j3d.file_type[:3] in ["bmd", "bdl"]:
+      self.model_loaded = True
+    
     self.reload_j3d_chunks_tree()
     
     self.try_show_model_preview(True)
     
     self.ui.export_j3d.setDisabled(False)
+  
+  def load_j3d_anim_by_data(self, data, anim_name):
+    j3d = J3D(data)
+    if j3d.file_type[:3] != "brk":
+      return
+    brk = j3d
+    
+    self.ui.j3d_viewer.load_brk(brk)
+    
+    self.ui.anim_slider.setMinimum(0)
+    self.ui.anim_slider.setMaximum(brk.trk1.duration-1)
+    self.ui.anim_slider.setValue(0)
+  
+  def update_anim_frame(self, frame: int):
+    self.ui.j3d_viewer.set_anim_frame(frame)
   
   def try_read_j3d(self, data):
     try:

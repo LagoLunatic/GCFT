@@ -64,6 +64,36 @@
          </column>
         </widget>
        </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QPushButton" name="anim_pause_button">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>30</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="anim_slider">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="j3d_sidebar" native="true">
@@ -139,7 +169,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>357</width>
+            <width>369</width>
             <height>618</height>
            </rect>
           </property>
@@ -167,7 +197,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>313</width>
+            <width>308</width>
             <height>69</height>
            </rect>
           </property>
