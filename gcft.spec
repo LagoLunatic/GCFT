@@ -25,12 +25,14 @@ def build_datas_recursive(paths):
 import sys
 def get_hidden_imports():
   import_modules = []
-
+  
   sys.path.insert(0, "./gclib")
   import gclib
   for module_name in gclib.__all__:
     import_modules.append(f"gclib.{module_name}")
-
+  for module_name in gclib.j3d_chunks.__all__:
+    import_modules.append(f"gclib.j3d_chunks.{module_name}")
+  
   return import_modules
 
 import platform
