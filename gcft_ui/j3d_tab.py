@@ -52,9 +52,12 @@ class J3DTab(BunfoeEditor):
     self.isolated_visibility = False
     
     self.ui.export_j3d.setDisabled(True)
+    self.ui.load_anim.setDisabled(True)
     
     self.ui.import_j3d.clicked.connect(self.import_j3d)
     self.ui.export_j3d.clicked.connect(self.export_j3d)
+    
+    self.ui.load_anim.clicked.connect(self.load_anim)
     
     self.ui.j3d_chunks_tree.itemSelectionChanged.connect(self.widget_item_selected)
     self.ui.j3d_chunks_tree.itemExpanded.connect(self.item_expanded)
@@ -114,6 +117,16 @@ class J3DTab(BunfoeEditor):
       default_file_name=j3d_name
     )
   
+  def load_anim(self):
+    filters = []
+    filters.append("J3D animations (*.bmt *.bls *.btk *.bck *.brk *.bpk *.btp *.bca *.bva *.bla)")
+    
+    self.window().generic_do_gui_file_operation(
+      op_callback=self.load_anim_by_path,
+      is_opening=True, is_saving=False, is_folder=False,
+      file_type="J3D animation", file_filter=";;".join(filters),
+    )
+  
   
   def import_j3d_by_path(self, j3d_path):
     with open(j3d_path, "rb") as f:
@@ -140,8 +153,9 @@ class J3DTab(BunfoeEditor):
     self.try_show_model_preview(True)
     
     self.ui.export_j3d.setDisabled(False)
+    self.ui.load_anim.setDisabled(not self.model_loaded)
   
-  def load_j3d_anim_by_data(self, data, anim_name):
+  def load_anim_by_data(self, data, anim_name):
     j3d = J3D(data)
     if j3d.file_type[:3] != "brk":
       return
@@ -517,6 +531,14 @@ class J3DTab(BunfoeEditor):
     self.j3d_name = os.path.splitext(os.path.basename(j3d_path))[0]
     
     QMessageBox.information(self, "J3D file saved", "Successfully saved J3D file.")
+  
+  def load_anim_by_path(self, anim_path):
+    with open(anim_path, "rb") as f:
+      data = BytesIO(f.read())
+    
+    anim_name = os.path.splitext(os.path.basename(anim_path))[0]
+    
+    self.load_anim_by_data(data, anim_name)
   
   def get_file_filter_by_current_j3d_file_type(self):
     if self.j3d.file_type == "bdl4":

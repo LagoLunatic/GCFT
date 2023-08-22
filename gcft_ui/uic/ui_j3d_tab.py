@@ -46,6 +46,11 @@ class Ui_J3DTab(object):
 
         self.horizontalLayout_6.addWidget(self.export_j3d)
 
+        self.load_anim = QPushButton(J3DTab)
+        self.load_anim.setObjectName(u"load_anim")
+
+        self.horizontalLayout_6.addWidget(self.load_anim)
+
 
         self.verticalLayout.addLayout(self.horizontalLayout_6)
 
@@ -199,6 +204,7 @@ class Ui_J3DTab(object):
         self.actionReplaceJ3DImage.setText(QCoreApplication.translate("J3DTab", u"Replace Image", None))
         self.import_j3d.setText(QCoreApplication.translate("J3DTab", u"Import J3D File", None))
         self.export_j3d.setText(QCoreApplication.translate("J3DTab", u"Export J3D File", None))
+        self.load_anim.setText(QCoreApplication.translate("J3DTab", u"Load Animation", None))
         ___qtreewidgetitem = self.j3d_chunks_tree.headerItem()
         ___qtreewidgetitem.setText(2, QCoreApplication.translate("J3DTab", u"Size", None));
         ___qtreewidgetitem.setText(1, QCoreApplication.translate("J3DTab", u"Name", None));

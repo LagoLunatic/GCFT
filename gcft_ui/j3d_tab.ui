@@ -30,6 +30,13 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QPushButton" name="load_anim">
+       <property name="text">
+        <string>Load Animation</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
