@@ -67,6 +67,7 @@ class BunfoeEditor(QWidget):
       return self.make_bunfoe_editor_widget_for_vector_type(bunfoe_type)
     
     form_layout = QFormLayout()
+    form_layout.setContentsMargins(0, 0, 0, 0)
     
     for field in fields(bunfoe_type):
       field_widget = self.make_widget_for_field(field)
@@ -121,6 +122,7 @@ class BunfoeEditor(QWidget):
   
   def make_bunfoe_editor_widget_for_vector_type(self, bunfoe_type: typing.Type) -> BunfoeWidget:
     box_layout = QHBoxLayout()
+    box_layout.setContentsMargins(0, 0, 0, 0)
     
     for field in fields(bunfoe_type):
       field_widget = self.make_widget_for_field(field)
