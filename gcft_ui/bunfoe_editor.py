@@ -51,7 +51,7 @@ class BunfoeEditor(QWidget):
       pretty_name = pretty_name.title()
     return pretty_name
   
-  def setup_editor_widget_for_bunfoe_instance(self, instance, disabled=False) -> BunfoeWidget:
+  def setup_editor_widget_for_bunfoe_instance(self, instance, disabled=None) -> BunfoeWidget:
     top_level_bunfoe_type = type(instance)
     if top_level_bunfoe_type not in self.cached_top_level_bunfoe_editor_widgets:
       bunfoe_editor_widget = self.make_bunfoe_editor_widget_for_type(top_level_bunfoe_type)
@@ -81,13 +81,11 @@ class BunfoeEditor(QWidget):
     
     return bunfoe_editor_widget
   
-  def set_field_values_for_bunfoe_instance(self, instance, bunfoe_widget: BunfoeWidget, disabled=False):
-    bunfoe_widget.setProperty('field_owner', instance)
-    
+  def set_field_values_for_bunfoe_instance(self, instance, bunfoe_widget: BunfoeWidget, disabled=None):
     layout = bunfoe_widget.layout()
     self.set_field_values_for_bunfoe_instance_recursive(instance, layout, disabled=disabled)
   
-  def set_field_values_for_bunfoe_instance_recursive(self, instance, layout: QLayout, disabled=False):
+  def set_field_values_for_bunfoe_instance_recursive(self, instance, layout: QLayout, disabled=None):
     for i in range(layout.count()):
       item = layout.itemAt(i)
       widget = item.widget()
@@ -96,17 +94,7 @@ class BunfoeEditor(QWidget):
         access_path = widget.property('access_path')
         if access_path is not None:
           value = self.get_instance_value(instance, access_path)
-          if value is None:
-            # TODO: for blank entries in a list, put a placeholder button in place of the widget
-            widget.hide()
-            continue
-          widget.show()
-          if issubclass(field_type, RGBA):
-            self.set_widget_value(widget, value, field_type, instance, disabled=disabled)
-          elif issubclass(field_type, BUNFOE):
-            self.set_field_values_for_bunfoe_instance(value, widget, disabled=disabled)
-          else:
-            self.set_widget_value(widget, value, field_type, instance, disabled=disabled)
+          self.set_widget_value(widget, value, field_type, instance, disabled=disabled)
       
       sublayout = item.layout()
       if sublayout:
@@ -116,9 +104,7 @@ class BunfoeEditor(QWidget):
           assert not issubclass(field_type, BUNFOE)
           value = self.get_instance_value(instance, access_path)
           assert value is not None
-          self.set_field_values_for_bunfoe_instance_recursive(instance, sublayout, disabled=disabled)
-        else:
-          self.set_field_values_for_bunfoe_instance_recursive(instance, sublayout, disabled=disabled)
+        self.set_field_values_for_bunfoe_instance_recursive(instance, sublayout, disabled=disabled)
   
   def make_bunfoe_editor_widget_for_vector_type(self, bunfoe_type: typing.Type) -> BunfoeWidget:
     box_layout = QHBoxLayout()
@@ -152,32 +138,51 @@ class BunfoeEditor(QWidget):
     
     return bunfoe_editor_widget
   
-  def add_all_sequence_elements_to_new_layout(self, field_type, access_path):
-    box_layout = QHBoxLayout()
+  def add_all_sequence_elements_to_new_layout(self, field_type, access_path) -> QLayout:
+    # Creates widgets to allow editing the elements of a sequence.
+    # If we were to create a widget for each and every element of every sequence, it would take a
+    # while to set up the widgets the first time, and also take up a lot of unnecessary space on the
+    # screen. So instead, we try to create dynamic widgets wherever possible.
+    # A dynamic widget is a single editor widget shared between all of the elements of the sequence,
+    # plus a combobox to allow switching which one is currently selected and actively being edited.
     
-    show_indexes = True
-    if issubclass(field_type, Matrix):
-      show_indexes = False
+    type_args = typing.get_args(field_type)
+    arg_type = type_args[0]
+    use_static_layout = False
+    if not all(at == arg_type for at in type_args):
+      # Can't use a dynamic layout if the args aren't all the same type.
+      use_static_layout = True
+    elif issubclass(arg_type, RGBA):
+      # Color selector buttons are small and simple, so allow showing multiple at once.
+      use_static_layout = True
+    # if len(type_args) > 4:
+    #   use_static_layout = False
+    
+    if use_static_layout:
+      return self.add_all_sequence_elements_to_static_layout(field_type, access_path)
+    else:
+      return self.add_all_sequence_elements_to_dynamic_layout(field_type, access_path)
+  
+  def add_all_sequence_elements_to_static_layout(self, field_type, access_path) -> QLayout:
+    # Creates a widget for each element of a sequence, arranged horizontally.
+    
+    box_layout = QHBoxLayout()
     
     type_args = typing.get_args(field_type)
     for i, arg_type in enumerate(type_args):
-      # TODO: it's slow to instantiate every element of a large array. we could lazy load these.
-      # or better: make arrays of BUNFOE instances be a combination of a dropdown to
-      # select the index and a single widget for editing the current index's element.
       arg_widget = self.make_widget_for_type(arg_type, access_path + [('item', i)])
       
       column_layout = QVBoxLayout()
       box_layout.addLayout(column_layout)
       
-      if show_indexes:
-        if len(type_args) > 10:
-          index_str = self.window().stringify_number(i, min_hex_chars=1)
-        else:
-          # Force decimal for small numbers to avoid taking up space.
-          index_str = str(i)
-        column_header_label = QLabel(index_str)
-        column_header_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-        column_layout.addWidget(column_header_label, stretch=0)
+      if len(type_args) > 10:
+        index_str = self.window().stringify_number(i, min_hex_chars=1)
+      else:
+        # Force decimal for small numbers to avoid taking up space.
+        index_str = str(i)
+      column_header_label = QLabel(index_str)
+      column_header_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+      column_layout.addWidget(column_header_label, stretch=0)
       
       if isinstance(arg_widget, QWidget):
         column_layout.addWidget(arg_widget)
@@ -191,6 +196,50 @@ class BunfoeEditor(QWidget):
     box_layout.addStretch(1)
     
     return box_layout
+  
+  def add_all_sequence_elements_to_dynamic_layout(self, field_type, access_path) -> QLayout:
+    # Creates one widget to be shared by all elements of a sequence, plus a combobox that allows
+    # for switching which one is actively being edited.
+    
+    box_layout = QVBoxLayout()
+    
+    type_args = typing.get_args(field_type)
+    arg_type = type_args[0]
+    assert all(at == arg_type for at in type_args)
+    
+    combobox = QComboBox()
+    combobox.setSizePolicy(QSizePolicy.Policy.Maximum, combobox.sizePolicy().verticalPolicy())
+    for i in range(len(type_args)):
+      index_str = self.window().stringify_number(i, min_hex_chars=1)
+      combobox.addItem(f"Selected: {index_str}")
+    box_layout.addWidget(combobox)
+    
+    # Use the combobox itself as the 'index' into this sequence.
+    arg_widget = self.make_widget_for_type(arg_type, access_path + [('item', combobox)])
+    
+    # When selecting a blank (None) element, we don't want the rest of the layout to get messed up.
+    # So we make the widget still take up its normal amount of space even when it isn't visible.
+    size_policy = arg_widget.sizePolicy()
+    size_policy.setRetainSizeWhenHidden(True)
+    arg_widget.setSizePolicy(size_policy)
+    
+    box_layout.addWidget(arg_widget)
+    
+    combobox.setProperty('indexed_widget', arg_widget)
+    combobox.currentIndexChanged.connect(self.index_combobox_value_changed)
+    
+    box_layout.addStretch(1)
+    
+    return box_layout
+  
+  def index_combobox_value_changed(self, new_index: int):
+    combobox: QComboBox = self.sender()
+    indexed_widget: QWidget = combobox.property('indexed_widget')
+    field_type = indexed_widget.property('field_type')
+    access_path = indexed_widget.property('access_path')
+    instance = indexed_widget.property('field_owner')
+    value = self.get_instance_value(instance, access_path)
+    self.set_widget_value(indexed_widget, value, field_type, instance)
   
   def make_widget_for_field(self, field: Field):
     if field.name.startswith('_padding'):
@@ -229,7 +278,15 @@ class BunfoeEditor(QWidget):
       widget.setSizePolicy(QSizePolicy.Policy.Maximum, widget.sizePolicy().verticalPolicy())
     return widget
   
-  def set_widget_value(self, widget: QWidget, value, field_type: typing.Type, instance, disabled=False):
+  def set_widget_value(self, widget: QWidget, value, field_type: typing.Type, instance, disabled=None):
+    widget.setProperty('field_owner', instance)
+    
+    if value is None:
+      # TODO: for blank entries in a list, put a placeholder button in place of the widget
+      widget.hide()
+      return
+    widget.show()
+    
     widget.blockSignals(True)
     
     if isinstance(widget, BigIntSpinbox):
@@ -254,18 +311,19 @@ class BunfoeEditor(QWidget):
     elif isinstance(widget, QPushButton):
       assert issubclass(field_type, RGBA)
       self.set_background_for_color_button(widget, value)
+    elif issubclass(field_type, BUNFOE):
+      self.set_field_values_for_bunfoe_instance(value, widget, disabled=disabled)
     else:
       print(f"Field type not implemented: {field_type}")
       raise NotImplementedError
     
-    widget.setProperty('field_owner', instance)
-    
-    if isinstance(widget, QWidget):
-      widget.setDisabled(disabled)
-    elif isinstance(widget, QLayout):
-      self.set_layout_disabled_recursive(widget, disabled=disabled)
-    else:
-      raise NotImplementedError
+    if disabled is not None:
+      if isinstance(widget, QWidget):
+        widget.setDisabled(disabled)
+      elif isinstance(widget, QLayout):
+        self.set_layout_disabled_recursive(widget, disabled=disabled)
+      else:
+        raise NotImplementedError
     
     widget.blockSignals(False)
   
@@ -274,6 +332,9 @@ class BunfoeEditor(QWidget):
       if access_type == 'attr':
         instance = getattr(instance, access_arg)
       elif access_type == 'item':
+        if isinstance(access_arg, QComboBox):
+          # Dynamic widget indexing.
+          access_arg = access_arg.currentIndex()
         instance = instance[access_arg]
       else:
         raise NotImplementedError
@@ -284,6 +345,9 @@ class BunfoeEditor(QWidget):
       if access_type == 'attr':
         instance = getattr(instance, access_arg)
       elif access_type == 'item':
+        if isinstance(access_arg, QComboBox):
+          # Dynamic widget indexing.
+          access_arg = access_arg.currentIndex()
         instance = instance[access_arg]
       else:
         raise NotImplementedError
