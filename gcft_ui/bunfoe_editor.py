@@ -138,7 +138,7 @@ class BunfoeEditor(QWidget):
     
     return bunfoe_editor_widget
   
-  def add_all_sequence_elements_to_new_layout(self, field_type, access_path) -> QLayout:
+  def add_all_sequence_elements_to_new_layout(self, field: Field) -> QLayout:
     # Creates widgets to allow editing the elements of a sequence.
     # If we were to create a widget for each and every element of every sequence, it would take a
     # while to set up the widgets the first time, and also take up a lot of unnecessary space on the
@@ -146,8 +146,11 @@ class BunfoeEditor(QWidget):
     # A dynamic widget is a single editor widget shared between all of the elements of the sequence,
     # plus a combobox to allow switching which one is currently selected and actively being edited.
     
-    type_args = typing.get_args(field_type)
+    assert isinstance(field.length, int) and field.length > 0
+    type_args = typing.get_args(field.type)
+    assert len(type_args) == 1
     arg_type = type_args[0]
+    
     use_static_layout = False
     if not all(at == arg_type for at in type_args):
       # Can't use a dynamic layout if the args aren't all the same type.
@@ -159,23 +162,22 @@ class BunfoeEditor(QWidget):
     #   use_static_layout = False
     
     if use_static_layout:
-      return self.add_all_sequence_elements_to_static_layout(field_type, access_path)
+      return self.add_all_sequence_elements_to_static_layout(arg_type, field.length, [('attr', field.name)])
     else:
-      return self.add_all_sequence_elements_to_dynamic_layout(field_type, access_path)
+      return self.add_all_sequence_elements_to_dynamic_layout(arg_type, field.length, [('attr', field.name)])
   
-  def add_all_sequence_elements_to_static_layout(self, field_type, access_path) -> QLayout:
+  def add_all_sequence_elements_to_static_layout(self, arg_type, field_length, access_path) -> QLayout:
     # Creates a widget for each element of a sequence, arranged horizontally.
     
     box_layout = QHBoxLayout()
     
-    type_args = typing.get_args(field_type)
-    for i, arg_type in enumerate(type_args):
+    for i in range(field_length):
       arg_widget = self.make_widget_for_type(arg_type, access_path + [('item', i)])
       
       column_layout = QVBoxLayout()
       box_layout.addLayout(column_layout)
       
-      if len(type_args) > 10:
+      if field_length > 10:
         index_str = self.window().stringify_number(i, min_hex_chars=1)
       else:
         # Force decimal for small numbers to avoid taking up space.
@@ -197,19 +199,15 @@ class BunfoeEditor(QWidget):
     
     return box_layout
   
-  def add_all_sequence_elements_to_dynamic_layout(self, field_type, access_path) -> QLayout:
+  def add_all_sequence_elements_to_dynamic_layout(self, arg_type, field_length, access_path) -> QLayout:
     # Creates one widget to be shared by all elements of a sequence, plus a combobox that allows
     # for switching which one is actively being edited.
     
     box_layout = QVBoxLayout()
     
-    type_args = typing.get_args(field_type)
-    arg_type = type_args[0]
-    assert all(at == arg_type for at in type_args)
-    
     combobox = QComboBox()
     combobox.setSizePolicy(QSizePolicy.Policy.Maximum, combobox.sizePolicy().verticalPolicy())
-    for i in range(len(type_args)):
+    for i in range(field_length):
       index_str = self.window().stringify_number(i, min_hex_chars=1)
       combobox.addItem(f"Selected: {index_str}")
     box_layout.addWidget(combobox)
@@ -246,7 +244,10 @@ class BunfoeEditor(QWidget):
       # No need to show these.
       return None
     
-    return self.make_widget_for_type(field.type, [('attr', field.name)])
+    if isinstance(field.type, typing.GenericAlias) and field.type.__origin__ == list:
+      return self.add_all_sequence_elements_to_new_layout(field)
+    else:
+      return self.make_widget_for_type(field.type, [('attr', field.name)])
   
   def make_widget_for_type(self, field_type: typing.Type, access_path: list[tuple]):
     if issubclass(field_type, int) and field_type in fs.PRIMITIVE_TYPE_TO_BYTE_SIZE:
@@ -261,8 +262,6 @@ class BunfoeEditor(QWidget):
       widget = self.make_line_edit_for_str(field_type)
     elif issubclass(field_type, Enum):
       widget = self.make_combobox_for_enum(field_type)
-    elif isinstance(field_type, typing.GenericAlias) and field_type.__origin__ in [tuple, list]:
-      widget = self.add_all_sequence_elements_to_new_layout(field_type, access_path)
     elif issubclass(field_type, RGBA):
       widget = self.make_button_for_color(field_type)
     elif issubclass(field_type, BUNFOE):
