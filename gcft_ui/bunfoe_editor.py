@@ -65,6 +65,8 @@ class BunfoeEditor(QWidget):
   def make_bunfoe_editor_widget_for_type(self, bunfoe_type: typing.Type) -> BunfoeWidget:
     if issubclass(bunfoe_type, Vector):
       return self.make_bunfoe_editor_widget_for_vector_type(bunfoe_type)
+    elif issubclass(bunfoe_type, Matrix):
+      return self.make_bunfoe_editor_widget_for_matrix_type(bunfoe_type)
     
     form_layout = QFormLayout()
     form_layout.setContentsMargins(0, 0, 0, 0)
@@ -138,6 +140,31 @@ class BunfoeEditor(QWidget):
     
     return bunfoe_editor_widget
   
+  def make_bunfoe_editor_widget_for_matrix_type(self, bunfoe_type: typing.Type) -> BunfoeWidget:
+    box_layout = QVBoxLayout()
+    box_layout.setContentsMargins(0, 0, 0, 0)
+    
+    for field in fields(bunfoe_type):
+      type_args = typing.get_args(field.type)
+      arg_type = type_args[0]
+      field_widget = self.add_all_sequence_elements_to_static_layout(arg_type, field.length, [('attr', field.name)], show_indexes=False)
+      if field_widget is None:
+        continue
+      
+      if isinstance(field_widget, QWidget):
+        box_layout.addWidget(field_widget)
+      elif isinstance(field_widget, QLayout):
+        box_layout.addLayout(field_widget)
+      else:
+        raise NotImplementedError
+    
+    box_layout.addStretch(1)
+    
+    bunfoe_editor_widget = BunfoeWidget(self)
+    bunfoe_editor_widget.setLayout(box_layout)
+    
+    return bunfoe_editor_widget
+  
   def add_all_sequence_elements_to_new_layout(self, field: Field) -> QLayout:
     # Creates widgets to allow editing the elements of a sequence.
     # If we were to create a widget for each and every element of every sequence, it would take a
@@ -166,7 +193,7 @@ class BunfoeEditor(QWidget):
     else:
       return self.add_all_sequence_elements_to_dynamic_layout(arg_type, field.length, [('attr', field.name)])
   
-  def add_all_sequence_elements_to_static_layout(self, arg_type, field_length, access_path) -> QLayout:
+  def add_all_sequence_elements_to_static_layout(self, arg_type, field_length, access_path, show_indexes=True) -> QLayout:
     # Creates a widget for each element of a sequence, arranged horizontally.
     
     box_layout = QHBoxLayout()
@@ -177,14 +204,15 @@ class BunfoeEditor(QWidget):
       column_layout = QVBoxLayout()
       box_layout.addLayout(column_layout)
       
-      if field_length > 10:
-        index_str = self.window().stringify_number(i, min_hex_chars=1)
-      else:
-        # Force decimal for small numbers to avoid taking up space.
-        index_str = str(i)
-      column_header_label = QLabel(index_str)
-      column_header_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-      column_layout.addWidget(column_header_label, stretch=0)
+      if show_indexes:
+        if field_length > 10:
+          index_str = self.window().stringify_number(i, min_hex_chars=1)
+        else:
+          # Force decimal for small numbers to avoid taking up space.
+          index_str = str(i)
+        column_header_label = QLabel(index_str)
+        column_header_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        column_layout.addWidget(column_header_label, stretch=0)
       
       if isinstance(arg_widget, QWidget):
         column_layout.addWidget(arg_widget)
