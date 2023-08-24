@@ -380,6 +380,14 @@ class J3DViewer(QOpenGLWidget):
     
     self.color_anim.setFrame(frame, True)
   
+  def set_anim_paused(self, paused: bool):
+    if self.color_anim is None:
+      return
+    
+    # Note: J3DUltra does not currently support animation playback, so this does nothing.
+    frame = self.color_anim.getFrame()
+    self.color_anim.setFrame(int(frame), paused)
+  
   def calculate_light_pos(self, frac):
     angle = (frac % 1.0) * np.pi*2
     return np.cos(angle), np.sin(angle)

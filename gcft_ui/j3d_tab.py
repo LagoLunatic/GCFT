@@ -33,6 +33,7 @@ class J3DTab(BunfoeEditor):
     self.j3d = None
     self.j3d_name = None
     self.model_loaded = False
+    self.anim_paused = True
     self.ui.j3d_chunks_tree.setColumnWidth(1, 170)
     self.ui.j3d_chunks_tree.setColumnWidth(2, 60)
     
@@ -85,9 +86,11 @@ class J3DTab(BunfoeEditor):
     # TODO: the J3D preview column should be collapsed whenever the preview is not visible
     self.ui.splitter.setSizes([250, 500, 500])
     
-    # self.ui.anim_pause_button.setIcon(self.style().standardIcon(QStyle.SP_MediaPause))
     self.ui.anim_pause_button.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
+    self.ui.anim_pause_button.clicked.connect(self.toggle_anim_paused)
     self.ui.anim_slider.valueChanged.connect(self.update_anim_frame)
+    self.ui.anim_pause_button.setDisabled(True)
+    self.ui.anim_slider.setDisabled(True)
   
   def import_j3d(self):
     filters = [
@@ -165,9 +168,21 @@ class J3DTab(BunfoeEditor):
     self.ui.anim_slider.setMinimum(0)
     self.ui.anim_slider.setMaximum(brk.trk1.duration-1)
     self.ui.anim_slider.setValue(0)
+    
+    self.ui.anim_pause_button.setDisabled(False)
+    self.ui.anim_slider.setDisabled(False)
   
   def update_anim_frame(self, frame: int):
     self.ui.j3d_viewer.set_anim_frame(frame)
+  
+  def toggle_anim_paused(self):
+    self.anim_paused = not self.anim_paused
+    if self.anim_paused:
+      self.ui.anim_pause_button.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
+    else:
+      self.ui.anim_pause_button.setIcon(self.style().standardIcon(QStyle.SP_MediaPause))
+    self.ui.j3d_viewer.set_anim_paused(self.anim_paused)
+    # TODO: Update self.ui.anim_slider to match the J3DUltra animation playback.
   
   def try_read_j3d(self, data):
     try:
