@@ -60,6 +60,7 @@ class BunfoeEditor(QWidget):
     bunfoe_editor_widget.show()
     
     self.set_field_values_for_bunfoe_instance(instance, bunfoe_editor_widget, disabled=disabled)
+    bunfoe_editor_widget.setProperty('bunfoe_instance', instance)
     return bunfoe_editor_widget
   
   def make_bunfoe_editor_widget_for_type(self, bunfoe_type: typing.Type) -> BunfoeWidget:

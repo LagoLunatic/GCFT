@@ -496,7 +496,7 @@ class J3DTab(BunfoeEditor):
     if not isinstance(bunfoe_widget, BunfoeWidget):
       return
     
-    vtx_fmt = bunfoe_widget.property('field_owner')
+    vtx_fmt = bunfoe_widget.property('bunfoe_instance')
     assert isinstance(vtx_fmt, VertexFormat)
     
     if vtx_fmt.is_color_attr:
