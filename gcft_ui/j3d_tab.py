@@ -1,6 +1,7 @@
 
 import os
 from io import BytesIO
+import re
 import traceback
 from PySide6.QtGui import *
 from PySide6.QtCore import *
@@ -13,8 +14,6 @@ from gclib import gx_enums as GX
 from gclib.j3d import J3D
 from gclib.jchunk import JChunk
 from gclib.j3d_chunks.vtx1 import VertexFormat
-from gclib.j3d_chunks.jnt1 import Joint
-from gclib.j3d_chunks.shp1 import Shape
 from gclib.j3d_chunks.mat3 import Material
 from gclib.animation import AnimationKeyframe
 from gclib.j3d_chunks.mdl3 import MDLEntry, BPRegister, XFRegister
@@ -338,12 +337,6 @@ class J3DTab(BunfoeEditor):
       self.color_anim_selected(obj)
     elif isinstance(obj, VertexFormat):
       self.vertex_format_selected(obj)
-    elif isinstance(obj, Joint):
-      self.bunfoe_instance_selected(obj, "joint")
-    elif isinstance(obj, Shape):
-      self.bunfoe_instance_selected(obj, "shape")
-    elif isinstance(obj, Material):
-      self.bunfoe_instance_selected(obj, "material")
     elif isinstance(obj, BUNFOE):
       self.bunfoe_instance_selected(obj)
     
@@ -358,6 +351,15 @@ class J3DTab(BunfoeEditor):
   def bunfoe_instance_selected(self, instance, text=None, disabled=False):
     if text:
       self.ui.j3d_sidebar_label.setText(f"Showing {text}.")
+    else:
+      cls_name = instance.__class__.__name__
+      # Split camel case words.
+      cls_name_words = re.split(r"(?<=[a-z])(?=[A-Z])", cls_name)
+      cls_name_spaced = " ".join(cls_name_words)
+      if re.search(r"[a-z]", cls_name_spaced):
+        # Lowercase but only if the name isn't all uppercase letters.
+        cls_name_spaced = cls_name_spaced.lower()
+      self.ui.j3d_sidebar_label.setText(f"Showing {cls_name_spaced}.")
     
     layout: QBoxLayout = self.ui.scrollAreaWidgetContents.layout()
     
