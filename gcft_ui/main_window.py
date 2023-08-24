@@ -358,12 +358,6 @@ class GCFTWindow(QMainWindow):
       QMessageBox.warning(self, "Failed to dump textures", failed_dump_message)
   
   
-  def keyPressEvent(self, event):
-    if event.key() == Qt.Key_Escape and IS_RUNNING_FROM_SOURCE:
-      # Dev shortcut to quickly close the program.
-      # Not enabled for executable builds as end users might accidentally lose their work.
-      self.close()
-  
   def closeEvent(self, event):
     self.save_settings()
   

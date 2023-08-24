@@ -98,6 +98,13 @@ class BunfoeEditor(QWidget):
         if access_path is not None:
           value = self.get_instance_value(instance, access_path)
           self.set_widget_value(widget, value, field_type, instance, disabled=disabled)
+        
+        # Uncomment the below code to make index comboboxes reset to element zero every time the
+        # selection changes.
+        # arg_widget = widget.property('indexed_widget')
+        # if arg_widget is not None:
+        #   combobox: QComboBox = widget
+        #   combobox.setCurrentIndex(0)
       
       sublayout = item.layout()
       if sublayout:
