@@ -65,7 +65,7 @@ class GCFTWindow(QMainWindow):
     icon_path = os.path.join(ASSETS_PATH, "icon.ico")
     self.setWindowIcon(QIcon(icon_path))
     
-    self.showMaximized()
+    self.show()
   
   def load_settings(self):
     self.settings_path = "settings.txt"

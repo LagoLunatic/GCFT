@@ -33,8 +33,8 @@ class J3DTab(BunfoeEditor):
     self.j3d = None
     self.j3d_name = None
     self.model_loaded = False
-    self.ui.j3d_chunks_tree.setColumnWidth(1, 200)
-    self.ui.j3d_chunks_tree.setColumnWidth(2, 70)
+    self.ui.j3d_chunks_tree.setColumnWidth(1, 170)
+    self.ui.j3d_chunks_tree.setColumnWidth(2, 60)
     
     self.j3d_col_name_to_index = {}
     for col in range(self.ui.j3d_chunks_tree.columnCount()):
@@ -83,7 +83,7 @@ class J3DTab(BunfoeEditor):
     
     # Make the splitter start out evenly split between all three widgets.
     # TODO: the J3D preview column should be collapsed whenever the preview is not visible
-    self.ui.splitter.setSizes([2**30, 2**30, 2**30])
+    self.ui.splitter.setSizes([250, 500, 500])
     
     # self.ui.anim_pause_button.setIcon(self.style().standardIcon(QStyle.SP_MediaPause))
     self.ui.anim_pause_button.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
