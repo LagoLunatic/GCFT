@@ -92,13 +92,9 @@ class JPCTab(QWidget):
   def reload_jpc_particles_tree(self):
     self.ui.jpc_particles_tree.clear()
     
-    self.jpc_particle_to_tree_widget_item = {}
     self.jpc_tree_widget_item_to_particle = {}
-    self.jpc_chunk_to_tree_widget_item = {}
     self.jpc_tree_widget_item_to_chunk = {}
-    self.jpc_color_anim_keyframe_to_tree_widget_item = {}
     self.jpc_tree_widget_item_to_color_anim_keyframe = {}
-    self.jpc_texture_to_tree_widget_item = {}
     self.jpc_tree_widget_item_to_texture = {}
     
     for particle in self.jpc.particles:
@@ -107,7 +103,6 @@ class JPCTab(QWidget):
       particle_item = QTreeWidgetItem([particle_id_str, "", ""])
       self.ui.jpc_particles_tree.addTopLevelItem(particle_item)
       
-      self.jpc_particle_to_tree_widget_item[particle] = particle_item
       self.jpc_tree_widget_item_to_particle[particle_item] = particle
       
       for chunk in particle.chunks:
@@ -116,7 +111,6 @@ class JPCTab(QWidget):
         chunk_item = QTreeWidgetItem(["", chunk.magic, ""])
         particle_item.addChild(chunk_item)
         
-        self.jpc_chunk_to_tree_widget_item[chunk] = chunk_item
         self.jpc_tree_widget_item_to_chunk[chunk_item] = chunk
         
         if chunk.magic == "BSP1":
@@ -127,7 +121,6 @@ class JPCTab(QWidget):
               keyframe_item = QTreeWidgetItem(["", "", "0x%02X" % keyframe_index])
               anim_item.addChild(keyframe_item)
               
-              self.jpc_color_anim_keyframe_to_tree_widget_item[keyframe] = keyframe_item
               self.jpc_tree_widget_item_to_color_anim_keyframe[keyframe_item] = keyframe
           
           if chunk.color_env_anm_table:
@@ -137,7 +130,6 @@ class JPCTab(QWidget):
               keyframe_item = QTreeWidgetItem(["", "", "0x%02X" % keyframe_index])
               anim_item.addChild(keyframe_item)
               
-              self.jpc_color_anim_keyframe_to_tree_widget_item[keyframe] = keyframe_item
               self.jpc_tree_widget_item_to_color_anim_keyframe[keyframe_item] = keyframe
         elif chunk.magic == "TDB1":
           # Expand TDB1 chunks by default.
@@ -148,7 +140,6 @@ class JPCTab(QWidget):
             chunk_item.addChild(texture_item)
             
             texture = self.jpc.textures_by_filename[texture_filename]
-            self.jpc_texture_to_tree_widget_item[texture] = texture_item
             self.jpc_tree_widget_item_to_texture[texture_item] = texture
   
   def widget_item_selected(self):
