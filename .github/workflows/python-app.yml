@@ -46,9 +46,11 @@ jobs:
         with:
           submodules: recursive
       - name: Set up Python 3.11
+        id: setup-py
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
+          check-latest: true
           architecture: ${{ matrix.architecture }}
           cache: 'pip' # Cache all pip dependency downloads
       - name: Get PyJ3DUltra submodule status for cache
@@ -59,7 +61,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: '${{ github.workspace }}/PyJ3DUltra/build'
-          key: pyj3dultra-${{ runner.os }}-${{ hashFiles('pyj3dultra_submodule_status.txt') }}
+          key: pyj3dultra-${{ runner.os }}-py${{ steps.setup-py.outputs.python-version  }}-${{ hashFiles('pyj3dultra_submodule_status.txt') }}
       - name: Setup cmake
         if: steps.cache-pyj3dultra.outputs.cache-hit != 'true'
         uses: lukka/get-cmake@latest
@@ -89,7 +91,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ./.venv
-          key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements*.txt') }}
+          key: ${{ runner.os }}-venv-${{ steps.setup-py.outputs.python-version  }}-${{ hashFiles('**/requirements*.txt') }}
       - name: Create venv
         if: steps.cache-venv.outputs.cache-hit != 'true'
         run: |
@@ -115,7 +117,7 @@ jobs:
           USER_INPUT_VERSION=${{ github.event.inputs.version }}
           TXT_VERSION=$(cat version.txt)
           GIT_SHA_SHORT=$(git rev-parse --short=7 ${{ github.sha }})
-          echo "full_version=${USER_INPUT_VERSION:-$TXT_VERSION-$GIT_SHA_SHORT}" >> $GITHUB_OUTPUT
+          echo "full_version=${USER_INPUT_VERSION:-${TXT_VERSION}_${GIT_SHA_SHORT}}" >> $GITHUB_OUTPUT
       - name: Set version
         id: version
         run: |
