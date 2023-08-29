@@ -486,7 +486,7 @@ class BunfoeEditor(QWidget):
   
   def make_button_for_color(self, field_type):
     button = QPushButton()
-    button.setText("Click to set color")
+    button.setText("")
     button.clicked.connect(self.open_color_chooser)
     # TODO: set property to enable alpha or disable it, depending on the class of the color
     # or maybe we can just detect that from the existing 'field_type' property
@@ -507,7 +507,7 @@ class BunfoeEditor(QWidget):
     
     # Depending on the value of the background color of the button, we need to make the text color either black or white for contrast.
     h, s, v = colorsys.rgb_to_hsv(r/255, g/255, b/255)
-    if v > 0.5:
+    if v > 0.7:
       text_color = (0, 0, 0)
     else:
       text_color = (255, 255, 255)
@@ -516,6 +516,7 @@ class BunfoeEditor(QWidget):
       "background-color: rgb(%d, %d, %d);" % (r, g, b) + \
       "color: rgb(%d, %d, %d);" % text_color,
     )
+    button.setText("#%02X%02X%02X%02X" % color.rgba)
   
   def open_color_chooser(self):
     button: QPushButton = self.sender()

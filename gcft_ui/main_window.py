@@ -235,7 +235,7 @@ class GCFTWindow(QMainWindow):
     row_layout.addWidget(label)
     
     color_selector_button = QPushButton()
-    color_selector_button.setText("Click to set color")
+    color_selector_button.setText("")
     row_layout.addWidget(color_selector_button)
     
     color_selector_button.setProperty("color_owner_object", color_owner_object)
@@ -287,15 +287,17 @@ class GCFTWindow(QMainWindow):
     if len(color) == 3:
       r, g, b = color
       a = 255
+      color_selector_button.setText("#%02X%02X%02X" % color)
     elif len(color) == 4:
       r, g, b, a = color
+      color_selector_button.setText("#%02X%02X%02X%02X" % color)
     else:
       QMessageBox.warning(self, "Unknown color format", "Color is neither RGB nor RGBA.")
       return
     
     # Depending on the value of the background color of the button, we need to make the text color either black or white for contrast.
     h, s, v = colorsys.rgb_to_hsv(r/255, g/255, b/255)
-    if v > 0.5:
+    if v > 0.7:
       text_color = (0, 0, 0)
     else:
       text_color = (255, 255, 255)
