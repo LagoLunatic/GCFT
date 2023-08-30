@@ -46,7 +46,7 @@ Note that compressing Yaz0 is slow and doesn't have a progress bar, so the progr
 
 Download and install git from here: https://git-scm.com/downloads  
 Then clone this repository with git by running this in a command prompt:  
-`git clone --recurse-submodules https://github.com/LagoLunatic/GCFT.git`  
+`git clone https://github.com/LagoLunatic/GCFT.git --recurse-submodules=":(exclude)PyJ3DUltra"`  
 
 Download and install Python 3.11.5 from here: https://www.python.org/downloads/release/python-3115/  
 "Windows installer (64-bit)" is the one you want if you're on Windows, "macOS 64-bit universal2 installer" if you're on Mac.  
@@ -62,15 +62,18 @@ Then run GCFT with:
 `python3 gcft.py` (on Mac)  
 `python3 gcft.py` (on Linux)  
 
-Optionally, if you want J3D model previews to display while running from source, you must also build PyJ3DUltra.  
-On Windows, you should first [install vcpkg](https://vcpkg.io/en/getting-started).  
-Then run the following commands from the GCFT directory (assuming you installed vcpkg to `C:/vcpkg`):  
-```
-cmake PyJ3DUltra -BPyJ3DUltra/build -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
-cmake --build PyJ3DUltra/build
-```
-On Mac or Linux, instead run the following commands from the GCFT directory:  
-```
-cmake PyJ3DUltra -BPyJ3DUltra/build
-cmake --build PyJ3DUltra/build
-```
+#### J3D model previews while running from source
+
+Optionally, if you want J3D model previews to display while running from source, you must also clone and build PyJ3DUltra.  
+First run this command to clone PyJ3DUltra:  
+`git submodule update --init --recursive PyJ3DUltra`  
+
+If you're on Windows, [install vcpkg](https://vcpkg.io/en/getting-started), then run the following command from the GCFT directory (assuming you installed vcpkg to `C:/vcpkg`):  
+`cmake PyJ3DUltra -BPyJ3DUltra/build -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake`  
+On Mac or Linux, simply run this command instead:  
+`cmake PyJ3DUltra -BPyJ3DUltra/build`  
+
+Finally, run this command to build PyJ3DUltra:  
+`cmake --build PyJ3DUltra/build`  
+
+Now when you load a J3D model in GCFT, it should be able to display the 3D preview.  
