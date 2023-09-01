@@ -190,8 +190,8 @@ class BunfoeEditor(QWidget):
     if not all(at == arg_type for at in type_args):
       # Can't use a dynamic layout if the args aren't all the same type.
       use_static_layout = True
-    elif issubclass(arg_type, RGBA):
-      # Color selector buttons are small and simple, so allow showing multiple at once.
+    elif issubclass(arg_type, RGBA) or issubclass(arg_type, bool):
+      # The widgets for these types are small and simple, so allow showing multiple at once.
       use_static_layout = True
     # if len(type_args) > 4:
     #   use_static_layout = False
@@ -276,7 +276,7 @@ class BunfoeEditor(QWidget):
     self.set_widget_value(indexed_widget, value, field_type, instance)
   
   def make_widget_for_field(self, field: Field):
-    if field.name.startswith('_padding'):
+    if field.name.startswith('_padding') or field.bitfield:
       # No need to show these.
       return None
     
