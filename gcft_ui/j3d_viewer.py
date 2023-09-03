@@ -107,7 +107,8 @@ class J3DViewer(QOpenGLWidget):
     
     self.init_lights()
     
-    self.clear()
+    glClearColor(0.25, 0.3, 0.4, 1.0)
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
     width = self.width()
     height = self.height()
@@ -121,8 +122,6 @@ class J3DViewer(QOpenGLWidget):
     self.update()
   
   def paintGL(self):
-    self.clear()
-    
     if self.show_widgets:
       self.draw_grid_widget()
     
@@ -164,10 +163,6 @@ class J3DViewer(QOpenGLWidget):
     major_ver = glGetIntegerv(GL_MAJOR_VERSION)
     minor_ver = glGetIntegerv(GL_MINOR_VERSION)
     return (major_ver, minor_ver)
-  
-  def clear(self):
-    glClearColor(0.25, 0.3, 0.4, 1.0)
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
   
   def load_model(self, j3d_model: J3D, reset_camera=False, hidden_material_indexes=None):
     if not J3DULTRA_INSTALLED:
