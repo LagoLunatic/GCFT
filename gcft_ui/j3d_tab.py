@@ -13,12 +13,18 @@ from gclib.bunfoe import BUNFOE
 from gclib import gx_enums as GX
 from gclib.j3d import J3D
 from gclib.jchunk import JChunk
-from gclib.j3d_chunks.vtx1 import VertexFormat
-from gclib.j3d_chunks.mat3 import Material
 from gclib.animation import AnimationKeyframe
-from gclib.j3d_chunks.mdl3 import MDLEntry, BPRegister, XFRegister
-from gclib.j3d_chunks.trk1 import ColorAnimation
-from gclib.j3d_chunks.ttk1 import UVAnimation
+from gclib.j3d_chunks.inf1 import INF1
+from gclib.j3d_chunks.vtx1 import VTX1, VertexFormat
+# from gclib.j3d_chunks.evp1 import EVP1
+# from gclib.j3d_chunks.drw1 import DRW1
+from gclib.j3d_chunks.jnt1 import JNT1
+from gclib.j3d_chunks.shp1 import SHP1
+from gclib.j3d_chunks.mat3 import MAT3, Material
+from gclib.j3d_chunks.mdl3 import MDL3, MDLEntry, BPRegister, XFRegister
+from gclib.j3d_chunks.tex1 import TEX1
+from gclib.j3d_chunks.trk1 import TRK1, ColorAnimation
+from gclib.j3d_chunks.ttk1 import TTK1, UVAnimation
 from gclib.bti import BTI
 
 from gcft_ui.uic.ui_j3d_tab import Ui_J3DTab
@@ -223,83 +229,28 @@ class J3DTab(BunfoeEditor):
       
       chunk_item.setExpanded(self.chunk_type_is_expanded.get(chunk.magic, False))
       
-      if chunk.magic == "TEX1":
-        seen_image_data_offsets = []
-        seen_palette_data_offsets = []
-        
-        for i, texture in enumerate(chunk.textures):
-          texture_name = chunk.texture_names[i]
-          
-          # We don't display sizes for texture headers that use image/palette datas duplicated from an earlier tex header.
-          # We also don't display the 0x20 byte size of any of the headers.
-          texture_total_size = 0
-          if texture.image_data_offset+texture.header_offset not in seen_image_data_offsets:
-            texture_total_size += fs.pad_offset_to_nearest(fs.data_len(texture.image_data), 0x20)
-            seen_image_data_offsets.append(texture.image_data_offset+texture.header_offset)
-          if texture.palette_data_offset+texture.header_offset not in seen_palette_data_offsets:
-            texture_total_size += fs.pad_offset_to_nearest(fs.data_len(texture.palette_data), 0x20)
-            seen_palette_data_offsets.append(texture.palette_data_offset+texture.header_offset)
-          
-          if texture_total_size == 0:
-            texture_size_str = ""
-          else:
-            texture_size_str = self.window().stringify_number(texture_total_size, min_hex_chars=5)
-          
-          self.make_tree_widget_item(texture, chunk_item, ["", texture_name, texture_size_str])
-      elif chunk.magic == "MAT3":
-        for mat_index, material in enumerate(chunk.materials):
-          mat_name = chunk.mat_names[mat_index]
-          mat_item = self.make_tree_widget_item(material, chunk_item, ["", mat_name, ""])
-          indirect = chunk.indirects[mat_index]
-          self.make_tree_widget_item(indirect, mat_item, ["", f"Indirect Texturing", ""])
-      elif chunk.magic == "MDL3":
-        for i, mdl_entry in enumerate(chunk.entries):
-          mat_name = self.j3d.mat3.mat_names[i]
-          self.make_tree_widget_item(mdl_entry, chunk_item, ["", mat_name, ""])
-      elif chunk.magic == "TRK1":
-        for anim_type_index, anim_type_dict in enumerate([chunk.mat_name_to_reg_anims, chunk.mat_name_to_konst_anims]):
-          anim_type = ["Register", "Konstant"][anim_type_index]
-          anim_type_item = self.make_tree_widget_item(None, chunk_item, ["", anim_type, ""], True)
-          for mat_name, anims in anim_type_dict.items():
-            mat_item = self.make_tree_widget_item(None, anim_type_item, ["", mat_name, ""])
-            for anim_index, anim in enumerate(anims):
-              anim_item = self.make_tree_widget_item(anim, mat_item, ["", "0x%02X" % anim_index, ""])
-              for track_name in ["r", "g", "b", "a"]:
-                track_item = self.make_tree_widget_item(None, anim_item, ["", track_name.upper(), ""], True)
-                track = getattr(anim, track_name)
-                for keyframe_index, keyframe in enumerate(track.keyframes):
-                  self.make_tree_widget_item(keyframe, track_item, ["", "0x%02X" % keyframe_index, ""])
-      elif chunk.magic == "TTK1":
-        chunk_item.setExpanded(True)
-        for mat_name, anims in chunk.mat_name_to_anims.items():
-          mat_item = self.make_tree_widget_item(None, chunk_item, ["", mat_name, ""])
-          for anim_index, anim in enumerate(anims):
-            anim_item = self.make_tree_widget_item(anim, mat_item, ["", "0x%02X" % anim_index, ""])
-            for track_name, track in anim.tracks.items():
-              track_item = self.make_tree_widget_item(track, anim_item, ["", track_name.upper(), ""], True)
-              for keyframe_index, keyframe in enumerate(track.keyframes):
-                self.make_tree_widget_item(keyframe, track_item, ["", "0x%02X" % keyframe_index, ""])
-      elif chunk.magic == "JNT1":
-        for joint_index, joint in enumerate(chunk.joints):
-          joint_index_str = self.window().stringify_number(joint_index, min_hex_chars=2)
-          joint_name = chunk.joint_names[joint_index]
-          self.make_tree_widget_item(joint, chunk_item, ["", f"{joint_index_str}: {joint_name}", ""])
-      elif chunk.magic == "SHP1":
-        for shape_index, shape in enumerate(chunk.shapes):
-          shape_index_str = self.window().stringify_number(shape_index, min_hex_chars=2)
-          self.make_tree_widget_item(shape, chunk_item, ["", shape_index_str, ""])
-      elif chunk.magic == "VTX1":
-        for vtx_fmt in chunk.vertex_formats:
-          if vtx_fmt.attribute_type == GX.Attr.NULL:
-            vtx_fmt_size_str = ""
-          else:
-            vtx_fmt_size = vtx_fmt.component_size * vtx_fmt.component_count * len(chunk.attributes[vtx_fmt.attribute_type])
-            vtx_fmt_size_str = self.window().stringify_number(vtx_fmt_size, min_hex_chars=2)
-          self.make_tree_widget_item(vtx_fmt, chunk_item, ["", vtx_fmt.attribute_type.name, vtx_fmt_size_str])
-      elif chunk.magic == "INF1":
-        for node_index, inf1_node in enumerate(chunk.flat_hierarchy):
-          node_index_str = self.window().stringify_number(node_index, min_hex_chars=2)
-          self.make_tree_widget_item(inf1_node, chunk_item, ["", node_index_str, ""])
+      if isinstance(chunk, INF1):
+        self.add_inf1_chunk_to_tree(chunk, chunk_item)
+      elif isinstance(chunk, VTX1):
+        self.add_vtx1_chunk_to_tree(chunk, chunk_item)
+      # elif isinstance(chunk, EVP1):
+      #   self.add_evp1_chunk_to_tree(chunk, chunk_item)
+      # elif isinstance(chunk, DRW1):
+      #   self.add_drw1_chunk_to_tree(chunk, chunk_item)
+      elif isinstance(chunk, JNT1):
+        self.add_jnt1_chunk_to_tree(chunk, chunk_item)
+      elif isinstance(chunk, SHP1):
+        self.add_shp1_chunk_to_tree(chunk, chunk_item)
+      elif isinstance(chunk, MAT3):
+        self.add_mat3_chunk_to_tree(chunk, chunk_item)
+      elif isinstance(chunk, MDL3):
+        self.add_mdl3_chunk_to_tree(chunk, chunk_item)
+      elif isinstance(chunk, TEX1):
+        self.add_tex1_chunk_to_tree(chunk, chunk_item)
+      elif isinstance(chunk, TRK1):
+        self.add_trk1_chunk_to_tree(chunk, chunk_item)
+      elif isinstance(chunk, TTK1):
+        self.add_ttk1_chunk_to_tree(chunk, chunk_item)
     
     # Expand all items in the tree (for debugging):
     #for item in self.ui.j3d_chunks_tree.findItems("*", Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive):
@@ -362,6 +313,100 @@ class J3DTab(BunfoeEditor):
     # with open("profileresults.txt", "w") as f:
     #   ps = pstats.Stats(profiler, stream=f).sort_stats("cumulative")
     #   ps.print_stats()
+  
+  
+  def add_inf1_chunk_to_tree(self, inf1: INF1, chunk_item: QTreeWidgetItem):
+    for node_index, inf1_node in enumerate(inf1.flat_hierarchy):
+      node_index_str = self.window().stringify_number(node_index, min_hex_chars=2)
+      self.make_tree_widget_item(inf1_node, chunk_item, ["", node_index_str, ""])
+  
+  def add_vtx1_chunk_to_tree(self, vtx1: VTX1, chunk_item: QTreeWidgetItem):
+    for vtx_fmt in vtx1.vertex_formats:
+      if vtx_fmt.attribute_type == GX.Attr.NULL:
+        vtx_fmt_size_str = ""
+      else:
+        vtx_fmt_size = vtx_fmt.component_size * vtx_fmt.component_count * len(vtx1.attributes[vtx_fmt.attribute_type])
+        vtx_fmt_size_str = self.window().stringify_number(vtx_fmt_size, min_hex_chars=2)
+      self.make_tree_widget_item(vtx_fmt, chunk_item, ["", vtx_fmt.attribute_type.name, vtx_fmt_size_str])
+  
+  # def add_evp1_chunk_to_tree(self, evp1: EVP1, chunk_item: QTreeWidgetItem):
+  #   pass
+  
+  # def add_drw1_chunk_to_tree(self, drw1: DRW1, chunk_item: QTreeWidgetItem):
+  #   pass
+  
+  def add_jnt1_chunk_to_tree(self, jnt1: JNT1, chunk_item: QTreeWidgetItem):
+    for joint_index, joint in enumerate(jnt1.joints):
+      joint_index_str = self.window().stringify_number(joint_index, min_hex_chars=2)
+      joint_name = jnt1.joint_names[joint_index]
+      self.make_tree_widget_item(joint, chunk_item, ["", f"{joint_index_str}: {joint_name}", ""])
+  
+  def add_shp1_chunk_to_tree(self, shp1: SHP1, chunk_item: QTreeWidgetItem):
+    for shape_index, shape in enumerate(shp1.shapes):
+      shape_index_str = self.window().stringify_number(shape_index, min_hex_chars=2)
+      self.make_tree_widget_item(shape, chunk_item, ["", shape_index_str, ""])
+  
+  def add_mat3_chunk_to_tree(self, mat3: MAT3, chunk_item: QTreeWidgetItem):
+    for mat_index, material in enumerate(mat3.materials):
+      mat_name = mat3.mat_names[mat_index]
+      mat_item = self.make_tree_widget_item(material, chunk_item, ["", mat_name, ""])
+      indirect = mat3.indirects[mat_index]
+      self.make_tree_widget_item(indirect, mat_item, ["", f"Indirect Texturing", ""])
+  
+  def add_mdl3_chunk_to_tree(self, mdl3: MDL3, chunk_item: QTreeWidgetItem):
+    for i, mdl_entry in enumerate(mdl3.entries):
+      mat_name = self.j3d.mat3.mat_names[i]
+      self.make_tree_widget_item(mdl_entry, chunk_item, ["", mat_name, ""])
+  
+  def add_tex1_chunk_to_tree(self, tex1: TEX1, chunk_item: QTreeWidgetItem):
+    seen_image_data_offsets = []
+    seen_palette_data_offsets = []
+    
+    for i, texture in enumerate(tex1.textures):
+      texture_name = tex1.texture_names[i]
+      
+      # We don't display sizes for texture headers that use image/palette datas duplicated from an earlier tex header.
+      # We also don't display the 0x20 byte size of any of the headers.
+      texture_total_size = 0
+      if texture.image_data_offset+texture.header_offset not in seen_image_data_offsets:
+        texture_total_size += fs.pad_offset_to_nearest(fs.data_len(texture.image_data), 0x20)
+        seen_image_data_offsets.append(texture.image_data_offset+texture.header_offset)
+      if texture.palette_data_offset+texture.header_offset not in seen_palette_data_offsets:
+        texture_total_size += fs.pad_offset_to_nearest(fs.data_len(texture.palette_data), 0x20)
+        seen_palette_data_offsets.append(texture.palette_data_offset+texture.header_offset)
+      
+      if texture_total_size == 0:
+        texture_size_str = ""
+      else:
+        texture_size_str = self.window().stringify_number(texture_total_size, min_hex_chars=5)
+      
+      self.make_tree_widget_item(texture, chunk_item, ["", texture_name, texture_size_str])
+  
+  def add_trk1_chunk_to_tree(self, trk1: TRK1, chunk_item: QTreeWidgetItem):
+    for anim_type_index, anim_type_dict in enumerate([trk1.mat_name_to_reg_anims, trk1.mat_name_to_konst_anims]):
+      anim_type = ["Register", "Konstant"][anim_type_index]
+      anim_type_item = self.make_tree_widget_item(None, chunk_item, ["", anim_type, ""], True)
+      for mat_name, anims in anim_type_dict.items():
+        mat_item = self.make_tree_widget_item(None, anim_type_item, ["", mat_name, ""])
+        for anim_index, anim in enumerate(anims):
+          anim_item = self.make_tree_widget_item(anim, mat_item, ["", "0x%02X" % anim_index, ""])
+          for track_name in ["r", "g", "b", "a"]:
+            track_item = self.make_tree_widget_item(None, anim_item, ["", track_name.upper(), ""], True)
+            track = getattr(anim, track_name)
+            for keyframe_index, keyframe in enumerate(track.keyframes):
+              self.make_tree_widget_item(keyframe, track_item, ["", "0x%02X" % keyframe_index, ""])
+  
+  def add_ttk1_chunk_to_tree(self, ttk1: TTK1, chunk_item: QTreeWidgetItem):
+    chunk_item.setExpanded(True)
+    for mat_name, anims in ttk1.mat_name_to_anims.items():
+      mat_item = self.make_tree_widget_item(None, chunk_item, ["", mat_name, ""])
+      for anim_index, anim in enumerate(anims):
+        anim_item = self.make_tree_widget_item(anim, mat_item, ["", "0x%02X" % anim_index, ""])
+        for track_name, track in anim.tracks.items():
+          track_item = self.make_tree_widget_item(track, anim_item, ["", track_name.upper(), ""], True)
+          for keyframe_index, keyframe in enumerate(track.keyframes):
+            self.make_tree_widget_item(keyframe, track_item, ["", "0x%02X" % keyframe_index, ""])
+  
   
   def bunfoe_instance_selected(self, instance, text=None, disabled=False):
     if text:
