@@ -430,7 +430,7 @@ class J3DTab(BunfoeEditor):
     
     return bunfoe_editor_widget
   
-  def mdl_entry_selected(self, mdl_entry):
+  def mdl_entry_selected(self, mdl_entry: MDLEntry):
     layout = self.ui.scrollAreaWidgetContents.layout()
     
     entry_index = self.j3d.mdl3.entries.index(mdl_entry)
@@ -438,9 +438,9 @@ class J3DTab(BunfoeEditor):
     self.ui.j3d_sidebar_label.setText("Showing material display list for: %s" % mat_name)
     
     bp_commands_widget = QWidget()
-    bp_commands_layout = QVBoxLayout(bp_commands_widget)
+    bp_commands_layout = QFormLayout(bp_commands_widget)
     xf_commands_widget = QWidget()
-    xf_commands_layout = QVBoxLayout(xf_commands_widget)
+    xf_commands_layout = QFormLayout(xf_commands_widget)
     
     bp_commands_scroll_area = QScrollArea()
     bp_commands_scroll_area.setWidgetResizable(True)
@@ -459,73 +459,67 @@ class J3DTab(BunfoeEditor):
       if bp_command.register in [entry.value for entry in BPRegister]:
         reg_name = BPRegister(bp_command.register).name
       else:
-        reg_name = "0x%02X" % bp_command.register
-      command_text = "%s: 0x%06X" % (reg_name, bp_command.value)
-      label = QLabel()
-      label.setText(command_text)
-      bp_commands_layout.addWidget(label)
+        reg_name = f"0x{bp_command.register:02X}"
+      
+      command_text = f"0x{bp_command.value:06X}"
+      
+      bp_commands_layout.addRow(reg_name, QLabel(command_text))
     
     for xf_command in mdl_entry.xf_commands:
       if xf_command.register in [entry.value for entry in XFRegister]:
         reg_name = XFRegister(xf_command.register).name
       else:
-        reg_name = "0x%04X" % xf_command.register
-      command_text = "%s:\n%s" % (reg_name, "\n".join(["0x%08X" % arg for arg in xf_command.args]))
-      label = QLabel()
-      label.setText(command_text)
-      xf_commands_layout.addWidget(label)
-    
-    bp_commands_layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
-    xf_commands_layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        reg_name = f"0x{xf_command.register:04X}"
+      
+      command_text = "\n".join([f"0x{arg:08X}" for arg in xf_command.args])
+      
+      reg_label = QLabel(reg_name)
+      reg_label.setAlignment(Qt.AlignmentFlag.AlignTop)
+      xf_commands_layout.addRow(reg_label, QLabel(command_text))
   
-  def keyframe_selected(self, keyframe):
+  def keyframe_selected(self, keyframe: AnimationKeyframe):
     layout = self.ui.scrollAreaWidgetContents.layout()
     
     self.ui.j3d_sidebar_label.setText("Showing animation keyframe.")
     
-    label = QLabel()
-    label.setText("Time: %f" % keyframe.time)
-    layout.addWidget(label)
+    form_widget = QWidget()
+    form_layout = QFormLayout(form_widget)
+    form_layout.setContentsMargins(0, 0, 0, 0)
+    layout.addWidget(form_widget)
     
-    label = QLabel()
-    label.setText("Value: %f" % keyframe.value)
-    layout.addWidget(label)
+    form_layout.addRow("Time", QLabel(f"{keyframe.time:f}"))
     
-    label = QLabel()
-    label.setText("Tangent in: %f" % keyframe.tangent_in)
-    layout.addWidget(label)
+    form_layout.addRow("Value", QLabel(f"{keyframe.value:f}"))
     
-    label = QLabel()
-    label.setText("Tangent out: %f" % keyframe.tangent_out)
-    layout.addWidget(label)
+    form_layout.addRow("Tangent in", QLabel(f"{keyframe.tangent_in:f}"))
     
-    spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-    layout.addItem(spacer)
+    form_layout.addRow("Tangent out", QLabel(f"{keyframe.tangent_out:f}"))
   
-  def uv_anim_selected(self, uv_anim):
+  def uv_anim_selected(self, uv_anim: UVAnimation):
     layout = self.ui.scrollAreaWidgetContents.layout()
     
     self.ui.j3d_sidebar_label.setText("Showing UV animation.")
     
-    label = QLabel()
-    label.setText("Center: (%f, %f, %f)" % uv_anim.center_coords)
-    layout.addWidget(label)
+    form_widget = QWidget()
+    form_layout = QFormLayout(form_widget)
+    form_layout.setContentsMargins(0, 0, 0, 0)
+    layout.addWidget(form_widget)
     
-    label = QLabel()
-    label.setText("Tex gen index: 0x%02X" % uv_anim.tex_gen_index)
-    layout.addWidget(label)
+    form_layout.addRow("Center", QLabel("(%f, %f, %f)" % uv_anim.center_coords))
     
-    spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-    layout.addItem(spacer)
+    form_layout.addRow("Tex gen index", QLabel(f"0x{uv_anim.tex_gen_index:02X}"))
   
-  def color_anim_selected(self, color_anim):
+  def color_anim_selected(self, color_anim: ColorAnimation):
     layout = self.ui.scrollAreaWidgetContents.layout()
     
     self.ui.j3d_sidebar_label.setText("Showing color animation.")
     
-    label = QLabel()
-    label.setText("Color ID: 0x%02X" % color_anim.color_id)
-    layout.addWidget(label)
+    form_widget = QWidget()
+    form_layout = QFormLayout(form_widget)
+    form_layout.setContentsMargins(0, 0, 0, 0)
+    layout.addWidget(form_widget)
+    
+    form_layout.addRow("Color ID", QLabel(f"0x{color_anim.color_id:02X}"))
     
     spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
     layout.addItem(spacer)
