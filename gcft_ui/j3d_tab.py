@@ -14,7 +14,7 @@ from gclib import gx_enums as GX
 from gclib.j3d import J3D
 from gclib.jchunk import JChunk
 from gclib.animation import AnimationKeyframe
-from gclib.j3d_chunks.inf1 import INF1
+from gclib.j3d_chunks.inf1 import INF1, INF1Node, INF1NodeType
 from gclib.j3d_chunks.vtx1 import VTX1, VertexFormat
 # from gclib.j3d_chunks.evp1 import EVP1
 # from gclib.j3d_chunks.drw1 import DRW1
@@ -303,6 +303,8 @@ class J3DTab(BunfoeEditor):
       self.color_anim_selected(obj)
     elif isinstance(obj, VertexFormat):
       self.vertex_format_selected(obj)
+    elif isinstance(obj, INF1Node):
+      self.inf1_node_selected(obj)
     elif isinstance(obj, BUNFOE):
       self.bunfoe_instance_selected(obj)
     
@@ -316,9 +318,35 @@ class J3DTab(BunfoeEditor):
   
   
   def add_inf1_chunk_to_tree(self, inf1: INF1, chunk_item: QTreeWidgetItem):
-    for node_index, inf1_node in enumerate(inf1.flat_hierarchy):
-      node_index_str = self.window().stringify_number(node_index, min_hex_chars=2)
-      self.make_tree_widget_item(inf1_node, chunk_item, ["", node_index_str, ""])
+    root_node = inf1.flat_hierarchy[0]
+    self.add_inf1_node_to_tree_recursive(root_node, chunk_item)
+  
+  def add_inf1_node_to_tree_recursive(self, inf1_node: INF1Node, parent_item: QTreeWidgetItem):
+    type_name = None
+    names_list = None
+    if inf1_node.type == INF1NodeType.JOINT:
+      type_name = "Joint"
+      names_list = self.j3d.jnt1.joint_names
+    elif inf1_node.type == INF1NodeType.MATERIAL:
+      type_name = "Material"
+      names_list = self.j3d.mat3.mat_names
+    elif inf1_node.type == INF1NodeType.SHAPE:
+      type_name = "Shape"
+      names_list = self.j3d.shp1.shape_names
+    
+    index_str = self.window().stringify_number(inf1_node.index, min_hex_chars=2)
+    if type_name is None:
+      node_name = ""
+    elif names_list is None:
+      node_name = f"{type_name} {index_str}"
+    else:
+      node_name = f"{type_name} {index_str}: {names_list[inf1_node.index]}"
+    
+    node_item = self.make_tree_widget_item(inf1_node, parent_item, [node_name, node_name, ""])
+    node_item.setExpanded(True)
+    
+    for child_node in inf1_node.children:
+      self.add_inf1_node_to_tree_recursive(child_node, node_item)
   
   def add_vtx1_chunk_to_tree(self, vtx1: VTX1, chunk_item: QTreeWidgetItem):
     for vtx_fmt in vtx1.vertex_formats:
@@ -573,6 +601,21 @@ class J3DTab(BunfoeEditor):
           enum_value = combobox.itemData(i)
           pretty_name = self.prettify_name(enum_value_order[enum_value], title=False)
           combobox.setItemText(i, pretty_name)
+  
+  def inf1_node_selected(self, inf1_node: INF1Node):
+    # When an INF1 node is selected, we want to allow editing the corresponding object referenced by
+    # that node, not the node itself.
+    if inf1_node.type == INF1NodeType.JOINT:
+      node_to_select = self.j3d.jnt1.joints[inf1_node.index]
+    elif inf1_node.type == INF1NodeType.MATERIAL:
+      node_to_select = self.j3d.mat3.materials[inf1_node.index]
+    elif inf1_node.type == INF1NodeType.SHAPE:
+      node_to_select = self.j3d.shp1.shapes[inf1_node.index]
+    else:
+      # Fall back to showing the INF1 node itself if something went wrong.
+      node_to_select = inf1_node
+    
+    self.bunfoe_instance_selected(node_to_select)
   
   
   def export_j3d_by_path(self, j3d_path):
