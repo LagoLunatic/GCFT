@@ -1,6 +1,5 @@
 
 import traceback
-import time
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
@@ -30,14 +29,8 @@ class GCFTThread(QThread):
   
   def run(self):
     try:
-      last_update_time = time.time()
       for next_progress_text, progress_value in self.action_generator:
-        if time.time()-last_update_time < 0.1:
-          # Limit how frequently the signal is emitted to 10 times per second.
-          # Extremely frequent updates (e.g. 1000 times per second) can cause the program to crash with no error message.
-          continue
         self.update_progress.emit(next_progress_text, progress_value)
-        last_update_time = time.time()
     except Exception as e:
       stack_trace = traceback.format_exc()
       error_message = "Error:\n" + str(e) + "\n\n" + stack_trace
