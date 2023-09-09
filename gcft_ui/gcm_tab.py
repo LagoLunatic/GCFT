@@ -42,7 +42,7 @@ class GCMTab(QWidget):
     self.ui.replace_all_files_in_gcm.clicked.connect(self.replace_all_files_in_gcm)
     self.ui.extract_all_files_from_gcm.clicked.connect(self.extract_all_files_from_gcm)
     self.ui.dump_all_gcm_textures.clicked.connect(self.dump_all_gcm_textures)
-    self.ui.add_replace_files_from_folder.clicked.connect(self.add_replace_files_from_folder)
+    self.ui.add_replace_files_from_folder.clicked.connect(self.add_replace_gcm_files_from_folder)
     
     self.ui.gcm_files_tree.setContextMenuPolicy(Qt.CustomContextMenu)
     self.ui.gcm_files_tree.customContextMenuRequested.connect(self.show_gcm_files_tree_context_menu)
@@ -62,6 +62,9 @@ class GCMTab(QWidget):
     self.ui.actionReplaceGCMDOL.triggered.connect(self.replace_dol_in_gcm)
     self.ui.actionAddGCMFolder.triggered.connect(self.add_folder_to_gcm)
     self.ui.actionDeleteGCMFolder.triggered.connect(self.delete_folder_in_gcm)
+    self.ui.actionExtractAllFilesFromGCMFolder.triggered.connect(self.extract_all_files_from_gcm_folder)
+    self.ui.actionReplaceAllFilesInGCMFolder.triggered.connect(self.replace_all_files_in_gcm_folder)
+    self.ui.actionAddReplaceFilesForFolder.triggered.connect(self.add_replace_gcm_folder_files_from_folder)
   
   
   def import_gcm(self):
@@ -79,15 +82,31 @@ class GCMTab(QWidget):
     )
   
   def replace_all_files_in_gcm(self):
+    self.ui.actionReplaceAllFilesInGCMFolder.setData(None) # All files
     self.window().generic_do_gui_file_operation(
-      op_callback=self.replace_all_files_in_gcm_by_path,
+      op_callback=self.replace_all_files_in_gcm_folder_by_path,
+      is_opening=True, is_saving=False, is_folder=True,
+      file_type="GCM"
+    )
+  
+  def replace_all_files_in_gcm_folder(self):
+    self.window().generic_do_gui_file_operation(
+      op_callback=self.replace_all_files_in_gcm_folder_by_path,
       is_opening=True, is_saving=False, is_folder=True,
       file_type="GCM"
     )
   
   def extract_all_files_from_gcm(self):
+    self.ui.actionExtractAllFilesFromGCMFolder.setData(None) # All files
     self.window().generic_do_gui_file_operation(
-      op_callback=self.extract_all_files_from_gcm_by_path,
+      op_callback=self.extract_all_files_from_gcm_folder_by_path,
+      is_opening=False, is_saving=True, is_folder=True,
+      file_type="GCM"
+    )
+  
+  def extract_all_files_from_gcm_folder(self):
+    self.window().generic_do_gui_file_operation(
+      op_callback=self.extract_all_files_from_gcm_folder_by_path,
       is_opening=False, is_saving=True, is_folder=True,
       file_type="GCM"
     )
@@ -99,7 +118,15 @@ class GCMTab(QWidget):
       file_type="all GCM texture"
     )
   
-  def add_replace_files_from_folder(self):
+  def add_replace_gcm_files_from_folder(self):
+    self.ui.actionAddReplaceFilesForFolder.setData(None) # All files
+    self.window().generic_do_gui_file_operation(
+      op_callback=self.add_replace_files_from_folder_by_path,
+      is_opening=True, is_saving=False, is_folder=True,
+      file_type="GCM"
+    )
+  
+  def add_replace_gcm_folder_files_from_folder(self):
     self.window().generic_do_gui_file_operation(
       op_callback=self.add_replace_files_from_folder_by_path,
       is_opening=True, is_saving=False, is_folder=True,
@@ -213,11 +240,18 @@ class GCMTab(QWidget):
   def export_gcm_by_path_complete(self):
     QMessageBox.information(self, "GCM saved", "Successfully saved GCM.")
   
-  def replace_all_files_in_gcm_by_path(self, folder_path):
-    replace_paths, add_paths = self.gcm.collect_files_to_replace_and_add_from_disk(folder_path)
+  def replace_all_files_in_gcm_folder_by_path(self, folder_path):
+    base_dir = self.ui.actionReplaceAllFilesInGCMFolder.data()
+    replace_paths, add_paths = self.gcm.collect_files_to_replace_and_add_from_disk(folder_path, base_dir=base_dir)
     
     if len(replace_paths) == 0:
-      QMessageBox.warning(self, "No matching files found", "The selected folder does not contain any files matching the name and directory structure of files in the currently loaded GCM. No files imported.\n\nMake sure you're selecting the correct folder - it should be the folder with 'files' and 'sys' inside of it, not the 'files' folder itself.")
+      if base_dir is None:
+        error_message = ("The selected folder does not contain any files matching the name and directory structure of files in the currently loaded GCM. No files imported.\n\n"
+          "Make sure you're selecting the correct folder - it should be the folder with 'files' and 'sys' inside of it, not the 'files' folder itself.")
+      else:
+        error_message = ("The selected folder does not contain any files matching the name and directory structure of files in the currently selected GCM folder. No files imported.\n\n"
+          f"Make sure you're selecting the correct folder.")
+      QMessageBox.warning(self, "No matching files found", error_message)
       return
     
     message = "Importing files from this folder will replace %d existing files in the GCM.\n\nAre you sure you want to proceed?" % (len(replace_paths))
@@ -230,7 +264,7 @@ class GCMTab(QWidget):
     if response != QMessageBox.Yes:
       return
     
-    generator = self.gcm.import_files_from_disk_by_paths(folder_path, replace_paths, [])
+    generator = self.gcm.import_files_from_disk_by_paths(folder_path, replace_paths, [], base_dir=base_dir)
     max_val = len(replace_paths)
     
     self.window().start_progress_thread(
@@ -245,9 +279,10 @@ class GCMTab(QWidget):
       file = self.gcm.files_by_path[file_path]
       self.update_changed_file_size_in_gcm(file)
   
-  def extract_all_files_from_gcm_by_path(self, folder_path):
-    generator = self.gcm.export_disc_to_folder_with_changed_files(folder_path)
-    max_val = len(self.gcm.files_by_path)
+  def extract_all_files_from_gcm_folder_by_path(self, folder_path):
+    base_dir = self.ui.actionExtractAllFilesFromGCMFolder.data()
+    generator = self.gcm.export_disc_to_folder_with_changed_files(folder_path, base_dir=base_dir)
+    max_val = self.gcm.get_num_files(base_dir)
     
     self.window().start_progress_thread(
       generator, "Extracting files", max_val,
@@ -265,19 +300,28 @@ class GCMTab(QWidget):
     self.window().start_texture_dumper_thread(asset_dumper, dumper_generator, max_val)
   
   def add_replace_files_from_folder_by_path(self, folder_path):
-    # First ensure the input folder's directory structure is correct.
+    base_dir = self.ui.actionExtractAllFilesFromGCMFolder.data()
+    
     root_names = set(os.listdir(folder_path))
     if len(root_names) == 0:
       QMessageBox.warning(self, "Invalid folder structure", "Input folder is empty. No files to import.")
       return
-    if root_names & set(["files", "sys"]) != root_names:
-      QMessageBox.warning(self, "Invalid folder structure", "Input folder contains unknown files or folders in its root directory.\n\nMake sure you're selecting the correct folder - it should be the folder with 'files' and 'sys' inside of it, not the 'files' folder itself.")
-      return
-    if not all(os.path.isdir(os.path.join(folder_path, name)) for name in root_names):
-      QMessageBox.warning(self, "Invalid folder structure", "Input folder contains files in places of folders in its root directory.\n\nMake sure you're selecting the correct folder - it should be the folder with 'files' and 'sys' inside of it, not the 'files' folder itself.")
-      return
     
-    replace_paths, add_paths = self.gcm.collect_files_to_replace_and_add_from_disk(folder_path)
+    if base_dir is None:
+      # If we're importing over the GCM root, first ensure the input folder's directory structure is correct.
+      if root_names & set(["files", "sys"]) != root_names:
+        QMessageBox.warning(self, "Invalid folder structure", "Input folder contains unknown files or folders in its root directory.\n\nMake sure you're selecting the correct folder - it should be the folder with 'files' and 'sys' inside of it, not the 'files' folder itself.")
+        return
+      if not all(os.path.isdir(os.path.join(folder_path, name)) for name in root_names):
+        QMessageBox.warning(self, "Invalid folder structure", "Input folder contains files in place of folders in its root directory.\n\nMake sure you're selecting the correct folder - it should be the folder with 'files' and 'sys' inside of it, not the 'files' folder itself.")
+        return
+    
+    replace_paths, add_paths = self.gcm.collect_files_to_replace_and_add_from_disk(folder_path, base_dir=base_dir)
+    
+    if len(replace_paths) == 0 and len(add_paths) == 0:
+      error_message = ("The selected folder does not contain any files, only directories.")
+      QMessageBox.warning(self, "No matching files found", error_message)
+      return
     
     message = "Importing files from this folder will replace %d existing files and add %d new files.\n\nAre you sure you want to proceed?" % (len(replace_paths), len(add_paths))
     response = QMessageBox.question(self, 
@@ -289,7 +333,7 @@ class GCMTab(QWidget):
     if response != QMessageBox.Yes:
       return
     
-    generator = self.gcm.import_files_from_disk_by_paths(folder_path, replace_paths, add_paths)
+    generator = self.gcm.import_files_from_disk_by_paths(folder_path, replace_paths, add_paths, base_dir=base_dir)
     max_val = len(replace_paths) + len(add_paths)
     
     self.window().start_progress_thread(
@@ -320,8 +364,8 @@ class GCMTab(QWidget):
       return
     
     if file.is_dir:
-      # TODO: Implement extracting/replacing folders
       menu = QMenu(self)
+      
       menu.addAction(self.ui.actionAddGCMFile)
       self.ui.actionAddGCMFile.setData(file)
       menu.addAction(self.ui.actionAddGCMFolder)
@@ -329,6 +373,13 @@ class GCMTab(QWidget):
       if file.file_path != "files":
         menu.addAction(self.ui.actionDeleteGCMFolder)
         self.ui.actionDeleteGCMFolder.setData(file)
+      menu.addAction(self.ui.actionExtractAllFilesFromGCMFolder)
+      self.ui.actionExtractAllFilesFromGCMFolder.setData(file)
+      menu.addAction(self.ui.actionReplaceAllFilesInGCMFolder)
+      self.ui.actionReplaceAllFilesInGCMFolder.setData(file)
+      menu.addAction(self.ui.actionAddReplaceFilesForFolder)
+      self.ui.actionAddReplaceFilesForFolder.setData(file)
+      
       menu.exec_(self.ui.gcm_files_tree.mapToGlobal(pos))
     else:
       menu = QMenu(self)

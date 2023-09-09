@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'gcm_tab.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.0
+## Created by: Qt User Interface Compiler version 6.5.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -53,6 +53,15 @@ class Ui_GCMTab(object):
         self.actionAddGCMFolder.setObjectName(u"actionAddGCMFolder")
         self.actionDeleteGCMFolder = QAction(GCMTab)
         self.actionDeleteGCMFolder.setObjectName(u"actionDeleteGCMFolder")
+        self.actionExtractAllFilesFromGCMFolder = QAction(GCMTab)
+        self.actionExtractAllFilesFromGCMFolder.setObjectName(u"actionExtractAllFilesFromGCMFolder")
+        self.actionExtractAllFilesFromGCMFolder.setMenuRole(QAction.NoRole)
+        self.actionReplaceAllFilesInGCMFolder = QAction(GCMTab)
+        self.actionReplaceAllFilesInGCMFolder.setObjectName(u"actionReplaceAllFilesInGCMFolder")
+        self.actionReplaceAllFilesInGCMFolder.setMenuRole(QAction.NoRole)
+        self.actionAddReplaceFilesForFolder = QAction(GCMTab)
+        self.actionAddReplaceFilesForFolder.setObjectName(u"actionAddReplaceFilesForFolder")
+        self.actionAddReplaceFilesForFolder.setMenuRole(QAction.NoRole)
         self.verticalLayout = QVBoxLayout(GCMTab)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout_3 = QHBoxLayout()
@@ -122,6 +131,9 @@ class Ui_GCMTab(object):
         self.actionOpenGCMRARC.setText(QCoreApplication.translate("GCMTab", u"Open RARC", None))
         self.actionAddGCMFolder.setText(QCoreApplication.translate("GCMTab", u"Add Folder", None))
         self.actionDeleteGCMFolder.setText(QCoreApplication.translate("GCMTab", u"Delete Folder", None))
+        self.actionExtractAllFilesFromGCMFolder.setText(QCoreApplication.translate("GCMTab", u"Extract All Files From Folder", None))
+        self.actionReplaceAllFilesInGCMFolder.setText(QCoreApplication.translate("GCMTab", u"Replace All Files in Folder", None))
+        self.actionAddReplaceFilesForFolder.setText(QCoreApplication.translate("GCMTab", u"Add/Replace Files For Folder", None))
         self.import_gcm.setText(QCoreApplication.translate("GCMTab", u"Import GCM", None))
         self.replace_all_files_in_gcm.setText(QCoreApplication.translate("GCMTab", u"Replace All Files in GCM", None))
         self.add_replace_files_from_folder.setText(QCoreApplication.translate("GCMTab", u"Add/Replace Files From Folder", None))

@@ -149,6 +149,30 @@
     <string>Delete Folder</string>
    </property>
   </action>
+  <action name="actionExtractAllFilesFromGCMFolder">
+   <property name="text">
+    <string>Extract All Files From Folder</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionReplaceAllFilesInGCMFolder">
+   <property name="text">
+    <string>Replace All Files in Folder</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionAddReplaceFilesForFolder">
+   <property name="text">
+    <string>Add/Replace Files For Folder</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
