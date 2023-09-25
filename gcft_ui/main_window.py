@@ -41,6 +41,9 @@ class GCFTWindow(QMainWindow):
     self.ui = Ui_MainWindow()
     self.ui.setupUi(self)
     
+    # Fix text not becoming grey when a widget is disabled in newer versions of PySide6.
+    self.setStyleSheet("*:disabled { color: grey; }")
+    
     self.setAcceptDrops(True)
     
     self.display_hexadecimal_numbers = True # TODO hex/decimal setting
