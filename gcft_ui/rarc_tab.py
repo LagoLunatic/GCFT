@@ -369,7 +369,23 @@ class RARCTab(QWidget):
   
   def export_rarc_to_c_header_by_path(self, header_path):
     out_str = "#define %s_RES_NAME \"%s\"\n\n" % (self.rarc_name.upper(), self.rarc_name)
-    out_str += "enum %s_RES_FILE_IDS {\n" % (self.rarc_name.upper())
+    
+    out_str += self.get_c_enum_for_rarc(index=False)
+    
+    if not self.rarc.keep_file_ids_synced_with_indexes:
+      out_str += "\n"
+      out_str += self.get_c_enum_for_rarc(index=True)
+    
+    with open(header_path, "w") as f:
+      f.write(out_str)
+  
+  def get_c_enum_for_rarc(self, index=False):
+    type_name = "ID"
+    if index:
+      type_name = "INDEX"
+    out_str = "enum %s_RES_FILE_%sS {\n" % (self.rarc_name.upper(), type_name)
+    indentation = "    "
+    
     on_first_node = True
     for node in self.rarc.nodes:
       wrote_node_comment = False
@@ -380,8 +396,8 @@ class RARCTab(QWidget):
         
         if not wrote_node_comment:
           if not on_first_node:
-            out_str += "  \n"
-          out_str += "  /* %s */\n" % node.type.strip()
+            out_str += f"{indentation}\n"
+          out_str += f"{indentation}/* %s */\n" % node.type.strip()
           wrote_node_comment = True
           on_first_node = False
         
@@ -394,15 +410,19 @@ class RARCTab(QWidget):
           duplicate_index = all_files_with_same_name.index(file_entry)
           file_name = "%s_%d" % (file_name, duplicate_index+1)
         
-        enum_val_name = "%s_%s_%s" % (self.rarc_name, file_ext, file_name)
+        enum_val_name = self.rarc_name
+        if index:
+          enum_val_name += "_INDEX"
+        enum_val_name += "_%s_%s" % (file_ext, file_name)
         enum_val_name = re.sub(r"[\s@:\.,\-<>*%\"!&()|]", "_", enum_val_name) # Sanitize identifier
         enum_val_name = enum_val_name.upper()
         
-        out_str += "  %s=0x%X,\n" % (enum_val_name, file_entry.id)
+        val = file_entry.id
+        if index:
+          val = self.rarc.file_entries.index(file_entry)
+        out_str += f"{indentation}%s=0x%X,\n" % (enum_val_name, val)
     out_str += "};\n"
-    
-    with open(header_path, "w") as f:
-      f.write(out_str)
+    return out_str
   
   def sync_file_ids_and_indexes_changed(self, checked):
     self.rarc.keep_file_ids_synced_with_indexes = 1 if checked else 0
