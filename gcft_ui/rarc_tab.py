@@ -370,22 +370,29 @@ class RARCTab(QWidget):
   def export_rarc_to_c_header_by_path(self, header_path):
     out_str = "#define %s_RES_NAME \"%s\"\n\n" % (self.rarc_name.upper(), self.rarc_name)
     
-    out_str += self.get_c_enum_for_rarc(index=False)
-    
-    if not self.rarc.keep_file_ids_synced_with_indexes:
+    if self.rarc.keep_file_ids_synced_with_indexes:
+      out_str += self.get_c_enum_for_rarc(id=True, index=True)
+    else:
+      out_str += self.get_c_enum_for_rarc(id=True)
       out_str += "\n"
       out_str += self.get_c_enum_for_rarc(index=True)
     
     with open(header_path, "w") as f:
       f.write(out_str)
   
-  def get_c_enum_for_rarc(self, index=False):
-    type_name = "ID"
-    if index:
-      type_name = "INDEX"
-    out_str = "enum %s_RES_FILE_%sS {\n" % (self.rarc_name.upper(), type_name)
-    indentation = "    "
+  def get_c_enum_for_rarc(self, id=False, index=False):
+    assert id or index
     
+    out_str = "enum "
+    if id and index:
+      out_str += "%s_RES_FILE_ID { // IDs and indexes are synced" % (self.rarc_name.upper())
+    elif id:
+      out_str += "%s_RES_FILE_ID {" % (self.rarc_name.upper())
+    elif index:
+      out_str += "%s_RES_FILE_INDEX {" % (self.rarc_name.upper())
+    out_str += "\n"
+    
+    indentation = "    "
     on_first_node = True
     for node in self.rarc.nodes:
       wrote_node_comment = False
@@ -411,7 +418,7 @@ class RARCTab(QWidget):
           file_name = "%s_%d" % (file_name, duplicate_index+1)
         
         enum_val_name = self.rarc_name
-        if index:
+        if index and not id:
           enum_val_name += "_INDEX"
         enum_val_name += "_%s_%s" % (file_ext, file_name)
         enum_val_name = re.sub(r"[\s@:\.,\-<>*%\"!&()|]", "_", enum_val_name) # Sanitize identifier
