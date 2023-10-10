@@ -59,7 +59,7 @@ class J3DViewer(QOpenGLWidget):
     self.j3d = None
     self.load_model_is_queued = False
     self.should_update_render = False
-    self.animate_light = True
+    self.animate_light = False
     self.show_debug_light_widget = True
     self.prev_mouse_pos = None
     self.key_is_held = {}
@@ -298,6 +298,8 @@ class J3DViewer(QOpenGLWidget):
     return bbox_min, bbox_max
   
   def get_preview_compatible_j3d(self, orig_j3d: J3D) -> J3D:
+    # return orig_j3d
+    
     # We have to save the original J3D for the changes to its chunks to be reflected properly.
     # Simply copying orig_j3d.data is not sufficient on its own.
     orig_j3d.save()
@@ -400,9 +402,14 @@ class J3DViewer(QOpenGLWidget):
       # TODO: Hack to try to detect Wind Waker models. Not perfectly accurate.
       use_ww_toon_lighting = True
     
+    if self.animate_light:
+      light_anim_time = self.total_time_elapsed
+    else:
+      light_anim_time = 0
+    
     if use_ww_toon_lighting:
       # Wind Waker lighting.
-      x, z = self.calculate_light_pos(self.total_time_elapsed / 5)
+      x, z = self.calculate_light_pos(light_anim_time / 5)
       light_pos = [-5000*x, 4000, 5000*z]
       light_dir = -(light_pos / np.linalg.norm(light_pos))
       light_col = [1, 0, 0, 1]
@@ -423,7 +430,7 @@ class J3DViewer(QOpenGLWidget):
         self.lights.append(light)
     else:
       # Plain default lighting.
-      x, z = self.calculate_light_pos(self.total_time_elapsed / 5)
+      x, z = self.calculate_light_pos(light_anim_time / 5)
       light_pos = [-5000*x, 4000, 5000*z]
       light_dir = -(light_pos / np.linalg.norm(light_pos))
       light_col = [1, 1, 1, 1]
@@ -462,7 +469,12 @@ class J3DViewer(QOpenGLWidget):
     if not self.model:
       return
     
-    x, z = self.calculate_light_pos(self.total_time_elapsed / 5)
+    if self.animate_light:
+      light_anim_time = self.total_time_elapsed
+    else:
+      light_anim_time = 0
+    
+    x, z = self.calculate_light_pos(light_anim_time / 5)
     self.lights[0].position.x = -5000*x
     self.lights[0].position.z = 5000*z
     self.model.setLight(self.lights[0], 0)
