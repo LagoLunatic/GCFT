@@ -303,8 +303,7 @@ class BunfoeEditor(QWidget):
     elif issubclass(field_type, BUNFOE):
       widget = self.make_bunfoe_editor_widget_for_type(field_type)
     else:
-      print(f"Field type not implemented: {field_type}")
-      raise NotImplementedError
+      raise NotImplementedError(f"Field type not implemented: {field_type}")
     
     widget.setProperty('field_type', field_type)
     widget.setProperty('access_path', access_path)
@@ -349,8 +348,7 @@ class BunfoeEditor(QWidget):
     elif issubclass(field_type, BUNFOE):
       self.set_field_values_for_bunfoe_instance(value, widget, disabled=disabled)
     else:
-      print(f"Field type not implemented: {field_type}")
-      raise NotImplementedError
+      raise NotImplementedError(f"Field type not implemented: {field_type}")
     
     if disabled is not None:
       if isinstance(widget, QWidget):
@@ -367,10 +365,7 @@ class BunfoeEditor(QWidget):
       if access_type == 'attr':
         instance = getattr(instance, access_arg)
       elif access_type == 'item':
-        if isinstance(access_arg, QComboBox):
-          # Dynamic widget indexing.
-          access_arg = access_arg.currentIndex()
-        instance = instance[access_arg]
+        instance = self.get_instance_item(instance, access_arg)
       else:
         raise NotImplementedError
     return instance
@@ -380,10 +375,7 @@ class BunfoeEditor(QWidget):
       if access_type == 'attr':
         instance = getattr(instance, access_arg)
       elif access_type == 'item':
-        if isinstance(access_arg, QComboBox):
-          # Dynamic widget indexing.
-          access_arg = access_arg.currentIndex()
-        instance = instance[access_arg]
+        instance = self.get_instance_item(instance, access_arg)
       else:
         raise NotImplementedError
     
@@ -391,9 +383,21 @@ class BunfoeEditor(QWidget):
     if access_type == 'attr':
       setattr(instance, access_arg, value)
     elif access_type == 'item':
-      instance[access_arg] = value
+      self.set_instance_item(instance, access_arg, value)
     else:
       raise NotImplementedError
+  
+  def get_instance_item(self, instance, index):
+    if isinstance(index, QComboBox):
+      # Dynamic widget indexing.
+      index = index.currentIndex()
+    return instance[index]
+  
+  def set_instance_item(self, instance, index, value):
+    if isinstance(index, QComboBox):
+      # Dynamic widget indexing.
+      index = index.currentIndex()
+    instance[index] = value
   
   def make_checkbox_for_bool(self, field_type: typing.Type):
     checkbox = QCheckBox()
