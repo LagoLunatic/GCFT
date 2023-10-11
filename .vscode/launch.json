@@ -19,6 +19,17 @@
       "program": "${workspaceFolder}/gcft.py",
       "console": "integratedTerminal",
       "justMyCode": true
-    }
+    },
+    {
+      "name": "Profile GCFT",
+      "type": "python",
+      "request": "launch",
+      "module": "cProfile",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "args": [
+        "-o", "profileresults.prof", "${workspaceFolder}/gcft.py",
+      ]
+    },
   ]
 }

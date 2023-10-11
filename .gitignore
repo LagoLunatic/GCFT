@@ -5,3 +5,5 @@ __pycache__
 \#launch.bat
 settings.txt
 /.venv
+profileresults*.txt
+profileresults*.prof
