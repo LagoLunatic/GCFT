@@ -96,8 +96,23 @@ class BunfoeEditor(QWidget):
         field_type = widget.property('field_type')
         access_path = widget.property('access_path')
         if access_path is not None:
-          value = self.get_instance_value(instance, access_path)
-          self.set_widget_value(widget, value, field_type, instance, disabled=disabled)
+          final_access_type, final_access_arg = access_path[-1]
+          if final_access_type == 'item' and isinstance(final_access_arg, QComboBox):
+            # Dynamic widget indexing.
+            combobox = final_access_arg
+            list_value = self.get_instance_value(instance, access_path[:-1])
+            combobox.blockSignals(True)
+            combobox.clear()
+            for i in range(len(list_value)):
+              index_str = self.window().stringify_number(i, min_hex_chars=1)
+              combobox.addItem(f"Selected: {index_str}")
+            combobox.blockSignals(False)
+            if len(list_value) > 0:
+              value = self.get_instance_value(instance, access_path)
+              self.set_widget_value(widget, value, field_type, instance, disabled=disabled)
+          else:
+            value = self.get_instance_value(instance, access_path)
+            self.set_widget_value(widget, value, field_type, instance, disabled=disabled)
         
         # Uncomment the below code to make index comboboxes reset to element zero every time the
         # selection changes.
@@ -181,7 +196,11 @@ class BunfoeEditor(QWidget):
     # A dynamic widget is a single editor widget shared between all of the elements of the sequence,
     # plus a combobox to allow switching which one is currently selected and actively being edited.
     
-    assert isinstance(field.length, int) and field.length > 0
+    if isinstance(field.length, int) and field.length > 0:
+      initial_length = field.length
+    else:
+      initial_length = 0
+    
     type_args = typing.get_args(field.type)
     assert len(type_args) == 1
     arg_type = type_args[0]
@@ -197,9 +216,9 @@ class BunfoeEditor(QWidget):
     #   use_static_layout = False
     
     if use_static_layout:
-      return self.add_all_sequence_elements_to_static_layout(arg_type, field.length, [('attr', field.name)])
+      return self.add_all_sequence_elements_to_static_layout(arg_type, initial_length, [('attr', field.name)])
     else:
-      return self.add_all_sequence_elements_to_dynamic_layout(arg_type, field.length, [('attr', field.name)])
+      return self.add_all_sequence_elements_to_dynamic_layout(arg_type, initial_length, [('attr', field.name)])
   
   def add_all_sequence_elements_to_static_layout(self, arg_type, field_length, access_path, show_indexes=True) -> QLayout:
     # Creates a widget for each element of a sequence, arranged horizontally.
@@ -276,7 +295,7 @@ class BunfoeEditor(QWidget):
     self.set_widget_value(indexed_widget, value, field_type, instance)
   
   def make_widget_for_field(self, field: Field):
-    if field.name.startswith('_padding') or field.bitfield:
+    if field.name.startswith('_padding') or field.assert_default:
       # No need to show these.
       return None
     
