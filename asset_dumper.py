@@ -1,9 +1,12 @@
 
 import os
 import re
+from PIL import Image
 
+from gclib.gcm import GCM
 from gclib.rarc import RARC
 from gclib.j3d import J3D
+from gclib.j3d_chunks.tex1 import TEX1
 from gclib.bti import BTI
 
 class AssetDumper:
@@ -11,7 +14,7 @@ class AssetDumper:
     self.succeeded_file_count = 0
     self.failed_file_paths = []
   
-  def get_all_gcm_file_paths(self, gcm):
+  def get_all_gcm_file_paths(self, gcm: GCM):
     all_file_paths = list(gcm.files_by_path.keys())
     
     # Sort the file names for determinism. And use natural sorting so the room numbers are in order.
@@ -20,7 +23,7 @@ class AssetDumper:
     
     return all_file_paths
   
-  def get_all_rarc_file_paths(self, rarc):
+  def get_all_rarc_file_paths(self, rarc: RARC):
     all_file_paths = []
     for file_entry in rarc.file_entries:
       if file_entry.is_dir:
@@ -31,7 +34,7 @@ class AssetDumper:
       
     return all_file_paths
   
-  def dump_all_textures_in_gcm(self, gcm, out_dir):
+  def dump_all_textures_in_gcm(self, gcm: GCM, out_dir):
     all_file_paths = self.get_all_gcm_file_paths(gcm)
     
     files_checked = 0
@@ -55,7 +58,8 @@ class AssetDumper:
         elif file_ext in [".bmd", ".bdl", ".bmt"]:
           out_path = os.path.join(out_dir, rel_dir, base_name + file_ext)
           j3d_file = J3D(gcm.get_changed_file_data(file_path))
-          self.dump_all_textures_in_j3d_file(j3d_file, out_path)
+          if j3d_file.tex1 is not None:
+            self.dump_all_textures_in_tex1(j3d_file.tex1, out_path)
       except Exception as e:
         display_path = file_path
         self.failed_file_paths.append(display_path)
@@ -87,7 +91,8 @@ class AssetDumper:
         elif file_ext in [".bmd", ".bdl", ".bmt"]:
           out_path = os.path.join(out_dir, rel_dir, base_name + file_ext)
           j3d_file = rarc.get_file(file_entry.name, J3D)
-          self.dump_all_textures_in_j3d_file(j3d_file, out_path)
+          if j3d_file.tex1 is not None:
+            self.dump_all_textures_in_tex1(j3d_file.tex1, out_path)
         elif file_ext == ".arc":
           out_path = os.path.join(out_dir, rel_dir, base_name + file_ext)
           inner_rarc = rarc.get_file(file_entry.name, RARC)
@@ -99,17 +104,15 @@ class AssetDumper:
       files_checked += 1
       yield(display_path, files_checked)
   
-  def dump_all_textures_in_j3d_file(self, j3d_file, out_dir):
-    if not hasattr(j3d_file, "tex1"):
-      return
+  def dump_all_textures_in_tex1(self, tex1: TEX1, out_dir):
     if not os.path.isdir(out_dir):
       os.makedirs(out_dir)
     
-    for texture_name, textures in j3d_file.tex1.textures_by_name.items():
+    for texture_name, textures in tex1.textures_by_name.items():
       if len(textures) == 0:
         continue
       
-      images = []
+      images: list[Image.Image] = []
       for i, texture in enumerate(textures):
         is_duplicate = False
         for prev_texture in textures[:i]:
@@ -141,7 +144,7 @@ class AssetDumper:
         
         self.succeeded_file_count += 1
   
-  def dump_texture(self, bti, out_path):
+  def dump_texture(self, bti: BTI, out_path):
     out_dir = os.path.dirname(out_path)
     if not os.path.isdir(out_dir):
       os.makedirs(out_dir)

@@ -16,8 +16,8 @@ from gclib.jchunk import JChunk
 from gclib.animation import AnimationKeyframe
 from gclib.j3d_chunks.inf1 import INF1, INF1Node, INF1NodeType
 from gclib.j3d_chunks.vtx1 import VTX1, VertexFormat
-# from gclib.j3d_chunks.evp1 import EVP1
-# from gclib.j3d_chunks.drw1 import DRW1
+from gclib.j3d_chunks.evp1 import EVP1
+from gclib.j3d_chunks.drw1 import DRW1
 from gclib.j3d_chunks.jnt1 import JNT1
 from gclib.j3d_chunks.shp1 import SHP1
 from gclib.j3d_chunks.mat3 import MAT3, Material
@@ -36,7 +36,7 @@ class J3DTab(BunfoeEditor):
     self.ui = Ui_J3DTab()
     self.ui.setupUi(self)
     
-    self.j3d = None
+    self.j3d: J3D = None
     self.j3d_name = None
     self.model_loaded = False
     self.anim_paused = True
