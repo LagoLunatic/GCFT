@@ -52,7 +52,7 @@ class AssetDumper:
           for _ in self.dump_all_textures_in_rarc(rarc, out_path, display_path_prefix=file_path):
             continue
         elif file_ext == ".bti":
-          out_path = os.path.join(out_dir, rel_dir, base_name + ".png")
+          out_path = os.path.join(out_dir, rel_dir, base_name)
           bti = BTI(gcm.get_changed_file_data(file_path))
           self.dump_texture(bti, out_path)
         elif file_ext in [".bmd", ".bdl", ".bmt"]:
@@ -85,7 +85,7 @@ class AssetDumper:
       
       try:
         if file_ext == ".bti":
-          out_path = os.path.join(out_dir, rel_dir, base_name + ".png")
+          out_path = os.path.join(out_dir, rel_dir, base_name)
           bti = rarc.get_file(file_entry.name, BTI)
           self.dump_texture(bti, out_path)
         elif file_ext in [".bmd", ".bdl", ".bmt"]:
@@ -112,7 +112,7 @@ class AssetDumper:
       if len(textures) == 0:
         continue
       
-      images: list[Image.Image] = []
+      unique_image_count = 0
       for i, texture in enumerate(textures):
         is_duplicate = False
         for prev_texture in textures[:i]:
@@ -122,34 +122,31 @@ class AssetDumper:
             break
         if is_duplicate:
           continue
-        
-        image = texture.render()
-        
-        if image in images:
-          # A duplicate not detected by is_visually_equal_to().
-          # For example, if one version uses C8 format with RGB565 palette and the other uses RGB565 format, they can be identical, but is_visually_equal_to() will not detect this.
-          continue
-        
-        images.append(image)
+        unique_image_count += 1
       
-      has_different_duplicates = len(images) > 1
-      for i, image in enumerate(images):
+      has_different_duplicates = unique_image_count > 1
+      for i, texture in enumerate(textures):
+        dupe_tex_name = texture_name
         if has_different_duplicates:
           # If there's more than one unique version of this texture, append _dupe0 _dupe1 etc to all the images.
-          out_path = os.path.join(out_dir, texture_name + "_dupe%d.png" % i)
-        else:
-          out_path = os.path.join(out_dir, texture_name + ".png")
+          dupe_tex_name += ".dupe%d" % i
         
-        image.save(out_path)
+        out_path = os.path.join(out_dir, dupe_tex_name)
         
-        self.succeeded_file_count += 1
+        self.dump_texture(texture, out_path)
   
   def dump_texture(self, bti: BTI, out_path):
     out_dir = os.path.dirname(out_path)
-    if not os.path.isdir(out_dir):
-      os.makedirs(out_dir)
+    os.makedirs(out_dir, exist_ok=True)
     
-    image = bti.render()
-    image.save(out_path)
+    for i in range(bti.mipmap_count):
+      mip_out_path = out_path
+      if (bti.mipmap_count) > 1:
+        mip_out_path += ".mip%d" % i
+      mip_out_path += ".png"
+      # if os.path.isfile(mip_out_path):
+      #   continue
+      image = bti.render_mipmap(i)
+      image.save(mip_out_path)
     
     self.succeeded_file_count += 1

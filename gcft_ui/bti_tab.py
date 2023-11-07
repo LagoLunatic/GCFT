@@ -28,6 +28,7 @@ BTI_INTEGER_FIELDS = [
   ("min_lod", 1),
   ("max_lod", 1),
   ("lod_bias", 2),
+  ("mipmap_count", 1),
 ]
 
 class BTITab(QWidget):
@@ -41,6 +42,8 @@ class BTITab(QWidget):
     
     self.ui.export_bti.setDisabled(True)
     self.ui.export_bti_image.setDisabled(True)
+    self.ui.bti_curr_mipmap.setDisabled(True)
+    self.ui.replace_bti_mipmap.setDisabled(True)
     
     self.ui.bti_file_size.setText("")
     self.ui.bti_resolution.setText("")
@@ -57,6 +60,8 @@ class BTITab(QWidget):
     self.ui.import_bti_image.clicked.connect(self.import_bti_image)
     self.ui.export_bti_image.clicked.connect(self.export_bti_image)
     self.ui.import_bti_from_bnr.clicked.connect(self.import_bti_from_bnr)
+    self.ui.bti_curr_mipmap.currentIndexChanged.connect(self.reload_bti_image)
+    self.ui.replace_bti_mipmap.clicked.connect(self.replace_bti_mipmap_image)
     
     for field_name, field_enum in BTI_ENUM_FIELDS:
       widget_name = "bti_" + field_name
@@ -116,6 +121,13 @@ class BTITab(QWidget):
       file_type="BNR", file_filter="All files (*.*)"
     )
   
+  def replace_bti_mipmap_image(self):
+    self.window().generic_do_gui_file_operation(
+      op_callback=self.replace_bti_mipmap_image_by_path,
+      is_opening=True, is_saving=False, is_folder=False,
+      file_type="image", file_filter="PNG Files (*.png)"
+    )
+  
   
   def import_bti_by_path(self, bti_path):
     with open(bti_path, "rb") as f:
@@ -126,6 +138,8 @@ class BTITab(QWidget):
     self.import_bti_by_data(data, bti_name)
   
   def import_bti_by_data(self, data, bti_name):
+    self.ui.bti_curr_mipmap.setCurrentIndex(0)
+    
     prev_bti = self.bti
     self.bti = BTI(data)
     
@@ -187,9 +201,15 @@ class BTITab(QWidget):
     
     self.ui.export_bti.setDisabled(False)
     self.ui.export_bti_image.setDisabled(False)
+    self.ui.replace_bti_mipmap.setDisabled(False)
+    self.ui.bti_curr_mipmap.setDisabled(False)
   
   def reload_bti_image(self):
-    self.bti_image = self.bti.render()
+    selected_mipmap_index = self.ui.bti_curr_mipmap.currentIndex()
+    selected_mipmap_index = max(0, selected_mipmap_index)
+    selected_mipmap_index = min(self.bti.mipmap_count-1, selected_mipmap_index)
+    
+    self.bti_image = self.bti.render_mipmap(selected_mipmap_index)
     
     image_bytes = self.bti_image.tobytes('raw', 'BGRA')
     qimage = QImage(image_bytes, self.bti_image.width, self.bti_image.height, QImage.Format_ARGB32)
@@ -210,6 +230,14 @@ class BTITab(QWidget):
     self.ui.bti_image_label.setFixedWidth(self.bti_image.width)
     self.ui.bti_image_label.setFixedHeight(self.bti_image.height)
     self.ui.bti_image_label.show()
+    
+    self.ui.bti_curr_mipmap.blockSignals(True)
+    self.ui.bti_curr_mipmap.clear()
+    for i in range(self.bti.mipmap_count):
+      _, _, mipmap_width, mipmap_height = self.bti.get_mipmap_offset_and_size(i)
+      self.ui.bti_curr_mipmap.addItem(f"{i}: {mipmap_width}x{mipmap_height}")
+    self.ui.bti_curr_mipmap.setCurrentIndex(selected_mipmap_index)
+    self.ui.bti_curr_mipmap.blockSignals(False)
   
   def export_bti_by_path(self, bti_path):
     self.bti.save_changes()
@@ -290,6 +318,26 @@ class BTITab(QWidget):
     
     self.import_bti_by_data(data, bti_name)
   
+  def replace_bti_mipmap_image_by_path(self, image_path):
+    _, _, width, height = self.bti.get_mipmap_offset_and_size(self.ui.bti_curr_mipmap.currentIndex())
+    image = Image.open(image_path)
+    if image.width != width or image.height != height:
+      QMessageBox.warning(self,
+        "Invalid mipmap size",
+        "The image you selected has the wrong size for this mipmap.\n" +
+        "Each mipmap must be exactly half the size of the previous one.\n" +
+        f"Expected size: {width}x{height}\n" +
+        f"Instead got: {image.width}x{image.height}\n\n" +
+        "If you want to completely replace all mipmaps with an image of a different size, select \"Import Image\" instead."
+      )
+    
+    self.bti.replace_mipmap(self.ui.bti_curr_mipmap.currentIndex(), image)
+    
+    self.bti.save_changes()
+    print(self.bti.num_colors)
+    
+    self.reload_bti_image()
+  
   def bti_header_field_changed(self):
     for field_name, field_enum in BTI_ENUM_FIELDS:
       widget_name = "bti_" + field_name
@@ -324,13 +372,20 @@ class BTITab(QWidget):
           QMessageBox.warning(self, "Invalid value", "\"%s\" is not a valid decimal number." % new_str_value)
           new_value = old_value
       
-      if new_value < 0:
-        QMessageBox.warning(self, "Invalid value", "Value cannot be negative.")
+      if field_name == "mipmap_count":
+        min_value = 1
+        max_value = self.bti.get_max_valid_mipmap_count()
+      else:
+        min_value = 0
+        max_value = max_value = (2**(byte_size*8)) - 1
+      
+      if new_value < min_value:
+        QMessageBox.warning(self, "Invalid value", f"Value is too small (minimum value: 0x{min_value:X})")
         new_value = old_value
-      if new_value >= 2**(byte_size*8):
+      if new_value > max_value:
         QMessageBox.warning(
           self, "Invalid value",
-          "Value is too large to fit in field %s (maximum value: 0x%X)" % (field_name, (2**(byte_size*8))-1)
+          "Value is too large to fit in field %s (maximum value: 0x%X)" % (field_name, max_value)
         )
         new_value = old_value
       

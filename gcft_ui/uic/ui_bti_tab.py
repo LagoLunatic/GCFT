@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'bti_tab.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.0
+## Created by: Qt User Interface Compiler version 6.5.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -39,6 +39,11 @@ class Ui_BTITab(object):
 
         self.horizontalLayout_5.addWidget(self.import_bti_image)
 
+        self.replace_bti_mipmap = QPushButton(BTITab)
+        self.replace_bti_mipmap.setObjectName(u"replace_bti_mipmap")
+
+        self.horizontalLayout_5.addWidget(self.replace_bti_mipmap)
+
         self.import_bti_from_bnr = QPushButton(BTITab)
         self.import_bti_from_bnr.setObjectName(u"import_bti_from_bnr")
 
@@ -63,6 +68,11 @@ class Ui_BTITab(object):
         self.widget.setObjectName(u"widget")
 
         self.horizontalLayout.addWidget(self.widget)
+
+        self.widget_2 = QWidget(BTITab)
+        self.widget_2.setObjectName(u"widget_2")
+
+        self.horizontalLayout.addWidget(self.widget_2)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -92,7 +102,7 @@ class Ui_BTITab(object):
         self.bti_image_scroll_area.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 591, 433))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 570, 431))
         self.gridLayout = QGridLayout(self.scrollAreaWidgetContents)
         self.gridLayout.setObjectName(u"gridLayout")
         self.bti_image_label = QLabel(self.scrollAreaWidgetContents)
@@ -272,9 +282,32 @@ class Ui_BTITab(object):
 
         self.formLayout.setWidget(13, QFormLayout.FieldRole, self.bti_lod_bias)
 
+        self.label_14 = QLabel(BTITab)
+        self.label_14.setObjectName(u"label_14")
+
+        self.formLayout.setWidget(14, QFormLayout.LabelRole, self.label_14)
+
+        self.bti_mipmap_count = QLineEdit(BTITab)
+        self.bti_mipmap_count.setObjectName(u"bti_mipmap_count")
+        self.bti_mipmap_count.setMaximumSize(QSize(35, 16777215))
+
+        self.formLayout.setWidget(14, QFormLayout.FieldRole, self.bti_mipmap_count)
+
+        self.label_16 = QLabel(BTITab)
+        self.label_16.setObjectName(u"label_16")
+
+        self.formLayout.setWidget(15, QFormLayout.LabelRole, self.label_16)
+
+        self.bti_curr_mipmap = QComboBox(BTITab)
+        self.bti_curr_mipmap.setObjectName(u"bti_curr_mipmap")
+        self.bti_curr_mipmap.setMinimumSize(QSize(80, 0))
+
+        self.formLayout.setWidget(15, QFormLayout.FieldRole, self.bti_curr_mipmap)
+
 
         self.horizontalLayout_8.addLayout(self.formLayout)
 
+        self.horizontalLayout_8.setStretch(0, 1)
 
         self.verticalLayout.addLayout(self.horizontalLayout_8)
 
@@ -288,7 +321,8 @@ class Ui_BTITab(object):
         BTITab.setWindowTitle(QCoreApplication.translate("BTITab", u"Form", None))
         self.import_bti.setText(QCoreApplication.translate("BTITab", u"Import BTI", None))
         self.import_bti_image.setText(QCoreApplication.translate("BTITab", u"Import Image", None))
-        self.import_bti_from_bnr.setText(QCoreApplication.translate("BTITab", u"Import From GameCube Banner (.bnr)", None))
+        self.replace_bti_mipmap.setText(QCoreApplication.translate("BTITab", u"Replace Mipmap", None))
+        self.import_bti_from_bnr.setText(QCoreApplication.translate("BTITab", u"Import From Banner (.bnr)", None))
         self.export_bti.setText(QCoreApplication.translate("BTITab", u"Export BTI", None))
         self.export_bti_image.setText(QCoreApplication.translate("BTITab", u"Export Image", None))
         self.bti_image_label.setText("")
@@ -310,5 +344,7 @@ class Ui_BTITab(object):
         self.label_8.setText(QCoreApplication.translate("BTITab", u"Min LOD", None))
         self.label_9.setText(QCoreApplication.translate("BTITab", u"Max LOD", None))
         self.label_10.setText(QCoreApplication.translate("BTITab", u"LOD Bias", None))
+        self.label_14.setText(QCoreApplication.translate("BTITab", u"Num Mipmaps", None))
+        self.label_16.setText(QCoreApplication.translate("BTITab", u"Selected Mipmap", None))
     # retranslateUi
 
