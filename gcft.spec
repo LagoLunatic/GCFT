@@ -32,6 +32,8 @@ def get_hidden_imports():
     import_modules.append(f"gclib.{module_name}")
   for module_name in gclib.j3d_chunks.__all__:
     import_modules.append(f"gclib.j3d_chunks.{module_name}")
+  for module_name in gclib.jpa_chunks.__all__:
+    import_modules.append(f"gclib.jpa_chunks.{module_name}")
   
   return import_modules
 

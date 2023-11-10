@@ -8,7 +8,11 @@ from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 
 from gclib import fs_helpers as fs
-from gclib.jpc import JPC, JPAChunk, ColorAnimationKeyframe, TEX1, Particle
+from gclib.jpc import JPC, JPAChunk, JParticle
+from gclib.jpa_chunks.bsp1 import BSP1, ColorAnimationKeyframe
+from gclib.jpa_chunks.ssp1 import SSP1
+from gclib.jpa_chunks.tdb1 import TDB1
+from gclib.jpa_chunks.tex1 import TEX1
 from gcft_ui.uic.ui_jpc_tab import Ui_JPCTab
 
 class JPCFilterProxyModel(QSortFilterProxyModel):
@@ -123,31 +127,12 @@ class JPCTab(QWidget):
         chunk_item.setData(chunk)
         particle_item.appendRow(chunk_item)
         
-        if chunk.magic == "BSP1":
-          if chunk.color_prm_anm_table:
-            anim_item = QStandardItem("Color PRM Anim")
-            chunk_item.appendRow(anim_item)
-            for keyframe_index, keyframe in enumerate(chunk.color_prm_anm_table):
-              keyframe_item = QStandardItem("0x%02X" % keyframe_index)
-              keyframe_item.setData(keyframe)
-              anim_item.appendRow(keyframe_item)
-          
-          if chunk.color_env_anm_table:
-            anim_item = QStandardItem("Color ENV Anim")
-            chunk_item.appendRow(anim_item)
-            for keyframe_index, keyframe in enumerate(chunk.color_env_anm_table):
-              keyframe_item = QStandardItem("0x%02X" % keyframe_index)
-              keyframe_item.setData(keyframe)
-              anim_item.appendRow(keyframe_item)
-        elif chunk.magic == "TDB1":
-          # Expand TDB1 chunks by default.
-          self.ui.jpc_particles_tree.expand(self.item_model.indexFromItem(chunk_item))
-          
-          for texture_filename in chunk.texture_filenames:
-            texture = self.jpc.textures_by_filename[texture_filename]
-            texture_item = QStandardItem(texture_filename)
-            texture_item.setData(texture)
-            chunk_item.appendRow(texture_item)
+        if isinstance(chunk, BSP1):
+          self.add_bsp1_chunk_to_tree(chunk, chunk_item)
+        elif isinstance(chunk, SSP1):
+          self.add_ssp1_chunk_to_tree(chunk, chunk_item)
+        elif isinstance(chunk, TDB1):
+          self.add_tdb1_chunk_to_tree(chunk, chunk_item)
   
   def filter_particles(self):
     query = self.ui.filter_particles.text()
@@ -183,6 +168,38 @@ class JPCTab(QWidget):
       keyframe = data
       self.color_anim_keyframe_selected(keyframe)
       return
+  
+  
+  def add_bsp1_chunk_to_tree(self, bsp1: BSP1, chunk_item: QStandardItem):
+    if bsp1.color_prm_anm_table:
+      anim_item = QStandardItem("Color PRM Anim")
+      chunk_item.appendRow(anim_item)
+      for keyframe_index, keyframe in enumerate(bsp1.color_prm_anm_table):
+        keyframe_item = QStandardItem("0x%02X" % keyframe_index)
+        keyframe_item.setData(keyframe)
+        anim_item.appendRow(keyframe_item)
+    
+    if bsp1.color_env_anm_table:
+      anim_item = QStandardItem("Color ENV Anim")
+      chunk_item.appendRow(anim_item)
+      for keyframe_index, keyframe in enumerate(bsp1.color_env_anm_table):
+        keyframe_item = QStandardItem("0x%02X" % keyframe_index)
+        keyframe_item.setData(keyframe)
+        anim_item.appendRow(keyframe_item)
+  
+  def add_ssp1_chunk_to_tree(self, ssp1: SSP1, chunk_item: QStandardItem):
+    pass
+  
+  def add_tdb1_chunk_to_tree(self, tdb1: TDB1, chunk_item: QStandardItem):
+    # Expand TDB1 chunks by default.
+    self.ui.jpc_particles_tree.expand(self.item_model.indexFromItem(chunk_item))
+    
+    for texture_filename in tdb1.texture_filenames:
+      texture = self.jpc.textures_by_filename[texture_filename]
+      texture_item = QStandardItem(texture_filename)
+      texture_item.setData(texture)
+      chunk_item.appendRow(texture_item)
+  
   
   def bsp1_chunk_selected(self, bsp1):
     layout = self.ui.scrollAreaWidgetContents.layout()
@@ -263,7 +280,7 @@ class JPCTab(QWidget):
     if isinstance(data, TEX1):
       texture = data
       particle_item = item.parent().parent()
-      particle: Particle = particle_item.data()
+      particle: JParticle = particle_item.data()
       
       menu = QMenu(self)
       
