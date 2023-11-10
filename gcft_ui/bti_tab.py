@@ -254,6 +254,7 @@ class BTITab(QWidget):
     try:
       if self.bti is None:
         # No BTI is already loaded. Create a dummy one from scratch to allow importing this image.
+        # TODO: this is a hack, should really be handled within the BTI class
         data = BytesIO()
         image_data = b"\0"*0x20
         fs.write_bytes(data, 0x20, image_data)
@@ -266,11 +267,14 @@ class BTITab(QWidget):
         fs.write_u8(data,  0x09, PaletteFormat.RGB5A3.value) # Palette format
         fs.write_u16(data, 0x0A, 1) # Num colors
         fs.write_u32(data, 0x0C, 0x20+len(image_data)) # Palette data offset
+        fs.write_u8(data, 0x18, 1) # Mipmap count
         fs.write_u32(data, 0x1C, 0x20) # Image data offset
         
         image_name = os.path.splitext(os.path.basename(image_path))[0]
         
         self.import_bti_by_data(data, image_name)
+      
+      assert self.bti is not None
       
       self.original_bti_image = Image.open(image_path)
       
