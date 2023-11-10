@@ -22,17 +22,24 @@ from gcft_ui.bunfoe_editor import BunfoeEditor, BunfoeWidget, BunfoeDialog
 class JPCFilterProxyModel(QSortFilterProxyModel):
   def filterAcceptsRow(self, source_row: int, source_parent: QModelIndex | QPersistentModelIndex) -> bool:
     if source_parent.isValid():
-      # Only filter top-level rows (the particles), not the child rows.
+      # Always show child rows if their top-level parent (the particle) is shown.
       return True
     
-    # Show the particle if any of its children match the query text.
+    # For the top-level rows (the particles), check if any of their children match the filter, recursively.
+    return self.check_row_recursive(source_row, source_parent)
+  
+  def check_row_recursive(self, source_row: int, source_parent: QModelIndex | QPersistentModelIndex) -> bool:
+    if super().filterAcceptsRow(source_row, source_parent):
+      # The current row itself matches the filter.
+      return True
+    
     source_index = self.sourceModel().index(source_row, 0, source_parent)
     for child_row in range(self.sourceModel().rowCount(source_index)):
-      if super().filterAcceptsRow(child_row, source_index):
+      if self.check_row_recursive(child_row, source_index):
+        # One of the current row's children (recursive) matches the filter.
         return True
     
-    # Also show the particle if its ID number matches the query text.
-    return super().filterAcceptsRow(source_row, source_parent)
+    return False
 
 class JPCTab(BunfoeEditor):
   def __init__(self):
