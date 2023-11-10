@@ -8,7 +8,9 @@ from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 
 from gclib import fs_helpers as fs
-from gclib.jpc import JPC, JPAChunk, JParticle
+from gclib.jpc import JPC
+from gclib.jpa import JParticle
+from gclib.jchunk import JPAChunk
 from gclib.jpa_chunks.bsp1 import BSP1, ColorAnimationKeyframe
 from gclib.jpa_chunks.ssp1 import SSP1
 from gclib.jpa_chunks.tdb1 import TDB1
