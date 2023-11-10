@@ -16,7 +16,7 @@ jobs:
       matrix:
         include:
           - name: Windows Build
-            os: windows-latest
+            os: windows-2019
             architecture: x64
             artifact: windows
             upload_path_suffix: '/*'
@@ -49,7 +49,7 @@ jobs:
         id: setup-py
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11.5'
+          python-version: '3.11'
           architecture: ${{ matrix.architecture }}
           cache: 'pip' # Cache all pip dependency downloads
       - name: Get PyJ3DUltra submodule status for cache
