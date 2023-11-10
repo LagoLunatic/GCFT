@@ -14,22 +14,22 @@ from gcft_ui.uic.ui_bti_tab import Ui_BTITab
 from gcft_paths import ASSETS_PATH
 from PIL import Image
 
-BTI_ENUM_FIELDS = [
-  ("image_format", ImageFormat),
-  ("palette_format", PaletteFormat),
-  ("wrap_s", WrapMode),
-  ("wrap_t", WrapMode),
-  ("min_filter", FilterMode),
-  ("mag_filter", FilterMode),
-]
+BTI_ENUM_FIELDS = {
+  "image_format": ImageFormat,
+  "palette_format": PaletteFormat,
+  "wrap_s": WrapMode,
+  "wrap_t": WrapMode,
+  "min_filter": FilterMode,
+  "mag_filter": FilterMode,
+}
 
-BTI_INTEGER_FIELDS = [
-  ("alpha_setting", 1),
-  ("min_lod", 1),
-  ("max_lod", 1),
-  ("lod_bias", 2),
-  ("mipmap_count", 1),
-]
+BTI_INTEGER_FIELDS = {
+  "alpha_setting": 1,
+  "min_lod": 1,
+  "max_lod": 1,
+  "lod_bias": 2,
+  "mipmap_count": 1,
+}
 
 class BTITab(QWidget):
   def __init__(self):
@@ -63,7 +63,7 @@ class BTITab(QWidget):
     self.ui.bti_curr_mipmap.currentIndexChanged.connect(self.reload_bti_image)
     self.ui.replace_bti_mipmap.clicked.connect(self.replace_bti_mipmap_image)
     
-    for field_name, field_enum in BTI_ENUM_FIELDS:
+    for field_name, field_enum in BTI_ENUM_FIELDS.items():
       widget_name = "bti_" + field_name
       combobox_widget = getattr(self.ui, widget_name)
       combobox_widget.setDisabled(True)
@@ -72,7 +72,7 @@ class BTITab(QWidget):
         combobox_widget.addItem(enum_value.name)
       combobox_widget.currentIndexChanged.connect(self.bti_header_field_changed)
     
-    for field_name, byte_size in BTI_INTEGER_FIELDS:
+    for field_name, byte_size in BTI_INTEGER_FIELDS.items():
       widget_name = "bti_" + field_name
       line_edit_widget = getattr(self.ui, widget_name)
       line_edit_widget.setDisabled(True)
@@ -158,7 +158,7 @@ class BTITab(QWidget):
     self.bti_name = bti_name
     
     
-    for field_name, field_enum in BTI_ENUM_FIELDS:
+    for field_name, field_enum in BTI_ENUM_FIELDS.items():
       widget_name = "bti_" + field_name
       combobox_widget = getattr(self.ui, widget_name)
       combobox_widget.setDisabled(False)
@@ -181,7 +181,7 @@ class BTITab(QWidget):
       combobox_widget.blockSignals(False)
     
     
-    for field_name, byte_size in BTI_INTEGER_FIELDS:
+    for field_name, byte_size in BTI_INTEGER_FIELDS.items():
       widget_name = "bti_" + field_name
       line_edit_widget = getattr(self.ui, widget_name)
       line_edit_widget.setDisabled(False)
@@ -339,19 +339,21 @@ class BTITab(QWidget):
     self.reload_bti_image()
   
   def bti_header_field_changed(self):
-    for field_name, field_enum in BTI_ENUM_FIELDS:
-      widget_name = "bti_" + field_name
-      combobox_widget = getattr(self.ui, widget_name)
+    field_name = self.sender().objectName()
+    assert field_name.startswith("bti_")
+    field_name = field_name[len("bti_"):]
+    
+    if field_name in BTI_ENUM_FIELDS:
+      field_enum = BTI_ENUM_FIELDS[field_name]
+      combobox_widget: QComboBox = self.sender()
       
       current_enum_name = combobox_widget.itemText(combobox_widget.currentIndex())
       current_enum_value = field_enum[current_enum_name]
       
       setattr(self.bti, field_name, current_enum_value)
-    
-    
-    for field_name, byte_size in BTI_INTEGER_FIELDS:
-      widget_name = "bti_" + field_name
-      line_edit_widget = getattr(self.ui, widget_name)
+    elif field_name in BTI_INTEGER_FIELDS:
+      byte_size = BTI_INTEGER_FIELDS[field_name]
+      line_edit_widget: QLineEdit = self.sender()
       new_str_value = line_edit_widget.text()
       old_value = getattr(self.bti, field_name)
       
