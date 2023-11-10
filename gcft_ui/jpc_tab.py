@@ -11,6 +11,13 @@ from gclib import fs_helpers as fs
 from gclib.jpc import JPC, JPAChunk, ColorAnimationKeyframe, TEX1, Particle
 from gcft_ui.uic.ui_jpc_tab import Ui_JPCTab
 
+class JPCFilterProxyModel(QSortFilterProxyModel):
+  def filterAcceptsRow(self, source_row: int, source_parent: QModelIndex | QPersistentModelIndex) -> bool:
+    # Only filter top-level rows (the particles), not the child rows.
+    if source_parent.isValid():
+      return True
+    return super().filterAcceptsRow(source_row, source_parent)
+
 class JPCTab(QWidget):
   def __init__(self):
     super().__init__()
@@ -21,9 +28,12 @@ class JPCTab(QWidget):
     self.jpc_name = None
     
     self.item_model = QStandardItemModel()
+    self.proxy_model = JPCFilterProxyModel()
+    self.proxy_model.setSourceModel(self.item_model)
+    self.proxy_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
     
     self.ui.jpc_particles_tree.setColumnWidth(0, 100)
-    self.ui.jpc_particles_tree.setModel(self.item_model)
+    self.ui.jpc_particles_tree.setModel(self.proxy_model)
     self.ui.jpc_particles_tree.setRootIndex(self.item_model.index(0, 0))
     self.selection_model = self.ui.jpc_particles_tree.selectionModel()
     self.ui.jpc_particles_tree.setHeaderHidden(True)
@@ -38,6 +48,7 @@ class JPCTab(QWidget):
     self.ui.export_jpc_folder.clicked.connect(self.export_jpc_folder)
     
     self.selection_model.selectionChanged.connect(self.widget_item_selected)
+    self.ui.filter_particles.textChanged.connect(self.filter_particles)
     
     self.ui.jpc_particles_tree.setContextMenuPolicy(Qt.CustomContextMenu)
     self.ui.jpc_particles_tree.customContextMenuRequested.connect(self.show_jpc_particles_tree_context_menu)
@@ -137,6 +148,10 @@ class JPCTab(QWidget):
             texture_item = QStandardItem(texture_filename)
             texture_item.setData(texture)
             chunk_item.appendRow(texture_item)
+  
+  def filter_particles(self):
+    query = self.ui.filter_particles.text()
+    self.proxy_model.setFilterFixedString(query)
   
   def widget_item_selected(self):
     layout = self.ui.scrollAreaWidgetContents.layout()

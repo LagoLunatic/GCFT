@@ -17,8 +17,8 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QLabel,
-    QPushButton, QScrollArea, QSizePolicy, QTreeView,
-    QVBoxLayout, QWidget)
+    QLineEdit, QPushButton, QScrollArea, QSizePolicy,
+    QTreeView, QVBoxLayout, QWidget)
 
 class Ui_JPCTab(object):
     def setupUi(self, JPCTab):
@@ -55,6 +55,11 @@ class Ui_JPCTab(object):
 
 
         self.verticalLayout.addLayout(self.horizontalLayout_4)
+
+        self.filter_particles = QLineEdit(JPCTab)
+        self.filter_particles.setObjectName(u"filter_particles")
+
+        self.verticalLayout.addWidget(self.filter_particles)
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
@@ -106,6 +111,7 @@ class Ui_JPCTab(object):
         self.export_jpc.setText(QCoreApplication.translate("JPCTab", u"Export JPC", None))
         self.add_particles_from_folder.setText(QCoreApplication.translate("JPCTab", u"Add Particles From Folder", None))
         self.export_jpc_folder.setText(QCoreApplication.translate("JPCTab", u"Export Folder", None))
+        self.filter_particles.setPlaceholderText(QCoreApplication.translate("JPCTab", u"Filter", None))
         self.jpc_sidebar_label.setText(QCoreApplication.translate("JPCTab", u"Extra information will be displayed here as necessary.", None))
     # retranslateUi
 
