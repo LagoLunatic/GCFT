@@ -273,7 +273,7 @@ class JPCTab(QWidget):
     index = self.ui.jpc_particles_tree.indexAt(pos)
     if not index.isValid():
       return
-    item = self.item_model.itemFromIndex(index)
+    item = self.item_model.itemFromIndex(self.proxy_model.mapToSource(index))
     if item is None:
       return
     
