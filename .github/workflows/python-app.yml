@@ -16,7 +16,7 @@ jobs:
       matrix:
         include:
           - name: Windows Build
-            os: windows-2019
+            os: windows-latest
             architecture: x64
             artifact: windows
             upload_path_suffix: '/*'
@@ -61,6 +61,9 @@ jobs:
         with:
           path: '${{ github.workspace }}/PyJ3DUltra/build'
           key: pyj3dultra-${{ runner.os }}-py${{ steps.setup-py.outputs.python-version  }}-${{ hashFiles('pyj3dultra_submodule_status.txt') }}
+      - name: Setup MSVC for Windows
+        if: runner.os == 'Windows' && steps.cache-pyj3dultra.outputs.cache-hit != 'true'
+        uses: ilammy/msvc-dev-cmd@v1
       - name: Setup cmake
         if: steps.cache-pyj3dultra.outputs.cache-hit != 'true'
         uses: lukka/get-cmake@latest
