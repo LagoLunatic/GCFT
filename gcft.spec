@@ -22,21 +22,6 @@ def build_datas_recursive(paths):
   
   return datas
 
-import sys
-def get_hidden_imports():
-  import_modules = []
-  
-  sys.path.insert(0, "./gclib")
-  import gclib
-  for module_name in gclib.__all__:
-    import_modules.append(f"gclib.{module_name}")
-  for module_name in gclib.j3d_chunks.__all__:
-    import_modules.append(f"gclib.j3d_chunks.{module_name}")
-  for module_name in gclib.jpa_chunks.__all__:
-    import_modules.append(f"gclib.jpa_chunks.{module_name}")
-  
-  return import_modules
-
 import platform
 import glob
 def get_binaries():
@@ -54,13 +39,13 @@ def get_binaries():
 
 
 a = Analysis(['gcft.py'],
-             pathex=[],
+             pathex=["./gclib", "./gclib/gclib"],
              binaries=get_binaries(),
              datas=build_datas_recursive([
                'assets/**/*.*',
                'version.txt',
              ]),
-             hiddenimports=get_hidden_imports(),
+             hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
