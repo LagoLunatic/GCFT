@@ -24,7 +24,8 @@ try:
   import J3DUltra as ultra # type: ignore
   from J3DUltra import J3DLight # type: ignore
   J3DULTRA_INSTALLED = True
-except ImportError:
+except ImportError as e:
+  print(f"Failed to import J3DUltra with error: {e}")
   J3DULTRA_INSTALLED = False
 
 REQUIRED_OPENGL_VERSION = (4, 5)

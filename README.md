@@ -65,15 +65,8 @@ Then run GCFT with:
 #### J3D model previews while running from source
 
 Optionally, if you want J3D model previews to display while running from source, you must also clone and build PyJ3DUltra.  
-First run this command to clone PyJ3DUltra:  
-`git submodule update --init --recursive PyJ3DUltra`  
+A script that automates this process is provided. Simply run the following command:  
+`py -3.11 build_pyj3dultra.py`  
+On Windows, you must first [install vcpkg](https://vcpkg.io/en/getting-started) before running that command.  
 
-If you're on Windows, [install vcpkg](https://vcpkg.io/en/getting-started), then run the following command from the GCFT directory (assuming you installed vcpkg to `C:/vcpkg`):  
-`cmake PyJ3DUltra -BPyJ3DUltra/build -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake`  
-On Mac or Linux, simply run this command instead:  
-`cmake PyJ3DUltra -BPyJ3DUltra/build`  
-
-Finally, run this command to build PyJ3DUltra:  
-`cmake --build PyJ3DUltra/build`  
-
-Now when you load a J3D model in GCFT, it should be able to display the 3D preview.  
+If the script ran successfully with no errors, then the next time you load a J3D model in GCFT you should see a 3D preview.
