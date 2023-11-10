@@ -165,7 +165,8 @@ class JPCTab(QWidget):
     selected_indexes = self.selection_model.selectedRows()
     if not selected_indexes:
       return
-    item = self.item_model.itemFromIndex(selected_indexes[0])
+    selected_index = self.proxy_model.mapToSource(selected_indexes[0])
+    item = self.item_model.itemFromIndex(selected_index)
     if item is None:
       return
     
