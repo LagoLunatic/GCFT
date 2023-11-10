@@ -19,9 +19,17 @@ from gcft_ui.uic.ui_jpc_tab import Ui_JPCTab
 
 class JPCFilterProxyModel(QSortFilterProxyModel):
   def filterAcceptsRow(self, source_row: int, source_parent: QModelIndex | QPersistentModelIndex) -> bool:
-    # Only filter top-level rows (the particles), not the child rows.
     if source_parent.isValid():
+      # Only filter top-level rows (the particles), not the child rows.
       return True
+    
+    # Show the particle if any of its children match the query text.
+    source_index = self.sourceModel().index(source_row, 0, source_parent)
+    for child_row in range(self.sourceModel().rowCount(source_index)):
+      if super().filterAcceptsRow(child_row, source_index):
+        return True
+    
+    # Also show the particle if its ID number matches the query text.
     return super().filterAcceptsRow(source_row, source_parent)
 
 class JPCTab(QWidget):
