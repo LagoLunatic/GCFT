@@ -15,7 +15,9 @@ from gclib.jpa_chunks.bsp1 import BSP1, ColorAnimationKeyframe
 from gclib.jpa_chunks.ssp1 import SSP1
 from gclib.jpa_chunks.tdb1 import TDB1
 from gclib.jpa_chunks.tex1 import TEX1
+
 from gcft_ui.uic.ui_jpc_tab import Ui_JPCTab
+from gcft_ui.bunfoe_editor import BunfoeEditor, BunfoeWidget, BunfoeDialog
 
 class JPCFilterProxyModel(QSortFilterProxyModel):
   def filterAcceptsRow(self, source_row: int, source_parent: QModelIndex | QPersistentModelIndex) -> bool:
@@ -32,7 +34,7 @@ class JPCFilterProxyModel(QSortFilterProxyModel):
     # Also show the particle if its ID number matches the query text.
     return super().filterAcceptsRow(source_row, source_parent)
 
-class JPCTab(QWidget):
+class JPCTab(BunfoeEditor):
   def __init__(self):
     super().__init__()
     self.ui = Ui_JPCTab()
@@ -46,7 +48,6 @@ class JPCTab(QWidget):
     self.proxy_model.setSourceModel(self.item_model)
     self.proxy_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
     
-    self.ui.jpc_particles_tree.setColumnWidth(0, 100)
     self.ui.jpc_particles_tree.setModel(self.proxy_model)
     self.ui.jpc_particles_tree.setRootIndex(self.item_model.index(0, 0))
     self.selection_model = self.ui.jpc_particles_tree.selectionModel()
@@ -152,11 +153,8 @@ class JPCTab(QWidget):
   
   def widget_item_selected(self):
     layout = self.ui.scrollAreaWidgetContents.layout()
-    while layout.count():
-      item = layout.takeAt(0)
-      widget = item.widget()
-      if widget:
-        widget.deleteLater()
+    self.clear_layout_recursive(layout)
+    
     self.ui.jpc_sidebar_label.setText("Extra information will be displayed here as necessary.")
     
     selected_indexes = self.selection_model.selectedRows()
@@ -230,8 +228,8 @@ class JPCTab(QWidget):
     
     self.ui.jpc_sidebar_label.setText("Showing SSP1 (Child Shape) chunk.")
     
-    self.window().make_color_selector_button(ssp1, "color_prm", "Color PRM", layout)
-    self.window().make_color_selector_button(ssp1, "color_env", "Color ENV", layout)
+    bunfoe_editor_widget = super().setup_editor_widget_for_bunfoe_instance(ssp1)
+    layout.addWidget(bunfoe_editor_widget)
     
     spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
     layout.addItem(spacer)
