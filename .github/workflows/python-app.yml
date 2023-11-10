@@ -49,7 +49,7 @@ jobs:
         id: setup-py
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.11.5'
           architecture: ${{ matrix.architecture }}
           cache: 'pip' # Cache all pip dependency downloads
       - name: Get PyJ3DUltra submodule status for cache
