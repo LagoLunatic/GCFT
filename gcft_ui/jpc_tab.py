@@ -143,6 +143,8 @@ class JPCTab(QWidget):
           self.add_ssp1_chunk_to_tree(chunk, chunk_item)
         elif isinstance(chunk, TDB1):
           self.add_tdb1_chunk_to_tree(chunk, chunk_item)
+    
+    self.filter_particles()
   
   def filter_particles(self):
     query = self.ui.filter_particles.text()
