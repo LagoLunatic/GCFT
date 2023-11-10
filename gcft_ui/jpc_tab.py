@@ -192,7 +192,8 @@ class JPCTab(QWidget):
   
   def add_tdb1_chunk_to_tree(self, tdb1: TDB1, chunk_item: QStandardItem):
     # Expand TDB1 chunks by default.
-    self.ui.jpc_particles_tree.expand(self.item_model.indexFromItem(chunk_item))
+    chunk_index = self.proxy_model.mapFromSource(self.item_model.indexFromItem(chunk_item))
+    self.ui.jpc_particles_tree.expand(chunk_index)
     
     for texture_filename in tdb1.texture_filenames:
       texture = self.jpc.textures_by_filename[texture_filename]
