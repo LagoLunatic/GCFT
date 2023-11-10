@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'jpc_tab.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.0
+## Created by: Qt User Interface Compiler version 6.5.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -17,8 +17,8 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QLabel,
-    QPushButton, QScrollArea, QSizePolicy, QTreeWidget,
-    QTreeWidgetItem, QVBoxLayout, QWidget)
+    QPushButton, QScrollArea, QSizePolicy, QTreeView,
+    QVBoxLayout, QWidget)
 
 class Ui_JPCTab(object):
     def setupUi(self, JPCTab):
@@ -58,7 +58,7 @@ class Ui_JPCTab(object):
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.jpc_particles_tree = QTreeWidget(JPCTab)
+        self.jpc_particles_tree = QTreeView(JPCTab)
         self.jpc_particles_tree.setObjectName(u"jpc_particles_tree")
 
         self.horizontalLayout.addWidget(self.jpc_particles_tree)
@@ -79,7 +79,7 @@ class Ui_JPCTab(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 298, 443))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 298, 439))
         self.verticalLayout_2 = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
@@ -106,10 +106,6 @@ class Ui_JPCTab(object):
         self.export_jpc.setText(QCoreApplication.translate("JPCTab", u"Export JPC", None))
         self.add_particles_from_folder.setText(QCoreApplication.translate("JPCTab", u"Add Particles From Folder", None))
         self.export_jpc_folder.setText(QCoreApplication.translate("JPCTab", u"Export Folder", None))
-        ___qtreewidgetitem = self.jpc_particles_tree.headerItem()
-        ___qtreewidgetitem.setText(2, QCoreApplication.translate("JPCTab", u"Name", None));
-        ___qtreewidgetitem.setText(1, QCoreApplication.translate("JPCTab", u"Chunk Type", None));
-        ___qtreewidgetitem.setText(0, QCoreApplication.translate("JPCTab", u"Particle ID", None));
         self.jpc_sidebar_label.setText(QCoreApplication.translate("JPCTab", u"Extra information will be displayed here as necessary.", None))
     # retranslateUi
 

@@ -49,23 +49,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QTreeWidget" name="jpc_particles_tree">
-       <column>
-        <property name="text">
-         <string>Particle ID</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Chunk Type</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Name</string>
-        </property>
-       </column>
-      </widget>
+      <widget class="QTreeView" name="jpc_particles_tree"/>
      </item>
      <item>
       <widget class="QWidget" name="jpc_sidebar" native="true">
@@ -76,7 +60,7 @@
         </size>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
-        <property name="margin">
+        <property name="margin" stdset="0">
          <number>0</number>
         </property>
         <item>
@@ -97,7 +81,7 @@
              <x>0</x>
              <y>0</y>
              <width>298</width>
-             <height>443</height>
+             <height>439</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_2"/>

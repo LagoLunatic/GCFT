@@ -8,7 +8,7 @@ from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 
 from gclib import fs_helpers as fs
-from gclib.jpc import JPC
+from gclib.jpc import JPC, JPAChunk, ColorAnimationKeyframe, TEX1, Particle
 from gcft_ui.uic.ui_jpc_tab import Ui_JPCTab
 
 class JPCTab(QWidget):
@@ -20,7 +20,13 @@ class JPCTab(QWidget):
     self.jpc = None
     self.jpc_name = None
     
+    self.item_model = QStandardItemModel()
+    
     self.ui.jpc_particles_tree.setColumnWidth(0, 100)
+    self.ui.jpc_particles_tree.setModel(self.item_model)
+    self.ui.jpc_particles_tree.setRootIndex(self.item_model.index(0, 0))
+    self.selection_model = self.ui.jpc_particles_tree.selectionModel()
+    self.ui.jpc_particles_tree.setHeaderHidden(True)
     
     self.ui.export_jpc.setDisabled(True)
     self.ui.add_particles_from_folder.setDisabled(True)
@@ -31,7 +37,7 @@ class JPCTab(QWidget):
     self.ui.add_particles_from_folder.clicked.connect(self.add_particles_from_folder)
     self.ui.export_jpc_folder.clicked.connect(self.export_jpc_folder)
     
-    self.ui.jpc_particles_tree.itemSelectionChanged.connect(self.widget_item_selected)
+    self.selection_model.selectionChanged.connect(self.widget_item_selected)
     
     self.ui.jpc_particles_tree.setContextMenuPolicy(Qt.CustomContextMenu)
     self.ui.jpc_particles_tree.customContextMenuRequested.connect(self.show_jpc_particles_tree_context_menu)
@@ -90,57 +96,47 @@ class JPCTab(QWidget):
     self.ui.export_jpc_folder.setDisabled(False)
   
   def reload_jpc_particles_tree(self):
-    self.ui.jpc_particles_tree.clear()
-    
-    self.jpc_tree_widget_item_to_particle = {}
-    self.jpc_tree_widget_item_to_chunk = {}
-    self.jpc_tree_widget_item_to_color_anim_keyframe = {}
-    self.jpc_tree_widget_item_to_texture = {}
+    self.item_model.removeRows(0, self.item_model.rowCount())
     
     for particle in self.jpc.particles:
       particle_id_str = self.window().stringify_number(particle.particle_id, min_hex_chars=4)
       
-      particle_item = QTreeWidgetItem([particle_id_str, "", ""])
-      self.ui.jpc_particles_tree.addTopLevelItem(particle_item)
-      
-      self.jpc_tree_widget_item_to_particle[particle_item] = particle
+      particle_item = QStandardItem(particle_id_str)
+      particle_item.setData(particle)
+      self.item_model.appendRow(particle_item)
       
       for chunk in particle.chunks:
         #chunk_size_str = self.window().stringify_number(chunk.size, min_hex_chars=5)
         
-        chunk_item = QTreeWidgetItem(["", chunk.magic, ""])
-        particle_item.addChild(chunk_item)
-        
-        self.jpc_tree_widget_item_to_chunk[chunk_item] = chunk
+        chunk_item = QStandardItem(chunk.magic)
+        chunk_item.setData(chunk)
+        particle_item.appendRow(chunk_item)
         
         if chunk.magic == "BSP1":
           if chunk.color_prm_anm_table:
-            anim_item = QTreeWidgetItem(["", "", "Color PRM Anim"])
-            chunk_item.addChild(anim_item)
+            anim_item = QStandardItem("Color PRM Anim")
+            chunk_item.appendRow(anim_item)
             for keyframe_index, keyframe in enumerate(chunk.color_prm_anm_table):
-              keyframe_item = QTreeWidgetItem(["", "", "0x%02X" % keyframe_index])
-              anim_item.addChild(keyframe_item)
-              
-              self.jpc_tree_widget_item_to_color_anim_keyframe[keyframe_item] = keyframe
+              keyframe_item = QStandardItem("0x%02X" % keyframe_index)
+              keyframe_item.setData(keyframe)
+              anim_item.appendRow(keyframe_item)
           
           if chunk.color_env_anm_table:
-            anim_item = QTreeWidgetItem(["", "", "Color ENV Anim"])
-            chunk_item.addChild(anim_item)
+            anim_item = QStandardItem("Color ENV Anim")
+            chunk_item.appendRow(anim_item)
             for keyframe_index, keyframe in enumerate(chunk.color_env_anm_table):
-              keyframe_item = QTreeWidgetItem(["", "", "0x%02X" % keyframe_index])
-              anim_item.addChild(keyframe_item)
-              
-              self.jpc_tree_widget_item_to_color_anim_keyframe[keyframe_item] = keyframe
+              keyframe_item = QStandardItem("0x%02X" % keyframe_index)
+              keyframe_item.setData(keyframe)
+              anim_item.appendRow(keyframe_item)
         elif chunk.magic == "TDB1":
           # Expand TDB1 chunks by default.
-          chunk_item.setExpanded(True)
+          self.ui.jpc_particles_tree.expand(self.item_model.indexFromItem(chunk_item))
           
           for texture_filename in chunk.texture_filenames:
-            texture_item = QTreeWidgetItem(["", "", texture_filename])
-            chunk_item.addChild(texture_item)
-            
             texture = self.jpc.textures_by_filename[texture_filename]
-            self.jpc_tree_widget_item_to_texture[texture_item] = texture
+            texture_item = QStandardItem(texture_filename)
+            texture_item.setData(texture)
+            chunk_item.appendRow(texture_item)
   
   def widget_item_selected(self):
     layout = self.ui.scrollAreaWidgetContents.layout()
@@ -151,22 +147,24 @@ class JPCTab(QWidget):
         widget.deleteLater()
     self.ui.jpc_sidebar_label.setText("Extra information will be displayed here as necessary.")
     
-    selected_items = self.ui.jpc_particles_tree.selectedItems()
-    if not selected_items:
+    selected_indexes = self.selection_model.selectedRows()
+    if not selected_indexes:
       return
-    item = selected_items[0]
+    item = self.item_model.itemFromIndex(selected_indexes[0])
+    if item is None:
+      return
     
-    chunk = self.jpc_tree_widget_item_to_chunk.get(item)
-    if chunk:
+    data = item.data()
+    if isinstance(data, JPAChunk):
+      chunk = data
       if chunk.magic == "BSP1":
         self.bsp1_chunk_selected(chunk)
         return
       elif chunk.magic == "SSP1":
         self.ssp1_chunk_selected(chunk)
         return
-    
-    keyframe = self.jpc_tree_widget_item_to_color_anim_keyframe.get(item)
-    if keyframe:
+    elif isinstance(data, ColorAnimationKeyframe):
+      keyframe = data
       self.color_anim_keyframe_selected(keyframe)
       return
   
@@ -238,14 +236,18 @@ class JPCTab(QWidget):
     if self.jpc is None:
       return
     
-    item = self.ui.jpc_particles_tree.itemAt(pos)
+    index = self.ui.jpc_particles_tree.indexAt(pos)
+    if not index.isValid():
+      return
+    item = self.item_model.itemFromIndex(index)
     if item is None:
       return
     
-    texture = self.jpc_tree_widget_item_to_texture.get(item)
-    if texture:
+    data = item.data()
+    if isinstance(data, TEX1):
+      texture = data
       particle_item = item.parent().parent()
-      particle = self.jpc_tree_widget_item_to_particle.get(particle_item)
+      particle: Particle = particle_item.data()
       
       menu = QMenu(self)
       
