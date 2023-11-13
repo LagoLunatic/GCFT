@@ -377,6 +377,8 @@ class J3DViewer(QOpenGLWidget):
       return
     
     self.color_anim.setFrame(frame, True)
+    
+    self.should_update_render = True
   
   def set_anim_paused(self, paused: bool):
     if self.color_anim is None:
