@@ -65,18 +65,14 @@
     </layout>
    </item>
    <item>
-    <widget class="QTreeWidget" name="gcm_files_tree">
-     <column>
-      <property name="text">
-       <string>File Name</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>File Size</string>
-      </property>
-     </column>
+    <widget class="QLineEdit" name="filter">
+     <property name="placeholderText">
+      <string>Filter</string>
+     </property>
     </widget>
+   </item>
+   <item>
+    <widget class="QTreeView" name="gcm_files_tree"/>
    </item>
   </layout>
   <action name="actionReplaceGCMFile">

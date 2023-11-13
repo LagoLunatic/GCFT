@@ -38,3 +38,29 @@ class GCFTThread(QThread):
       return
     
     self.action_complete.emit()
+
+class RecursiveFilterProxyModel(QSortFilterProxyModel):
+  def __init__(self, always_show_children=False):
+    super().__init__()
+    self.always_show_children = always_show_children
+  
+  def filterAcceptsRow(self, source_row: int, source_parent: QModelIndex | QPersistentModelIndex) -> bool:
+    if self.always_show_children and source_parent.isValid():
+      # Always show child rows if their top-level parent is shown.
+      return True
+    
+    # For the top-level rows (the particles), check if any of their children match the filter, recursively.
+    return self.check_row_recursive(source_row, source_parent)
+  
+  def check_row_recursive(self, source_row: int, source_parent: QModelIndex | QPersistentModelIndex) -> bool:
+    if super().filterAcceptsRow(source_row, source_parent):
+      # The current row itself matches the filter.
+      return True
+    
+    source_index = self.sourceModel().index(source_row, 0, source_parent)
+    for child_row in range(self.sourceModel().rowCount(source_index)):
+      if self.check_row_recursive(child_row, source_index):
+        # One of the current row's children (recursive) matches the filter.
+        return True
+    
+    return False

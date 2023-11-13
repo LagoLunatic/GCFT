@@ -102,7 +102,7 @@ class Ui_BTITab(object):
         self.bti_image_scroll_area.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 570, 431))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 550, 431))
         self.gridLayout = QGridLayout(self.scrollAreaWidgetContents)
         self.gridLayout.setObjectName(u"gridLayout")
         self.bti_image_label = QLabel(self.scrollAreaWidgetContents)
@@ -300,7 +300,7 @@ class Ui_BTITab(object):
 
         self.bti_curr_mipmap = QComboBox(BTITab)
         self.bti_curr_mipmap.setObjectName(u"bti_curr_mipmap")
-        self.bti_curr_mipmap.setMinimumSize(QSize(80, 0))
+        self.bti_curr_mipmap.setMinimumSize(QSize(100, 0))
 
         self.formLayout.setWidget(15, QFormLayout.FieldRole, self.bti_curr_mipmap)
 

@@ -47,7 +47,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QLineEdit" name="filter_particles">
+    <widget class="QLineEdit" name="filter">
      <property name="placeholderText">
       <string>Filter</string>
      </property>
@@ -88,7 +88,7 @@
              <x>0</x>
              <y>0</y>
              <width>298</width>
-             <height>439</height>
+             <height>411</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_2"/>

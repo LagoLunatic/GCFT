@@ -155,7 +155,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>570</width>
+             <width>550</width>
              <height>431</height>
             </rect>
            </property>
@@ -431,7 +431,7 @@
         <widget class="QComboBox" name="bti_curr_mipmap">
          <property name="minimumSize">
           <size>
-           <width>80</width>
+           <width>100</width>
            <height>0</height>
           </size>
          </property>

@@ -8,9 +8,11 @@ from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 
 from gclib import fs_helpers as fs
-from gclib.gcm import GCM
+from gclib.gcm import GCM, GCMBaseFile, GCMFileEntry
 from gclib.texture_utils import ImageFormat, PaletteFormat
+
 from gcft_ui.uic.ui_gcm_tab import Ui_GCMTab
+from gcft_ui.gcft_common import RecursiveFilterProxyModel
 from asset_dumper import AssetDumper
 
 class GCMTab(QWidget):
@@ -21,15 +23,23 @@ class GCMTab(QWidget):
     
     self.gcm = None
     
+    self.column_names = [
+      "File Name",
+      "File Size",
+    ]
+    
+    self.model = QStandardItemModel()
+    self.model.setHorizontalHeaderLabels(self.column_names)
+    self.model.setColumnCount(2)
+    self.proxy = RecursiveFilterProxyModel()
+    self.proxy.setSourceModel(self.model)
+    self.proxy.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+    
+    self.ui.gcm_files_tree.setModel(self.proxy)
+    self.selection_model = self.ui.gcm_files_tree.selectionModel()
     self.ui.gcm_files_tree.setColumnWidth(0, 300)
     
-    # This should be in the .ui file, but PySide6 doesn't compile it correctly.
-    self.ui.gcm_files_tree.setEditTriggers(QAbstractItemView.NoEditTriggers)
-    
-    self.gcm_col_name_to_index = {}
-    for col in range(self.ui.gcm_files_tree.columnCount()):
-      column_name = self.ui.gcm_files_tree.headerItem().text(col)
-      self.gcm_col_name_to_index[column_name] = col
+    self.ui.filter.textChanged.connect(self.filter_rows)
     
     self.ui.export_gcm.setDisabled(True)
     self.ui.replace_all_files_in_gcm.setDisabled(True)
@@ -46,8 +56,7 @@ class GCMTab(QWidget):
     
     self.ui.gcm_files_tree.setContextMenuPolicy(Qt.CustomContextMenu)
     self.ui.gcm_files_tree.customContextMenuRequested.connect(self.show_gcm_files_tree_context_menu)
-    self.ui.gcm_files_tree.itemDoubleClicked.connect(self.edit_gcm_files_tree_item_text)
-    self.ui.gcm_files_tree.itemChanged.connect(self.gcm_file_tree_item_text_changed)
+    self.model.dataChanged.connect(self.gcm_file_tree_item_text_changed)
     self.ui.actionExtractGCMFile.triggered.connect(self.extract_file_from_gcm)
     self.ui.actionReplaceGCMFile.triggered.connect(self.replace_file_in_gcm)
     self.ui.actionDeleteGCMFile.triggered.connect(self.delete_file_in_gcm)
@@ -167,17 +176,15 @@ class GCMTab(QWidget):
     self.reload_gcm_files_tree()
   
   def reload_gcm_files_tree(self):
-    self.ui.gcm_files_tree.clear()
-    
-    self.gcm_file_entry_to_tree_widget_item = {}
-    self.gcm_tree_widget_item_to_file_entry = {}
+    self.model.removeRows(0, self.model.rowCount())
     
     root_entry = self.gcm.file_entries[0]
     assert root_entry.file_path == "files"
-    root_item = QTreeWidgetItem(["files", ""])
-    self.ui.gcm_files_tree.addTopLevelItem(root_item)
-    self.gcm_file_entry_to_tree_widget_item[root_entry] = root_item
-    self.gcm_tree_widget_item_to_file_entry[root_item] = root_entry
+    root_item = QStandardItem("files")
+    root_item.setData(root_entry)
+    root_item.setEditable(False)
+    self.model.appendRow(root_item)
+    self.expand_item(root_item)
     
     # Add data files.
     for file_entry in self.gcm.file_entries[1:]:
@@ -185,14 +192,15 @@ class GCMTab(QWidget):
     
     # Add system files.
     # (Note that the "sys" folder has no corresponding directory file entry because it is not really a directory.)
-    sys_item = QTreeWidgetItem(["sys", ""])
-    self.ui.gcm_files_tree.addTopLevelItem(sys_item)
+    sys_item = QStandardItem("sys")
+    sys_item.setData("__systemfile")
+    sys_item.setEditable(False)
+    self.model.appendRow(sys_item)
+    self.expand_item(sys_item)
+    
+    # Add system files.
     for file_entry in self.gcm.system_files:
       self.add_gcm_file_entry_to_files_tree(file_entry)
-    
-    # Expand the "files" and "sys" root entries by default.
-    self.ui.gcm_files_tree.topLevelItem(0).setExpanded(True)
-    self.ui.gcm_files_tree.topLevelItem(1).setExpanded(True)
     
     self.ui.export_gcm.setDisabled(False)
     self.ui.replace_all_files_in_gcm.setDisabled(False)
@@ -200,24 +208,53 @@ class GCMTab(QWidget):
     self.ui.dump_all_gcm_textures.setDisabled(False)
     self.ui.add_replace_files_from_folder.setDisabled(False)
   
-  def add_gcm_file_entry_to_files_tree(self, file_entry):
+  def add_gcm_file_entry_to_files_tree(self, file_entry: GCMBaseFile):
+    if file_entry.is_system_file:
+      match_value = "__systemfile"
+    else:
+      match_value = file_entry.parent
+    parent_item = self.find_item_by_data(0, match_value)
+    assert parent_item is not None
+    
+    name_item = QStandardItem(file_entry.name)
+    name_item.setData(file_entry)
+    if file_entry.is_system_file:
+      name_item.setEditable(False)
+    else:
+      name_item.setEditable(True)
+    
     if file_entry.is_dir:
       file_size_str = ""
     else:
       file_size = self.gcm.get_changed_file_size(file_entry.file_path)
       file_size_str = self.window().stringify_number(file_size)
     
-    if file_entry.is_system_file:
-      parent_item = self.ui.gcm_files_tree.topLevelItem(1)
-      assert parent_item.text(0) == "sys"
-    else:
-      parent_item = self.gcm_file_entry_to_tree_widget_item[file_entry.parent]
+    size_item = QStandardItem(file_size_str)
+    size_item.setData(file_entry)
+    size_item.setEditable(False)
     
-    item = QTreeWidgetItem([file_entry.name, file_size_str])
-    item.setFlags(item.flags() | Qt.ItemIsEditable)
-    parent_item.addChild(item)
-    self.gcm_file_entry_to_tree_widget_item[file_entry] = item
-    self.gcm_tree_widget_item_to_file_entry[item] = file_entry
+    parent_item.appendRow([name_item, size_item])
+    
+    return name_item
+  
+  def expand_item(self, item: QStandardItem):
+    self.ui.gcm_files_tree.expand(self.proxy.mapFromSource(item.index()))
+  
+  def find_item_by_data(self, column, value):
+    matched_indexes = self.model.match(
+      self.model.index(0, column),
+      Qt.ItemDataRole.UserRole + 1, # Equivalent to item.data()
+      value,
+      1,
+      Qt.MatchFlag.MatchRecursive
+    )
+    assert len(matched_indexes) == 1
+    return self.model.itemFromIndex(matched_indexes[0])
+  
+  def filter_rows(self):
+    query = self.ui.filter.text()
+    self.proxy.setFilterFixedString(query)
+  
   
   def is_banner_filename(self, filename):
     match = re.search(r"\.bnr(?:$| |\.)", filename, re.I)
@@ -355,12 +392,14 @@ class GCMTab(QWidget):
     if self.gcm is None:
       return
     
-    item = self.ui.gcm_files_tree.itemAt(pos)
+    index = self.ui.gcm_files_tree.indexAt(pos)
+    if not index.isValid():
+      return
+    item = self.model.itemFromIndex(self.proxy.mapToSource(index))
     if item is None:
       return
-    
-    file = self.gcm_tree_widget_item_to_file_entry.get(item)
-    if file is None:
+    file = item.data()
+    if not isinstance(file, GCMBaseFile):
       return
     
     if file.is_dir:
@@ -438,7 +477,7 @@ class GCMTab(QWidget):
       menu.exec_(self.ui.gcm_files_tree.mapToGlobal(pos))
   
   def extract_file_from_gcm_by_path(self, file_path):
-    file = self.ui.actionExtractGCMFile.data()
+    file: GCMBaseFile = self.ui.actionExtractGCMFile.data()
     
     if file.file_path in self.gcm.changed_files:
       data = self.gcm.changed_files[file.file_path]
@@ -457,8 +496,8 @@ class GCMTab(QWidget):
   def update_changed_file_size_in_gcm(self, file):
     file_size = self.gcm.get_changed_file_size(file.file_path)
     file_size_str = self.window().stringify_number(file_size)
-    item = self.gcm_file_entry_to_tree_widget_item[file]
-    item.setText(self.gcm_col_name_to_index["File Size"], file_size_str)
+    item = self.find_item_by_data(self.column_names.index("File Size"), file)
+    item.setText(file_size_str)
   
   def replace_file_in_gcm_by_path(self, file_path):
     file = self.ui.actionReplaceGCMFile.data()
@@ -482,15 +521,10 @@ class GCMTab(QWidget):
     if not self.window().confirm_delete(file_entry.name):
       return
     
-    dir_entry = file_entry.parent
-    
     self.gcm.delete_file(file_entry)
     
-    dir_item = self.gcm_file_entry_to_tree_widget_item[dir_entry]
-    file_item = self.gcm_file_entry_to_tree_widget_item[file_entry]
-    dir_item.removeChild(file_item)
-    del self.gcm_file_entry_to_tree_widget_item[file_entry]
-    del self.gcm_tree_widget_item_to_file_entry[file_item]
+    item = self.find_item_by_data(0, file_entry)
+    assert self.model.removeRow(item.row(), item.parent().index())
   
   def delete_folder_in_gcm(self):
     dir_entry = self.ui.actionDeleteGCMFolder.data()
@@ -502,11 +536,8 @@ class GCMTab(QWidget):
     
     self.gcm.delete_directory(dir_entry)
     
-    parent_dir_item = self.gcm_file_entry_to_tree_widget_item[parent_dir_entry]
-    dir_item = self.gcm_file_entry_to_tree_widget_item[dir_entry]
-    parent_dir_item.removeChild(dir_item)
-    del self.gcm_file_entry_to_tree_widget_item[dir_entry]
-    del self.gcm_tree_widget_item_to_file_entry[dir_item]
+    item = self.find_item_by_data(0, dir_entry)
+    assert self.model.removeRow(item.row(), item.parent().index())
   
   def open_rarc_in_gcm(self):
     file_entry = self.ui.actionOpenGCMRARC.data()
@@ -632,11 +663,12 @@ class GCMTab(QWidget):
       return
     file_entry = self.gcm.add_new_file(gcm_file_path, file_data)
     
-    dir_item = self.gcm_file_entry_to_tree_widget_item[dir_entry]
-    file_item = QTreeWidgetItem([file_name, file_size_str])
-    dir_item.addChild(file_item)
-    self.gcm_file_entry_to_tree_widget_item[file_entry] = file_item
-    self.gcm_tree_widget_item_to_file_entry[file_item] = file_entry
+    name_item = self.add_gcm_file_entry_to_files_tree(file_entry)
+    
+    # Select the newly added entry.
+    self.selection_model.reset()
+    new_index = self.proxy.mapFromSource(name_item.index())
+    self.selection_model.setCurrentIndex(new_index, QItemSelectionModel.SelectionFlag.Select)
   
   def add_folder_to_gcm(self):
     parent_dir_entry = self.ui.actionAddGCMFolder.data()
@@ -660,34 +692,26 @@ class GCMTab(QWidget):
       return
     dir_entry = self.gcm.add_new_directory(gcm_dir_path)
     
-    self.add_gcm_file_entry_to_files_tree(dir_entry)
-  
-  
-  def edit_gcm_files_tree_item_text(self, item, column):
-    if (item.flags() & Qt.ItemIsEditable) == 0:
-      return
+    name_item = self.add_gcm_file_entry_to_files_tree(dir_entry)
     
-    file = self.gcm_tree_widget_item_to_file_entry.get(item)
-    if file is None:
-      return
-    if file.is_system_file:
-      return
-    
-    # Allow editing only certain columns.
-    if column in [self.gcm_col_name_to_index["File Name"]]: 
-      self.ui.gcm_files_tree.editItem(item, column)
+    # Select the newly added entry.
+    self.selection_model.reset()
+    new_index = self.proxy.mapFromSource(name_item.index())
+    self.selection_model.setCurrentIndex(new_index, QItemSelectionModel.SelectionFlag.Select)
   
-  def gcm_file_tree_item_text_changed(self, item, column):
-    if column == self.gcm_col_name_to_index["File Name"]:
+  
+  def gcm_file_tree_item_text_changed(self, top_left_index: QModelIndex, bottom_right_index: QModelIndex, roles: list[int]):
+    if top_left_index.column() == self.column_names.index("File Name"):
+      item = self.model.itemFromIndex(top_left_index)
       self.change_gcm_file_name(item)
   
-  def change_gcm_file_name(self, item):
-    file_entry = self.gcm_tree_widget_item_to_file_entry.get(item)
-    new_file_name = item.text(self.gcm_col_name_to_index["File Name"])
+  def change_gcm_file_name(self, item: QStandardItem):
+    file_entry: GCMBaseFile = item.data()
+    new_file_name = item.text()
     
     if len(new_file_name) == 0:
       QMessageBox.warning(self, "Invalid file name", "File name cannot be empty.")
-      item.setText(self.gcm_col_name_to_index["File Name"], file_entry.name)
+      item.setText(file_entry.name)
       return
     
     other_file_entry = next((fe for fe in file_entry.parent.children if fe.name == new_file_name), None)
@@ -697,7 +721,7 @@ class GCMTab(QWidget):
     
     if other_file_entry is not None:
       QMessageBox.warning(self, "Duplicate file name", "The file name you entered is already used by another file or folder in this directory.")
-      item.setText(self.gcm_col_name_to_index["File Name"], file_entry.name)
+      item.setText(file_entry.name)
       return
     
     if file_entry.is_dir:
@@ -717,18 +741,24 @@ class GCMTab(QWidget):
       self.gcm.files_by_path[file_entry.file_path] = file_entry
       self.gcm.files_by_path_lowercase[file_entry.file_path.lower()] = file_entry
     
-    item.setText(self.gcm_col_name_to_index["File Name"], new_file_name)
+    item.setText(new_file_name)
   
   
   def keyPressEvent(self, event):
     event.ignore()
     if event.matches(QKeySequence.Copy):
-      if self.ui.gcm_files_tree.currentColumn() == self.gcm_col_name_to_index["File Name"]:
-        item = self.ui.gcm_files_tree.currentItem()
-        if item not in self.gcm_tree_widget_item_to_file_entry:
-          # The sys folder is not real.
-          return
-        file_entry = self.gcm_tree_widget_item_to_file_entry[item]
-        file_path = file_entry.file_path
-        QApplication.instance().clipboard().setText(file_path)
-        event.accept()
+      selected_index = self.selection_model.currentIndex()
+      if not selected_index.isValid():
+        return
+      selected_index = self.proxy.mapToSource(selected_index)
+      if selected_index.column() != self.column_names.index("File Name"):
+        return
+      item = self.model.itemFromIndex(selected_index)
+      if item is None:
+        return
+      file_entry = item.data()
+      if not isinstance(file_entry, GCMBaseFile):
+        return
+      file_path = file_entry.file_path
+      QApplication.instance().clipboard().setText(file_path)
+      event.accept()

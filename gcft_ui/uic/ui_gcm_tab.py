@@ -16,8 +16,8 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QPushButton,
-    QSizePolicy, QTreeWidget, QTreeWidgetItem, QVBoxLayout,
+from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QLineEdit,
+    QPushButton, QSizePolicy, QTreeView, QVBoxLayout,
     QWidget)
 
 class Ui_GCMTab(object):
@@ -104,7 +104,12 @@ class Ui_GCMTab(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout)
 
-        self.gcm_files_tree = QTreeWidget(GCMTab)
+        self.filter = QLineEdit(GCMTab)
+        self.filter.setObjectName(u"filter")
+
+        self.verticalLayout.addWidget(self.filter)
+
+        self.gcm_files_tree = QTreeView(GCMTab)
         self.gcm_files_tree.setObjectName(u"gcm_files_tree")
 
         self.verticalLayout.addWidget(self.gcm_files_tree)
@@ -140,8 +145,6 @@ class Ui_GCMTab(object):
         self.export_gcm.setText(QCoreApplication.translate("GCMTab", u"Export GCM", None))
         self.extract_all_files_from_gcm.setText(QCoreApplication.translate("GCMTab", u"Extract All Files From GCM", None))
         self.dump_all_gcm_textures.setText(QCoreApplication.translate("GCMTab", u"Dump All Textures", None))
-        ___qtreewidgetitem = self.gcm_files_tree.headerItem()
-        ___qtreewidgetitem.setText(1, QCoreApplication.translate("GCMTab", u"File Size", None));
-        ___qtreewidgetitem.setText(0, QCoreApplication.translate("GCMTab", u"File Name", None));
+        self.filter.setPlaceholderText(QCoreApplication.translate("GCMTab", u"Filter", None))
     # retranslateUi
 

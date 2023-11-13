@@ -18,28 +18,7 @@ from gclib.jpa_chunks.tex1 import TEX1
 
 from gcft_ui.uic.ui_jpc_tab import Ui_JPCTab
 from gcft_ui.bunfoe_editor import BunfoeEditor, BunfoeWidget, BunfoeDialog
-
-class JPCFilterProxyModel(QSortFilterProxyModel):
-  def filterAcceptsRow(self, source_row: int, source_parent: QModelIndex | QPersistentModelIndex) -> bool:
-    if source_parent.isValid():
-      # Always show child rows if their top-level parent (the particle) is shown.
-      return True
-    
-    # For the top-level rows (the particles), check if any of their children match the filter, recursively.
-    return self.check_row_recursive(source_row, source_parent)
-  
-  def check_row_recursive(self, source_row: int, source_parent: QModelIndex | QPersistentModelIndex) -> bool:
-    if super().filterAcceptsRow(source_row, source_parent):
-      # The current row itself matches the filter.
-      return True
-    
-    source_index = self.sourceModel().index(source_row, 0, source_parent)
-    for child_row in range(self.sourceModel().rowCount(source_index)):
-      if self.check_row_recursive(child_row, source_index):
-        # One of the current row's children (recursive) matches the filter.
-        return True
-    
-    return False
+from gcft_ui.gcft_common import RecursiveFilterProxyModel
 
 class JPCTab(BunfoeEditor):
   def __init__(self):
@@ -50,15 +29,17 @@ class JPCTab(BunfoeEditor):
     self.jpc = None
     self.jpc_name = None
     
-    self.item_model = QStandardItemModel()
-    self.proxy_model = JPCFilterProxyModel()
-    self.proxy_model.setSourceModel(self.item_model)
-    self.proxy_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+    self.model = QStandardItemModel()
+    self.proxy = RecursiveFilterProxyModel(always_show_children=True)
+    self.proxy.setSourceModel(self.model)
+    self.proxy.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
     
-    self.ui.jpc_particles_tree.setModel(self.proxy_model)
-    self.ui.jpc_particles_tree.setRootIndex(self.item_model.index(0, 0))
+    self.ui.jpc_particles_tree.setModel(self.proxy)
     self.selection_model = self.ui.jpc_particles_tree.selectionModel()
     self.ui.jpc_particles_tree.setHeaderHidden(True)
+    
+    self.selection_model.selectionChanged.connect(self.widget_item_selected)
+    self.ui.filter.textChanged.connect(self.filter_particles)
     
     self.ui.export_jpc.setDisabled(True)
     self.ui.add_particles_from_folder.setDisabled(True)
@@ -68,9 +49,6 @@ class JPCTab(BunfoeEditor):
     self.ui.export_jpc.clicked.connect(self.export_jpc)
     self.ui.add_particles_from_folder.clicked.connect(self.add_particles_from_folder)
     self.ui.export_jpc_folder.clicked.connect(self.export_jpc_folder)
-    
-    self.selection_model.selectionChanged.connect(self.widget_item_selected)
-    self.ui.filter_particles.textChanged.connect(self.filter_particles)
     
     self.ui.jpc_particles_tree.setContextMenuPolicy(Qt.CustomContextMenu)
     self.ui.jpc_particles_tree.customContextMenuRequested.connect(self.show_jpc_particles_tree_context_menu)
@@ -129,14 +107,14 @@ class JPCTab(BunfoeEditor):
     self.ui.export_jpc_folder.setDisabled(False)
   
   def reload_jpc_particles_tree(self):
-    self.item_model.removeRows(0, self.item_model.rowCount())
+    self.model.removeRows(0, self.model.rowCount())
     
     for particle in self.jpc.particles:
       particle_id_str = self.window().stringify_number(particle.particle_id, min_hex_chars=4)
       
       particle_item = QStandardItem(particle_id_str)
       particle_item.setData(particle)
-      self.item_model.appendRow(particle_item)
+      self.model.appendRow(particle_item)
       
       for chunk in particle.chunks:
         #chunk_size_str = self.window().stringify_number(chunk.size, min_hex_chars=5)
@@ -155,8 +133,8 @@ class JPCTab(BunfoeEditor):
     self.filter_particles()
   
   def filter_particles(self):
-    query = self.ui.filter_particles.text()
-    self.proxy_model.setFilterFixedString(query)
+    query = self.ui.filter.text()
+    self.proxy.setFilterFixedString(query)
   
   def widget_item_selected(self):
     layout = self.ui.scrollAreaWidgetContents.layout()
@@ -164,11 +142,11 @@ class JPCTab(BunfoeEditor):
     
     self.ui.jpc_sidebar_label.setText("Extra information will be displayed here as necessary.")
     
-    selected_indexes = self.selection_model.selectedRows()
-    if not selected_indexes:
+    selected_index = self.selection_model.currentIndex()
+    if not selected_index.isValid():
       return
-    selected_index = self.proxy_model.mapToSource(selected_indexes[0])
-    item = self.item_model.itemFromIndex(selected_index)
+    selected_index = self.proxy.mapToSource(selected_index)
+    item = self.model.itemFromIndex(selected_index)
     if item is None:
       return
     
@@ -209,7 +187,7 @@ class JPCTab(BunfoeEditor):
   
   def add_tdb1_chunk_to_tree(self, tdb1: TDB1, chunk_item: QStandardItem):
     # Expand TDB1 chunks by default.
-    chunk_index = self.proxy_model.mapFromSource(self.item_model.indexFromItem(chunk_item))
+    chunk_index = self.proxy.mapFromSource(self.model.indexFromItem(chunk_item))
     self.ui.jpc_particles_tree.expand(chunk_index)
     
     for texture_filename in tdb1.texture_filenames:
@@ -290,7 +268,7 @@ class JPCTab(BunfoeEditor):
     index = self.ui.jpc_particles_tree.indexAt(pos)
     if not index.isValid():
       return
-    item = self.item_model.itemFromIndex(self.proxy_model.mapToSource(index))
+    item = self.model.itemFromIndex(self.proxy.mapToSource(index))
     if item is None:
       return
     

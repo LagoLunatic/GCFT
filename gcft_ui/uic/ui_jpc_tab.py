@@ -56,10 +56,10 @@ class Ui_JPCTab(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_4)
 
-        self.filter_particles = QLineEdit(JPCTab)
-        self.filter_particles.setObjectName(u"filter_particles")
+        self.filter = QLineEdit(JPCTab)
+        self.filter.setObjectName(u"filter")
 
-        self.verticalLayout.addWidget(self.filter_particles)
+        self.verticalLayout.addWidget(self.filter)
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
@@ -84,7 +84,7 @@ class Ui_JPCTab(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 298, 439))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 298, 411))
         self.verticalLayout_2 = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
@@ -111,7 +111,7 @@ class Ui_JPCTab(object):
         self.export_jpc.setText(QCoreApplication.translate("JPCTab", u"Export JPC", None))
         self.add_particles_from_folder.setText(QCoreApplication.translate("JPCTab", u"Add Particles From Folder", None))
         self.export_jpc_folder.setText(QCoreApplication.translate("JPCTab", u"Export Folder", None))
-        self.filter_particles.setPlaceholderText(QCoreApplication.translate("JPCTab", u"Filter", None))
+        self.filter.setPlaceholderText(QCoreApplication.translate("JPCTab", u"Filter", None))
         self.jpc_sidebar_label.setText(QCoreApplication.translate("JPCTab", u"Extra information will be displayed here as necessary.", None))
     # retranslateUi
 
