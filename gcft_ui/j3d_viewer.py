@@ -37,18 +37,27 @@ class J3DViewer(QOpenGLWidget):
   DELAY_BETWEEN_FRAMES = 1000 // DESIRED_FPS
   
   KEY_TO_MOVE_DIR = {
-    Qt.Key_W: [0, 0, -1],
-    Qt.Key_A: [-1, 0, 0],
-    Qt.Key_S: [0, 0, 1],
-    Qt.Key_D: [1, 0, 0],
-    Qt.Key_Q: [0, -1, 0],
-    Qt.Key_E: [0, 1, 0],
+    Qt.Key.Key_W: [0, 0, -1],
+    Qt.Key.Key_A: [-1, 0, 0],
+    Qt.Key.Key_S: [0, 0, 1],
+    Qt.Key.Key_D: [1, 0, 0],
+    Qt.Key.Key_Q: [0, -1, 0],
+    Qt.Key.Key_E: [0, 1, 0],
   }
   KEY_TO_SPEED_MULTIPLIER = {
-    Qt.Key_Shift: 4.0,
-    Qt.Key_Control: 0.25,
+    Qt.Key.Key_Shift: 4.0,
+    Qt.Key.Key_Control: 0.25,
   }
   BASE_CAMERA_MOVE_SPEED = 40.0
+  
+  KEY_TO_CAMERA_ANGLE = {
+    Qt.Key.Key_1: [0.0, 0.0],  # Front
+    Qt.Key.Key_3: [0.0, 90.0], # Right
+    Qt.Key.Key_7: [90.0, 0.0], # Top
+    # TODO: keys for bottom/left/right
+    # TODO: key for orthographic/perspective toggle
+    # TODO: key 9 for rotating the current view 180 degrees
+  }
   
   def __init__(self, parent):
     super().__init__(parent)
@@ -648,10 +657,14 @@ class J3DViewer(QOpenGLWidget):
       self.camera.move(offset)
       self.should_update_render = True
   
-  def reset_camera(self):
+  def reset_camera(self, pitch=None, yaw=None):
+    if pitch is None:
+      pitch = self.base_pitch
+    if yaw is None:
+      yaw = self.base_yaw
     self.camera.distance = self.base_cam_dist
-    self.camera.pitch = self.base_pitch
-    self.camera.yaw = self.base_yaw
+    self.camera.pitch = pitch
+    self.camera.yaw = yaw
     self.camera.target = np.array(self.base_center) # Make a copy so we don't modify it
     self.camera.update()
     self.should_update_render = True
@@ -670,10 +683,13 @@ class J3DViewer(QOpenGLWidget):
     self.should_update_render = True
   
   def keyPressEvent(self, event):
-    if event.key() == Qt.Key_R:
+    if event.key() == Qt.Key.Key_R:
       self.reset_camera()
       event.accept()
-    elif event.key() == Qt.Key_Space:
+    elif event.key() in self.KEY_TO_CAMERA_ANGLE:
+      pitch, yaw = self.KEY_TO_CAMERA_ANGLE[event.key()]
+      self.reset_camera(pitch=pitch, yaw=yaw)
+    elif event.key() == Qt.Key.Key_Space:
       self.show_widgets = not self.show_widgets
       self.should_update_render = True
       event.accept()
