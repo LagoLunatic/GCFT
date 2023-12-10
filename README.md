@@ -48,12 +48,12 @@ Download and install git from here: https://git-scm.com/downloads
 Then clone this repository with git by running this in a command prompt:  
 `git clone https://github.com/LagoLunatic/GCFT.git --recurse-submodules=":(exclude)PyJ3DUltra"`  
 
-Download and install Python 3.11.5 from here: https://www.python.org/downloads/release/python-3115/  
+Download and install Python 3.12 from here: https://www.python.org/downloads/release/python-3121/  
 "Windows installer (64-bit)" is the one you want if you're on Windows, "macOS 64-bit universal2 installer" if you're on Mac.  
-If you're on Linux, run this command instead: `sudo apt-get install python3.11`  
+If you're on Linux, run this command instead: `sudo apt-get install python3.12`  
 
 Open the GCFT folder in a command prompt and install dependencies by running:  
-`py -3.11 -m pip install -r requirements.txt` (on Windows)  
+`py -3.12 -m pip install -r requirements.txt` (on Windows)  
 `python3 -m pip install -r requirements.txt` (on Mac)  
 `python3 -m pip install $(cat requirements.txt) --user` (on Linux)  
 
@@ -66,7 +66,7 @@ Then run GCFT with:
 
 Optionally, if you want J3D model previews to display while running from source, you must also clone and build PyJ3DUltra.  
 A script that automates this process is provided. Simply run the following command:  
-`py -3.11 build_pyj3dultra.py`  
+`py -3.12 build_pyj3dultra.py`  
 On Windows, you must first [install vcpkg](https://vcpkg.io/en/getting-started) before running that command.  
 
 If the script ran successfully with no errors, then the next time you load a J3D model in GCFT you should see a 3D preview.

@@ -1,1 +1,1 @@
-py #build_ui.py
+py -3.12 #build_ui.py
