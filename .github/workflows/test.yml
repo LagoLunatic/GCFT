@@ -36,8 +36,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y qtbase5-dev
-          sudo apt-get install -y libxcb-cursor0
+          sudo apt-get install -y qtbase5-dev libxcb-cursor0 libxcb-xinerama0
       - name: Test with pytest
         run: |
           pip install pytest pytest-cov
