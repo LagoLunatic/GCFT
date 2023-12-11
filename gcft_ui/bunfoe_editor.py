@@ -582,3 +582,21 @@ class BunfoeEditor(QWidget):
     
     self.set_background_for_color_button(button, color)
     self.field_value_changed.emit()
+
+class BunfoeDialog(QDialog):
+  @staticmethod
+  def show_dialog_for_bunfoe(bunfoe_inst: BUNFOE, parent: BunfoeEditor, title):
+    dialog = BunfoeDialog(parent)
+    dialog.set_bunfoe_instance(bunfoe_inst, title)
+    dialog.exec()
+  
+  def __init__(self, parent: BunfoeEditor):
+    super().__init__(parent)
+    QVBoxLayout(self)
+    self.bunfoe_editor = parent
+    self.setModal(True)
+  
+  def set_bunfoe_instance(self, bunfoe_inst: BUNFOE, title):
+    self.setWindowTitle(title)
+    bunfoe_editor_widget = self.bunfoe_editor.setup_editor_widget_for_bunfoe_instance(bunfoe_inst)
+    self.layout().addWidget(bunfoe_editor_widget)
