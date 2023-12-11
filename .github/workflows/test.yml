@@ -9,6 +9,7 @@ on:
 jobs:
   test:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - name: Windows
@@ -19,6 +20,9 @@ jobs:
             os: ubuntu-20.04
     
     runs-on: ${{ matrix.os }}
+    
+    env:
+      DISPLAY: ':99.0'
     
     steps:
       - uses: actions/checkout@v4
@@ -37,9 +41,14 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y qtbase5-dev libxcb-cursor0 libxcb-xinerama0
-          sudo apt update
-          sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev mesa-common-dev libicu-dev
+          sudo apt-get install -y qtbase5-dev libxcb-cursor0 libxcb-xinerama0 xvfb herbstluftwm
+      - name: Set up Qt
+        uses: tlambert03/setup-qt-libs@v1
+        if: runner.os == 'Linux'
+      - name: Build "display"
+        if: runner.os == 'Linux'
+        run: |
+          /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX
       - name: Test with pytest
         run: |
           pip install pytest pytest-cov
