@@ -42,7 +42,8 @@ if __name__ == "__main__":
     error_message_title = "Encountered an unhandled error"
     stack_trace = traceback.format_exception(excepttype, exception, tb)
     error_message = "GCFT encountered an unhandled error.\n"
-    error_message += "Please report this issue with a screenshot of this message.\n"
+    error_message += "Please report this issue with a screenshot of this message.\n\n"
+    error_message += f"{exception}\n\n"
     error_message += "\n".join(stack_trace)
     QMessageBox.critical(None, error_message_title, error_message)
   sys.excepthook = show_unhandled_exception
