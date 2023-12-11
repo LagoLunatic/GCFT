@@ -35,8 +35,8 @@ jobs:
       - name: Install any missing Qt dependencies
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get update
-          sudo apt-get install -y qtbase5-dev libxcb-cursor0 libxcb-xinerama0
+          sudo apt update
+          sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev mesa-common-dev libicu-dev
       - name: Test with pytest
         run: |
           pip install pytest pytest-cov
