@@ -7,3 +7,4 @@ settings.txt
 /.venv
 profileresults*.txt
 profileresults*.prof
+.coverage

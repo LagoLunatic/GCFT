@@ -1,4 +1,5 @@
 
+import sys
 import os
 import re
 import traceback
@@ -7,6 +8,11 @@ from io import BytesIO
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
+
+sys.path.insert(0, "./gclib")
+sys.path.insert(0, "./PyJ3DUltra/build")
+sys.path.insert(0, "./PyJ3DUltra/build/Release")
+sys.path.insert(0, "./PyJ3DUltra/build/Debug")
 
 from gclib import fs_helpers as fs
 from gcft_ui.uic.ui_main import Ui_MainWindow

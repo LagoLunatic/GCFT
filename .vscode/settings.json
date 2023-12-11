@@ -12,4 +12,15 @@
   "search.exclude": {
     "PyJ3DUltra": true,
   },
+  "python.analysis.exclude": [
+    "PyJ3DUltra"
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": [
+    "test",
+    "--cov=gcft_ui",
+    "--cov=gclib",
+    "--cov-report=html",
+  ],
 }

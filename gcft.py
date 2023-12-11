@@ -1,16 +1,10 @@
 #!/usr/bin/python3
 
+import sys
 import traceback
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
-
-import sys
-
-sys.path.insert(0, "./gclib")
-sys.path.insert(0, "./PyJ3DUltra/build")
-sys.path.insert(0, "./PyJ3DUltra/build/Release")
-sys.path.insert(0, "./PyJ3DUltra/build/Debug")
 
 from gcft_ui.main_window import GCFTWindow
 
