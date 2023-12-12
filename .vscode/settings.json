@@ -19,8 +19,7 @@
   "python.testing.pytestEnabled": true,
   "python.testing.pytestArgs": [
     "test",
-    "--cov=gcft_ui",
-    "--cov=gclib",
+    "--cov",
     "--cov-report=html",
   ],
 }

@@ -52,7 +52,7 @@ jobs:
       - name: Test with pytest
         run: |
           pip install pytest pytest-cov
-          pytest test --cov=gcft_ui --cov=gclib --cov-report=html
+          pytest test --cov --cov-report=html
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v3
         with:
