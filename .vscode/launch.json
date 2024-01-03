@@ -5,20 +5,13 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python: Current File",
-      "type": "python",
-      "request": "launch",
-      "program": "${file}",
-      "console": "integratedTerminal",
-      "justMyCode": true
-    },
-    {
       "name": "Run GCFT",
       "type": "python",
       "request": "launch",
       "program": "${workspaceFolder}/gcft.py",
       "console": "integratedTerminal",
-      "justMyCode": true
+      "justMyCode": true,
+      "args": []
     },
     {
       "name": "Profile GCFT",
@@ -30,6 +23,14 @@
       "args": [
         "-o", "profileresults.prof", "${workspaceFolder}/gcft.py",
       ]
+    },
+    {
+      "name": "Python: Current File",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "justMyCode": true
     },
   ]
 }
