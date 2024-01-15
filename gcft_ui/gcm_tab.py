@@ -37,7 +37,6 @@ class GCMTab(QWidget):
     
     self.ui.gcm_files_tree.setModel(self.proxy)
     self.selection_model = self.ui.gcm_files_tree.selectionModel()
-    self.ui.gcm_files_tree.setColumnWidth(0, 300)
     
     self.ui.filter.textChanged.connect(self.filter_rows)
     
@@ -207,6 +206,8 @@ class GCMTab(QWidget):
     self.ui.extract_all_files_from_gcm.setDisabled(False)
     self.ui.dump_all_gcm_textures.setDisabled(False)
     self.ui.add_replace_files_from_folder.setDisabled(False)
+    
+    self.ui.gcm_files_tree.setColumnWidth(0, 300)
   
   def add_gcm_file_entry_to_files_tree(self, file_entry: GCMBaseFile):
     if file_entry.is_system_file:

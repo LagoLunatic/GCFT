@@ -40,8 +40,6 @@ class J3DTab(BunfoeEditor):
     self.j3d_name = None
     self.model_loaded = False
     self.anim_paused = True
-    self.ui.j3d_chunks_tree.setColumnWidth(1, 170)
-    self.ui.j3d_chunks_tree.setColumnWidth(2, 60)
     
     self.j3d_col_name_to_index = {}
     for col in range(self.ui.j3d_chunks_tree.columnCount()):
@@ -251,6 +249,9 @@ class J3DTab(BunfoeEditor):
         self.add_trk1_chunk_to_tree(chunk, chunk_item)
       elif isinstance(chunk, TTK1):
         self.add_ttk1_chunk_to_tree(chunk, chunk_item)
+    
+    self.ui.j3d_chunks_tree.setColumnWidth(1, 170)
+    self.ui.j3d_chunks_tree.setColumnWidth(2, 60)
     
     # Expand all items in the tree (for debugging):
     #for item in self.ui.j3d_chunks_tree.findItems("*", Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive):

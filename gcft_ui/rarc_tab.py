@@ -24,8 +24,6 @@ class RARCTab(QWidget):
     self.display_rarc_relative_dir_entries = False
     self.display_rarc_dir_indexes = False
     
-    self.ui.rarc_files_tree.setColumnWidth(0, 300)
-    
     # This should be in the .ui file, but PySide6 doesn't compile it correctly.
     self.ui.rarc_files_tree.setEditTriggers(QAbstractItemView.NoEditTriggers)
     
@@ -249,6 +247,8 @@ class RARCTab(QWidget):
     self.ui.dump_all_rarc_textures.setDisabled(False)
     self.ui.export_rarc_to_c_header.setDisabled(False)
     self.ui.sync_file_ids_and_indexes.setDisabled(False)
+    
+    self.ui.rarc_files_tree.setColumnWidth(0, 300)
   
   def add_rarc_file_entry_to_files_tree(self, file_entry):
     index_of_entry_in_parent_dir = file_entry.parent_node.files.index(file_entry)
