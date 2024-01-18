@@ -3,4 +3,5 @@
 	url = https://github.com/LagoLunatic/gclib.git
 [submodule "PyJ3DUltra"]
 	path = PyJ3DUltra
-	url = https://github.com/Astral-C/PyJ3DUltra.git
+	url = https://github.com/LagoLunatic/PyJ3DUltra.git
+	branch = gcft

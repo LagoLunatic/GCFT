@@ -163,14 +163,20 @@ class J3DTab(BunfoeEditor):
   
   def load_anim_by_data(self, data, anim_name):
     j3d = J3D(data)
-    if j3d.file_type[:3] != "brk":
+    max_frame = None
+    if j3d.file_type[:3] == "bck":
+      bck = j3d
+      max_frame = bck.ank1.duration-1
+      self.ui.j3d_viewer.load_bck(bck)
+    elif j3d.file_type[:3] == "brk":
+      brk = j3d
+      max_frame = brk.trk1.duration-1
+      self.ui.j3d_viewer.load_brk(brk)
+    else:
       return
-    brk = j3d
-    
-    self.ui.j3d_viewer.load_brk(brk)
     
     self.ui.anim_slider.setMinimum(0)
-    self.ui.anim_slider.setMaximum(brk.trk1.duration-1)
+    self.ui.anim_slider.setMaximum(max_frame)
     self.ui.anim_slider.setValue(0)
     
     self.ui.anim_pause_button.setDisabled(False)

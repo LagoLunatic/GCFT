@@ -90,6 +90,7 @@ class J3DViewer(QOpenGLWidget):
     self.base_center = np.zeros(3)
     self.aspect = 1.0
     self.model = None
+    self.joint_anim = None
     self.color_anim = None
     self.camera = Camera(
       distance=self.base_cam_dist,
@@ -268,6 +269,7 @@ class J3DViewer(QOpenGLWidget):
     self.hide()
   
   def unload_anims(self):
+    self.joint_anim = None
     self.color_anim = None
   
   def guesstimate_model_bbox(self, j3d_model: J3D) -> tuple[np.ndarray, np.ndarray]:
@@ -366,6 +368,23 @@ class J3DViewer(QOpenGLWidget):
     else:
       return orig_j3d
   
+  def load_bck(self, bck: J3D):
+    self.bck = bck
+    
+    if self.model is None:
+      return
+    
+    if bck.ank1.anims_count != self.j3d.jnt1.joint_count:
+      error_message = "This animation is not for this model.\nThe loaded BCK animation has animations for %s joints, while the currently loaded model has %s joints." % (
+        self.window().stringify_number(bck.ank1.anims_count, min_hex_chars=2),
+        self.window().stringify_number(self.j3d.jnt1.joint_count, min_hex_chars=2),
+      )
+      QMessageBox.warning(self, "Wrong joint count", error_message)
+      return
+    
+    self.model.attachBck(data=fs.read_all_bytes(self.bck.data))
+    self.joint_anim = self.model.getBck()
+  
   def load_brk(self, brk: J3D):
     self.brk = brk
     
@@ -382,20 +401,27 @@ class J3DViewer(QOpenGLWidget):
     # brk. maybe make a separate func: load_model vs reload_model
   
   def set_anim_frame(self, frame: int):
-    if self.color_anim is None:
-      return
-    
-    self.color_anim.setFrame(frame, True)
-    
-    self.should_update_render = True
+    for anim in [self.joint_anim, self.color_anim]:
+      if anim is None:
+        continue
+      anim.setFrame(frame, True)
+      self.should_update_render = True
   
   def set_anim_paused(self, paused: bool):
-    if self.color_anim is None:
+    for anim in [self.joint_anim, self.color_anim]:
+      if anim is None:
+        continue
+      anim.setPaused(paused)
+  
+  def tick_anims(self, delta_time: float):
+    if delta_time <= 0:
       return
     
-    # Note: J3DUltra does not currently support animation playback, so this does nothing.
-    frame = self.color_anim.getFrame()
-    self.color_anim.setFrame(int(frame), paused)
+    for anim in [self.joint_anim, self.color_anim]:
+      if anim is None:
+        continue
+      anim.tick(delta_time)
+      self.should_update_render = True
   
   def calculate_light_pos(self, frac):
     angle = (frac % 1.0) * np.pi*2
@@ -628,7 +654,8 @@ class J3DViewer(QOpenGLWidget):
   
   def process_frame(self):
     current_time = time.monotonic()
-    self.total_time_elapsed += (current_time - self.last_render_time)
+    delta_time = current_time - self.last_render_time
+    self.total_time_elapsed += delta_time
     self.last_render_time = current_time
     
     if self.context() is None:
@@ -639,6 +666,8 @@ class J3DViewer(QOpenGLWidget):
     
     if self.animate_light:
       self.update_lights()
+    
+    self.tick_anims(delta_time)
     
     if self.should_update_render:
       self.update()
