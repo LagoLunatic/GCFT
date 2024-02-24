@@ -335,8 +335,9 @@ class J3DTab(BunfoeEditor):
       type_name = "Joint"
       names_list = self.j3d.jnt1.joint_names
     elif inf1_node.type == INF1NodeType.MATERIAL:
-      type_name = "Material"
-      names_list = self.j3d.mat3.mat_names
+      if self.j3d.mat3 is not None:
+        type_name = "Material"
+        names_list = self.j3d.mat3.mat_names
     elif inf1_node.type == INF1NodeType.SHAPE:
       type_name = "Shape"
       names_list = self.j3d.shp1.shape_names
