@@ -251,8 +251,6 @@ class RARCTab(QWidget):
     self.ui.rarc_files_tree.setColumnWidth(0, 300)
   
   def add_rarc_file_entry_to_files_tree(self, file_entry):
-    index_of_entry_in_parent_dir = file_entry.parent_node.files.index(file_entry)
-    
     if file_entry.is_dir:
       dir_file_entry = file_entry
       if file_entry.name in [".", ".."] and not self.display_rarc_relative_dir_entries:
@@ -270,11 +268,11 @@ class RARCTab(QWidget):
       
       if file_entry.name in [".", ".."]:
         item = QTreeWidgetItem([file_entry.name, "", dir_file_index_str, "", "", ""])
-        parent_item.insertChild(index_of_entry_in_parent_dir, item)
+        parent_item.addChild(item)
       else:
         item = QTreeWidgetItem([node.name, node.type, dir_file_index_str, "", "", ""])
         item.setFlags(item.flags() | Qt.ItemIsEditable)
-        parent_item.insertChild(index_of_entry_in_parent_dir, item)
+        parent_item.addChild(item)
         
         self.rarc_node_to_tree_widget_item[node] = item
         self.rarc_tree_widget_item_to_node[item] = node
@@ -290,7 +288,7 @@ class RARCTab(QWidget):
       parent_item = self.rarc_node_to_tree_widget_item[file_entry.parent_node]
       item = QTreeWidgetItem([file_entry.name, "", file_index_str, file_id_str, file_size_str, ""])
       item.setFlags(item.flags() | Qt.ItemIsEditable)
-      parent_item.insertChild(index_of_entry_in_parent_dir, item)
+      parent_item.addChild(item)
       self.rarc_file_entry_to_tree_widget_item[file_entry] = item
       self.rarc_tree_widget_item_to_file_entry[item] = file_entry
       self.update_file_size_and_compression_in_ui(file_entry)
@@ -638,8 +636,7 @@ class RARCTab(QWidget):
     parent_dir_item = self.rarc_node_to_tree_widget_item.get(parent_node)
     file_item = QTreeWidgetItem([file_entry.name, "", file_index_str, file_id_str, file_size_str, ""])
     file_item.setFlags(file_item.flags() | Qt.ItemIsEditable)
-    index_of_file_in_dir = parent_node.files.index(file_entry)
-    parent_dir_item.insertChild(index_of_file_in_dir, file_item)
+    parent_dir_item.addChild(file_item)
     
     self.rarc_file_entry_to_tree_widget_item[file_entry] = file_item
     self.rarc_tree_widget_item_to_file_entry[file_item] = file_entry
