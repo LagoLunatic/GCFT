@@ -17,7 +17,7 @@ jobs:
           - name: MacOS
             os: macos-latest
           - name: Linux
-            os: ubuntu-20.04
+            os: ubuntu-latest
     
     runs-on: ${{ matrix.os }}
     
