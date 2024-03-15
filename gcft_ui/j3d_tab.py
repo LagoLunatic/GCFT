@@ -386,8 +386,9 @@ class J3DTab(BunfoeEditor):
     for mat_index, material in enumerate(mat3.materials):
       mat_name = mat3.mat_names[mat_index]
       mat_item = self.make_tree_widget_item(material, chunk_item, ["", mat_name, ""])
-      indirect = mat3.indirects[mat_index]
-      self.make_tree_widget_item(indirect, mat_item, ["", f"Indirect Texturing", ""])
+      if len(mat3.indirects) != 0:
+        indirect = mat3.indirects[mat_index]
+        self.make_tree_widget_item(indirect, mat_item, ["", f"Indirect Texturing", ""])
   
   def add_mdl3_chunk_to_tree(self, mdl3: MDL3, chunk_item: QTreeWidgetItem):
     for i, mdl_entry in enumerate(mdl3.entries):
