@@ -65,6 +65,6 @@ Then run GCFT with:
 Optionally, if you want J3D model previews to display while running from source, you must also clone and build PyJ3DUltra.  
 A script that automates this process is provided. Simply run the following command:  
 `py -3.12 build_pyj3dultra.py`  
-On Windows, you must first [install vcpkg](https://vcpkg.io/en/getting-started) before running that command.  
+On Windows, you must first [install vcpkg](https://vcpkg.io/en/getting-started) and [Visual Studio](https://visualstudio.microsoft.com/vs/community/) before running that command.  
 
 If the script ran successfully with no errors, then the next time you load a J3D model in GCFT you should see a 3D preview.

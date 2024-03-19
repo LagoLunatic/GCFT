@@ -9,7 +9,7 @@ from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 from PySide6.QtOpenGLWidgets import *
 
-from gcft_paths import ASSETS_PATH
+from gcft_paths import ASSETS_PATH, IS_RUNNING_FROM_SOURCE
 from gcft_ui.nav_camera import Camera
 from gclib.j3d import J3D
 from gclib.bti import BTI
@@ -180,6 +180,15 @@ class J3DViewer(QOpenGLWidget):
   
   def load_model(self, j3d_model: J3D, reset_camera=False, hidden_material_indexes=None):
     if not J3DULTRA_INSTALLED:
+      error_msg = "Cannot show J3D previews, J3DUltra could not be imported."
+      if IS_RUNNING_FROM_SOURCE:
+        error_msg += "\n\n"
+        error_msg += "Make sure you compiled PyJ3DUltra by running the following command:\n"
+        error_msg += "py build_pyj3dultra.py"
+      elif sys.platform == "win32":
+        error_msg += "\n\n"
+        error_msg += "Make sure you have the Microsoft Visual C++ 2015 Redistributable installed."
+      self.error_showing_preview.emit(error_msg)
       return
     
     if j3d_model.file_type not in ["bmd3", "bdl4", "bmd2"]:
