@@ -1,4 +1,5 @@
 
+import sys
 import os
 import re
 from io import BytesIO
@@ -26,6 +27,8 @@ try:
   J3DULTRA_INSTALLED = True
 except ImportError as e:
   print(f"Failed to import J3DUltra with error: {e}")
+  print("Current Python module search paths are:")
+  print(sys.path)
   J3DULTRA_INSTALLED = False
 
 REQUIRED_OPENGL_VERSION = (4, 5)
