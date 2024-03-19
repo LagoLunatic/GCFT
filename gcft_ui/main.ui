@@ -50,9 +50,9 @@
         <string>DOL Executables</string>
        </attribute>
       </widget>
-      <widget class="Yaz0Tab" name="yaz0_tab">
+      <widget class="Yaz0Yay0Tab" name="yaz0_yay0_tab">
        <attribute name="title">
-        <string>Yaz0 Compression</string>
+        <string>Yaz0/Yay0 Compression</string>
        </attribute>
       </widget>
      </widget>
@@ -109,9 +109,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>Yaz0Tab</class>
+   <class>Yaz0Yay0Tab</class>
    <extends>QWidget</extends>
-   <header>gcft_ui.yaz0_tab</header>
+   <header>gcft_ui.yaz0_yay0_tab</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

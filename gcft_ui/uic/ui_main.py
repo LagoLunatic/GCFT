@@ -24,7 +24,7 @@ from gcft_ui.gcm_tab import GCMTab
 from gcft_ui.j3d_tab import J3DTab
 from gcft_ui.jpc_tab import JPCTab
 from gcft_ui.rarc_tab import RARCTab
-from gcft_ui.yaz0_tab import Yaz0Tab
+from gcft_ui.yaz0_yay0_tab import Yaz0Yay0Tab
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -55,9 +55,9 @@ class Ui_MainWindow(object):
         self.dol_tab = DOLTab()
         self.dol_tab.setObjectName(u"dol_tab")
         self.tabWidget.addTab(self.dol_tab, "")
-        self.yaz0_tab = Yaz0Tab()
-        self.yaz0_tab.setObjectName(u"yaz0_tab")
-        self.tabWidget.addTab(self.yaz0_tab, "")
+        self.yaz0_yay0_tab = Yaz0Yay0Tab()
+        self.yaz0_yay0_tab.setObjectName(u"yaz0_yay0_tab")
+        self.tabWidget.addTab(self.yaz0_yay0_tab, "")
 
         self.verticalLayout.addWidget(self.tabWidget)
 
@@ -86,6 +86,6 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.j3d_tab), QCoreApplication.translate("MainWindow", u"J3D Files", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.jpc_tab), QCoreApplication.translate("MainWindow", u"JPC Particle Archives", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.dol_tab), QCoreApplication.translate("MainWindow", u"DOL Executables", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.yaz0_tab), QCoreApplication.translate("MainWindow", u"Yaz0 Compression", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.yaz0_yay0_tab), QCoreApplication.translate("MainWindow", u"Yaz0/Yay0 Compression", None))
     # retranslateUi
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Yaz0Tab</class>
- <widget class="QWidget" name="Yaz0Tab">
+ <class>Yaz0Yay0Tab</class>
+ <widget class="QWidget" name="Yaz0Yay0Tab">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -19,14 +19,32 @@
      <item>
       <widget class="QPushButton" name="decompress_yaz0">
        <property name="text">
-        <string>Decompress File</string>
+        <string>Decompress Yaz0 File</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="compress_yaz0">
        <property name="text">
-        <string>Compress File</string>
+        <string>Compress Yaz0 File</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QPushButton" name="decompress_yay0">
+       <property name="text">
+        <string>Decompress Yay0 File</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="compress_yay0">
+       <property name="text">
+        <string>Compress Yay0 File</string>
        </property>
       </widget>
      </item>

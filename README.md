@@ -7,7 +7,7 @@ GameCube File Tools (GCFT) is a GUI tool for editing the following common file f
 * BTI (images)
 * Various J3D formats (e.g. textures in BDL and BMD models)
 * JPC (particle effect archives) (versions 1-00 and 2-10)
-* Yaz0 (compression)
+* Yaz0 and Yay0 (compression)
 
 Features:
 * Open and view GCMs, RARCs, BTIs, and JPCs
@@ -23,7 +23,7 @@ Features:
 * Extract and replace the BTI textures embedded in J3D BDL and BMD models and BMT material tables, and JPC particle archives
 * Import a folder of particle files onto an existing JPC, adding/overwriting all the particles from the folder to the JPC
 * Viewing DOL executable sections, and converting between offsets within the DOL file and RAM addresses in the game's memory
-* Compress and decompress Yaz0 files
+* Compress and decompress Yaz0 and Yay0 files
 
 It currently cannot create brand new GCMs or JPCs from scratch.  
 
@@ -39,8 +39,6 @@ Editing the file name, folder type, or file ID of RARC files/folders can be done
 
 Modifying BTI images can be done by importing a standalone .bti file from the BTI Images tab, or first opening a GCM/RARC/JPC/J3D file that has BTIs inside it, right clicking on the image you want to edit there, and clicking "Open Image".  
 Once you're on the BTI Images tab, you can import or export the image as a PNG via the buttons at the top, and modify various attributes of the BTI image via the sidebar on the right.  
-
-Note that compressing Yaz0 is slow and doesn't have a progress bar, so the program might look frozen for a while, but it's actually working.  
 
 ### Running from source
 

@@ -8,8 +8,8 @@ from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 
 from gclib import fs_helpers as fs
-from gclib.rarc import RARC, RARCFileAttrType
-from gclib.yaz0 import Yaz0
+from gclib.rarc import RARC, RARCFileAttrType, RARCFileEntry
+from gclib.yaz0_yay0 import Yaz0, Yay0
 from gcft_ui.uic.ui_rarc_tab import Ui_RARCTab
 from asset_dumper import AssetDumper
 
@@ -21,7 +21,7 @@ class RARCTab(QWidget):
     
     self.rarc = None
     self.rarc_name = None
-    self.display_rarc_relative_dir_entries = False
+    self.display_rarc_relative_dir_entries = False # TODO: add option for this to the GUI
     self.display_rarc_dir_indexes = False
     
     # This should be in the .ui file, but PySide6 doesn't compile it correctly.
@@ -304,14 +304,16 @@ class RARCTab(QWidget):
     file_size_str = self.window().stringify_number(fs.data_len(file_entry.data))
     item.setText(self.rarc_col_name_to_index["File Size"], file_size_str)
     
-    # TODO: Add a Yay0 checkbox and update it here once Yay0 compression is supported.
     if file_entry.type & RARCFileAttrType.COMPRESSED:
       if file_entry.type & RARCFileAttrType.YAZ0_COMPRESSED:
         item.setCheckState(self.rarc_col_name_to_index["Yaz0 Compressed"], Qt.Checked)
+        item.setCheckState(self.rarc_col_name_to_index["Yay0 Compressed"], Qt.Unchecked)
       else:
         item.setCheckState(self.rarc_col_name_to_index["Yaz0 Compressed"], Qt.Unchecked)
+        item.setCheckState(self.rarc_col_name_to_index["Yay0 Compressed"], Qt.Checked)
     else:
       item.setCheckState(self.rarc_col_name_to_index["Yaz0 Compressed"], Qt.Unchecked)
+      item.setCheckState(self.rarc_col_name_to_index["Yay0 Compressed"], Qt.Unchecked)
     
     self.ui.rarc_files_tree.blockSignals(False)
   
@@ -740,7 +742,9 @@ class RARCTab(QWidget):
     elif column == self.rarc_col_name_to_index["File ID"]:
       self.change_rarc_file_id(item)
     elif column == self.rarc_col_name_to_index["Yaz0 Compressed"]:
-      self.change_rarc_file_yaz0_compressed(item)
+      self.change_rarc_file_compression_type(item)
+    elif column == self.rarc_col_name_to_index["Yay0 Compressed"]:
+      self.change_rarc_file_compression_type(item)
   
   def change_rarc_file_name(self, item):
     node = self.rarc_tree_widget_item_to_node.get(item)
@@ -846,32 +850,34 @@ class RARCTab(QWidget):
     file_id_str = self.window().stringify_number(file_entry.id, min_hex_chars=4)
     item.setText(self.rarc_col_name_to_index["File ID"], file_id_str)
   
-  def change_rarc_file_yaz0_compressed(self, item):
-    file_entry = self.rarc_tree_widget_item_to_file_entry.get(item)
-    checkstate = item.checkState(self.rarc_col_name_to_index["Yaz0 Compressed"])
-    
+  def change_rarc_file_compression_type(self, item: QTreeWidgetItem):
+    file_entry: RARCFileEntry = self.rarc_tree_widget_item_to_file_entry.get(item)
     file_entry.update_compression_flags_from_data()
-    if checkstate == Qt.Unchecked:
-      if file_entry.type & RARCFileAttrType.COMPRESSED:
-        if file_entry.type & RARCFileAttrType.YAZ0_COMPRESSED:
-          file_entry.data = Yaz0.decompress(file_entry.data)
-          file_entry.update_compression_flags_from_data()
-        else: # Yay0
-          QMessageBox.warning(self, "Yay0 not supported", "This file is currently Yay0 compressed. GCFT does not currently support decompressing Yay0.")
-      else:
-        # Already uncompressed. Do nothing.
-        pass
-    else: # Checked
-      if file_entry.type & RARCFileAttrType.COMPRESSED:
-        if file_entry.type & RARCFileAttrType.YAZ0_COMPRESSED:
-          # Already Yaz0 compressed. Do nothing.
-          pass
-        else: # Yay0
-          QMessageBox.warning(self, "Yay0 not supported", "This file is currently Yay0 compressed. GCFT does not currently support decompressing Yay0.")
-      else:
-        search_depth, should_pad_data = self.yaz0_tab.get_search_depth_and_should_pad()
-        file_entry.data = Yaz0.compress(file_entry.data, search_depth=search_depth, should_pad_data=should_pad_data)
-        file_entry.update_compression_flags_from_data()
+    is_yaz0_compressed = bool((file_entry.type & RARCFileAttrType.COMPRESSED) and (file_entry.type & RARCFileAttrType.YAZ0_COMPRESSED))
+    is_yay0_compressed = bool((file_entry.type & RARCFileAttrType.COMPRESSED) and not (file_entry.type & RARCFileAttrType.YAZ0_COMPRESSED))
+    
+    yaz0_checked = item.checkState(self.rarc_col_name_to_index["Yaz0 Compressed"]) == Qt.CheckState.Checked
+    yay0_checked = item.checkState(self.rarc_col_name_to_index["Yay0 Compressed"]) == Qt.CheckState.Checked
+    if yaz0_checked and yay0_checked:
+      QMessageBox.warning(self, "Selected both Yaz0 and Yay0", "RARC files cannot be both Yaz0 and Yay0 compressed at the same time, please select only one.")
+      self.update_file_size_and_compression_in_ui(file_entry)
+      return
+    
+    if is_yaz0_compressed and not yaz0_checked:
+      file_entry.data = Yaz0.decompress(file_entry.data)
+      file_entry.update_compression_flags_from_data()
+    elif is_yay0_compressed and not yay0_checked:
+      file_entry.data = Yay0.decompress(file_entry.data)
+      file_entry.update_compression_flags_from_data()
+    
+    if yaz0_checked and not is_yaz0_compressed:
+      search_depth, should_pad_data = self.yaz0_yay0_tab.get_search_depth_and_should_pad()
+      file_entry.data = Yaz0.compress(file_entry.data, search_depth=search_depth, should_pad_data=should_pad_data)
+      file_entry.update_compression_flags_from_data()
+    elif yay0_checked and not is_yay0_compressed:
+      search_depth, should_pad_data = self.yaz0_yay0_tab.get_search_depth_and_should_pad()
+      file_entry.data = Yay0.compress(file_entry.data, search_depth=search_depth, should_pad_data=should_pad_data)
+      file_entry.update_compression_flags_from_data()
     
     # Update the UI to match the file data.
     self.update_file_size_and_compression_in_ui(file_entry)
