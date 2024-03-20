@@ -202,7 +202,7 @@ class J3DViewer(QOpenGLWidget):
         error_msg += "py build_pyj3dultra.py"
       elif sys.platform == "win32":
         error_msg += "\n\n"
-        error_msg += "Make sure you have the Microsoft Visual C++ 2015 Redistributable installed."
+        error_msg += "Make sure you have Visual Studio installed."
       self.error_showing_preview.emit(error_msg)
       return
     
