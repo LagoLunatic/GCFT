@@ -86,9 +86,7 @@ jobs:
           cmakeListsTxtPath: '${{ github.workspace }}/PyJ3DUltra/CMakeLists.txt'
           buildDirectory: '${{ github.workspace }}/PyJ3DUltra/build'
           useVcpkgToolchainFile: true
-          cmakeAppendedArgs: '-G Ninja'
-          cmakeBuildType: 'Release'
-          buildWithCMakeArgs: '--config Release'
+          cmakeAppendedArgs: '-G Ninja -DCMAKE_BUILD_TYPE=Release'
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
