@@ -296,11 +296,17 @@ class J3DViewer(QOpenGLWidget):
     self.hide()
   
   def unload_anims(self):
+    self.brk = None
     self.j3dultra_brk = None
+    self.btp = None
     self.j3dultra_btp = None
+    self.btk = None
     self.j3dultra_btk = None
+    self.bck = None
     self.j3dultra_bck = None
+    self.bca = None
     self.j3dultra_bca = None
+    self.bva = None
     self.j3dultra_bva = None
   
   def guesstimate_model_bbox(self, j3d_model: J3D) -> tuple[np.ndarray, np.ndarray]:
@@ -470,6 +476,12 @@ class J3DViewer(QOpenGLWidget):
     
     self.model.attachBca(data=fs.read_all_bytes(self.bca.data))
     self.j3dultra_bca = self.model.getBca()
+    
+    if self.j3dultra_bck:
+      # BCK takes precedence over BCA, so we have to unload the BCK for the BCA to show up.
+      self.model.detachBck()
+      self.bck = None
+      self.j3dultra_bck = None
     
     self.set_anim_frame(0)
   
