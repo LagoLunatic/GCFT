@@ -39,7 +39,7 @@ class J3DTab(BunfoeEditor):
     self.j3d: J3D = None
     self.j3d_name = None
     self.model_loaded = False
-    self.anim_paused = True
+    self.anim_paused = False
     
     self.j3d_col_name_to_index = {}
     for col in range(self.ui.j3d_chunks_tree.columnCount()):
@@ -72,6 +72,8 @@ class J3DTab(BunfoeEditor):
     self.ui.actionOpenJ3DImage.triggered.connect(self.open_image_in_j3d)
     self.ui.actionReplaceJ3DImage.triggered.connect(self.replace_image_in_j3d)
     
+    self.ui.j3d_viewer.bck_frame_changed.connect(self.update_slider_from_bck_frame)
+    
     self.ui.j3d_viewer.error_showing_preview.connect(self.display_j3d_preview_error)
     self.ui.j3d_viewer.hide()
     self.ui.j3dultra_error_area.hide()
@@ -92,9 +94,12 @@ class J3DTab(BunfoeEditor):
     
     self.ui.anim_pause_button.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
     self.ui.anim_pause_button.clicked.connect(self.toggle_anim_paused)
-    self.ui.anim_slider.valueChanged.connect(self.update_anim_frame)
+    self.ui.anim_slider.sliderMoved.connect(self.update_anim_frame)
     self.ui.anim_pause_button.setDisabled(True)
     self.ui.anim_slider.setDisabled(True)
+  
+    self.ui.j3d_viewer.set_anim_paused(self.anim_paused)
+    self.update_anim_pause_button_icon()
   
   def import_j3d(self):
     filters = [
@@ -172,8 +177,27 @@ class J3DTab(BunfoeEditor):
       brk = j3d
       max_frame = brk.trk1.duration-1
       self.ui.j3d_viewer.load_brk(brk)
+    elif j3d.file_type[:3] == "btk":
+      btk = j3d
+      max_frame = btk.ttk1.duration-1
+      self.ui.j3d_viewer.load_btk(btk)
+    elif j3d.file_type[:3] == "btp":
+      btp = j3d
+      max_frame = btp.tpt1.duration-1
+      self.ui.j3d_viewer.load_btp(btp)
+    elif j3d.file_type[:3] == "bca":
+      bca = j3d
+      max_frame = bca.anf1.duration-1
+      self.ui.j3d_viewer.load_bca(bca)
+    elif j3d.file_type[:3] == "bva":
+      bva = j3d
+      max_frame = bva.vaf1.duration-1
+      self.ui.j3d_viewer.load_bva(bva)
     else:
       return
+    
+    self.anim_paused = False
+    self.ui.j3d_viewer.set_anim_paused(self.anim_paused)
     
     self.ui.anim_slider.setMinimum(0)
     self.ui.anim_slider.setMaximum(max_frame)
@@ -187,12 +211,21 @@ class J3DTab(BunfoeEditor):
   
   def toggle_anim_paused(self):
     self.anim_paused = not self.anim_paused
+    self.update_anim_pause_button_icon()
+    self.ui.j3d_viewer.set_anim_paused(self.anim_paused)
+  
+  def update_anim_pause_button_icon(self):
     if self.anim_paused:
       self.ui.anim_pause_button.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
     else:
       self.ui.anim_pause_button.setIcon(self.style().standardIcon(QStyle.SP_MediaPause))
-    self.ui.j3d_viewer.set_anim_paused(self.anim_paused)
-    # TODO: Update self.ui.anim_slider to match the J3DUltra animation playback.
+  
+  def update_slider_from_bck_frame(self, bck_frame: float):
+    self.ui.anim_slider.setValue(bck_frame)
+    if bck_frame >= self.ui.j3d_viewer.bck.ank1.duration:
+      self.anim_paused = True
+      self.ui.j3d_viewer.set_anim_paused(self.anim_paused)
+      self.update_anim_pause_button_icon()
   
   def try_read_j3d(self, data):
     try:

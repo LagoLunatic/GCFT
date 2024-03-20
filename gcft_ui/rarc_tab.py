@@ -481,7 +481,7 @@ class RARCTab(QWidget):
           image_selected = True
         elif file_ext in [".bdl", ".bmd"]:
           j3d_selected = True
-        elif file_ext in [".bmt", ".btk", ".bck", ".brk", ".btp"]:
+        elif file_ext in [".bmt", ".btk", ".bck", ".brk", ".btp", ".bca", ".bva"]:
           j3d_selected = True
           j3d_anim_selected = True
         

@@ -36,6 +36,8 @@ REQUIRED_OPENGL_VERSION = (4, 5)
 class J3DViewer(QOpenGLWidget):
   error_showing_preview = Signal(str)
   
+  bck_frame_changed = Signal(float)
+  
   DESIRED_FPS = 30
   DELAY_BETWEEN_FRAMES = 1000 // DESIRED_FPS
   
@@ -93,8 +95,21 @@ class J3DViewer(QOpenGLWidget):
     self.base_center = np.zeros(3)
     self.aspect = 1.0
     self.model = None
-    self.joint_anim = None
-    self.color_anim = None
+    
+    self.anim_paused = False
+    self.brk = None
+    self.j3dultra_brk = None
+    self.btp = None
+    self.j3dultra_btp = None
+    self.btk = None
+    self.j3dultra_btk = None
+    self.bck = None
+    self.j3dultra_bck = None
+    self.bca = None
+    self.j3dultra_bca = None
+    self.bva = None
+    self.j3dultra_bva = None
+    
     self.camera = Camera(
       distance=self.base_cam_dist,
       pitch=self.base_pitch, yaw=self.base_yaw,
@@ -281,8 +296,12 @@ class J3DViewer(QOpenGLWidget):
     self.hide()
   
   def unload_anims(self):
-    self.joint_anim = None
-    self.color_anim = None
+    self.j3dultra_brk = None
+    self.j3dultra_btp = None
+    self.j3dultra_btk = None
+    self.j3dultra_bck = None
+    self.j3dultra_bca = None
+    self.j3dultra_bva = None
   
   def guesstimate_model_bbox(self, j3d_model: J3D) -> tuple[np.ndarray, np.ndarray]:
     # Estimate the model's size based on its visual shape bounding boxes.
@@ -380,6 +399,50 @@ class J3DViewer(QOpenGLWidget):
     else:
       return orig_j3d
   
+  #region Animation
+  
+  def load_brk(self, brk: J3D):
+    self.brk = brk
+    
+    if self.model is None:
+      return
+    
+    # NOTE: Loading a new brk does not reset the registers to how they originally were
+    # this means loading several brks can have them all visible at once, depending on how
+    # they're set up.
+    self.model.attachBrk(data=fs.read_all_bytes(self.brk.data))
+    self.j3dultra_brk = self.model.getBrk()
+    
+    self.set_anim_frame(0)
+    
+    # TODO: when reloading the model due to different isolated visibility, we need to re-attach the
+    # brk. maybe make a separate func: load_model vs reload_model
+  
+  def load_btp(self, btp: J3D):
+    self.btp = btp
+    
+    if self.model is None:
+      return
+    
+    self.model.attachBtp(data=fs.read_all_bytes(self.btp.data))
+    self.j3dultra_btp = self.model.getBtp()
+    
+    self.set_anim_frame(0)
+  
+  def load_btk(self, btk: J3D):
+    self.btk = btk
+    
+    if self.model is None:
+      return
+    
+    self.model.attachBtk(data=fs.read_all_bytes(self.btk.data))
+    self.j3dultra_btk = self.model.getBtk()
+    
+    self.set_anim_frame(0)
+    
+    # TODO: when reloading the model due to different isolated visibility, we need to re-attach the
+    # btk. maybe make a separate func: load_model vs reload_model
+  
   def load_bck(self, bck: J3D):
     self.bck = bck
     
@@ -395,45 +458,57 @@ class J3DViewer(QOpenGLWidget):
       return
     
     self.model.attachBck(data=fs.read_all_bytes(self.bck.data))
-    self.joint_anim = self.model.getBck()
+    self.j3dultra_bck = self.model.getBck()
+    
+    self.set_anim_frame(0)
   
-  def load_brk(self, brk: J3D):
-    self.brk = brk
+  def load_bca(self, bca: J3D):
+    self.bca = bca
     
     if self.model is None:
       return
     
-    # NOTE: Loading a new brk does not reset the registers to how they originally were
-    # this means loading several brks can have them all visible at once, depending on how
-    # they're set up.
-    self.model.attachBrk(data=fs.read_all_bytes(self.brk.data))
-    self.color_anim = self.model.getBrk()
+    self.model.attachBca(data=fs.read_all_bytes(self.bca.data))
+    self.j3dultra_bca = self.model.getBca()
     
-    # TODO: when reloading the model due to different isolated visibility, we need to re-attach the
-    # brk. maybe make a separate func: load_model vs reload_model
+    self.set_anim_frame(0)
   
-  def set_anim_frame(self, frame: int):
-    for anim in [self.joint_anim, self.color_anim]:
+  def load_bva(self, bva: J3D):
+    self.bva = bva
+    
+    if self.model is None:
+      return
+    
+    self.model.attachBva(data=fs.read_all_bytes(self.bva.data))
+    self.j3dultra_bva = self.model.getBva()
+    
+    self.set_anim_frame(0)
+  
+  def each_anim(self):
+    for anim in [self.j3dultra_brk, self.j3dultra_btp, self.j3dultra_btk, self.j3dultra_bck, self.j3dultra_bca, self.j3dultra_bva]:
       if anim is None:
         continue
-      anim.setFrame(frame, True)
+      yield anim
+  
+  def set_anim_frame(self, frame: int):
+    for anim in self.each_anim():
+      anim.setFrame(frame, self.anim_paused)
       self.should_update_render = True
   
   def set_anim_paused(self, paused: bool):
-    for anim in [self.joint_anim, self.color_anim]:
-      if anim is None:
-        continue
+    self.anim_paused = paused
+    for anim in self.each_anim():
       anim.setPaused(paused)
   
   def tick_anims(self, delta_time: float):
     if delta_time <= 0:
       return
     
-    for anim in [self.joint_anim, self.color_anim]:
-      if anim is None:
-        continue
+    for anim in self.each_anim():
       anim.tick(delta_time)
       self.should_update_render = True
+  
+  #endregion
   
   def calculate_light_pos(self, frac):
     angle = (frac % 1.0) * np.pi*2
@@ -680,6 +755,9 @@ class J3DViewer(QOpenGLWidget):
       self.update_lights()
     
     self.tick_anims(delta_time)
+    
+    if self.j3dultra_bck is not None:
+      self.bck_frame_changed.emit(self.j3dultra_bck.getFrame())
     
     if self.should_update_render:
       self.update()
