@@ -9,10 +9,10 @@ from PySide6.QtGui import *
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 
-sys.path.insert(0, "./gclib")
-sys.path.insert(0, "./PyJ3DUltra/build")
-sys.path.insert(0, "./PyJ3DUltra/build/Release")
-sys.path.insert(0, "./PyJ3DUltra/build/Debug")
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "gclib"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "PyJ3DUltra", "build"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "PyJ3DUltra", "build", "Release"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "PyJ3DUltra", "build", "Debug"))
 
 from gclib import fs_helpers as fs
 from gcft_ui.uic.ui_main import Ui_MainWindow
