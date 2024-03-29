@@ -31,6 +31,10 @@ if platform.system() == "Windows":
 call_command(cmake_command)
 
 build_command = ["cmake", "--build", "PyJ3DUltra/build"]
+build_type = "Release"
+if len(sys.argv) > 1:
+  build_type = sys.argv[1]
+build_command += ["--config %s" % build_type]
 call_command(build_command)
 
 print("Successfully compiled PyJ3DUltra.")
