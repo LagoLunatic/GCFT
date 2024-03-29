@@ -121,12 +121,12 @@
      </column>
      <column>
       <property name="text">
-       <string>Yaz0 Compressed</string>
+       <string>Compression</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Yay0 Compressed</string>
+       <string>Preload</string>
       </property>
      </column>
     </widget>

@@ -291,7 +291,33 @@ class RARCTab(QWidget):
       parent_item.addChild(item)
       self.rarc_file_entry_to_tree_widget_item[file_entry] = item
       self.rarc_tree_widget_item_to_file_entry[item] = file_entry
-      self.update_file_size_and_compression_in_ui(file_entry)
+      self.initialize_tree_item_for_file_entry(file_entry)
+  
+  def initialize_tree_item_for_file_entry(self, file_entry: RARCFileEntry):
+    if file_entry.is_dir:
+      return
+    
+    item = self.rarc_file_entry_to_tree_widget_item.get(file_entry)
+    
+    comp_combobox = QComboBox()
+    comp_combobox.setMaximumWidth(80)
+    comp_combobox.addItem("None")
+    comp_combobox.addItem("Yaz0")
+    comp_combobox.addItem("Yay0")
+    comp_combobox.setProperty("tree_item", item)
+    comp_combobox.currentIndexChanged.connect(self.change_rarc_file_compression_type)
+    self.ui.rarc_files_tree.setItemWidget(item, self.rarc_col_name_to_index["Compression"], comp_combobox)
+    
+    load_combobox = QComboBox()
+    load_combobox.setMaximumWidth(80)
+    load_combobox.addItem("None")
+    load_combobox.addItem("MRAM")
+    load_combobox.addItem("ARAM")
+    load_combobox.setProperty("tree_item", item)
+    load_combobox.currentIndexChanged.connect(self.change_rarc_file_preload_type)
+    self.ui.rarc_files_tree.setItemWidget(item, self.rarc_col_name_to_index["Preload"], load_combobox)
+    
+    self.update_file_size_and_compression_in_ui(file_entry)
   
   def update_file_size_and_compression_in_ui(self, file_entry):
     if file_entry.is_dir:
@@ -304,16 +330,24 @@ class RARCTab(QWidget):
     file_size_str = self.window().stringify_number(fs.data_len(file_entry.data))
     item.setText(self.rarc_col_name_to_index["File Size"], file_size_str)
     
+    comp_combobox = self.ui.rarc_files_tree.itemWidget(item, self.rarc_col_name_to_index["Compression"])
     if file_entry.type & RARCFileAttrType.COMPRESSED:
       if file_entry.type & RARCFileAttrType.YAZ0_COMPRESSED:
-        item.setCheckState(self.rarc_col_name_to_index["Yaz0 Compressed"], Qt.Checked)
-        item.setCheckState(self.rarc_col_name_to_index["Yay0 Compressed"], Qt.Unchecked)
+        comp_combobox.setCurrentIndex(comp_combobox.findText("Yaz0"))
       else:
-        item.setCheckState(self.rarc_col_name_to_index["Yaz0 Compressed"], Qt.Unchecked)
-        item.setCheckState(self.rarc_col_name_to_index["Yay0 Compressed"], Qt.Checked)
+        comp_combobox.setCurrentIndex(comp_combobox.findText("Yay0"))
     else:
-      item.setCheckState(self.rarc_col_name_to_index["Yaz0 Compressed"], Qt.Unchecked)
-      item.setCheckState(self.rarc_col_name_to_index["Yay0 Compressed"], Qt.Unchecked)
+      comp_combobox.setCurrentIndex(comp_combobox.findText("None"))
+    
+    load_combobox = self.ui.rarc_files_tree.itemWidget(item, self.rarc_col_name_to_index["Preload"])
+    if file_entry.type & RARCFileAttrType.PRELOAD_TO_MRAM:
+      load_combobox.setCurrentIndex(load_combobox.findText("MRAM"))
+    elif file_entry.type & RARCFileAttrType.PRELOAD_TO_ARAM:
+      load_combobox.setCurrentIndex(load_combobox.findText("ARAM"))
+    elif file_entry.type & RARCFileAttrType.LOAD_FROM_DVD:
+      load_combobox.setCurrentIndex(load_combobox.findText("None"))
+    else:
+      load_combobox.setCurrentIndex(-1)
     
     self.ui.rarc_files_tree.blockSignals(False)
   
@@ -643,7 +677,7 @@ class RARCTab(QWidget):
     self.rarc_file_entry_to_tree_widget_item[file_entry] = file_item
     self.rarc_tree_widget_item_to_file_entry[file_item] = file_entry
     
-    self.update_file_size_and_compression_in_ui(file_entry)
+    self.initialize_tree_item_for_file_entry(file_entry)
     
     self.update_all_displayed_file_indexes_and_ids()
   
@@ -741,10 +775,6 @@ class RARCTab(QWidget):
       self.change_rarc_node_type(item)
     elif column == self.rarc_col_name_to_index["File ID"]:
       self.change_rarc_file_id(item)
-    elif column == self.rarc_col_name_to_index["Yaz0 Compressed"]:
-      self.change_rarc_file_compression_type(item)
-    elif column == self.rarc_col_name_to_index["Yay0 Compressed"]:
-      self.change_rarc_file_compression_type(item)
   
   def change_rarc_file_name(self, item):
     node = self.rarc_tree_widget_item_to_node.get(item)
@@ -850,37 +880,51 @@ class RARCTab(QWidget):
     file_id_str = self.window().stringify_number(file_entry.id, min_hex_chars=4)
     item.setText(self.rarc_col_name_to_index["File ID"], file_id_str)
   
-  def change_rarc_file_compression_type(self, item: QTreeWidgetItem):
+  def change_rarc_file_compression_type(self, index: int):
+    combobox: QComboBox = self.sender()
+    item: QTreeWidgetItem = combobox.property("tree_item")
     file_entry: RARCFileEntry = self.rarc_tree_widget_item_to_file_entry.get(item)
     file_entry.update_compression_flags_from_data()
     is_yaz0_compressed = bool((file_entry.type & RARCFileAttrType.COMPRESSED) and (file_entry.type & RARCFileAttrType.YAZ0_COMPRESSED))
     is_yay0_compressed = bool((file_entry.type & RARCFileAttrType.COMPRESSED) and not (file_entry.type & RARCFileAttrType.YAZ0_COMPRESSED))
     
-    yaz0_checked = item.checkState(self.rarc_col_name_to_index["Yaz0 Compressed"]) == Qt.CheckState.Checked
-    yay0_checked = item.checkState(self.rarc_col_name_to_index["Yay0 Compressed"]) == Qt.CheckState.Checked
-    if yaz0_checked and yay0_checked:
-      QMessageBox.warning(self, "Selected both Yaz0 and Yay0", "RARC files cannot be both Yaz0 and Yay0 compressed at the same time, please select only one.")
-      self.update_file_size_and_compression_in_ui(file_entry)
-      return
+    yaz0_selected = combobox.currentIndex() == combobox.findText("Yaz0")
+    yay0_selected = combobox.currentIndex() == combobox.findText("Yay0")
     
-    if is_yaz0_compressed and not yaz0_checked:
+    if is_yaz0_compressed and not yaz0_selected:
       file_entry.data = Yaz0.decompress(file_entry.data)
       file_entry.update_compression_flags_from_data()
-    elif is_yay0_compressed and not yay0_checked:
+    elif is_yay0_compressed and not yay0_selected:
       file_entry.data = Yay0.decompress(file_entry.data)
       file_entry.update_compression_flags_from_data()
     
-    if yaz0_checked and not is_yaz0_compressed:
+    if yaz0_selected and not is_yaz0_compressed:
       search_depth, should_pad_data = self.yaz0_yay0_tab.get_search_depth_and_should_pad()
       file_entry.data = Yaz0.compress(file_entry.data, search_depth=search_depth, should_pad_data=should_pad_data)
       file_entry.update_compression_flags_from_data()
-    elif yay0_checked and not is_yay0_compressed:
+    elif yay0_selected and not is_yay0_compressed:
       search_depth, should_pad_data = self.yaz0_yay0_tab.get_search_depth_and_should_pad()
       file_entry.data = Yay0.compress(file_entry.data, search_depth=search_depth, should_pad_data=should_pad_data)
       file_entry.update_compression_flags_from_data()
     
     # Update the UI to match the file data.
     self.update_file_size_and_compression_in_ui(file_entry)
+  
+  def change_rarc_file_preload_type(self, index: int):
+    combobox: QComboBox = self.sender()
+    item: QTreeWidgetItem = combobox.property("tree_item")
+    file_entry: RARCFileEntry = self.rarc_tree_widget_item_to_file_entry.get(item)
+    
+    file_entry.type &= ~RARCFileAttrType.PRELOAD_TO_MRAM
+    file_entry.type &= ~RARCFileAttrType.PRELOAD_TO_ARAM
+    file_entry.type &= ~RARCFileAttrType.LOAD_FROM_DVD
+    
+    if combobox.currentIndex() == combobox.findText("MRAM"):
+      file_entry.type |= RARCFileAttrType.PRELOAD_TO_MRAM
+    elif combobox.currentIndex() == combobox.findText("ARAM"):
+      file_entry.type |= RARCFileAttrType.PRELOAD_TO_ARAM
+    else:
+      file_entry.type |= RARCFileAttrType.LOAD_FROM_DVD
   
   
   def keyPressEvent(self, event):

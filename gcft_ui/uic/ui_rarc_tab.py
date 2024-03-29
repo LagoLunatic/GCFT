@@ -151,8 +151,8 @@ class Ui_RARCTab(object):
         self.export_rarc_to_c_header.setText(QCoreApplication.translate("RARCTab", u"Export File List to C Header", None))
         self.sync_file_ids_and_indexes.setText(QCoreApplication.translate("RARCTab", u"Sync File IDs and Indexes", None))
         ___qtreewidgetitem = self.rarc_files_tree.headerItem()
-        ___qtreewidgetitem.setText(6, QCoreApplication.translate("RARCTab", u"Yay0 Compressed", None));
-        ___qtreewidgetitem.setText(5, QCoreApplication.translate("RARCTab", u"Yaz0 Compressed", None));
+        ___qtreewidgetitem.setText(6, QCoreApplication.translate("RARCTab", u"Preload", None));
+        ___qtreewidgetitem.setText(5, QCoreApplication.translate("RARCTab", u"Compression", None));
         ___qtreewidgetitem.setText(4, QCoreApplication.translate("RARCTab", u"File Size", None));
         ___qtreewidgetitem.setText(3, QCoreApplication.translate("RARCTab", u"File ID", None));
         ___qtreewidgetitem.setText(2, QCoreApplication.translate("RARCTab", u"File Index", None));
