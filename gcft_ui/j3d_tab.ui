@@ -72,34 +72,39 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <item>
-          <widget class="QPushButton" name="anim_pause_button">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>30</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSlider" name="anim_slider">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="AnimControl" name="joint_anim_control" native="true">
+         <property name="anim_type" stdset="0">
+          <string>joint</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="AnimControl" name="reg_anim_control" native="true">
+         <property name="anim_type" stdset="0">
+          <string>reg</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="AnimControl" name="texidx_anim_control" native="true">
+         <property name="anim_type" stdset="0">
+          <string>texidx</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="AnimControl" name="texmtx_anim_control" native="true">
+         <property name="anim_type" stdset="0">
+          <string>texmtx</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="AnimControl" name="vis_anim_control" native="true">
+         <property name="anim_type" stdset="0">
+          <string>vis</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -272,6 +277,12 @@
    <class>J3DViewer</class>
    <extends>QOpenGLWidget</extends>
    <header>gcft_ui.j3d_viewer</header>
+  </customwidget>
+  <customwidget>
+   <class>AnimControl</class>
+   <extends>QWidget</extends>
+   <header>gcft_ui.anim_control</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

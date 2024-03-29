@@ -39,7 +39,6 @@ class J3DTab(BunfoeEditor):
     self.j3d: J3D = None
     self.j3d_name = None
     self.model_loaded = False
-    self.anim_paused = False
     
     self.j3d_col_name_to_index = {}
     for col in range(self.ui.j3d_chunks_tree.columnCount()):
@@ -72,7 +71,11 @@ class J3DTab(BunfoeEditor):
     self.ui.actionOpenJ3DImage.triggered.connect(self.open_image_in_j3d)
     self.ui.actionReplaceJ3DImage.triggered.connect(self.replace_image_in_j3d)
     
-    self.ui.j3d_viewer.bck_frame_changed.connect(self.update_slider_from_bck_frame)
+    self.ui.j3d_viewer.joint_anim_frame_changed.connect(self.ui.joint_anim_control.update_slider_from_anim_frame)
+    self.ui.j3d_viewer.reg_anim_frame_changed.connect(self.ui.reg_anim_control.update_slider_from_anim_frame)
+    self.ui.j3d_viewer.texidx_anim_frame_changed.connect(self.ui.texidx_anim_control.update_slider_from_anim_frame)
+    self.ui.j3d_viewer.texmtx_anim_frame_changed.connect(self.ui.texmtx_anim_control.update_slider_from_anim_frame)
+    self.ui.j3d_viewer.vis_anim_frame_changed.connect(self.ui.vis_anim_control.update_slider_from_anim_frame)
     
     self.ui.j3d_viewer.error_showing_preview.connect(self.display_j3d_preview_error)
     self.ui.j3d_viewer.hide()
@@ -80,7 +83,7 @@ class J3DTab(BunfoeEditor):
     
     self.field_value_changed.connect(self.update_j3d_preview)
     self.ui.update_j3d_preview.clicked.connect(self.update_j3d_preview)
-    self.ui.update_j3d_preview.setIcon(self.style().standardIcon(QStyle.SP_BrowserReload))
+    self.ui.update_j3d_preview.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_BrowserReload))
     self.ui.toggle_visibility.clicked.connect(self.toggle_isolated_visibility)
     self.icon_visible_all = QIcon(os.path.join(ASSETS_PATH, "visible_all.png"))
     self.icon_visible_isolated = QIcon(os.path.join(ASSETS_PATH, "visible_isolated.png"))
@@ -92,14 +95,17 @@ class J3DTab(BunfoeEditor):
     # TODO: the J3D preview column should be collapsed whenever the preview is not visible
     self.ui.splitter.setSizes([250, 500, 500])
     
-    self.ui.anim_pause_button.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
-    self.ui.anim_pause_button.clicked.connect(self.toggle_anim_paused)
-    self.ui.anim_slider.sliderMoved.connect(self.update_anim_frame)
-    self.ui.anim_pause_button.setDisabled(True)
-    self.ui.anim_slider.setDisabled(True)
-  
-    self.ui.j3d_viewer.set_anim_paused(self.anim_paused)
-    self.update_anim_pause_button_icon()
+    anim_controls = [
+      self.ui.joint_anim_control,
+      self.ui.reg_anim_control,
+      self.ui.texidx_anim_control,
+      self.ui.texmtx_anim_control,
+      self.ui.vis_anim_control,
+    ]
+    for anim_control in anim_controls:
+      anim_control.anim_type_paused_changed.connect(self.ui.j3d_viewer.set_anim_type_paused)
+      anim_control.anim_type_slider_frame_changed.connect(self.ui.j3d_viewer.set_anim_frame_by_type)
+      anim_control.anim_type_detached.connect(self.ui.j3d_viewer.detach_anim_type)
   
   def import_j3d(self):
     filters = [
@@ -161,71 +167,46 @@ class J3DTab(BunfoeEditor):
     
     self.reload_j3d_chunks_tree()
     
-    self.try_show_model_preview(True)
+    self.try_show_model_preview(reload_same_model=False)
     
     self.ui.export_j3d.setDisabled(False)
     self.ui.load_anim.setDisabled(not self.model_loaded)
   
   def load_anim_by_data(self, data, anim_name):
     j3d = J3D(data)
-    max_frame = None
+    duration = None
     if j3d.file_type[:3] == "bck":
       bck = j3d
-      max_frame = bck.ank1.duration-1
-      self.ui.j3d_viewer.load_bck(bck)
+      duration = bck.ank1.duration
+      if self.ui.j3d_viewer.load_bck(bck):
+        self.ui.joint_anim_control.load_anim(duration, "BCK (Keyframed Joint Animation)", anim_name)
     elif j3d.file_type[:3] == "brk":
       brk = j3d
-      max_frame = brk.trk1.duration-1
-      self.ui.j3d_viewer.load_brk(brk)
+      duration = brk.trk1.duration
+      if self.ui.j3d_viewer.load_brk(brk):
+        self.ui.reg_anim_control.load_anim(duration, "BRK (Register Color Animation)", anim_name)
     elif j3d.file_type[:3] == "btk":
       btk = j3d
-      max_frame = btk.ttk1.duration-1
-      self.ui.j3d_viewer.load_btk(btk)
+      duration = btk.ttk1.duration
+      if self.ui.j3d_viewer.load_btk(btk):
+        self.ui.texmtx_anim_control.load_anim(duration, "BTK (Texture Matrix Animation)", anim_name)
     elif j3d.file_type[:3] == "btp":
       btp = j3d
-      max_frame = btp.tpt1.duration-1
-      self.ui.j3d_viewer.load_btp(btp)
+      duration = btp.tpt1.duration
+      if self.ui.j3d_viewer.load_btp(btp):
+        self.ui.texidx_anim_control.load_anim(duration, "BTP (Texture Swap Animation)", anim_name)
     elif j3d.file_type[:3] == "bca":
       bca = j3d
-      max_frame = bca.anf1.duration-1
-      self.ui.j3d_viewer.load_bca(bca)
+      duration = bca.anf1.duration
+      if self.ui.j3d_viewer.load_bca(bca):
+        self.ui.joint_anim_control.load_anim(duration, "BCA (Full Joint Animation)", anim_name)
     elif j3d.file_type[:3] == "bva":
       bva = j3d
-      max_frame = bva.vaf1.duration-1
-      self.ui.j3d_viewer.load_bva(bva)
+      duration = bva.vaf1.duration
+      if self.ui.j3d_viewer.load_bva(bva):
+        self.ui.vis_anim_control.load_anim(duration, "BVA (Visibility Animation)", anim_name)
     else:
-      return
-    
-    self.anim_paused = False
-    self.ui.j3d_viewer.set_anim_paused(self.anim_paused)
-    
-    self.ui.anim_slider.setMinimum(0)
-    self.ui.anim_slider.setMaximum(max_frame)
-    self.ui.anim_slider.setValue(0)
-    
-    self.ui.anim_pause_button.setDisabled(False)
-    self.ui.anim_slider.setDisabled(False)
-  
-  def update_anim_frame(self, frame: int):
-    self.ui.j3d_viewer.set_anim_frame(frame)
-  
-  def toggle_anim_paused(self):
-    self.anim_paused = not self.anim_paused
-    self.update_anim_pause_button_icon()
-    self.ui.j3d_viewer.set_anim_paused(self.anim_paused)
-  
-  def update_anim_pause_button_icon(self):
-    if self.anim_paused:
-      self.ui.anim_pause_button.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
-    else:
-      self.ui.anim_pause_button.setIcon(self.style().standardIcon(QStyle.SP_MediaPause))
-  
-  def update_slider_from_bck_frame(self, bck_frame: float):
-    self.ui.anim_slider.setValue(bck_frame)
-    if bck_frame >= self.ui.j3d_viewer.bck.ank1.duration:
-      self.anim_paused = True
-      self.ui.j3d_viewer.set_anim_paused(self.anim_paused)
-      self.update_anim_pause_button_icon()
+      QMessageBox.warning(self, "Unsupported animation type", f"Previewing animations of type {j3d.file_type!r} is not currently supported.")
   
   def try_read_j3d(self, data):
     try:
@@ -777,25 +758,20 @@ class J3DTab(BunfoeEditor):
     texture_name = self.j3d.tex1.texture_names[texture_index]
     self.window().ui.statusbar.showMessage("Replaced %s." % texture_name, 3000)
   
-  def try_show_model_preview(self, reset_camera=False):
+  def try_show_model_preview(self, *, reload_same_model: bool):
     self.ui.j3dultra_error_area.hide()
-    self.ui.j3d_viewer.load_model(self.j3d, reset_camera, self.get_hidden_material_indexes())
+    self.ui.j3d_viewer.load_model(self.j3d, reload_same_model, self.get_hidden_material_indexes())
   
   def update_j3d_preview(self):
     if self.j3d is None:
       return
     
-    # TODO: implement copying just the instance, without having to serialize and deserialize it here.
-    success = self.try_save_j3d()
-    if not success:
-      return
+    # # TODO: implement copying just the instance, without having to serialize and deserialize it here.
+    # success = self.try_save_j3d()
+    # if not success:
+    #   return
     
-    self.try_show_model_preview(False)
-  
-  def update_j3d_preview(self):
-    if self.j3d is None:
-      return
-    self.try_show_model_preview(False)
+    self.try_show_model_preview(reload_same_model=True)
   
   def display_j3d_preview_error(self, error: str):
     self.ui.j3dultra_error_area.show()

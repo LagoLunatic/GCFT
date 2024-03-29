@@ -17,10 +17,10 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QLabel,
-    QPushButton, QScrollArea, QSizePolicy, QSlider,
-    QSplitter, QTreeWidget, QTreeWidgetItem, QVBoxLayout,
-    QWidget)
+    QPushButton, QScrollArea, QSizePolicy, QSplitter,
+    QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
 
+from gcft_ui.anim_control import AnimControl
 from gcft_ui.j3d_viewer import J3DViewer
 
 class Ui_J3DTab(object):
@@ -68,27 +68,30 @@ class Ui_J3DTab(object):
 
         self.verticalLayout_6.addWidget(self.j3d_chunks_tree)
 
-        self.horizontalLayout = QHBoxLayout()
-        self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.anim_pause_button = QPushButton(self.verticalLayoutWidget_2)
-        self.anim_pause_button.setObjectName(u"anim_pause_button")
-        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.anim_pause_button.sizePolicy().hasHeightForWidth())
-        self.anim_pause_button.setSizePolicy(sizePolicy)
-        self.anim_pause_button.setMaximumSize(QSize(30, 16777215))
+        self.joint_anim_control = AnimControl(self.verticalLayoutWidget_2)
+        self.joint_anim_control.setObjectName(u"joint_anim_control")
 
-        self.horizontalLayout.addWidget(self.anim_pause_button)
+        self.verticalLayout_6.addWidget(self.joint_anim_control)
 
-        self.anim_slider = QSlider(self.verticalLayoutWidget_2)
-        self.anim_slider.setObjectName(u"anim_slider")
-        self.anim_slider.setOrientation(Qt.Horizontal)
+        self.reg_anim_control = AnimControl(self.verticalLayoutWidget_2)
+        self.reg_anim_control.setObjectName(u"reg_anim_control")
 
-        self.horizontalLayout.addWidget(self.anim_slider)
+        self.verticalLayout_6.addWidget(self.reg_anim_control)
 
+        self.texidx_anim_control = AnimControl(self.verticalLayoutWidget_2)
+        self.texidx_anim_control.setObjectName(u"texidx_anim_control")
 
-        self.verticalLayout_6.addLayout(self.horizontalLayout)
+        self.verticalLayout_6.addWidget(self.texidx_anim_control)
+
+        self.texmtx_anim_control = AnimControl(self.verticalLayoutWidget_2)
+        self.texmtx_anim_control.setObjectName(u"texmtx_anim_control")
+
+        self.verticalLayout_6.addWidget(self.texmtx_anim_control)
+
+        self.vis_anim_control = AnimControl(self.verticalLayoutWidget_2)
+        self.vis_anim_control.setObjectName(u"vis_anim_control")
+
+        self.verticalLayout_6.addWidget(self.vis_anim_control)
 
         self.splitter.addWidget(self.verticalLayoutWidget_2)
         self.j3d_sidebar = QWidget(self.splitter)
@@ -100,11 +103,11 @@ class Ui_J3DTab(object):
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.j3d_sidebar_label = QLabel(self.j3d_sidebar)
         self.j3d_sidebar_label.setObjectName(u"j3d_sidebar_label")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.j3d_sidebar_label.sizePolicy().hasHeightForWidth())
-        self.j3d_sidebar_label.setSizePolicy(sizePolicy1)
+        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.j3d_sidebar_label.sizePolicy().hasHeightForWidth())
+        self.j3d_sidebar_label.setSizePolicy(sizePolicy)
 
         self.horizontalLayout_2.addWidget(self.j3d_sidebar_label)
 
@@ -116,8 +119,11 @@ class Ui_J3DTab(object):
 
         self.update_j3d_preview = QPushButton(self.j3d_sidebar)
         self.update_j3d_preview.setObjectName(u"update_j3d_preview")
-        sizePolicy.setHeightForWidth(self.update_j3d_preview.sizePolicy().hasHeightForWidth())
-        self.update_j3d_preview.setSizePolicy(sizePolicy)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.update_j3d_preview.sizePolicy().hasHeightForWidth())
+        self.update_j3d_preview.setSizePolicy(sizePolicy1)
         self.update_j3d_preview.setMaximumSize(QSize(30, 16777215))
 
         self.horizontalLayout_2.addWidget(self.update_j3d_preview)
@@ -209,7 +215,11 @@ class Ui_J3DTab(object):
         ___qtreewidgetitem.setText(2, QCoreApplication.translate("J3DTab", u"Size", None));
         ___qtreewidgetitem.setText(1, QCoreApplication.translate("J3DTab", u"Name", None));
         ___qtreewidgetitem.setText(0, QCoreApplication.translate("J3DTab", u"Chunk Type", None));
-        self.anim_pause_button.setText("")
+        self.joint_anim_control.setProperty("anim_type", QCoreApplication.translate("J3DTab", u"joint", None))
+        self.reg_anim_control.setProperty("anim_type", QCoreApplication.translate("J3DTab", u"reg", None))
+        self.texidx_anim_control.setProperty("anim_type", QCoreApplication.translate("J3DTab", u"texidx", None))
+        self.texmtx_anim_control.setProperty("anim_type", QCoreApplication.translate("J3DTab", u"texmtx", None))
+        self.vis_anim_control.setProperty("anim_type", QCoreApplication.translate("J3DTab", u"vis", None))
         self.j3d_sidebar_label.setText(QCoreApplication.translate("J3DTab", u"Extra information will be displayed here as necessary.", None))
         self.toggle_visibility.setText("")
         self.j3dultra_error_label.setText(QCoreApplication.translate("J3DTab", u"No errors to display.", None))

@@ -25,6 +25,7 @@ try:
   import J3DUltra as ultra # type: ignore
   from J3DUltra import J3DLight # type: ignore
   J3DULTRA_INSTALLED = True
+  # print(f"Loaded J3DUltra from: {ultra.__file__}")
 except ImportError as e:
   print(f"Failed to import J3DUltra with error: {e}")
   print("Current Python module search paths are:")
@@ -36,7 +37,11 @@ REQUIRED_OPENGL_VERSION = (4, 5)
 class J3DViewer(QOpenGLWidget):
   error_showing_preview = Signal(str)
   
-  bck_frame_changed = Signal(float)
+  joint_anim_frame_changed = Signal(float)
+  reg_anim_frame_changed = Signal(float)
+  texidx_anim_frame_changed = Signal(float)
+  texmtx_anim_frame_changed = Signal(float)
+  vis_anim_frame_changed = Signal(float)
   
   DESIRED_FPS = 30
   DELAY_BETWEEN_FRAMES = 1000 // DESIRED_FPS
@@ -96,7 +101,6 @@ class J3DViewer(QOpenGLWidget):
     self.aspect = 1.0
     self.model = None
     
-    self.anim_paused = False
     self.brk = None
     self.j3dultra_brk = None
     self.btp = None
@@ -193,7 +197,7 @@ class J3DViewer(QOpenGLWidget):
     minor_ver = glGetIntegerv(GL_MINOR_VERSION)
     return (major_ver, minor_ver)
   
-  def load_model(self, j3d_model: J3D, reset_camera=False, hidden_material_indexes=None):
+  def load_model(self, j3d_model: J3D, reload_same_model: bool, hidden_material_indexes=None):
     if not J3DULTRA_INSTALLED:
       error_msg = "Cannot show J3D previews, J3DUltra could not be imported."
       if IS_RUNNING_FROM_SOURCE:
@@ -222,7 +226,11 @@ class J3DViewer(QOpenGLWidget):
     # that process can also try loading the model into j3dultra to check if it segfaults.
     self.j3d = self.get_preview_compatible_j3d(j3d_model)
     
-    if reset_camera:
+    if not reload_same_model:
+      # Unload the animations so load_queued_model doesn't try to reattach them.
+      self.unload_anims()
+      
+      # Reset the camera.
       bbox_min, bbox_max = self.guesstimate_model_bbox(self.j3d)
       self.base_center = (bbox_min + bbox_max) / 2
       aabb_diag_len = np.linalg.norm(bbox_max - bbox_min)
@@ -231,9 +239,7 @@ class J3DViewer(QOpenGLWidget):
       self.base_cam_dist = (aabb_diag_len / 2) / abs(np.sin(np.radians(self.fovy)/2.0))
       # print("bbox", bbox_min, bbox_max)
       # print(self.base_center, self.base_cam_dist)
-      
       self.reset_camera()
-      
       self.total_time_elapsed = 0.0
     
     # Display the preview widget.
@@ -264,7 +270,6 @@ class J3DViewer(QOpenGLWidget):
     if not self.enable_j3dultra:
       return
     
-    self.unload_anims()
     self.model = ultra.loadModel(data=fs.read_all_bytes(self.j3d.data))
     if self.model is None:
       error_msg = "Failed to load J3D model preview."
@@ -287,6 +292,11 @@ class J3DViewer(QOpenGLWidget):
     
     self.init_lights()
     
+    # Reattach any animations that are still loaded from before we reloaded this model.
+    # If we're not reloading a model, then load_model will have already unloaded all animations.
+    # So this will do nothing in that case.
+    self.reattach_anims()
+    
     self.update()
     self.show()
   
@@ -308,6 +318,20 @@ class J3DViewer(QOpenGLWidget):
     self.j3dultra_bca = None
     self.bva = None
     self.j3dultra_bva = None
+  
+  def reattach_anims(self):
+    if self.j3dultra_brk:
+      self.model.attachBrk(anim=self.j3dultra_brk)
+    if self.j3dultra_btp:
+      self.model.attachBtp(anim=self.j3dultra_btp)
+    if self.j3dultra_btk:
+      self.model.attachBtk(anim=self.j3dultra_btk)
+    if self.j3dultra_bck:
+      self.model.attachBck(anim=self.j3dultra_bck)
+    if self.j3dultra_bca:
+      self.model.attachBca(anim=self.j3dultra_bca)
+    if self.j3dultra_bva:
+      self.model.attachBva(anim=self.j3dultra_bva)
   
   def guesstimate_model_bbox(self, j3d_model: J3D) -> tuple[np.ndarray, np.ndarray]:
     # Estimate the model's size based on its visual shape bounding boxes.
@@ -411,7 +435,7 @@ class J3DViewer(QOpenGLWidget):
     self.brk = brk
     
     if self.model is None:
-      return
+      return False
     
     # NOTE: Loading a new brk does not reset the registers to how they originally were
     # this means loading several brks can have them all visible at once, depending on how
@@ -419,41 +443,41 @@ class J3DViewer(QOpenGLWidget):
     self.model.attachBrk(data=fs.read_all_bytes(self.brk.data))
     self.j3dultra_brk = self.model.getBrk()
     
-    self.set_anim_frame(0)
-    
     # TODO: when reloading the model due to different isolated visibility, we need to re-attach the
     # brk. maybe make a separate func: load_model vs reload_model
+    
+    return True
   
   def load_btp(self, btp: J3D):
     self.btp = btp
     
     if self.model is None:
-      return
+      return False
     
     self.model.attachBtp(data=fs.read_all_bytes(self.btp.data))
     self.j3dultra_btp = self.model.getBtp()
     
-    self.set_anim_frame(0)
+    return True
   
   def load_btk(self, btk: J3D):
     self.btk = btk
     
     if self.model is None:
-      return
+      return False
     
     self.model.attachBtk(data=fs.read_all_bytes(self.btk.data))
     self.j3dultra_btk = self.model.getBtk()
     
-    self.set_anim_frame(0)
-    
     # TODO: when reloading the model due to different isolated visibility, we need to re-attach the
     # btk. maybe make a separate func: load_model vs reload_model
+    
+    return True
   
   def load_bck(self, bck: J3D):
     self.bck = bck
     
     if self.model is None:
-      return
+      return False
     
     if bck.ank1.anims_count != self.j3d.jnt1.joint_count:
       error_message = "This animation is not for this model.\nThe loaded BCK animation has animations for %s joints, while the currently loaded model has %s joints." % (
@@ -461,18 +485,24 @@ class J3DViewer(QOpenGLWidget):
         self.window().stringify_number(self.j3d.jnt1.joint_count, min_hex_chars=2),
       )
       QMessageBox.warning(self, "Wrong joint count", error_message)
-      return
+      return False
     
     self.model.attachBck(data=fs.read_all_bytes(self.bck.data))
     self.j3dultra_bck = self.model.getBck()
     
-    self.set_anim_frame(0)
+    if self.j3dultra_bca:
+      # BCK takes precedence over BCA, but we still detach the BCA anyway when loading the BCK just in case.
+      self.model.detachBca()
+      self.bca = None
+      self.j3dultra_bca = None
+    
+    return True
   
   def load_bca(self, bca: J3D):
     self.bca = bca
     
     if self.model is None:
-      return
+      return False
     
     self.model.attachBca(data=fs.read_all_bytes(self.bca.data))
     self.j3dultra_bca = self.model.getBca()
@@ -483,18 +513,18 @@ class J3DViewer(QOpenGLWidget):
       self.bck = None
       self.j3dultra_bck = None
     
-    self.set_anim_frame(0)
+    return True
   
   def load_bva(self, bva: J3D):
     self.bva = bva
     
     if self.model is None:
-      return
+      return False
     
     self.model.attachBva(data=fs.read_all_bytes(self.bva.data))
     self.j3dultra_bva = self.model.getBva()
     
-    self.set_anim_frame(0)
+    return True
   
   def each_anim(self):
     for anim in [self.j3dultra_brk, self.j3dultra_btp, self.j3dultra_btk, self.j3dultra_bck, self.j3dultra_bca, self.j3dultra_bva]:
@@ -502,15 +532,49 @@ class J3DViewer(QOpenGLWidget):
         continue
       yield anim
   
-  def set_anim_frame(self, frame: int):
-    for anim in self.each_anim():
-      anim.setFrame(frame, self.anim_paused)
-      self.should_update_render = True
+  def anim_by_type(self, anim_type: str):
+    anim = None
+    if anim_type == "joint":
+      if self.j3dultra_bck:
+        anim = self.j3dultra_bck
+      else:
+        anim = self.j3dultra_bca
+    elif anim_type == "reg":
+      anim = self.j3dultra_brk
+    elif anim_type == "texidx":
+      anim = self.j3dultra_btp
+    elif anim_type == "texmtx":
+      anim = self.j3dultra_btk
+    elif anim_type == "vis":
+      anim = self.j3dultra_bva
+    else:
+      raise Exception(f"Unknown animation type: {anim_type!r}")
+    
+    if anim is None:
+      raise Exception(f"No animation of type {anim_type!r} is currently loaded.")
+    
+    return anim
   
-  def set_anim_paused(self, paused: bool):
-    self.anim_paused = paused
-    for anim in self.each_anim():
-      anim.setPaused(paused)
+  def set_anim_type_paused(self, anim_type: str, paused: bool):
+    self.anim_by_type(anim_type).setPaused(paused)
+  
+  def set_anim_frame_by_type(self, anim_type: str, frame: int):
+    self.anim_by_type(anim_type).setFrame(frame, True)
+  
+  def detach_anim_type(self, anim_type: str):
+    if anim_type == "joint":
+      self.model.detachBck()
+      self.model.detachBca()
+    elif anim_type == "reg":
+      self.model.detachBrk()
+    elif anim_type == "texidx":
+      self.model.detachBtp()
+    elif anim_type == "texmtx":
+      self.model.detachBtk()
+    elif anim_type == "vis":
+      self.model.detachBva()
+    else:
+      raise Exception(f"Unknown animation type: {anim_type!r}")
   
   def tick_anims(self, delta_time: float):
     if delta_time <= 0:
@@ -519,6 +583,24 @@ class J3DViewer(QOpenGLWidget):
     for anim in self.each_anim():
       anim.tick(delta_time)
       self.should_update_render = True
+  
+  def emit_anim_frame_changed_signals(self):
+    if self.j3dultra_bck:
+      self.joint_anim_frame_changed.emit(self.j3dultra_bck.getFrame())
+    elif self.j3dultra_bca:
+      self.joint_anim_frame_changed.emit(self.j3dultra_bca.getFrame())
+    
+    if self.j3dultra_brk:
+      self.reg_anim_frame_changed.emit(self.j3dultra_brk.getFrame())
+    
+    if self.j3dultra_btp:
+      self.texidx_anim_frame_changed.emit(self.j3dultra_btp.getFrame())
+    
+    if self.j3dultra_btk:
+      self.texmtx_anim_frame_changed.emit(self.j3dultra_btk.getFrame())
+    
+    if self.j3dultra_bva:
+      self.vis_anim_frame_changed.emit(self.j3dultra_bva.getFrame())
   
   #endregion
   
@@ -767,9 +849,7 @@ class J3DViewer(QOpenGLWidget):
       self.update_lights()
     
     self.tick_anims(delta_time)
-    
-    if self.j3dultra_bck is not None:
-      self.bck_frame_changed.emit(self.j3dultra_bck.getFrame())
+    self.emit_anim_frame_changed_signals()
     
     if self.should_update_render:
       self.update()
