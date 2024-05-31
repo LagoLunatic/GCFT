@@ -402,7 +402,9 @@ class RARCTab(QWidget):
     self.window().start_texture_dumper_thread(asset_dumper, dumper_generator, max_val)
   
   def export_rarc_to_c_header_by_path(self, header_path):
-    out_str = "#define %s_RES_NAME \"%s\"\n\n" % (self.rarc_name.upper(), self.rarc_name)
+    out_str = ""
+    out_str += f"#ifndef RES_{self.rarc_name.upper()}_H\n"
+    out_str += f"#define RES_{self.rarc_name.upper()}_H\n\n"
     
     if self.rarc.keep_file_ids_synced_with_indexes:
       out_str += self.get_c_enum_for_rarc(id=True, index=True)
@@ -410,6 +412,9 @@ class RARCTab(QWidget):
       out_str += self.get_c_enum_for_rarc(id=True)
       out_str += "\n"
       out_str += self.get_c_enum_for_rarc(index=True)
+    
+    out_str += f"\n"
+    out_str += f"#endif /* RES_{self.rarc_name.upper()}_H */\n"
     
     with open(header_path, "w") as f:
       f.write(out_str)
