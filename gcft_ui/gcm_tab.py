@@ -31,7 +31,7 @@ class GCMTab(QWidget):
     
     self.model = QStandardItemModel()
     self.model.setHorizontalHeaderLabels(self.column_names)
-    self.model.setColumnCount(2)
+    self.model.setColumnCount(len(self.column_names))
     self.proxy = RecursiveFilterProxyModel()
     self.proxy.setSourceModel(self.model)
     self.proxy.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
@@ -54,7 +54,7 @@ class GCMTab(QWidget):
     self.ui.dump_all_gcm_textures.clicked.connect(self.dump_all_gcm_textures)
     self.ui.add_replace_files_from_folder.clicked.connect(self.add_replace_gcm_files_from_folder)
     
-    self.ui.gcm_files_tree.setContextMenuPolicy(Qt.CustomContextMenu)
+    self.ui.gcm_files_tree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
     self.ui.gcm_files_tree.customContextMenuRequested.connect(self.show_gcm_files_tree_context_menu)
     self.model.dataChanged.connect(self.gcm_file_tree_item_text_changed)
     self.ui.actionExtractGCMFile.triggered.connect(self.extract_file_from_gcm)
@@ -696,7 +696,7 @@ class GCMTab(QWidget):
     
     dir_name, confirmed = QInputDialog.getText(
       self, "Input Folder Name", "Write the name for the new folder:",
-      flags=Qt.WindowSystemMenuHint | Qt.WindowTitleHint
+      flags=Qt.WindowType.WindowSystemMenuHint | Qt.WindowType.WindowTitleHint
     )
     if not confirmed:
       return
@@ -767,7 +767,7 @@ class GCMTab(QWidget):
   
   def keyPressEvent(self, event):
     event.ignore()
-    if event.matches(QKeySequence.Copy):
+    if event.matches(QKeySequence.StandardKey.Copy):
       selected_index = self.selection_model.currentIndex()
       if not selected_index.isValid():
         return
@@ -780,6 +780,8 @@ class GCMTab(QWidget):
       file_entry = item.data()
       if not isinstance(file_entry, GCMBaseFile):
         return
+      
       file_path = file_entry.file_path
-      QApplication.instance().clipboard().setText(file_path)
+      
+      QApplication.clipboard().setText(file_path)
       event.accept()
