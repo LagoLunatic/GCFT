@@ -13,7 +13,9 @@
     "PyJ3DUltra": true,
   },
   "python.analysis.exclude": [
-    "PyJ3DUltra"
+    "PyJ3DUltra",
+    "build",
+    "wip",
   ],
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
