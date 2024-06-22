@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'rarc_tab.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.6.1
+## Created by: Qt User Interface Compiler version 6.7.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -17,7 +17,7 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QHBoxLayout, QHeaderView,
-    QPushButton, QSizePolicy, QTreeWidget, QTreeWidgetItem,
+    QLineEdit, QPushButton, QSizePolicy, QTreeView,
     QVBoxLayout, QWidget)
 
 class Ui_RARCTab(object):
@@ -51,7 +51,7 @@ class Ui_RARCTab(object):
         self.actionReplaceAllFilesInRARCFolder.setObjectName(u"actionReplaceAllFilesInRARCFolder")
         self.actionLoadJ3DAnim = QAction(RARCTab)
         self.actionLoadJ3DAnim.setObjectName(u"actionLoadJ3DAnim")
-        self.actionLoadJ3DAnim.setMenuRole(QAction.NoRole)
+        self.actionLoadJ3DAnim.setMenuRole(QAction.MenuRole.NoRole)
         self.verticalLayout = QVBoxLayout(RARCTab)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout = QHBoxLayout()
@@ -115,7 +115,12 @@ class Ui_RARCTab(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_2)
 
-        self.rarc_files_tree = QTreeWidget(RARCTab)
+        self.filter = QLineEdit(RARCTab)
+        self.filter.setObjectName(u"filter")
+
+        self.verticalLayout.addWidget(self.filter)
+
+        self.rarc_files_tree = QTreeView(RARCTab)
         self.rarc_files_tree.setObjectName(u"rarc_files_tree")
 
         self.verticalLayout.addWidget(self.rarc_files_tree)
@@ -150,13 +155,6 @@ class Ui_RARCTab(object):
         self.dump_all_rarc_textures.setText(QCoreApplication.translate("RARCTab", u"Dump All Textures", None))
         self.export_rarc_to_c_header.setText(QCoreApplication.translate("RARCTab", u"Export File List to C Header", None))
         self.sync_file_ids_and_indexes.setText(QCoreApplication.translate("RARCTab", u"Sync File IDs and Indexes", None))
-        ___qtreewidgetitem = self.rarc_files_tree.headerItem()
-        ___qtreewidgetitem.setText(6, QCoreApplication.translate("RARCTab", u"Preload", None));
-        ___qtreewidgetitem.setText(5, QCoreApplication.translate("RARCTab", u"Compression", None));
-        ___qtreewidgetitem.setText(4, QCoreApplication.translate("RARCTab", u"File Size", None));
-        ___qtreewidgetitem.setText(3, QCoreApplication.translate("RARCTab", u"File ID", None));
-        ___qtreewidgetitem.setText(2, QCoreApplication.translate("RARCTab", u"File Index", None));
-        ___qtreewidgetitem.setText(1, QCoreApplication.translate("RARCTab", u"Folder Type", None));
-        ___qtreewidgetitem.setText(0, QCoreApplication.translate("RARCTab", u"File Name", None));
+        self.filter.setPlaceholderText(QCoreApplication.translate("RARCTab", u"Filter", None))
     # retranslateUi
 

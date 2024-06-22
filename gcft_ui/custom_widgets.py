@@ -116,3 +116,36 @@ class BigIntValidator(QIntValidator):
   def setRange(self, minimum, maximum):
     self._minimum = minimum
     self._maximum = maximum
+
+
+class ComboBoxDelegate(QItemDelegate):
+  def __init__(self, parent=None):
+    super().__init__(parent)
+    self.items: list[str] = []
+  
+  def set_items(self, items: list[str]):
+    self.items = items
+  
+  def createEditor(self, parent, option, index):
+    combobox = QComboBox(parent)
+    combobox.setMaximumWidth(80)
+    for item in self.items:
+      combobox.addItem(item)
+    return combobox
+  
+  def setEditorData(self, editor: QComboBox, index):
+    value = index.model().data(index, Qt.ItemDataRole.EditRole)
+    if value:
+      editor.setCurrentIndex(self.items.index(value))
+    else:
+      editor.setCurrentIndex(-1)
+    
+  def setModelData(self, editor: QComboBox, model, index):
+    model.setData(index, editor.currentText(), Qt.ItemDataRole.EditRole)
+
+class ReadOnlyDelegate(QItemDelegate):
+  def editorEvent(self, event, model, option, index):
+    return False
+  
+  def createEditor(self, parent, option, index):
+    return None

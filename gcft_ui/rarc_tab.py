@@ -1,19 +1,24 @@
 
 import os
 import re
-import traceback
 from io import BytesIO
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 
 from gclib import fs_helpers as fs
-from gclib.rarc import RARC, RARCFileAttrType, RARCFileEntry
+from gclib.rarc import RARC, RARCFileAttrType, RARCFileEntry, RARCNode
 from gclib.yaz0_yay0 import Yaz0, Yay0
+
 from gcft_ui.uic.ui_rarc_tab import Ui_RARCTab
+from gcft_ui.gcft_common import RecursiveFilterProxyModel
+from gcft_ui.custom_widgets import ComboBoxDelegate, ReadOnlyDelegate
 from asset_dumper import AssetDumper
 
 class RARCTab(QWidget):
+  FILE_ENTRY_ROLE = Qt.ItemDataRole.UserRole + 0
+  NODE_ROLE = Qt.ItemDataRole.UserRole + 1
+  
   def __init__(self):
     super().__init__()
     self.ui = Ui_RARCTab()
@@ -22,15 +27,39 @@ class RARCTab(QWidget):
     self.rarc = None
     self.rarc_name = None
     self.display_rarc_relative_dir_entries = False # TODO: add option for this to the GUI
-    self.display_rarc_dir_indexes = False
+    self.display_rarc_dir_indexes = False # TODO: add option for this to the GUI
     
-    # This should be in the .ui file, but PySide6 doesn't compile it correctly.
-    self.ui.rarc_files_tree.setEditTriggers(QAbstractItemView.NoEditTriggers)
+    self.column_names = [
+      "File Name",
+      "Folder Type",
+      "File Index",
+      "File ID",
+      "File Size",
+      "Compression",
+      "Preload",
+    ]
     
-    self.rarc_col_name_to_index = {}
-    for col in range(self.ui.rarc_files_tree.columnCount()):
-      column_name = self.ui.rarc_files_tree.headerItem().text(col)
-      self.rarc_col_name_to_index[column_name] = col
+    self.model = QStandardItemModel()
+    self.model.setHorizontalHeaderLabels(self.column_names)
+    self.model.setColumnCount(len(self.column_names))
+    self.proxy = RecursiveFilterProxyModel()
+    self.proxy.setSourceModel(self.model)
+    self.proxy.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+    
+    self.ui.rarc_files_tree.setModel(self.proxy)
+    self.selection_model = self.ui.rarc_files_tree.selectionModel()
+    
+    read_only_delegate = ReadOnlyDelegate(self.ui.rarc_files_tree)
+    self.ui.rarc_files_tree.setItemDelegateForColumn(self.column_names.index("File Index"), read_only_delegate)
+    self.ui.rarc_files_tree.setItemDelegateForColumn(self.column_names.index("File Size"), read_only_delegate)
+    comp_delegate = ComboBoxDelegate(self.ui.rarc_files_tree)
+    comp_delegate.set_items(["None", "Yaz0", "Yay0"])
+    self.ui.rarc_files_tree.setItemDelegateForColumn(self.column_names.index("Compression"), comp_delegate)
+    preload_delegate = ComboBoxDelegate(self.ui.rarc_files_tree)
+    preload_delegate.set_items(["None", "MRAM", "ARAM"])
+    self.ui.rarc_files_tree.setItemDelegateForColumn(self.column_names.index("Preload"), preload_delegate)
+    
+    self.ui.filter.textChanged.connect(self.filter_rows)
     
     self.ui.export_rarc.setDisabled(True)
     self.ui.replace_all_files_in_rarc.setDisabled(True)
@@ -50,10 +79,9 @@ class RARCTab(QWidget):
     
     self.ui.sync_file_ids_and_indexes.clicked.connect(self.sync_file_ids_and_indexes_changed)
     
-    self.ui.rarc_files_tree.setContextMenuPolicy(Qt.CustomContextMenu)
+    self.ui.rarc_files_tree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
     self.ui.rarc_files_tree.customContextMenuRequested.connect(self.show_rarc_files_tree_context_menu)
-    self.ui.rarc_files_tree.itemDoubleClicked.connect(self.edit_rarc_files_tree_item_text)
-    self.ui.rarc_files_tree.itemChanged.connect(self.rarc_file_tree_item_changed)
+    self.model.dataChanged.connect(self.rarc_file_tree_item_changed)
     self.ui.actionExtractRARCFile.triggered.connect(self.extract_file_from_rarc)
     self.ui.actionReplaceRARCFile.triggered.connect(self.replace_file_in_rarc)
     self.ui.actionDeleteRARCFile.triggered.connect(self.delete_file_in_rarc)
@@ -141,7 +169,7 @@ class RARCTab(QWidget):
     )
   
   def extract_file_from_rarc(self):
-    file = self.ui.actionExtractRARCFile.data()
+    file: RARCFileEntry = self.ui.actionExtractRARCFile.data()
     self.window().generic_do_gui_file_operation(
       op_callback=self.extract_file_from_rarc_by_path,
       is_opening=False, is_saving=True, is_folder=False,
@@ -150,7 +178,7 @@ class RARCTab(QWidget):
     )
   
   def replace_file_in_rarc(self):
-    file = self.ui.actionReplaceRARCFile.data()
+    file: RARCFileEntry = self.ui.actionReplaceRARCFile.data()
     self.window().generic_do_gui_file_operation(
       op_callback=self.replace_file_in_rarc_by_path,
       is_opening=True, is_saving=False, is_folder=False,
@@ -219,25 +247,23 @@ class RARCTab(QWidget):
     self.reload_rarc_files_tree()
   
   def reload_rarc_files_tree(self):
-    self.ui.rarc_files_tree.clear()
-    
-    self.rarc_node_to_tree_widget_item = {}
-    self.rarc_tree_widget_item_to_node = {}
-    self.rarc_file_entry_to_tree_widget_item = {}
-    self.rarc_tree_widget_item_to_file_entry = {}
+    self.model.removeRows(0, self.model.rowCount())
     
     root_node = self.rarc.nodes[0]
-    root_item = QTreeWidgetItem([root_node.name, root_node.type, "", "", "", ""])
-    root_item.setFlags(root_item.flags() | Qt.ItemIsEditable)
-    self.ui.rarc_files_tree.addTopLevelItem(root_item)
-    self.rarc_node_to_tree_widget_item[root_node] = root_item
-    self.rarc_tree_widget_item_to_node[root_item] = root_node
+    root_name_item = QStandardItem(root_node.name)
+    root_node_type_item = QStandardItem(root_node.type)
+    file_id_item = QStandardItem()
+    file_id_item.setEditable(False)
+    compression_item = QStandardItem()
+    compression_item.setEditable(False)
+    preload_item = QStandardItem()
+    preload_item.setEditable(False)
+    self.model.appendRow([root_name_item, root_node_type_item, QStandardItem(), file_id_item, QStandardItem(), compression_item, preload_item])
+    self.set_node_for_model_index(root_name_item.index(), root_node)
+    self.expand_item(root_name_item)
     
     for file_entry in self.rarc.file_entries:
-      self.add_rarc_file_entry_to_files_tree(file_entry)
-    
-    # Expand the root node by default.
-    self.ui.rarc_files_tree.topLevelItem(0).setExpanded(True)
+      self.add_new_tree_row_for_file_or_dir_entry(file_entry)
     
     self.ui.sync_file_ids_and_indexes.setChecked(self.rarc.keep_file_ids_synced_with_indexes != 0)
     
@@ -248,121 +274,177 @@ class RARCTab(QWidget):
     self.ui.export_rarc_to_c_header.setDisabled(False)
     self.ui.sync_file_ids_and_indexes.setDisabled(False)
     
-    self.ui.rarc_files_tree.setColumnWidth(0, 300)
+    self.ui.rarc_files_tree.setColumnWidth(self.column_names.index("File Name"), 300)
   
-  def add_rarc_file_entry_to_files_tree(self, file_entry):
+  def add_new_tree_row_for_file_or_dir_entry(self, file_entry: RARCFileEntry):
+    parent_item = self.find_item_by_node(file_entry.parent_node)
+    assert parent_item is not None
+    
     if file_entry.is_dir:
-      dir_file_entry = file_entry
-      if file_entry.name in [".", ".."] and not self.display_rarc_relative_dir_entries:
-        return
-      
-      node = file_entry.node
-      
-      parent_item = self.rarc_node_to_tree_widget_item[dir_file_entry.parent_node]
-      
-      if self.display_rarc_dir_indexes:
-        dir_file_index = self.rarc.file_entries.index(dir_file_entry)
-        dir_file_index_str = self.window().stringify_number(dir_file_index, min_hex_chars=4)
-      else:
-        dir_file_index_str = ""
-      
-      if file_entry.name in [".", ".."]:
-        item = QTreeWidgetItem([file_entry.name, "", dir_file_index_str, "", "", ""])
-        parent_item.addChild(item)
-      else:
-        item = QTreeWidgetItem([node.name, node.type, dir_file_index_str, "", "", ""])
-        item.setFlags(item.flags() | Qt.ItemIsEditable)
-        parent_item.addChild(item)
-        
-        self.rarc_node_to_tree_widget_item[node] = item
-        self.rarc_tree_widget_item_to_node[item] = node
-      
-      self.rarc_file_entry_to_tree_widget_item[dir_file_entry] = item
-      self.rarc_tree_widget_item_to_file_entry[item] = dir_file_entry
+      self.add_new_tree_row_for_dir_entry(file_entry, parent_item)
     else:
-      file_size_str = self.window().stringify_number(file_entry.data_size)
-      file_id_str = self.window().stringify_number(file_entry.id, min_hex_chars=4)
-      file_index = self.rarc.file_entries.index(file_entry)
-      file_index_str = self.window().stringify_number(file_index, min_hex_chars=4)
-      
-      parent_item = self.rarc_node_to_tree_widget_item[file_entry.parent_node]
-      item = QTreeWidgetItem([file_entry.name, "", file_index_str, file_id_str, file_size_str, ""])
-      item.setFlags(item.flags() | Qt.ItemIsEditable)
-      parent_item.addChild(item)
-      self.rarc_file_entry_to_tree_widget_item[file_entry] = item
-      self.rarc_tree_widget_item_to_file_entry[item] = file_entry
-      self.initialize_tree_item_for_file_entry(file_entry)
+      self.add_new_tree_row_for_file_entry(file_entry, parent_item)
   
-  def initialize_tree_item_for_file_entry(self, file_entry: RARCFileEntry):
+  def add_new_tree_row_for_dir_entry(self, dir_entry: RARCFileEntry, parent_item: QStandardItem):
+    if dir_entry.name in [".", ".."] and not self.display_rarc_relative_dir_entries:
+      return
+    
+    if self.display_rarc_dir_indexes:
+      dir_file_index = self.rarc.file_entries.index(dir_entry)
+      dir_file_index_str = self.window().stringify_number(dir_file_index, min_hex_chars=4)
+    else:
+      dir_file_index_str = ""
+    
+    if dir_entry.name in [".", ".."]:
+      name_item = QStandardItem(dir_entry.name)
+      name_item.setEditable(False)
+      node_type_item = QStandardItem()
+      node_type_item.setEditable(False)
+    else:
+      name_item = QStandardItem(dir_entry.node.name)
+      node_type_item = QStandardItem(dir_entry.node.type)
+    
+    file_index_item = QStandardItem(dir_file_index_str)
+    file_index_item.setEditable(False)
+    file_id_item = QStandardItem()
+    file_id_item.setEditable(False)
+    compression_item = QStandardItem()
+    compression_item.setEditable(False)
+    preload_item = QStandardItem()
+    preload_item.setEditable(False)
+    
+    parent_item.appendRow([name_item, node_type_item, file_index_item, file_id_item, QStandardItem(), compression_item, preload_item])
+    
+    if dir_entry.name not in [".", ".."]:
+      self.set_file_entry_for_model_index(name_item.index(), dir_entry)
+      self.set_node_for_model_index(name_item.index(), dir_entry.node)
+  
+  def add_new_tree_row_for_file_entry(self, file_entry: RARCFileEntry, parent_item: QStandardItem):
+    file_size_str = self.window().stringify_number(file_entry.data_size)
+    file_id_str = self.window().stringify_number(file_entry.id, min_hex_chars=4)
+    file_index = self.rarc.file_entries.index(file_entry)
+    file_index_str = self.window().stringify_number(file_index, min_hex_chars=4)
+    
+    name_item = QStandardItem(file_entry.name)
+    
+    parent_item.appendRow([name_item, QStandardItem(), QStandardItem(file_index_str), QStandardItem(file_id_str), QStandardItem(file_size_str), QStandardItem(), QStandardItem()])
+    
+    name_index = self.model.indexFromItem(name_item)
+    self.set_file_entry_for_model_index(name_index, file_entry)
+    
     if file_entry.is_dir:
       return
     
-    item = self.rarc_file_entry_to_tree_widget_item.get(file_entry)
-    
-    comp_combobox = QComboBox()
-    comp_combobox.setMaximumWidth(80)
-    comp_combobox.addItem("None")
-    comp_combobox.addItem("Yaz0")
-    comp_combobox.addItem("Yay0")
-    comp_combobox.setProperty("tree_item", item)
-    comp_combobox.currentIndexChanged.connect(self.change_rarc_file_compression_type)
-    self.ui.rarc_files_tree.setItemWidget(item, self.rarc_col_name_to_index["Compression"], comp_combobox)
-    
-    load_combobox = QComboBox()
-    load_combobox.setMaximumWidth(80)
-    load_combobox.addItem("None")
-    load_combobox.addItem("MRAM")
-    load_combobox.addItem("ARAM")
-    load_combobox.setProperty("tree_item", item)
-    load_combobox.currentIndexChanged.connect(self.change_rarc_file_preload_type)
-    self.ui.rarc_files_tree.setItemWidget(item, self.rarc_col_name_to_index["Preload"], load_combobox)
-    
-    self.update_file_size_and_compression_in_ui(file_entry)
+    self.update_file_size_and_compression_and_preload_in_ui(file_entry)
   
-  def update_file_size_and_compression_in_ui(self, file_entry):
+  def get_compression_type_string_for_file_entry(self, file_entry: RARCFileEntry):
+    if file_entry.type & RARCFileAttrType.COMPRESSED:
+      if file_entry.type & RARCFileAttrType.YAZ0_COMPRESSED:
+        return "Yaz0"
+      else:
+        return "Yay0"
+    else:
+      return "None"
+  
+  def get_preload_type_string_for_file_entry(self, file_entry: RARCFileEntry):
+    if file_entry.type & RARCFileAttrType.PRELOAD_TO_MRAM:
+      return "MRAM"
+    elif file_entry.type & RARCFileAttrType.PRELOAD_TO_ARAM:
+      return "ARAM"
+    elif file_entry.type & RARCFileAttrType.LOAD_FROM_DVD:
+      return "None"
+    else:
+      return None
+  
+  def expand_item(self, item: QStandardItem):
+    self.ui.rarc_files_tree.expand(self.proxy.mapFromSource(item.index()))
+  
+  def find_item_by_file_entry(self, file_entry: RARCFileEntry):
+    matched_indexes = self.model.match(
+      self.model.index(0, 0),
+      self.FILE_ENTRY_ROLE,
+      file_entry,
+      1,
+      Qt.MatchFlag.MatchRecursive
+    )
+    assert len(matched_indexes) == 1
+    return self.model.itemFromIndex(matched_indexes[0])
+  
+  def find_item_by_node(self, node: RARCNode):
+    matched_indexes = self.model.match(
+      self.model.index(0, 0),
+      self.NODE_ROLE,
+      node,
+      1,
+      Qt.MatchFlag.MatchRecursive
+    )
+    assert len(matched_indexes) == 1
+    return self.model.itemFromIndex(matched_indexes[0])
+  
+  def set_file_entry_for_model_index(self, index: QModelIndex, file_entry: RARCFileEntry):
+    name_index = index.siblingAtColumn(self.column_names.index("File Name"))
+    self.model.setData(name_index, file_entry, self.FILE_ENTRY_ROLE)
+  
+  def set_node_for_model_index(self, index: QModelIndex, node: RARCNode):
+    name_index = index.siblingAtColumn(self.column_names.index("File Name"))
+    self.model.setData(name_index, node, self.NODE_ROLE)
+  
+  def get_file_entry_for_model_index(self, index: QModelIndex):
+    name_index = index.siblingAtColumn(self.column_names.index("File Name"))
+    file_entry: RARCFileEntry = self.model.data(name_index, self.FILE_ENTRY_ROLE)
+    return file_entry
+  
+  def get_node_for_model_index(self, index: QModelIndex):
+    name_index = index.siblingAtColumn(self.column_names.index("File Name"))
+    node: RARCNode = self.model.data(name_index, self.NODE_ROLE)
+    return node
+  
+  def filter_rows(self):
+    query = self.ui.filter.text()
+    self.proxy.setFilterFixedString(query)
+  
+  def each_model_row_index(self, parent: QModelIndex = QModelIndex()):
+    # Recursively iterates over each row in the model.
+    for row in range(self.model.rowCount(parent)):
+      index = self.model.index(row, self.column_names.index("File Name"), parent=parent)
+      yield index
+      yield from self.each_model_row_index(parent=index)
+  
+  
+  def update_file_size_and_compression_and_preload_in_ui(self, file_entry: RARCFileEntry):
     if file_entry.is_dir:
       return
     
-    item = self.rarc_file_entry_to_tree_widget_item.get(file_entry)
+    name_item = self.find_item_by_file_entry(file_entry)
+    name_index = name_item.index()
+    file_size_item = self.model.itemFromIndex(name_index.siblingAtColumn(self.column_names.index("File Size")))
     
     self.ui.rarc_files_tree.blockSignals(True)
     
     file_size_str = self.window().stringify_number(fs.data_len(file_entry.data))
-    item.setText(self.rarc_col_name_to_index["File Size"], file_size_str)
+    file_size_item.setText(file_size_str)
     
-    comp_combobox = self.ui.rarc_files_tree.itemWidget(item, self.rarc_col_name_to_index["Compression"])
-    if file_entry.type & RARCFileAttrType.COMPRESSED:
-      if file_entry.type & RARCFileAttrType.YAZ0_COMPRESSED:
-        comp_combobox.setCurrentIndex(comp_combobox.findText("Yaz0"))
-      else:
-        comp_combobox.setCurrentIndex(comp_combobox.findText("Yay0"))
-    else:
-      comp_combobox.setCurrentIndex(comp_combobox.findText("None"))
+    comp_index = name_index.siblingAtColumn(self.column_names.index("Compression"))
+    self.model.setData(comp_index, self.get_compression_type_string_for_file_entry(file_entry), Qt.ItemDataRole.EditRole)
     
-    load_combobox = self.ui.rarc_files_tree.itemWidget(item, self.rarc_col_name_to_index["Preload"])
-    if file_entry.type & RARCFileAttrType.PRELOAD_TO_MRAM:
-      load_combobox.setCurrentIndex(load_combobox.findText("MRAM"))
-    elif file_entry.type & RARCFileAttrType.PRELOAD_TO_ARAM:
-      load_combobox.setCurrentIndex(load_combobox.findText("ARAM"))
-    elif file_entry.type & RARCFileAttrType.LOAD_FROM_DVD:
-      load_combobox.setCurrentIndex(load_combobox.findText("None"))
-    else:
-      load_combobox.setCurrentIndex(-1)
+    preload_index = name_index.siblingAtColumn(self.column_names.index("Preload"))
+    self.model.setData(preload_index, self.get_preload_type_string_for_file_entry(file_entry), Qt.ItemDataRole.EditRole)
     
     self.ui.rarc_files_tree.blockSignals(False)
   
   def update_all_displayed_file_indexes_and_ids(self):
     # Update all the displayed file indexes in case they got shuffled around by adding/removing files/directories.
-    for file_entry, item in self.rarc_file_entry_to_tree_widget_item.items():
-      if file_entry.is_dir:
+    for index in self.each_model_row_index():
+      file_entry = self.get_file_entry_for_model_index(index)
+      if file_entry is None or file_entry.is_dir:
         continue
       
       file_index = self.rarc.file_entries.index(file_entry)
       file_index_str = self.window().stringify_number(file_index, min_hex_chars=4)
-      item.setText(self.rarc_col_name_to_index["File Index"], file_index_str)
+      self.model.setData(index.siblingAtColumn(self.column_names.index("File Index")), file_index_str)
       
       file_id_str = self.window().stringify_number(file_entry.id, min_hex_chars=4)
-      item.setText(self.rarc_col_name_to_index["File ID"], file_id_str)
+      self.model.setData(index.siblingAtColumn(self.column_names.index("File ID")), file_id_str)
   
   def export_rarc_by_path(self, rarc_path):
     self.rarc.save_changes()
@@ -376,13 +458,13 @@ class RARCTab(QWidget):
     QMessageBox.information(self, "RARC saved", "Successfully saved RARC.")
   
   def extract_all_files_from_rarc_folder_by_path(self, folder_path):
-    node = self.ui.actionExtractAllFilesFromRARCFolder.data()
+    node: RARCNode = self.ui.actionExtractAllFilesFromRARCFolder.data()
     self.rarc.extract_node_to_disk(node, folder_path)
     
     QMessageBox.information(self, "Folder extracted", "Successfully extracted RARC folder contents to \"%s\"." % folder_path)
   
   def replace_all_files_in_rarc_folder_by_path(self, folder_path):
-    node = self.ui.actionReplaceAllFilesInRARCFolder.data()
+    node: RARCNode = self.ui.actionReplaceAllFilesInRARCFolder.data()
     num_files_overwritten = self.rarc.import_node_from_disk(node, folder_path)
     
     if num_files_overwritten == 0:
@@ -392,7 +474,7 @@ class RARCTab(QWidget):
     QMessageBox.information(self, "Folder imported", "Successfully overwrote %d files in the RARC folder from \"%s\"." % (num_files_overwritten, folder_path))
     
     for file_entry in self.rarc.file_entries:
-      self.update_file_size_and_compression_in_ui(file_entry)
+      self.update_file_size_and_compression_and_preload_in_ui(file_entry)
   
   def dump_all_rarc_textures_by_path(self, folder_path):
     asset_dumper = AssetDumper()
@@ -482,11 +564,16 @@ class RARCTab(QWidget):
     if self.rarc is None:
       return
     
-    item = self.ui.rarc_files_tree.itemAt(pos)
+    index = self.ui.rarc_files_tree.indexAt(pos)
+    if not index.isValid():
+      return
+    item = self.model.itemFromIndex(self.proxy.mapToSource(index))
     if item is None:
       return
     
-    node = self.rarc_tree_widget_item_to_node.get(item)
+    file_entry = self.get_file_entry_for_model_index(item.index())
+    node = self.get_node_for_model_index(item.index())
+    
     if node:
       menu = QMenu(self)
       menu.addAction(self.ui.actionAddRARCFile)
@@ -501,18 +588,14 @@ class RARCTab(QWidget):
       menu.addAction(self.ui.actionReplaceAllFilesInRARCFolder)
       self.ui.actionReplaceAllFilesInRARCFolder.setData(node)
       menu.exec_(self.ui.rarc_files_tree.mapToGlobal(pos))
-    else:
-      file = self.rarc_tree_widget_item_to_file_entry.get(item)
-      if file is None:
-        return
-      
-      if file.is_dir:
-        # Selected a . or .. relative directory entry. Don't give any options for this..
+    elif file_entry:
+      if file_entry.is_dir:
+        # Selected a . or .. relative directory entry. Don't give any options for this.
         pass
       else:
         menu = QMenu(self)
         
-        basename, file_ext = os.path.splitext(file.name)
+        basename, file_ext = os.path.splitext(file_entry.name)
         image_selected = False
         j3d_selected = False
         j3d_anim_selected = False
@@ -526,10 +609,10 @@ class RARCTab(QWidget):
         
         if image_selected:
           menu.addAction(self.ui.actionOpenRARCImage)
-          self.ui.actionOpenRARCImage.setData(file)
+          self.ui.actionOpenRARCImage.setData(file_entry)
           
           menu.addAction(self.ui.actionReplaceRARCImage)
-          self.ui.actionReplaceRARCImage.setData(file)
+          self.ui.actionReplaceRARCImage.setData(file_entry)
           if self.bti_tab.bti is None:
             self.ui.actionReplaceRARCImage.setDisabled(True)
           else:
@@ -537,7 +620,7 @@ class RARCTab(QWidget):
         
         if j3d_anim_selected:
           menu.addAction(self.ui.actionLoadJ3DAnim)
-          self.ui.actionLoadJ3DAnim.setData(file)
+          self.ui.actionLoadJ3DAnim.setData(file_entry)
           if not self.j3d_tab.model_loaded:
             self.ui.actionLoadJ3DAnim.setDisabled(True)
           else:
@@ -545,63 +628,59 @@ class RARCTab(QWidget):
         
         if j3d_selected:
           menu.addAction(self.ui.actionOpenRARCJ3D)
-          self.ui.actionOpenRARCJ3D.setData(file)
+          self.ui.actionOpenRARCJ3D.setData(file_entry)
           
           menu.addAction(self.ui.actionReplaceRARCJ3D)
-          self.ui.actionReplaceRARCJ3D.setData(file)
+          self.ui.actionReplaceRARCJ3D.setData(file_entry)
           if self.j3d_tab.j3d is None:
             self.ui.actionReplaceRARCJ3D.setDisabled(True)
           else:
             self.ui.actionReplaceRARCJ3D.setDisabled(False)
         
         menu.addAction(self.ui.actionExtractRARCFile)
-        self.ui.actionExtractRARCFile.setData(file)
+        self.ui.actionExtractRARCFile.setData(file_entry)
         menu.addAction(self.ui.actionReplaceRARCFile)
-        self.ui.actionReplaceRARCFile.setData(file)
+        self.ui.actionReplaceRARCFile.setData(file_entry)
         menu.addAction(self.ui.actionDeleteRARCFile)
-        self.ui.actionDeleteRARCFile.setData(file)
+        self.ui.actionDeleteRARCFile.setData(file_entry)
         
         menu.exec_(self.ui.rarc_files_tree.mapToGlobal(pos))
   
   def extract_file_from_rarc_by_path(self, file_path):
-    file_entry = self.ui.actionExtractRARCFile.data()
+    file_entry: RARCFileEntry = self.ui.actionExtractRARCFile.data()
     
     with open(file_path, "wb") as f:
       file_entry.data.seek(0)
       f.write(file_entry.data.read())
   
   def replace_file_in_rarc_by_path(self, file_path):
-    file_entry = self.ui.actionReplaceRARCFile.data()
+    file_entry: RARCFileEntry = self.ui.actionReplaceRARCFile.data()
     
     with open(file_path, "rb") as f:
       data = BytesIO(f.read())
     file_entry.data = data
     file_entry.update_compression_flags_from_data()
     
-    self.update_file_size_and_compression_in_ui(file_entry)
+    self.update_file_size_and_compression_and_preload_in_ui(file_entry)
     
     self.window().ui.statusbar.showMessage("Replaced %s." % file_entry.name, 3000)
   
   def delete_file_in_rarc(self):
-    file_entry = self.ui.actionDeleteRARCFile.data()
+    file_entry: RARCFileEntry = self.ui.actionDeleteRARCFile.data()
     
     if not self.window().confirm_delete(file_entry.name):
       return
     
-    node = file_entry.parent_node
-    
     self.rarc.delete_file(file_entry)
     
-    file_item = self.rarc_file_entry_to_tree_widget_item.get(file_entry)
-    dir_item = self.rarc_node_to_tree_widget_item.get(node)
-    dir_item.removeChild(file_item)
-    del self.rarc_file_entry_to_tree_widget_item[file_entry]
-    del self.rarc_tree_widget_item_to_file_entry[file_item]
+    file_item = self.find_item_by_file_entry(file_entry)
+    dir_item = self.find_item_by_node(file_entry.parent_node)
+    dir_item.removeRow(file_item.index().row())
     
     self.update_all_displayed_file_indexes_and_ids()
   
   def open_image_in_rarc(self):
-    file_entry = self.ui.actionOpenRARCImage.data()
+    file_entry: RARCFileEntry = self.ui.actionOpenRARCImage.data()
     
     bti_name = os.path.splitext(file_entry.name)[0]
     
@@ -611,19 +690,19 @@ class RARCTab(QWidget):
     self.window().set_tab_by_name("BTI Images")
   
   def replace_image_in_rarc(self):
-    file_entry = self.ui.actionReplaceRARCImage.data()
+    file_entry: RARCFileEntry = self.ui.actionReplaceRARCImage.data()
     
     self.bti_tab.bti.save_changes()
     
     file_entry.data = fs.make_copy_data(self.bti_tab.bti.data)
     file_entry.update_compression_flags_from_data()
     
-    self.update_file_size_and_compression_in_ui(file_entry)
+    self.update_file_size_and_compression_and_preload_in_ui(file_entry)
     
     self.window().ui.statusbar.showMessage("Replaced %s." % file_entry.name, 3000)
   
   def open_j3d_in_rarc(self):
-    file_entry = self.ui.actionOpenRARCJ3D.data()
+    file_entry: RARCFileEntry = self.ui.actionOpenRARCJ3D.data()
     
     j3d_name = os.path.splitext(file_entry.name)[0]
     
@@ -633,19 +712,19 @@ class RARCTab(QWidget):
     self.window().set_tab_by_name("J3D Files")
   
   def replace_j3d_in_rarc(self):
-    file_entry = self.ui.actionReplaceRARCJ3D.data()
+    file_entry: RARCFileEntry = self.ui.actionReplaceRARCJ3D.data()
     
     self.j3d_tab.j3d.save()
     
     file_entry.data = fs.make_copy_data(self.j3d_tab.j3d.data)
     file_entry.update_compression_flags_from_data()
     
-    self.update_file_size_and_compression_in_ui(file_entry)
+    self.update_file_size_and_compression_and_preload_in_ui(file_entry)
     
     self.window().ui.statusbar.showMessage("Replaced %s." % file_entry.name, 3000)
   
   def load_j3d_anim(self):
-    file_entry = self.ui.actionLoadJ3DAnim.data()
+    file_entry: RARCFileEntry = self.ui.actionLoadJ3DAnim.data()
     
     j3d_name = os.path.splitext(file_entry.name)[0]
     
@@ -655,13 +734,11 @@ class RARCTab(QWidget):
     self.window().set_tab_by_name("J3D Files")
   
   def add_file_to_rarc_by_path(self, file_path):
-    parent_node = self.ui.actionAddRARCFile.data()
+    parent_node: RARCNode = self.ui.actionAddRARCFile.data()
     
     file_name = os.path.basename(file_path)
     with open(file_path, "rb") as f:
       file_data = BytesIO(f.read())
-    file_size = fs.data_len(file_data)
-    file_size_str = self.window().stringify_number(file_size)
     
     existing_file_names = [fe.name for fe in self.rarc.file_entries if not fe.is_dir]
     if file_name in existing_file_names:
@@ -670,28 +747,18 @@ class RARCTab(QWidget):
     
     file_entry = self.rarc.add_new_file(file_name, file_data, parent_node)
     
-    file_id_str = self.window().stringify_number(file_entry.id, min_hex_chars=4)
-    file_index = self.rarc.file_entries.index(file_entry)
-    file_index_str = self.window().stringify_number(file_index, min_hex_chars=4)
+    parent_item = self.find_item_by_node(parent_node)
     
-    parent_dir_item = self.rarc_node_to_tree_widget_item.get(parent_node)
-    file_item = QTreeWidgetItem([file_entry.name, "", file_index_str, file_id_str, file_size_str, ""])
-    file_item.setFlags(file_item.flags() | Qt.ItemIsEditable)
-    parent_dir_item.addChild(file_item)
-    
-    self.rarc_file_entry_to_tree_widget_item[file_entry] = file_item
-    self.rarc_tree_widget_item_to_file_entry[file_item] = file_entry
-    
-    self.initialize_tree_item_for_file_entry(file_entry)
+    self.add_new_tree_row_for_file_entry(file_entry, parent_item)
     
     self.update_all_displayed_file_indexes_and_ids()
   
   def add_folder_to_rarc(self):
-    parent_node = self.ui.actionAddRARCFolder.data()
+    parent_node: RARCNode = self.ui.actionAddRARCFolder.data()
     
     dir_name, confirmed = QInputDialog.getText(
       self, "Input Folder Name", "Write the name for the new folder:",
-      flags=Qt.WindowSystemMenuHint | Qt.WindowTitleHint
+      flags=Qt.WindowType.WindowSystemMenuHint | Qt.WindowType.WindowTitleHint
     )
     if not confirmed:
       return
@@ -704,7 +771,7 @@ class RARCTab(QWidget):
     
     node_type, confirmed = QInputDialog.getText(
       self, "Input Folder Type", "Write the type of the new folder (maximum 4 characters):",
-      flags=Qt.WindowSystemMenuHint | Qt.WindowTitleHint
+      flags=Qt.WindowType.WindowSystemMenuHint | Qt.WindowType.WindowTitleHint
     )
     if not confirmed:
       return
@@ -717,15 +784,15 @@ class RARCTab(QWidget):
     
     dir_file_entry, node = self.rarc.add_new_directory(dir_name, node_type, parent_node)
     
-    self.add_rarc_file_entry_to_files_tree(dir_file_entry)
+    self.add_new_tree_row_for_file_or_dir_entry(dir_file_entry)
     for child_file_entry in dir_file_entry.node.files:
       # Add the . and .. relative dir entries.
-      self.add_rarc_file_entry_to_files_tree(child_file_entry)
+      self.add_new_tree_row_for_file_or_dir_entry(child_file_entry)
     
     self.update_all_displayed_file_indexes_and_ids()
   
   def delete_folder_in_rarc(self):
-    node = self.ui.actionDeleteRARCFolder.data()
+    node: RARCNode = self.ui.actionDeleteRARCFolder.data()
     
     if not self.window().confirm_delete(node.name, is_folder=True):
       return
@@ -738,58 +805,37 @@ class RARCTab(QWidget):
     
     self.update_all_displayed_file_indexes_and_ids()
   
-  def remove_folder_from_files_tree(self, dir_entry):
-    dir_item = self.rarc_file_entry_to_tree_widget_item.get(dir_entry)
-    parent_dir_item = self.rarc_node_to_tree_widget_item.get(dir_entry.parent_node)
-    parent_dir_item.removeChild(dir_item)
-    del self.rarc_file_entry_to_tree_widget_item[dir_entry]
-    del self.rarc_tree_widget_item_to_file_entry[dir_item]
-    
-    # Recursively delete children from the dictionaries.
-    for child_item in dir_item.takeChildren():
-      child_file_entry = self.rarc_tree_widget_item_to_file_entry[child_item]
-      if child_file_entry.is_dir:
-        self.remove_folder_from_files_tree(child_file_entry)
-      else:
-        dir_item.removeChild(child_item)
-        del self.rarc_file_entry_to_tree_widget_item[child_file_entry]
-        del self.rarc_tree_widget_item_to_file_entry[child_item]
+  def remove_folder_from_files_tree(self, dir_entry: RARCFileEntry):
+    dir_item = self.find_item_by_file_entry(dir_entry)
+    parent_dir_item = self.find_item_by_node(dir_entry.parent_node)
+    # When removing one row, the model automatically takes care of recursively deleting all children.
+    parent_dir_item.removeRow(dir_item.index().row())
   
   
-  def edit_rarc_files_tree_item_text(self, item, column):
-    if (item.flags() & Qt.ItemIsEditable) == 0:
-      return
-    
-    node = self.rarc_tree_widget_item_to_node.get(item)
-    
-    # Allow editing only certain columns.
-    allowed_column_indexes = []
-    allowed_column_indexes.append(self.rarc_col_name_to_index["File Name"])
-    if node is not None:
-      allowed_column_indexes.append(self.rarc_col_name_to_index["Folder Type"])
-    else:
-      if not self.rarc.keep_file_ids_synced_with_indexes:
-        allowed_column_indexes.append(self.rarc_col_name_to_index["File ID"])
-    if column in allowed_column_indexes: 
-      self.ui.rarc_files_tree.editItem(item, column)
+  def rarc_file_tree_item_changed(self, top_left_index: QModelIndex, bottom_right_index: QModelIndex):
+    if top_left_index != bottom_right_index:
+      raise Exception("Multi-cell editing not supported")
+    column = top_left_index.column()
+    if column == self.column_names.index("File Name"):
+      self.change_rarc_file_name(top_left_index)
+    elif column == self.column_names.index("Folder Type"):
+      self.change_rarc_node_type(top_left_index)
+    elif column == self.column_names.index("File ID"):
+      self.change_rarc_file_id(top_left_index)
+    elif column == self.column_names.index("Compression"):
+      self.change_rarc_file_compression_type(top_left_index)
+    elif column == self.column_names.index("Preload"):
+      self.change_rarc_file_preload_type(top_left_index)
   
-  def rarc_file_tree_item_changed(self, item, column):
-    if column == self.rarc_col_name_to_index["File Name"]:
-      self.change_rarc_file_name(item)
-    elif column == self.rarc_col_name_to_index["Folder Type"]:
-      self.change_rarc_node_type(item)
-    elif column == self.rarc_col_name_to_index["File ID"]:
-      self.change_rarc_file_id(item)
-  
-  def change_rarc_file_name(self, item):
-    node = self.rarc_tree_widget_item_to_node.get(item)
-    file_entry = self.rarc_tree_widget_item_to_file_entry.get(item)
-    new_file_name = item.text(self.rarc_col_name_to_index["File Name"])
+  def change_rarc_file_name(self, name_index: QModelIndex):
+    new_file_name = name_index.model().data(name_index, Qt.ItemDataRole.EditRole)
+    file_entry = self.get_file_entry_for_model_index(name_index)
+    node = self.get_node_for_model_index(name_index)
     
     if node is not None:
       if len(new_file_name) == 0:
         QMessageBox.warning(self, "Invalid folder name", "Folder name cannot be empty.")
-        item.setText(self.rarc_col_name_to_index["File Name"], node.name)
+        self.model.setData(name_index, node.name)
         return
       
       node.name = new_file_name
@@ -798,35 +844,40 @@ class RARCTab(QWidget):
     else:
       if len(new_file_name) == 0:
         QMessageBox.warning(self, "Invalid file name", "File name cannot be empty.")
-        item.setText(self.rarc_col_name_to_index["File Name"], file_entry.name)
+        self.model.setData(name_index, file_entry.name)
         return
       
-      other_file_entry = next((fe for fe in self.rarc.file_entries if fe.name == new_file_name and not fe.is_dir), None)
+      other_file_entry = next((
+        fe for fe in self.rarc.file_entries
+        if fe.name == new_file_name
+        and fe.parent_node == file_entry.parent_node
+        and not fe.is_dir
+      ), None)
       
       if other_file_entry == file_entry:
         # File name not changed
         return
       
       if other_file_entry is not None:
-        QMessageBox.warning(self, "Duplicate file name", "The file name you entered is already used by another file.\n\nNote that file names in RARCs must be unique - even if the other file is in a completely different folder.")
-        item.setText(self.rarc_col_name_to_index["File Name"], file_entry.name)
+        QMessageBox.warning(self, "Duplicate file name", "The file name you entered is already used by another file in this directory.")
+        self.model.setData(name_index, file_entry.name)
         return
     
       file_entry.name = new_file_name
     
-    item.setText(self.rarc_col_name_to_index["File Name"], new_file_name)
+    self.model.setData(name_index, new_file_name)
   
-  def change_rarc_node_type(self, item):
-    node = self.rarc_tree_widget_item_to_node.get(item)
-    new_node_type = item.text(self.rarc_col_name_to_index["Folder Type"])
+  def change_rarc_node_type(self, node_type_index: QModelIndex):
+    new_node_type = node_type_index.model().data(node_type_index, Qt.ItemDataRole.EditRole)
+    node = self.get_node_for_model_index(node_type_index)
     
     if len(new_node_type) == 0:
       QMessageBox.warning(self, "Invalid folder type", "Folder type cannot be empty.")
-      item.setText(self.rarc_col_name_to_index["Folder Type"], node.type)
+      self.model.setData(node_type_index, node.type)
       return
     if len(new_node_type) > 4:
       QMessageBox.warning(self, "Invalid folder type", "Folder types cannot be longer than 4 characters.")
-      item.setText(self.rarc_col_name_to_index["Folder Type"], node.type)
+      self.model.setData(node_type_index, node.type)
       return
     
     if len(new_node_type) < 4:
@@ -835,11 +886,11 @@ class RARCTab(QWidget):
     
     node.type = new_node_type
     
-    item.setText(self.rarc_col_name_to_index["Folder Type"], new_node_type)
+    self.model.setData(node_type_index, node.type)
   
-  def change_rarc_file_id(self, item):
-    file_entry = self.rarc_tree_widget_item_to_file_entry.get(item)
-    new_file_id_str = item.text(self.rarc_col_name_to_index["File ID"])
+  def change_rarc_file_id(self, file_id_index: QModelIndex):
+    new_file_id_str = file_id_index.model().data(file_id_index, Qt.ItemDataRole.EditRole)
+    file_entry = self.get_file_entry_for_model_index(file_id_index)
     
     if self.window().display_hexadecimal_numbers:
       hexadecimal_match = re.search(r"^\s*(?:0x)?([0-9a-f]+)\s*$", new_file_id_str, re.IGNORECASE)
@@ -848,7 +899,7 @@ class RARCTab(QWidget):
       else:
         QMessageBox.warning(self, "Invalid file ID", "\"%s\" is not a valid hexadecimal number." % new_file_id_str)
         file_id_str = self.window().stringify_number(file_entry.id, min_hex_chars=4)
-        item.setText(self.rarc_col_name_to_index["File ID"], file_id_str)
+        self.model.setData(file_id_index, file_id_str)
         return
     else:
       decimal_match = re.search(r"^\s*(\d+)\s*$", new_file_id_str, re.IGNORECASE)
@@ -857,13 +908,13 @@ class RARCTab(QWidget):
       else:
         QMessageBox.warning(self, "Invalid file ID", "\"%s\" is not a valid decimal number." % new_file_id_str)
         file_id_str = self.window().stringify_number(file_entry.id, min_hex_chars=4)
-        item.setText(self.rarc_col_name_to_index["File ID"], file_id_str)
+        self.model.setData(file_id_index, file_id_str)
         return
     
     if new_file_id >= 0xFFFF:
       QMessageBox.warning(self, "Invalid file ID", "\"%s\" is too large to be a file ID. It must be in the range 0x0000-0xFFFE." % new_file_id_str)
       file_id_str = self.window().stringify_number(file_entry.id, min_hex_chars=4)
-      item.setText(self.rarc_col_name_to_index["File ID"], file_id_str)
+      self.model.setData(file_id_index, file_id_str)
       return
     
     other_file_entry = next((fe for fe in self.rarc.file_entries if fe.id == new_file_id), None)
@@ -871,30 +922,31 @@ class RARCTab(QWidget):
     if other_file_entry == file_entry:
       # File ID not changed
       file_id_str = self.window().stringify_number(file_entry.id, min_hex_chars=4)
-      item.setText(self.rarc_col_name_to_index["File ID"], file_id_str)
+      self.model.setData(file_id_index, file_id_str)
       return
     
     if other_file_entry is not None:
       QMessageBox.warning(self, "Duplicate file ID", "The file ID you entered is already used by the file \"%s\"." % other_file_entry.name)
       file_id_str = self.window().stringify_number(file_entry.id, min_hex_chars=4)
-      item.setText(self.rarc_col_name_to_index["File ID"], file_id_str)
+      self.model.setData(file_id_index, file_id_str)
       return
     
     file_entry.id = new_file_id
     
     file_id_str = self.window().stringify_number(file_entry.id, min_hex_chars=4)
-    item.setText(self.rarc_col_name_to_index["File ID"], file_id_str)
+    self.model.setData(file_id_index, file_id_str)
   
-  def change_rarc_file_compression_type(self, index: int):
-    combobox: QComboBox = self.sender()
-    item: QTreeWidgetItem = combobox.property("tree_item")
-    file_entry: RARCFileEntry = self.rarc_tree_widget_item_to_file_entry.get(item)
+  def change_rarc_file_compression_type(self, comp_index: QModelIndex):
+    comp_value_str = comp_index.model().data(comp_index, Qt.ItemDataRole.EditRole)
+    file_entry = self.get_file_entry_for_model_index(comp_index)
+    
     file_entry.update_compression_flags_from_data()
+    
     is_yaz0_compressed = bool((file_entry.type & RARCFileAttrType.COMPRESSED) and (file_entry.type & RARCFileAttrType.YAZ0_COMPRESSED))
     is_yay0_compressed = bool((file_entry.type & RARCFileAttrType.COMPRESSED) and not (file_entry.type & RARCFileAttrType.YAZ0_COMPRESSED))
     
-    yaz0_selected = combobox.currentIndex() == combobox.findText("Yaz0")
-    yay0_selected = combobox.currentIndex() == combobox.findText("Yay0")
+    yaz0_selected = comp_value_str == "Yaz0"
+    yay0_selected = comp_value_str == "Yay0"
     
     if is_yaz0_compressed and not yaz0_selected:
       file_entry.data = Yaz0.decompress(file_entry.data)
@@ -912,21 +964,20 @@ class RARCTab(QWidget):
       file_entry.data = Yay0.compress(file_entry.data, search_depth=search_depth, should_pad_data=should_pad_data)
       file_entry.update_compression_flags_from_data()
     
-    # Update the UI to match the file data.
-    self.update_file_size_and_compression_in_ui(file_entry)
+    # Update the UI to match the new file data's size.
+    self.update_file_size_and_compression_and_preload_in_ui(file_entry)
   
-  def change_rarc_file_preload_type(self, index: int):
-    combobox: QComboBox = self.sender()
-    item: QTreeWidgetItem = combobox.property("tree_item")
-    file_entry: RARCFileEntry = self.rarc_tree_widget_item_to_file_entry.get(item)
+  def change_rarc_file_preload_type(self, preload_index: QModelIndex):
+    preload_value_str = preload_index.model().data(preload_index, Qt.ItemDataRole.EditRole)
+    file_entry = self.get_file_entry_for_model_index(preload_index)
     
     file_entry.type &= ~RARCFileAttrType.PRELOAD_TO_MRAM
     file_entry.type &= ~RARCFileAttrType.PRELOAD_TO_ARAM
     file_entry.type &= ~RARCFileAttrType.LOAD_FROM_DVD
     
-    if combobox.currentIndex() == combobox.findText("MRAM"):
+    if preload_value_str == "MRAM":
       file_entry.type |= RARCFileAttrType.PRELOAD_TO_MRAM
-    elif combobox.currentIndex() == combobox.findText("ARAM"):
+    elif preload_value_str == "ARAM":
       file_entry.type |= RARCFileAttrType.PRELOAD_TO_ARAM
     else:
       file_entry.type |= RARCFileAttrType.LOAD_FROM_DVD
@@ -934,9 +985,25 @@ class RARCTab(QWidget):
   
   def keyPressEvent(self, event):
     event.ignore()
-    if event.matches(QKeySequence.Copy):
-      if self.ui.rarc_files_tree.currentColumn() == self.rarc_col_name_to_index["File Name"]:
-        item = self.ui.rarc_files_tree.currentItem()
-        file_path = "%s/%s" % (item.parent().text(self.rarc_col_name_to_index["File Name"]), item.text(self.rarc_col_name_to_index["File Name"]))
-        QApplication.instance().clipboard().setText(file_path)
-        event.accept()
+    if event.matches(QKeySequence.StandardKey.Copy):
+      selected_index = self.selection_model.currentIndex()
+      if not selected_index.isValid():
+        return
+      selected_index = self.proxy.mapToSource(selected_index)
+      if selected_index.column() != self.column_names.index("File Name"):
+        return
+      item = self.model.itemFromIndex(selected_index)
+      if item is None:
+        return
+      file_entry = self.get_file_entry_for_model_index(item.index())
+      if not isinstance(file_entry, RARCFileEntry):
+        return
+      
+      file_path = file_entry.name
+      dir_entry: RARCFileEntry = file_entry.parent_node.dir_entry
+      while dir_entry is not None:
+        file_path = dir_entry.name + "/" + file_path
+        dir_entry = dir_entry.parent_node.dir_entry
+      
+      QApplication.clipboard().setText(file_path)
+      event.accept()
