@@ -179,31 +179,41 @@ class J3DTab(BunfoeEditor):
     #     dict_1s.append(dict_1)
     #   self.j3d.mdl3.generate_from_mat3(self.j3d.mat3, self.j3d.tex1)
     #   for i, entry in enumerate(self.j3d.mdl3.entries):
-    #     dict_1 = dict_1s.pop(0)
-    #     dict_2 = entry.asdict()
+    #     dict_1 = {"name": self.j3d.mdl3.mat_names[i]}
+    #     dict_1.update(dict_1s.pop(0))
+    #     dict_2 = {"name": self.j3d.mdl3.mat_names[i]}
+    #     dict_2.update(entry.asdict())
+    #     with open("1.json", "w") as f: json.dump(dict_1, f, indent=4)
+    #     with open("2.json", "w") as f: json.dump(dict_2, f, indent=4)
     #     diff = DeepDiff(dict_1, dict_2, ignore_type_in_groups=[(int, fs.u8)], ignore_type_subclasses=True)
     #     if diff != {}:
-    #       with open("1.json", "w") as f: json.dump(dict_1, f, indent=4)
-    #       with open("2.json", "w") as f: json.dump(dict_2, f, indent=4)
     #       print(i)
     #       pprint(diff)
     #       break
     
+    # if self.j3d.mdl3 is not None:
+    #   with open("1.bin", "wb") as f: f.write(fs.read_all_bytes(self.j3d.mdl3.data))
+    #   self.j3d.mdl3.generate_from_mat3(self.j3d.mat3, self.j3d.tex1)
+    #   with open("2.bin", "wb") as f: f.write(fs.read_all_bytes(self.j3d.mdl3.data))
+    
     # if j3d_name == "cl":
-    #   # self.j3d.mdl3.generate_from_mat3(self.j3d.mat3, self.j3d.tex1)
     #   import json
-    #   entry_1 = self.j3d.mdl3.entries[0x17].copy()
-    #   dict_1 = self.j3d.mdl3.entries[0x17].asdict()
+    #   mat_idx = 0x17
+    #   entry_1 = self.j3d.mdl3.entries[mat_idx].copy()
+    #   dict_1 = self.j3d.mdl3.entries[mat_idx].asdict()
+    #   print(self.j3d.mdl3.entries[mat_idx].bp_commands[0].texture_index)
     #   with open("1.json", "w") as f: json.dump(dict_1, f, indent=4)
-    #   self.j3d.mdl3.entries[0x17].generate_from_material(self.j3d.mat3.materials[0x17], self.j3d.tex1)
-    #   self.j3d.mdl3.entries[0x17].save(0)
-    #   entry_2 = self.j3d.mdl3.entries[0x17].copy()
-    #   dict_2 = self.j3d.mdl3.entries[0x17].asdict()
+    #   self.j3d.mdl3.entries[mat_idx].generate_from_material(self.j3d.mat3.materials[mat_idx], self.j3d.tex1)
+    #   self.j3d.mdl3.entries[mat_idx].save(0)
+    #   entry_2 = self.j3d.mdl3.entries[mat_idx].copy()
+    #   dict_2 = self.j3d.mdl3.entries[mat_idx].asdict()
     #   with open("2.json", "w") as f: json.dump(dict_2, f, indent=4)
-    #   from deepdiff import DeepDiff
-    #   from pprint import pprint
-    #   diff = DeepDiff(dict_1, dict_2, ignore_type_in_groups=[(int, fs.u8)], ignore_type_subclasses=True)
-    #   pprint(diff)
+    #   # from deepdiff import DeepDiff, Delta
+    #   # from pprint import pprint, pformat
+    #   # diff = DeepDiff(dict_1, dict_2, ignore_type_in_groups=[(int, fs.u8)], ignore_type_subclasses=True)
+    #   # # pprint(diff)
+    #   # # print(Delta(diff).to_dict())
+    #   # with open("diff.json", "w") as f: f.write(pformat(Delta(diff).to_flat_dicts()))
     
     self.reload_j3d_chunks_tree()
     
@@ -350,7 +360,7 @@ class J3DTab(BunfoeEditor):
     item = selected_items[0]
     obj = self.tree_widget_item_to_object.get(item)
     
-    # TODO: need to access items dynamically via indexing into lists via the bunfoe 'paths' system
+    # TODO important: need to access items dynamically via indexing into lists via the bunfoe 'paths' system
     # right now we're preserving references to old MDL3 entries after they get regenerated...
     
     # import cProfile, pstats
