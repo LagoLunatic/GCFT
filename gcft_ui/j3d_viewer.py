@@ -4,6 +4,7 @@ import os
 import re
 from io import BytesIO
 import time
+import copy
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
@@ -373,11 +374,10 @@ class J3DViewer(QOpenGLWidget):
   def get_preview_compatible_j3d(self, orig_j3d: J3D) -> J3D:
     # return orig_j3d
     
-    # We have to save the original J3D for the changes to its chunks to be reflected properly.
-    # Simply copying orig_j3d.data is not sufficient on its own.
-    orig_j3d.save()
-    # TODO: implement copying just the instance, without having to serialize and deserialize it here.
-    hack_j3d = J3D(fs.make_copy_data(orig_j3d.data))
+    # Making a copy of the orig_j3d's data bytes or its instance wouldn't be enough for the changes
+    # to its chunks to be reflected properly. So we make a deepcopy of it instead.
+    # Then we modify that copy with some hacks and save that, then use those bytes for the preview.
+    hack_j3d = copy.deepcopy(orig_j3d)
     chunks_modified = set()
     
     # Wind Waker has a hardcoded system where the textures that control toon shading are dynamically
@@ -423,11 +423,8 @@ class J3DViewer(QOpenGLWidget):
       # del hack_j3d.mat3.materials[mat_index]
       chunks_modified.add("MAT3")
     
-    if chunks_modified:
-      hack_j3d.save(only_chunks=chunks_modified)
-      return hack_j3d
-    else:
-      return orig_j3d
+    hack_j3d.save()
+    return hack_j3d
   
   #region Animation
   
