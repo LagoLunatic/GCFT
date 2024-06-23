@@ -22,13 +22,15 @@ from gclib.j3d_chunks.jnt1 import JNT1
 from gclib.j3d_chunks.shp1 import SHP1
 from gclib.j3d_chunks.mat3 import MAT3, Material
 from gclib.j3d_chunks.mdl3 import MDL3, MDLEntry, BPRegister, XFRegister
+import gclib.j3d_chunks.bp_command as BP
+import gclib.j3d_chunks.xf_command as XF
 from gclib.j3d_chunks.tex1 import TEX1
 from gclib.j3d_chunks.trk1 import TRK1, ColorAnimation
 from gclib.j3d_chunks.ttk1 import TTK1, UVAnimation
 from gclib.bti import BTI
 
 from gcft_ui.uic.ui_j3d_tab import Ui_J3DTab
-from gcft_ui.bunfoe_editor import BunfoeEditor, BunfoeWidget
+from gcft_ui.bunfoe_editor import BunfoeEditor, BunfoeWidget, BunfoeDialog
 
 class J3DTab(BunfoeEditor):
   def __init__(self):
@@ -48,7 +50,9 @@ class J3DTab(BunfoeEditor):
     # TODO: save to settings file?
     self.chunk_type_is_expanded = {
       "TEX1": True,
-      "MAT3": True,
+      # "MAT3": True,
+      "MAT3": False,
+      "MDL3": True, # TODO remove later, just for testing
       "TRK1": True,
     }
     
@@ -164,6 +168,42 @@ class J3DTab(BunfoeEditor):
     self.model_loaded = False
     if self.j3d.file_type[:3] in ["bmd", "bdl"]:
       self.model_loaded = True
+    
+    # if self.j3d.mdl3 is not None:
+    #   import json
+    #   from deepdiff import DeepDiff
+    #   from pprint import pprint
+    #   dict_1s = []
+    #   for entry in self.j3d.mdl3.entries:
+    #     dict_1 = entry.asdict()
+    #     dict_1s.append(dict_1)
+    #   self.j3d.mdl3.generate_from_mat3(self.j3d.mat3, self.j3d.tex1)
+    #   for i, entry in enumerate(self.j3d.mdl3.entries):
+    #     dict_1 = dict_1s.pop(0)
+    #     dict_2 = entry.asdict()
+    #     diff = DeepDiff(dict_1, dict_2, ignore_type_in_groups=[(int, fs.u8)], ignore_type_subclasses=True)
+    #     if diff != {}:
+    #       with open("1.json", "w") as f: json.dump(dict_1, f, indent=4)
+    #       with open("2.json", "w") as f: json.dump(dict_2, f, indent=4)
+    #       print(i)
+    #       pprint(diff)
+    #       break
+    
+    # if j3d_name == "cl":
+    #   # self.j3d.mdl3.generate_from_mat3(self.j3d.mat3, self.j3d.tex1)
+    #   import json
+    #   entry_1 = self.j3d.mdl3.entries[0x17].copy()
+    #   dict_1 = self.j3d.mdl3.entries[0x17].asdict()
+    #   with open("1.json", "w") as f: json.dump(dict_1, f, indent=4)
+    #   self.j3d.mdl3.entries[0x17].generate_from_material(self.j3d.mat3.materials[0x17], self.j3d.tex1)
+    #   self.j3d.mdl3.entries[0x17].save(0)
+    #   entry_2 = self.j3d.mdl3.entries[0x17].copy()
+    #   dict_2 = self.j3d.mdl3.entries[0x17].asdict()
+    #   with open("2.json", "w") as f: json.dump(dict_2, f, indent=4)
+    #   from deepdiff import DeepDiff
+    #   from pprint import pprint
+    #   diff = DeepDiff(dict_1, dict_2, ignore_type_in_groups=[(int, fs.u8)], ignore_type_subclasses=True)
+    #   pprint(diff)
     
     self.reload_j3d_chunks_tree()
     
@@ -309,6 +349,9 @@ class J3DTab(BunfoeEditor):
       return
     item = selected_items[0]
     obj = self.tree_widget_item_to_object.get(item)
+    
+    # TODO: need to access items dynamically via indexing into lists via the bunfoe 'paths' system
+    # right now we're preserving references to old MDL3 entries after they get regenerated...
     
     # import cProfile, pstats
     # profiler = cProfile.Profile()
@@ -484,9 +527,14 @@ class J3DTab(BunfoeEditor):
   def mdl_entry_selected(self, mdl_entry: MDLEntry):
     layout = self.ui.scrollAreaWidgetContents.layout()
     
-    entry_index = self.j3d.mdl3.entries.index(mdl_entry)
-    mat_name = self.j3d.mat3.mat_names[entry_index]
-    self.ui.j3d_sidebar_label.setText("Showing material display list for: %s" % mat_name)
+    # TODO: this index doesn't work if the MDL3 has been regenned because it's different instances of entries...
+    # gotta update the MDL3 section of the tree after regenning?
+    # or maybe the mdl3 entry should have the mat name there...
+    # entry_index = self.j3d.mdl3.entries.index(mdl_entry)
+    # mat_name = self.j3d.mat3.mat_names[entry_index]
+    # self.ui.j3d_sidebar_label.setText("Showing material display list for: %s" % mat_name)
+    
+    # TODO: text should show a warning that you don't want to manually edit MDL3
     
     bp_commands_widget = QWidget()
     bp_commands_layout = QFormLayout(bp_commands_widget)
@@ -512,9 +560,13 @@ class J3DTab(BunfoeEditor):
       else:
         reg_name = f"0x{bp_command.register:02X}"
       
-      command_text = f"0x{bp_command.value:06X}"
+      command_text = f"0x{bp_command.bitfield:06X}"
+      field_widget = QPushButton(command_text)
+      field_widget.setProperty('mdl_command', bp_command)
+      field_widget.setSizePolicy(QSizePolicy.Policy.Maximum, field_widget.sizePolicy().verticalPolicy())
+      field_widget.clicked.connect(self.open_mdl_command_editor)
       
-      bp_commands_layout.addRow(reg_name, QLabel(command_text))
+      bp_commands_layout.addRow(reg_name, field_widget)
     
     for xf_command in mdl_entry.xf_commands:
       if xf_command.register in [entry.value for entry in XFRegister]:
@@ -522,11 +574,30 @@ class J3DTab(BunfoeEditor):
       else:
         reg_name = f"0x{xf_command.register:04X}"
       
-      command_text = "\n".join([f"0x{arg:08X}" for arg in xf_command.args])
+      # print(xf_command)
+      command_text = ", ".join([f"0x{arg.bitfield:08X}" for arg in xf_command.args])
+      field_widget = QPushButton(command_text)
+      field_widget.setProperty('mdl_command', xf_command)
+      field_widget.setSizePolicy(QSizePolicy.Policy.Maximum, field_widget.sizePolicy().verticalPolicy())
+      field_widget.clicked.connect(self.open_mdl_command_editor)
       
-      reg_label = QLabel(reg_name)
-      reg_label.setAlignment(Qt.AlignmentFlag.AlignTop)
-      xf_commands_layout.addRow(reg_label, QLabel(command_text))
+      xf_commands_layout.addRow(reg_name, field_widget)
+  
+  def open_mdl_command_editor(self):
+    button: QPushButton = self.sender()
+    # mdl_command: MDLCommand = button.property('mdl_command')
+    mdl_command = button.property('mdl_command')
+    print(mdl_command)
+    
+    BunfoeDialog.show_dialog_for_bunfoe(mdl_command, self, "Edit MDL Command")
+    
+    # Update the text on the button.
+    self.j3d.mdl3.save()
+    if isinstance(mdl_command, BP.BPCommand):
+      command_text = f"0x{mdl_command.bitfield:06X}"
+    elif isinstance(mdl_command, XF.XFCommand):
+      command_text = ", ".join([f"0x{arg.bitfield:08X}" for arg in mdl_command.args])
+    button.setText(command_text)
   
   def keyframe_selected(self, keyframe: AnimationKeyframe):
     layout = self.ui.scrollAreaWidgetContents.layout()
