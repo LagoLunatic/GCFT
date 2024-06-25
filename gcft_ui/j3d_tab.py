@@ -173,6 +173,7 @@ class J3DTab(BunfoeEditor):
     #   import json
     #   from deepdiff import DeepDiff
     #   from pprint import pprint
+    #   import difflib
     #   dict_1s = []
     #   for entry in self.j3d.mdl3.entries:
     #     dict_1 = entry.asdict()
@@ -185,11 +186,21 @@ class J3DTab(BunfoeEditor):
     #     dict_2.update(entry.asdict())
     #     with open("1.json", "w") as f: json.dump(dict_1, f, indent=4)
     #     with open("2.json", "w") as f: json.dump(dict_2, f, indent=4)
-    #     diff = DeepDiff(dict_1, dict_2, ignore_type_in_groups=[(int, fs.u8)], ignore_type_subclasses=True)
-    #     if diff != {}:
-    #       print(i)
-    #       pprint(diff)
-    #       break
+    #     # reload from json to fix spurious diffs from the types being different, e.g. u32 -> int
+    #     with open("1.json", "r") as f: dict_1 = json.load(f)
+    #     with open("2.json", "r") as f: dict_2 = json.load(f)
+        
+    #     # diff = DeepDiff(dict_1, dict_2, ignore_type_in_groups=[(int, fs.u8)], ignore_type_subclasses=True)
+    #     # if diff != {}:
+    #     #   print(i)
+    #     #   pprint(diff)
+    #     #   break
+        
+    #     dict_str_1 = json.dumps(dict_1, indent=4)
+    #     dict_str_2 = json.dumps(dict_2, indent=4)
+    #     diff = difflib.unified_diff(dict_str_1.split("\n"), dict_str_2.split("\n"))
+    #     print("============")
+    #     print("\n".join(diff))
     
     # if self.j3d.mdl3 is not None:
     #   with open("1.bin", "wb") as f: f.write(fs.read_all_bytes(self.j3d.mdl3.data))
