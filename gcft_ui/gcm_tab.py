@@ -427,24 +427,6 @@ class GCMTab(QWidget):
       
       basename, file_ext = os.path.splitext(file.name)
       
-      is_compressed_rarc = False
-      try:
-        if file_ext == ".szs":
-          file_data = self.gcm.get_changed_file_data(file.file_path)
-          if Yaz0.check_is_compressed(file_data):
-            magic = fs.read_str(file_data, 0x11, 4)
-            if magic == "RARC":
-              is_compressed_rarc = True
-        elif file_ext == ".szp":
-          file_data = self.gcm.get_changed_file_data(file.file_path)
-          if Yay0.check_is_compressed(file_data):
-            chunk_offset = fs.read_u32(file_data, 0xC)
-            magic = fs.read_str(file_data, chunk_offset, 4)
-            if magic == "RARC":
-              is_compressed_rarc = True
-      except Exception as e:
-        pass
-      
       if file_ext == ".bti" or self.is_banner_filename(file.name):
         menu.addAction(self.ui.actionOpenGCMImage)
         self.ui.actionOpenGCMImage.setData(file)
@@ -455,7 +437,7 @@ class GCMTab(QWidget):
           self.ui.actionReplaceGCMImage.setDisabled(True)
         else:
           self.ui.actionReplaceGCMImage.setDisabled(False)
-      elif file_ext == ".arc" or is_compressed_rarc:
+      elif self.gcm.check_file_is_rarc(file.file_path):
         menu.addAction(self.ui.actionOpenGCMRARC)
         self.ui.actionOpenGCMRARC.setData(file)
         
