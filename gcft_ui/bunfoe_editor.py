@@ -356,10 +356,11 @@ class BunfoeEditor(QWidget):
       widget.setText(value)
     elif isinstance(widget, QComboBox):
       assert issubclass(field_type, Enum)
-      if len(field_type) > 0:
+      if len(field_type) > 0 and isinstance(value, field_type):
         index_of_value = list(field_type).index(value)
         widget.setCurrentIndex(index_of_value)
       else:
+        # TODO: Is there some way we could display invalid values for enums instead of a blank combobox?
         widget.setCurrentIndex(-1)
     elif isinstance(widget, QPushButton):
       assert issubclass(field_type, RGBA)
