@@ -131,7 +131,7 @@ class RARCTab(QWidget):
       recursive=True, 
       base_path="", 
       debug=True, rtn_counter=False, 
-      swallow_assertion_errors=True # Does not stop program if assertion error occurs
+      swallow_assertion_errors=True # Prevents invalid or non-RARC files from stopping the program
       ):
 
     NO_RECURSION_DIRECTORIES = ["GCFTUnpacked"] # Does not recurse in it's own created "unpacked" directory
@@ -165,6 +165,7 @@ class RARCTab(QWidget):
 
       file_ext = os.path.splitext(object)[1]
 
+      # Path is a valid folder and can recurse
       if os.path.isdir(object_path) and recursive and not (object in NO_RECURSION_DIRECTORIES):
         if debug:
           print(" Folder found. Making directory and recursing...")
@@ -176,17 +177,18 @@ class RARCTab(QWidget):
           debug=debug, rtn_counter=True, swallow_assertion_errors=swallow_assertion_errors
           )
         
-      elif (not os.path.isdir(object_path)) and (file_ext in [".arc"]):
+      # Path is not a folder
+      elif (not os.path.isdir(object_path)):
         item_counter += 1
 
         if debug:
-          print("  Valid RARC found. Importing. ",end='')
+          print("  Potential RARC found. Importing. ",end='')
         # Extract and export
         try:
           self.import_rarc_by_path(object_path)
         
-        except AssertionError as e:
-          print("!!! Some assertion error occured while importing RARC file!!! (most likely invalid RARC file) "+str(e))
+        except (AssertionError, UnicodeDecodeError) as e:
+          print(" -- Invalid RARC file - Skipping -- "+str(e))
           if not swallow_assertion_errors:
             raise e
           
