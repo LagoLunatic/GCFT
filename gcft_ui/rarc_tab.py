@@ -136,6 +136,7 @@ class RARCTab(QWidget):
 
     NO_RECURSION_DIRECTORIES = ["GCFTUnpacked"] # Does not recurse in it's own created "unpacked" directory
     item_counter = 0 # Number of files unpacked.
+    total_item_counter = 0 # Total number of files attempted.
 
     #if base_path != "":
     #  # This is a recursion
@@ -163,8 +164,6 @@ class RARCTab(QWidget):
       if debug:
         print("| "*recursion_guess+"  - Object "+subfolder_path+"\\"+object, end='')
 
-      file_ext = os.path.splitext(object)[1]
-
       # Path is a valid folder and can recurse
       if os.path.isdir(object_path) and recursive and not (object in NO_RECURSION_DIRECTORIES):
         if debug:
@@ -179,35 +178,30 @@ class RARCTab(QWidget):
         
       # Path is not a folder
       elif (not os.path.isdir(object_path)):
-        item_counter += 1
+        total_item_counter += 1
 
         if debug:
           print("  Potential RARC found. Importing. ",end='')
         # Extract and export
         try:
           self.import_rarc_by_path(object_path)
+
+          if debug:
+            print("Extracting. ")
+
+          export_path = base_path+"\\GCFTUnpacked"+subfolder_path+"\\"+object
+          #print("export path: "+str(export_path))
+          self.rarc.extract_all_files_to_disk(export_path)
+          #input(base_path+"\\GCFTUnpacked\\"+object)
+          
+          item_counter += 1
         
         except (AssertionError, UnicodeDecodeError) as e:
-          print(" -- Invalid RARC file - Skipping -- "+str(e))
+          print(" !! Invalid RARC file, skipping. !! ")
           if not swallow_assertion_errors:
             raise e
-          
-          else:
-            return 1 # Needed to stop the extracting, otherwise more errors happen
-        
-        if debug:
-          print("Extracting. ")
-        #input(base_path+"\\GCFTUnpacked\\"+object)
-        #self.extract_all_files_from_rarc()
-
-        #print("new path: "+str(new_path))
-        export_path = base_path+"\\GCFTUnpacked"+subfolder_path+"\\"+object
-
-        #print("export path: "+str(export_path))
-        #self.extract_all_files_from_rarc_folder()
 
         #node = self.ui.actionExtractAllFilesFromRARCFolder.data()
-        self.rarc.extract_all_files_to_disk(export_path)
         #self.extract_all_files_from_rarc_folder_by_path(base_path+"\\GCFTUnpacked\\"+object)
       
       elif debug:
@@ -215,7 +209,7 @@ class RARCTab(QWidget):
   
     # If this is the "main" thread - not inside of a recursion
     if base_path == folder_of_rarcs_path and debug:
-      print(f" -- Successfully de-RARC'd {item_counter} files. --")
+      print(f" -- Successfully de-RARC'd {item_counter} files out of {total_item_counter} total files. --")
     
     if rtn_counter:
       return item_counter
