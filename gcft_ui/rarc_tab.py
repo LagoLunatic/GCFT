@@ -131,11 +131,11 @@ class RARCTab(QWidget):
       recursive=True, 
       base_path="", 
       debug=True, rtn_counter=False, 
-      swallow_assertion_errors=True
+      swallow_assertion_errors=True # Does not stop program if assertion error occurs
       ):
 
-    NO_RECURSION_DIRECTORIES = ["GCFTUnpacked","HomeBTN","\\res\\HomeBTN"] # FIles in HomeBTN throws some strange AssertionError
-    item_counter = 0
+    NO_RECURSION_DIRECTORIES = ["GCFTUnpacked"] # Does not recurse in it's own created "unpacked" directory
+    item_counter = 0 # Number of files unpacked.
 
     #if base_path != "":
     #  # This is a recursion
@@ -181,7 +181,7 @@ class RARCTab(QWidget):
 
         if debug:
           print("  Valid RARC found. Importing. ",end='')
-        #extract and export
+        # Extract and export
         try:
           self.import_rarc_by_path(object_path)
         
@@ -191,7 +191,7 @@ class RARCTab(QWidget):
             raise e
           
           else:
-            return 1 # Needed to stop the extracting, otherwise more errors crop up
+            return 1 # Needed to stop the extracting, otherwise more errors happen
         
         if debug:
           print("Extracting. ")
