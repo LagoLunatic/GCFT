@@ -169,9 +169,12 @@ class RARCTab(QWidget):
         if debug:
           print(" Folder found. Making directory and recursing...")
         
-        os.mkdir(base_path+"\\GCFTUnpacked"+subfolder_path+"\\"+object) # make copy directory in the unpacked section
+        os.mkdir(base_path+"\\GCFTUnpacked"+subfolder_path+"\\"+object) # Make copy directory in the unpacked section
         
-        item_counter += self.import_all_rarcs_from_folder(object_path, base_path=base_path, debug=debug, rtn_counter=True)
+        item_counter += self.import_all_rarcs_from_folder(
+          object_path, base_path=base_path, 
+          debug=debug, rtn_counter=True, swallow_assertion_errors=swallow_assertion_errors
+          )
         
       elif (not os.path.isdir(object_path)) and (file_ext in [".arc"]):
         item_counter += 1
@@ -183,7 +186,7 @@ class RARCTab(QWidget):
           self.import_rarc_by_path(object_path)
         
         except AssertionError as e:
-          print("!!! Some assertion error occured while importing RARC file!!! "+str(e))
+          print("!!! Some assertion error occured while importing RARC file!!! (most likely invalid RARC file) "+str(e))
           if not swallow_assertion_errors:
             raise e
           
