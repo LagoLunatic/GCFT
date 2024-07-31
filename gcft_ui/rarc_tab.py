@@ -171,10 +171,12 @@ class RARCTab(QWidget):
         
         os.mkdir(base_path+"\\GCFTUnpacked"+subfolder_path+"\\"+object) # Make copy directory in the unpacked section
         
-        item_counter += self.import_all_rarcs_from_folder(
+        add_item_counter, add_total_item_counter = self.import_all_rarcs_from_folder(
           object_path, base_path=base_path, 
           debug=debug, rtn_counter=True, swallow_assertion_errors=swallow_assertion_errors
           )
+        item_counter += add_item_counter
+        total_item_counter += add_total_item_counter
         
       # Path is not a folder
       elif (not os.path.isdir(object_path)):
@@ -209,10 +211,10 @@ class RARCTab(QWidget):
   
     # If this is the "main" thread - not inside of a recursion
     if base_path == folder_of_rarcs_path and debug:
-      print(f" -- Successfully de-RARC'd {item_counter} files out of {total_item_counter} total files. --")
+      print(f" -- Successfully de-RARC'd {item_counter} archives out of {total_item_counter} total files. --")
     
     if rtn_counter:
-      return item_counter
+      return item_counter, total_item_counter
 
     
 
