@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'rarc_tab.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.1
+## Created by: Qt User Interface Compiler version 6.6.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -16,9 +16,9 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QApplication, QCheckBox, QHBoxLayout, QHeaderView,
-    QLineEdit, QPushButton, QSizePolicy, QTreeView,
-    QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractItemView, QApplication, QCheckBox, QHBoxLayout,
+    QHeaderView, QLineEdit, QPushButton, QSizePolicy,
+    QTreeView, QVBoxLayout, QWidget)
 
 class Ui_RARCTab(object):
     def setupUi(self, RARCTab):
@@ -51,7 +51,7 @@ class Ui_RARCTab(object):
         self.actionReplaceAllFilesInRARCFolder.setObjectName(u"actionReplaceAllFilesInRARCFolder")
         self.actionLoadJ3DAnim = QAction(RARCTab)
         self.actionLoadJ3DAnim.setObjectName(u"actionLoadJ3DAnim")
-        self.actionLoadJ3DAnim.setMenuRole(QAction.MenuRole.NoRole)
+        self.actionLoadJ3DAnim.setMenuRole(QAction.NoRole)
         self.verticalLayout = QVBoxLayout(RARCTab)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout = QHBoxLayout()
@@ -122,6 +122,7 @@ class Ui_RARCTab(object):
 
         self.rarc_files_tree = QTreeView(RARCTab)
         self.rarc_files_tree.setObjectName(u"rarc_files_tree")
+        self.rarc_files_tree.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
         self.verticalLayout.addWidget(self.rarc_files_tree)
 

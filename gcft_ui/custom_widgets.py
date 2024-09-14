@@ -140,8 +140,12 @@ class ComboBoxDelegate(QItemDelegate):
     else:
       editor.setCurrentIndex(-1)
     
-  def setModelData(self, editor: QComboBox, model, index):
-    model.setData(index, editor.currentText(), Qt.ItemDataRole.EditRole)
+  def setModelData(self, editor: QComboBox, model, primary_index):
+    selection_model: QItemSelectionModel = editor.parent().parent().selectionModel()
+    assert primary_index in selection_model.selectedIndexes()
+    for row_index in selection_model.selectedRows():
+      item_index = primary_index.siblingAtRow(row_index.row())
+      model.setData(item_index, editor.currentText(), Qt.ItemDataRole.EditRole)
 
 class ReadOnlyDelegate(QItemDelegate):
   def editorEvent(self, event, model, option, index):

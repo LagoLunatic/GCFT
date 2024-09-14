@@ -100,7 +100,11 @@
     </widget>
    </item>
    <item>
-    <widget class="QTreeView" name="rarc_files_tree"/>
+    <widget class="QTreeView" name="rarc_files_tree">
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ExtendedSelection</enum>
+     </property>
+    </widget>
    </item>
   </layout>
   <action name="actionReplaceRARCFile">
@@ -168,7 +172,7 @@
     <string>Load J3D Animation</string>
    </property>
    <property name="menuRole">
-    <enum>QAction::MenuRole::NoRole</enum>
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
  </widget>
