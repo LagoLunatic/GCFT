@@ -1,0 +1,34 @@
+
+before:
+nonmatching_chunk_types=Counter({'MAT3': 1930, 'MDL3': 1727, 'TEX1': 354, 'JNT1': 4})
+errors=799
+
+after GX.TexCoordID.TEXCOORD_NULL check:
+nonmatching_chunk_types=Counter({'MAT3': 2281, 'MDL3': 2078, 'TEX1': 514, 'JNT1': 4})
+errors=448
+
+after fog exponent != 0 check:
+nonmatching_chunk_types=Counter({'MAT3': 2281, 'MDL3': 2078, 'TEX1': 514, 'JNT1': 4})
+errors=448
+
+after fog val_b fix:
+nonmatching_chunk_types=Counter({'MAT3': 2281, 'MDL3': 2078, 'TEX1': 514, 'JNT1': 4})
+errors=448
+
+after fog exponent != 0 check *and* val_b fix:
+nonmatching_chunk_types=Counter({'MAT3': 2281, 'MDL3': 2072, 'TEX1': 514, 'JNT1': 4})
+errors=448
+
+after tex_matrix.translation default value skip:
+nonmatching_chunk_types=Counter({'MAT3': 2300, 'MDL3': 2054, 'TEX1': 519, 'JNT1': 4})
+errors=429
+
+after any_tex_coord_gen_exists check:
+total_chunk_types=Counter({'INF1': 2737, 'VTX1': 2737, 'EVP1': 2737, 'DRW1': 2737, 'JNT1': 2737, 'SHP1': 2737, 'TEX1': 2737, 'MAT3': 2728, 'MDL3': 2535, 'MAT2': 9})
+nonmatching_chunk_types=Counter({'MAT3': 2669, 'MDL3': 2423, 'TEX1': 527, 'JNT1': 4})
+errors=60
+
+after ignoring non-default default_tex_matrix.center.z:
+total_chunk_types=Counter({'INF1': 2737, 'VTX1': 2737, 'EVP1': 2737, 'DRW1': 2737, 'JNT1': 2737, 'SHP1': 2737, 'TEX1': 2737, 'MAT3': 2728, 'MDL3': 2535, 'MAT2': 9})
+nonmatching_chunk_types=Counter({'MAT3': 2649, 'MDL3': 2403, 'TEX1': 522, 'JNT1': 4})
+errors=80

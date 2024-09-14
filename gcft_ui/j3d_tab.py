@@ -169,38 +169,42 @@ class J3DTab(BunfoeEditor):
     if self.j3d.file_type[:3] in ["bmd", "bdl"]:
       self.model_loaded = True
     
-    # if self.j3d.mdl3 is not None:
-    #   import json
-    #   from deepdiff import DeepDiff
-    #   from pprint import pprint
-    #   import difflib
-    #   dict_1s = []
-    #   for entry in self.j3d.mdl3.entries:
-    #     dict_1 = entry.asdict()
-    #     dict_1s.append(dict_1)
-    #   self.j3d.mdl3.generate_from_mat3(self.j3d.mat3, self.j3d.tex1)
-    #   for i, entry in enumerate(self.j3d.mdl3.entries):
-    #     dict_1 = {"name": self.j3d.mdl3.mat_names[i]}
-    #     dict_1.update(dict_1s.pop(0))
-    #     dict_2 = {"name": self.j3d.mdl3.mat_names[i]}
-    #     dict_2.update(entry.asdict())
-    #     with open("1.json", "w") as f: json.dump(dict_1, f, indent=4)
-    #     with open("2.json", "w") as f: json.dump(dict_2, f, indent=4)
-    #     # reload from json to fix spurious diffs from the types being different, e.g. u32 -> int
-    #     with open("1.json", "r") as f: dict_1 = json.load(f)
-    #     with open("2.json", "r") as f: dict_2 = json.load(f)
+    if self.j3d.mdl3 is not None:
+      import json
+      from deepdiff import DeepDiff
+      from pprint import pprint
+      import difflib
+      dict_1s = []
+      for entry in self.j3d.mdl3.entries:
+        dict_1 = entry.asdict()
+        dict_1s.append(dict_1)
+      self.j3d.mdl3.generate_from_mat3(self.j3d.mat3, self.j3d.tex1)
+      already_printed_nontrivial_diff = False
+      for i, entry in enumerate(self.j3d.mdl3.entries):
+        dict_1 = {"name": self.j3d.mdl3.mat_names[i]}
+        dict_1.update(dict_1s.pop(0))
+        dict_2 = {"name": self.j3d.mdl3.mat_names[i]}
+        dict_2.update(entry.asdict())
+        if not already_printed_nontrivial_diff:
+          with open("1.json", "w") as f: json.dump(dict_1, f, indent=4)
+          with open("2.json", "w") as f: json.dump(dict_2, f, indent=4)
+          # reload from json to fix spurious diffs from the types being different, e.g. u32 -> int
+          with open("1.json", "r") as f: dict_1 = json.load(f)
+          with open("2.json", "r") as f: dict_2 = json.load(f)
         
-    #     # diff = DeepDiff(dict_1, dict_2, ignore_type_in_groups=[(int, fs.u8)], ignore_type_subclasses=True)
-    #     # if diff != {}:
-    #     #   print(i)
-    #     #   pprint(diff)
-    #     #   break
+        # diff = DeepDiff(dict_1, dict_2, ignore_type_in_groups=[(int, fs.u8)], ignore_type_subclasses=True)
+        # if diff != {}:
+        #   print(i)
+        #   pprint(diff)
+        #   break
         
-    #     dict_str_1 = json.dumps(dict_1, indent=4)
-    #     dict_str_2 = json.dumps(dict_2, indent=4)
-    #     diff = difflib.unified_diff(dict_str_1.split("\n"), dict_str_2.split("\n"))
-    #     print("============")
-    #     print("\n".join(diff))
+        dict_str_1 = json.dumps(dict_1, indent=4)
+        dict_str_2 = json.dumps(dict_2, indent=4)
+        diff = difflib.unified_diff(dict_str_1.split("\n"), dict_str_2.split("\n"))
+        print("============")
+        print("\n".join(diff))
+        if diff:
+          already_printed_nontrivial_diff = True
     
     # if self.j3d.mdl3 is not None:
     #   with open("1.bin", "wb") as f: f.write(fs.read_all_bytes(self.j3d.mdl3.data))
@@ -576,6 +580,17 @@ class J3DTab(BunfoeEditor):
     layout.addWidget(tab_widget)
     
     for bp_command in mdl_entry.bp_commands:
+      # if isinstance(bp_command, BP.RAS1_TREF):
+      #   mat_index = self.j3d.mdl3.entries.index(mdl_entry)
+      #   mat = self.j3d.mat3.materials[mat_index]
+      #   last_tev_order_index = None
+      #   for i, tev_order in enumerate(mat.tev_orders):
+      #     if tev_order is not None:
+      #       last_tev_order_index = i
+      #   # last_tev_order_index = next(mat.tev_orders.index(tev_order) for tev_order in reversed(mat.tev_orders) if tev_order is not None)
+      #   print(repr(last_tev_order_index))
+      #   if last_tev_order_index % 2 == 0 and bp_command.VALID_REGISTERS.index(bp_command.register) == last_tev_order_index//2:
+      #     bp_command.channel_id_1 = BP.MDLColorChannelID.COLOR_ZERO
       if bp_command.register in [entry.value for entry in BPRegister]:
         reg_name = BPRegister(bp_command.register).name
       else:
