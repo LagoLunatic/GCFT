@@ -141,8 +141,13 @@ class ComboBoxDelegate(QItemDelegate):
       editor.setCurrentIndex(-1)
     
   def setModelData(self, editor: QComboBox, model, primary_index):
+    # In order to support multi-select editing, we set the data on the appropriate column for all
+    # selected rows, instead of just the primary selected row.
     selection_model: QItemSelectionModel = editor.parent().parent().selectionModel()
-    assert primary_index in selection_model.selectedIndexes()
+    if primary_index not in selection_model.selectedIndexes():
+      # The user managed to deselect the primary selected item so it won't be covered by the loop.
+      # Handle this separately so that it's not skipped.
+      model.setData(primary_index, editor.currentText(), Qt.ItemDataRole.EditRole)
     for row_index in selection_model.selectedRows():
       item_index = primary_index.siblingAtRow(row_index.row())
       model.setData(item_index, editor.currentText(), Qt.ItemDataRole.EditRole)
