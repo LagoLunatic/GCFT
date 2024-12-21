@@ -1,7 +1,4 @@
 {
-  "python.analysis.extraPaths": [
-    "gclib",
-  ],
   "qtForPython.uic.options": [
     "-o", "${resourceDirname}${pathSeparator}uic${pathSeparator}ui_${resourceBasenameNoExtension}.py",
   ],
@@ -12,11 +9,6 @@
   "search.exclude": {
     "PyJ3DUltra": true,
   },
-  "python.analysis.exclude": [
-    "PyJ3DUltra",
-    "build",
-    "wip",
-  ],
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
   "python.testing.pytestArgs": [
@@ -24,4 +16,7 @@
     "--cov",
     "--cov-report=html",
   ],
+  "files.associations": {
+    "*.spec": "python",
+  },
 }
