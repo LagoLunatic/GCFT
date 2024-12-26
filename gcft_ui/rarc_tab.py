@@ -813,6 +813,34 @@ class RARCTab(QWidget):
     # When removing one row, the model automatically takes care of recursively deleting all children.
     parent_dir_item.removeRow(dir_item.index().row())
   
+  # See: GCM.check_file_is_rarc
+  def check_file_path_is_rarc(self, file_path: str) -> bool:
+    try:
+      _, file_ext = os.path.splitext(os.path.basename(file_path))
+      if file_ext == ".arc":
+        with open(file_path, "rb") as f:
+          file_data = BytesIO(f.read(4))
+        if RARC.check_file_is_rarc(file_data):
+          return True
+      elif file_ext == ".szs":
+        with open(file_path, "rb") as f:
+          file_data = BytesIO(f.read(0x15))
+        if Yaz0.check_is_compressed(file_data):
+          magic = fs.read_str(file_data, 0x11, 4)
+          if magic == "RARC":
+            return True
+      elif file_ext == ".szp":
+        with open(file_path, "rb") as f:
+          file_data = BytesIO(f.read())
+        if Yay0.check_is_compressed(file_data):
+          chunk_offset = fs.read_u32(file_data, 0xC)
+          magic = fs.read_str(file_data, chunk_offset, 4)
+          if magic == "RARC":
+            return True
+    except Exception as e:
+      pass
+    return False
+  
   
   def rarc_file_tree_item_changed(self, top_left_index: QModelIndex, bottom_right_index: QModelIndex):
     if top_left_index != bottom_right_index:
