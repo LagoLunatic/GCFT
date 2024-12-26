@@ -154,7 +154,7 @@ def print_mdl3_diff_for_file(file_path, file_data):
       dict_1 = entry.asdict()
       dict_1s.append(dict_1)
     
-    orig_j3d.mdl3.generate_from_mat3(orig_j3d.mat3, orig_j3d.tex1)
+    # orig_j3d.mdl3.generate_from_mat3(orig_j3d.mat3, orig_j3d.tex1)
     
     for i, entry in enumerate(orig_j3d.mdl3.entries):
       mat_name = orig_j3d.mdl3.mat_names[i]
