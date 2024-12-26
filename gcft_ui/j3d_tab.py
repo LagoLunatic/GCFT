@@ -120,7 +120,7 @@ class J3DTab(BunfoeEditor):
     self.window().generic_do_gui_file_operation(
       op_callback=self.import_j3d_by_path,
       is_opening=True, is_saving=False, is_folder=False,
-      file_type="J3D file", file_filter=";;".join(filters)
+      file_type="J3D file", file_filters=filters,
     )
   
   def export_j3d(self):
@@ -134,7 +134,7 @@ class J3DTab(BunfoeEditor):
     self.window().generic_do_gui_file_operation(
       op_callback=self.export_j3d_by_path,
       is_opening=False, is_saving=True, is_folder=False,
-      file_type="J3D file", file_filter=";;".join(filters),
+      file_type="J3D file", file_filters=filters,
       default_file_name=j3d_name
     )
   
@@ -145,7 +145,7 @@ class J3DTab(BunfoeEditor):
     self.window().generic_do_gui_file_operation(
       op_callback=self.load_anim_by_path,
       is_opening=True, is_saving=False, is_folder=False,
-      file_type="J3D animation", file_filter=";;".join(filters),
+      file_type="J3D animation", file_filters=filters,
     )
   
   

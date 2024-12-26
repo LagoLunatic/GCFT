@@ -6,7 +6,7 @@
   "configurations": [
     {
       "name": "Run GCFT",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/gcft.py",
       "console": "integratedTerminal",
@@ -15,7 +15,7 @@
     },
     {
       "name": "Profile GCFT",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "cProfile",
       "console": "integratedTerminal",
@@ -26,11 +26,35 @@
     },
     {
       "name": "Python: Current File",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "program": "${file}",
       "console": "integratedTerminal",
       "justMyCode": true
+    },
+    {
+      "name": "Python: Profile Current File",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "cProfile",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      // snakeviz profileresults.prof
+      // gprof2dot -f pstats profileresults.prof | dot -Tpng -o profileresults.png && profileresults.png
+      "args": [
+        "-o", "profileresults.prof", "${file}",
+      ]
+    },
+    {
+      "name": "Python: Profile Current File (MP)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "viztracer",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "args": [
+        "${file}",
+      ]
     },
   ]
 }

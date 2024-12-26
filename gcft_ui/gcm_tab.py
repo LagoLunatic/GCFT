@@ -1,7 +1,6 @@
 
 import os
 import re
-import traceback
 from io import BytesIO
 from PySide6.QtGui import *
 from PySide6.QtCore import *
@@ -80,14 +79,14 @@ class GCMTab(QWidget):
     self.window().generic_do_gui_file_operation(
       op_callback=self.import_gcm_by_path,
       is_opening=True, is_saving=False, is_folder=False,
-      file_type="GCM", file_filter="GC ISO Files (*.iso *.gcm)"
+      file_type="GCM", file_filters=["GC ISO Files (*.iso *.gcm)"],
     )
   
   def export_gcm(self):
     self.window().generic_do_gui_file_operation(
       op_callback=self.export_gcm_by_path,
       is_opening=False, is_saving=True, is_folder=False,
-      file_type="GCM", file_filter="GC ISO Files (*.iso *.gcm)"
+      file_type="GCM", file_filters=["GC ISO Files (*.iso *.gcm)"],
     )
   
   def replace_all_files_in_gcm(self):
@@ -184,7 +183,6 @@ class GCMTab(QWidget):
     root_item.setData(root_entry)
     root_item.setEditable(False)
     self.model.appendRow(root_item)
-    self.expand_item(root_item)
     
     # Add data files.
     for file_entry in self.gcm.file_entries[1:]:
@@ -196,7 +194,6 @@ class GCMTab(QWidget):
     sys_item.setData("__systemfile")
     sys_item.setEditable(False)
     self.model.appendRow(sys_item)
-    self.expand_item(sys_item)
     
     # Add system files.
     for file_entry in self.gcm.system_files:
@@ -209,6 +206,10 @@ class GCMTab(QWidget):
     self.ui.add_replace_files_from_folder.setDisabled(False)
     
     self.ui.gcm_files_tree.setColumnWidth(0, 300)
+    
+    self.filter_rows()
+    self.expand_item(root_item)
+    self.expand_item(sys_item)
   
   def add_gcm_file_entry_to_files_tree(self, file_entry: GCMBaseFile):
     if file_entry.is_system_file:

@@ -101,7 +101,7 @@ class RARCTab(QWidget):
     self.window().generic_do_gui_file_operation(
       op_callback=self.import_rarc_by_path,
       is_opening=True, is_saving=False, is_folder=False,
-      file_type="RARC", file_filter="RARC files (*.arc)"
+      file_type="RARC", file_filters=["RARC files (*.arc)"],
     )
   
   def create_rarc_from_folder(self):
@@ -116,7 +116,7 @@ class RARCTab(QWidget):
     self.window().generic_do_gui_file_operation(
       op_callback=self.export_rarc_by_path,
       is_opening=False, is_saving=True, is_folder=False,
-      file_type="RARC", file_filter="RARC files (*.arc)",
+      file_type="RARC", file_filters=["RARC files (*.arc)"],
       default_file_name=rarc_name
     )
   
@@ -260,7 +260,6 @@ class RARCTab(QWidget):
     preload_item.setEditable(False)
     self.model.appendRow([root_name_item, root_node_type_item, QStandardItem(), file_id_item, QStandardItem(), compression_item, preload_item])
     self.set_node_for_model_index(root_name_item.index(), root_node)
-    self.expand_item(root_name_item)
     
     for file_entry in self.rarc.file_entries:
       self.add_new_tree_row_for_file_or_dir_entry(file_entry)
@@ -275,6 +274,9 @@ class RARCTab(QWidget):
     self.ui.sync_file_ids_and_indexes.setDisabled(False)
     
     self.ui.rarc_files_tree.setColumnWidth(self.column_names.index("File Name"), 300)
+    
+    self.filter_rows()
+    self.expand_item(root_name_item)
   
   def add_new_tree_row_for_file_or_dir_entry(self, file_entry: RARCFileEntry):
     parent_item = self.find_item_by_node(file_entry.parent_node)
@@ -810,6 +812,34 @@ class RARCTab(QWidget):
     parent_dir_item = self.find_item_by_node(dir_entry.parent_node)
     # When removing one row, the model automatically takes care of recursively deleting all children.
     parent_dir_item.removeRow(dir_item.index().row())
+  
+  # See: GCM.check_file_is_rarc
+  def check_file_path_is_rarc(self, file_path: str) -> bool:
+    try:
+      _, file_ext = os.path.splitext(os.path.basename(file_path))
+      if file_ext == ".arc":
+        with open(file_path, "rb") as f:
+          file_data = BytesIO(f.read(4))
+        if RARC.check_file_is_rarc(file_data):
+          return True
+      elif file_ext == ".szs":
+        with open(file_path, "rb") as f:
+          file_data = BytesIO(f.read(0x15))
+        if Yaz0.check_is_compressed(file_data):
+          magic = fs.read_str(file_data, 0x11, 4)
+          if magic == "RARC":
+            return True
+      elif file_ext == ".szp":
+        with open(file_path, "rb") as f:
+          file_data = BytesIO(f.read())
+        if Yay0.check_is_compressed(file_data):
+          chunk_offset = fs.read_u32(file_data, 0xC)
+          magic = fs.read_str(file_data, chunk_offset, 4)
+          if magic == "RARC":
+            return True
+    except Exception as e:
+      pass
+    return False
   
   
   def rarc_file_tree_item_changed(self, top_left_index: QModelIndex, bottom_right_index: QModelIndex):
