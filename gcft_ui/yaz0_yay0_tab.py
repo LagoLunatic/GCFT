@@ -1,7 +1,4 @@
 
-import os
-import re
-import traceback
 from io import BytesIO
 from PySide6.QtGui import *
 from PySide6.QtCore import *
@@ -26,28 +23,28 @@ class Yaz0Yay0Tab(QWidget):
     self.window().generic_do_gui_file_operation(
       op_callback=self.decompress_yaz0_by_paths,
       is_opening=True, is_saving=True, is_folder=False,
-      file_type="Yaz0", file_filter=""
+      file_type="Yaz0", file_filters=[]
     )
   
   def compress_yaz0(self):
     self.window().generic_do_gui_file_operation(
       op_callback=self.compress_yaz0_by_paths,
       is_opening=True, is_saving=True, is_folder=False,
-      file_type="Yaz0", file_filter=""
+      file_type="Yaz0", file_filters=[]
     )
   
   def decompress_yay0(self):
     self.window().generic_do_gui_file_operation(
       op_callback=self.decompress_yay0_by_paths,
       is_opening=True, is_saving=True, is_folder=False,
-      file_type="Yay0", file_filter=""
+      file_type="Yay0", file_filters=[]
     )
   
   def compress_yay0(self):
     self.window().generic_do_gui_file_operation(
       op_callback=self.compress_yay0_by_paths,
       is_opening=True, is_saving=True, is_folder=False,
-      file_type="Yay0", file_filter=""
+      file_type="Yay0", file_filters=[]
     )
   
   

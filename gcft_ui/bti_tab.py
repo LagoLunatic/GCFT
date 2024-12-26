@@ -86,7 +86,7 @@ class BTITab(QWidget):
     self.window().generic_do_gui_file_operation(
       op_callback=self.import_bti_by_path,
       is_opening=True, is_saving=False, is_folder=False,
-      file_type="BTI", file_filter="BTI files (*.bti)"
+      file_type="BTI", file_filters=["BTI files (*.bti)"],
     )
   
   def export_bti(self):
@@ -94,7 +94,7 @@ class BTITab(QWidget):
     self.window().generic_do_gui_file_operation(
       op_callback=self.export_bti_by_path,
       is_opening=False, is_saving=True, is_folder=False,
-      file_type="BTI", file_filter="BTI files (*.bti)",
+      file_type="BTI", file_filters=["BTI files (*.bti)"],
       default_file_name=bti_name
     )
   
@@ -102,7 +102,7 @@ class BTITab(QWidget):
     self.window().generic_do_gui_file_operation(
       op_callback=self.import_bti_image_by_path,
       is_opening=True, is_saving=False, is_folder=False,
-      file_type="image", file_filter="PNG Files (*.png)"
+      file_type="image", file_filters=["PNG Files (*.png)"],
     )
   
   def export_bti_image(self):
@@ -110,7 +110,7 @@ class BTITab(QWidget):
     self.window().generic_do_gui_file_operation(
       op_callback=self.export_bti_image_by_path,
       is_opening=False, is_saving=True, is_folder=False,
-      file_type="image", file_filter="PNG Files (*.png)",
+      file_type="image", file_filters=["PNG Files (*.png)"],
       default_file_name=png_name
     )
   
@@ -118,14 +118,14 @@ class BTITab(QWidget):
     self.window().generic_do_gui_file_operation(
       op_callback=self.import_bti_from_bnr_by_path,
       is_opening=True, is_saving=False, is_folder=False,
-      file_type="BNR", file_filter="All files (*.*)"
+      file_type="BNR", file_filters=[],
     )
   
   def replace_bti_mipmap_image(self):
     self.window().generic_do_gui_file_operation(
       op_callback=self.replace_bti_mipmap_image_by_path,
       is_opening=True, is_saving=False, is_folder=False,
-      file_type="image", file_filter="PNG Files (*.png)"
+      file_type="image", file_filters=["PNG Files (*.png)"],
     )
   
   

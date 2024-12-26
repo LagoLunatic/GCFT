@@ -101,7 +101,7 @@ class RARCTab(QWidget):
     self.window().generic_do_gui_file_operation(
       op_callback=self.import_rarc_by_path,
       is_opening=True, is_saving=False, is_folder=False,
-      file_type="RARC", file_filter="RARC files (*.arc)"
+      file_type="RARC", file_filters=["RARC files (*.arc)"],
     )
   
   def create_rarc_from_folder(self):
@@ -116,7 +116,7 @@ class RARCTab(QWidget):
     self.window().generic_do_gui_file_operation(
       op_callback=self.export_rarc_by_path,
       is_opening=False, is_saving=True, is_folder=False,
-      file_type="RARC", file_filter="RARC files (*.arc)",
+      file_type="RARC", file_filters=["RARC files (*.arc)"],
       default_file_name=rarc_name
     )
   

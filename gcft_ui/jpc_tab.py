@@ -1,7 +1,5 @@
 
 import os
-import re
-import traceback
 from io import BytesIO
 from PySide6.QtGui import *
 from PySide6.QtCore import *
@@ -60,7 +58,7 @@ class JPCTab(BunfoeEditor):
     self.window().generic_do_gui_file_operation(
       op_callback=self.import_jpc_by_path,
       is_opening=True, is_saving=False, is_folder=False,
-      file_type="JPC", file_filter="JPC Files (*.jpc)"
+      file_type="JPC", file_filters=["JPC Files (*.jpc)"],
     )
   
   def export_jpc(self):
@@ -68,7 +66,7 @@ class JPCTab(BunfoeEditor):
     self.window().generic_do_gui_file_operation(
       op_callback=self.export_jpc_by_path,
       is_opening=False, is_saving=True, is_folder=False,
-      file_type="JPC", file_filter="JPC Files (*.jpc)",
+      file_type="JPC", file_filters=["JPC Files (*.jpc)"],
       default_file_name=jpc_name
     )
   

@@ -1,10 +1,9 @@
 
 import sys
 import os
-import re
 import traceback
 import colorsys
-from io import BytesIO
+from typing import Callable, Optional
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
@@ -126,7 +125,14 @@ class GCFTWindow(QMainWindow):
   
   
   
-  def generic_do_gui_file_operation(self, op_callback, is_opening, is_saving, is_folder, file_type, file_filter="", default_file_name=None):
+  def generic_do_gui_file_operation(
+      self, op_callback: Callable, is_opening: bool, is_saving: bool, is_folder: bool,
+      file_type: str, file_filters: list=[], default_file_name: Optional[str]=None
+    ):
+    if "All files (*.*)" not in file_filters:
+      file_filters.append("All files (*.*)")
+    file_filters_str = ";;".join(file_filters)
+    
     if not is_opening and not is_saving:
       raise Exception("Tried to perform a file operation without opening or saving")
     
@@ -156,7 +162,7 @@ class GCFTWindow(QMainWindow):
       if is_folder:
         in_selected_path = QFileDialog.getExistingDirectory(self, "Select source folder to import from", default_dir)
       else:
-        in_selected_path, selected_filter = QFileDialog.getOpenFileName(self, "Open %s" % file_type, default_dir, file_filter)
+        in_selected_path, selected_filter = QFileDialog.getOpenFileName(self, "Open %s" % file_type, default_dir, file_filters_str)
       if not in_selected_path:
         return
       
@@ -179,7 +185,7 @@ class GCFTWindow(QMainWindow):
       if is_folder:
         out_selected_path = QFileDialog.getExistingDirectory(self, "Select destination folder to export to", default_dir)
       else:
-        out_selected_path, selected_filter = QFileDialog.getSaveFileName(self, "Save %s" % file_type, default_dir, file_filter)
+        out_selected_path, selected_filter = QFileDialog.getSaveFileName(self, "Save %s" % file_type, default_dir, file_filters_str)
       if not out_selected_path:
         return
     

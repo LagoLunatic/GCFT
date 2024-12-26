@@ -1,7 +1,6 @@
 
 import os
 import re
-import traceback
 from io import BytesIO
 from PySide6.QtGui import *
 from PySide6.QtCore import *
@@ -38,7 +37,7 @@ class DOLTab(QWidget):
     self.window().generic_do_gui_file_operation(
       op_callback=self.import_dol_by_path,
       is_opening=True, is_saving=False, is_folder=False,
-      file_type="DOL executable", file_filter="DOL Executables (*.dol)",
+      file_type="DOL executable", file_filters=["DOL Executables (*.dol)"],
     )
   
   def export_dol(self):
@@ -46,7 +45,7 @@ class DOLTab(QWidget):
     self.window().generic_do_gui_file_operation(
       op_callback=self.export_dol_by_path,
       is_opening=False, is_saving=True, is_folder=False,
-      file_type="DOL executable", file_filter="DOL Executables (*.dol)",
+      file_type="DOL executable", file_filters=["DOL Executables (*.dol)"],
       default_file_name=dol_name
     )
   

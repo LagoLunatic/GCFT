@@ -1,7 +1,6 @@
 
 import os
 import re
-import traceback
 from io import BytesIO
 from PySide6.QtGui import *
 from PySide6.QtCore import *
@@ -80,14 +79,14 @@ class GCMTab(QWidget):
     self.window().generic_do_gui_file_operation(
       op_callback=self.import_gcm_by_path,
       is_opening=True, is_saving=False, is_folder=False,
-      file_type="GCM", file_filter="GC ISO Files (*.iso *.gcm)"
+      file_type="GCM", file_filters=["GC ISO Files (*.iso *.gcm)"],
     )
   
   def export_gcm(self):
     self.window().generic_do_gui_file_operation(
       op_callback=self.export_gcm_by_path,
       is_opening=False, is_saving=True, is_folder=False,
-      file_type="GCM", file_filter="GC ISO Files (*.iso *.gcm)"
+      file_type="GCM", file_filters=["GC ISO Files (*.iso *.gcm)"],
     )
   
   def replace_all_files_in_gcm(self):
