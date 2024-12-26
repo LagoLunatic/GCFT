@@ -260,7 +260,6 @@ class RARCTab(QWidget):
     preload_item.setEditable(False)
     self.model.appendRow([root_name_item, root_node_type_item, QStandardItem(), file_id_item, QStandardItem(), compression_item, preload_item])
     self.set_node_for_model_index(root_name_item.index(), root_node)
-    self.expand_item(root_name_item)
     
     for file_entry in self.rarc.file_entries:
       self.add_new_tree_row_for_file_or_dir_entry(file_entry)
@@ -275,6 +274,9 @@ class RARCTab(QWidget):
     self.ui.sync_file_ids_and_indexes.setDisabled(False)
     
     self.ui.rarc_files_tree.setColumnWidth(self.column_names.index("File Name"), 300)
+    
+    self.filter_rows()
+    self.expand_item(root_name_item)
   
   def add_new_tree_row_for_file_or_dir_entry(self, file_entry: RARCFileEntry):
     parent_item = self.find_item_by_node(file_entry.parent_node)

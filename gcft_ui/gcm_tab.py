@@ -184,7 +184,6 @@ class GCMTab(QWidget):
     root_item.setData(root_entry)
     root_item.setEditable(False)
     self.model.appendRow(root_item)
-    self.expand_item(root_item)
     
     # Add data files.
     for file_entry in self.gcm.file_entries[1:]:
@@ -196,7 +195,6 @@ class GCMTab(QWidget):
     sys_item.setData("__systemfile")
     sys_item.setEditable(False)
     self.model.appendRow(sys_item)
-    self.expand_item(sys_item)
     
     # Add system files.
     for file_entry in self.gcm.system_files:
@@ -209,6 +207,10 @@ class GCMTab(QWidget):
     self.ui.add_replace_files_from_folder.setDisabled(False)
     
     self.ui.gcm_files_tree.setColumnWidth(0, 300)
+    
+    self.filter_rows()
+    self.expand_item(root_item)
+    self.expand_item(sys_item)
   
   def add_gcm_file_entry_to_files_tree(self, file_entry: GCMBaseFile):
     if file_entry.is_system_file:
