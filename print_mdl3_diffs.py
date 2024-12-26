@@ -52,12 +52,12 @@ from collections import deque
 # after fixing TEXMTXINFO source_row: 260KB, 8034/8319
 # after using float32 for fog: 238KB, 8099/8319
 
-iso_path = "D:/WW/Vanilla ISOs/The Legend of Zelda - The Wind Waker.iso"
+iso_path = "/media/data/Emulation/GC/#Games/Wind Waker/GZLE01.iso"
 # iso_path = "D:/Emulation/GC/#Games/Legend of Zelda, The - Twilight Princess (USA).iso"
 # iso_path = "D:/Emulation/GC/#Games/Super Mario Sunshine (USA)/Super Mario Sunshine (USA).iso"
 # iso_path = "D:/Emulation/GC/#Games/Mario Kart - Double Dash (USA).nkit.iso"
 
-base_out_dir = "D:/dev/GCFT/wip/mdl3diffs"
+base_out_dir = "./wip/mdl3diffs"
 
 gcm = GCM(iso_path)
 gcm.read_entire_disc()
