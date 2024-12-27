@@ -22,13 +22,16 @@ from gclib.j3d_chunks.jnt1 import JNT1
 from gclib.j3d_chunks.shp1 import SHP1
 from gclib.j3d_chunks.mat3 import MAT3, Material
 from gclib.j3d_chunks.mdl3 import MDL3, MDLEntry, BPRegister, XFRegister
+from gclib.j3d_chunks.mdl_command import MDLCommand
+import gclib.j3d_chunks.bp_command as BP
+import gclib.j3d_chunks.xf_command as XF
 from gclib.j3d_chunks.tex1 import TEX1
 from gclib.j3d_chunks.trk1 import TRK1, ColorAnimation
 from gclib.j3d_chunks.ttk1 import TTK1, UVAnimation
 from gclib.bti import BTI
 
 from gcft_ui.uic.ui_j3d_tab import Ui_J3DTab
-from gcft_ui.bunfoe_editor import BunfoeEditor, BunfoeWidget
+from gcft_ui.bunfoe_editor import BunfoeEditor, BunfoeWidget, BunfoeDialog
 
 class J3DTab(BunfoeEditor):
   def __init__(self):
@@ -49,6 +52,7 @@ class J3DTab(BunfoeEditor):
     self.chunk_type_is_expanded = {
       "TEX1": True,
       "MAT3": True,
+      "MDL3": False,
       "TRK1": True,
     }
     
@@ -486,7 +490,9 @@ class J3DTab(BunfoeEditor):
     
     entry_index = self.j3d.mdl3.entries.index(mdl_entry)
     mat_name = self.j3d.mat3.mat_names[entry_index]
-    self.ui.j3d_sidebar_label.setText("Showing material display list for: %s" % mat_name)
+    sidebar_label_text = "Showing material display list for: %s" % mat_name
+    sidebar_label_text += "\n(MDL3 is generated automatically from MAT3.)"
+    self.ui.j3d_sidebar_label.setText(sidebar_label_text)
     
     bp_commands_widget = QWidget()
     bp_commands_layout = QFormLayout(bp_commands_widget)
@@ -512,9 +518,13 @@ class J3DTab(BunfoeEditor):
       else:
         reg_name = f"0x{bp_command.register:02X}"
       
-      command_text = f"0x{bp_command.value:06X}"
+      command_text = f"0x{bp_command.bitfield:06X}"
+      field_widget = QPushButton(command_text)
+      field_widget.setProperty('mdl_command', bp_command)
+      field_widget.setSizePolicy(QSizePolicy.Policy.Maximum, field_widget.sizePolicy().verticalPolicy())
+      field_widget.clicked.connect(self.open_mdl_command_editor)
       
-      bp_commands_layout.addRow(reg_name, QLabel(command_text))
+      bp_commands_layout.addRow(reg_name, field_widget)
     
     for xf_command in mdl_entry.xf_commands:
       if xf_command.register in [entry.value for entry in XFRegister]:
@@ -522,11 +532,28 @@ class J3DTab(BunfoeEditor):
       else:
         reg_name = f"0x{xf_command.register:04X}"
       
-      command_text = "\n".join([f"0x{arg:08X}" for arg in xf_command.args])
+      command_text = ", ".join([f"0x{arg.bitfield:08X}" for arg in xf_command.args])
+      field_widget = QPushButton(command_text)
+      field_widget.setProperty('mdl_command', xf_command)
+      field_widget.setSizePolicy(QSizePolicy.Policy.Maximum, field_widget.sizePolicy().verticalPolicy())
+      field_widget.clicked.connect(self.open_mdl_command_editor)
       
-      reg_label = QLabel(reg_name)
-      reg_label.setAlignment(Qt.AlignmentFlag.AlignTop)
-      xf_commands_layout.addRow(reg_label, QLabel(command_text))
+      xf_commands_layout.addRow(reg_name, field_widget)
+  
+  def open_mdl_command_editor(self):
+    button: QPushButton = self.sender()
+    mdl_command: MDLCommand = button.property('mdl_command')
+    print(mdl_command)
+    
+    BunfoeDialog.show_dialog_for_bunfoe(mdl_command, self, "Edit MDL Command")
+    
+    # Update the text on the button.
+    self.j3d.mdl3.save()
+    if isinstance(mdl_command, BP.BPCommand):
+      command_text = f"0x{mdl_command.bitfield:06X}"
+    elif isinstance(mdl_command, XF.XFCommand):
+      command_text = ", ".join([f"0x{arg.bitfield:08X}" for arg in mdl_command.args])
+    button.setText(command_text)
   
   def keyframe_selected(self, keyframe: AnimationKeyframe):
     layout = self.ui.scrollAreaWidgetContents.layout()
