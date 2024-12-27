@@ -75,7 +75,7 @@ if __name__ == "__main__":
     error_message += f"{exception}\n\n"
     error_message += "\n".join(stack_trace)
     QMessageBox.critical(None, error_message_title, error_message)
-  # sys.excepthook = show_unhandled_exception
+  sys.excepthook = show_unhandled_exception
   
   # Have a timer updated frequently so keyboard interrupts always work.
   # 499 milliseconds seems to be the maximum value that works here, but use 100 to be safe.

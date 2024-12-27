@@ -22,6 +22,7 @@ from gclib.j3d_chunks.jnt1 import JNT1
 from gclib.j3d_chunks.shp1 import SHP1
 from gclib.j3d_chunks.mat3 import MAT3, Material
 from gclib.j3d_chunks.mdl3 import MDL3, MDLEntry, BPRegister, XFRegister
+from gclib.j3d_chunks.mdl_command import MDLCommand
 import gclib.j3d_chunks.bp_command as BP
 import gclib.j3d_chunks.xf_command as XF
 from gclib.j3d_chunks.tex1 import TEX1
@@ -50,9 +51,8 @@ class J3DTab(BunfoeEditor):
     # TODO: save to settings file?
     self.chunk_type_is_expanded = {
       "TEX1": True,
-      # "MAT3": True,
-      "MAT3": False,
-      "MDL3": True, # TODO remove later, just for testing
+      "MAT3": True,
+      "MDL3": False,
       "TRK1": True,
     }
     
@@ -168,67 +168,6 @@ class J3DTab(BunfoeEditor):
     self.model_loaded = False
     if self.j3d.file_type[:3] in ["bmd", "bdl"]:
       self.model_loaded = True
-    
-    if self.j3d.mdl3 is not None:
-      import json
-      # from deepdiff import DeepDiff
-      from pprint import pprint
-      import difflib
-      dict_1s = []
-      for entry in self.j3d.mdl3.entries:
-        dict_1 = entry.asdict()
-        dict_1s.append(dict_1)
-      self.j3d.mdl3.generate_from_mat3(self.j3d.mat3, self.j3d.tex1)
-      already_printed_nontrivial_diff = False
-      for i, entry in enumerate(self.j3d.mdl3.entries):
-        dict_1 = {"name": self.j3d.mdl3.mat_names[i]}
-        dict_1.update(dict_1s.pop(0))
-        dict_2 = {"name": self.j3d.mdl3.mat_names[i]}
-        dict_2.update(entry.asdict())
-        if not already_printed_nontrivial_diff:
-          with open("1.json", "w") as f: json.dump(dict_1, f, indent=4)
-          with open("2.json", "w") as f: json.dump(dict_2, f, indent=4)
-          # reload from json to fix spurious diffs from the types being different, e.g. u32 -> int
-          with open("1.json", "r") as f: dict_1 = json.load(f)
-          with open("2.json", "r") as f: dict_2 = json.load(f)
-        
-        # diff = DeepDiff(dict_1, dict_2, ignore_type_in_groups=[(int, fs.u8)], ignore_type_subclasses=True)
-        # if diff != {}:
-        #   print(i)
-        #   pprint(diff)
-        #   break
-        
-        dict_str_1 = json.dumps(dict_1, indent=4)
-        dict_str_2 = json.dumps(dict_2, indent=4)
-        diff = difflib.unified_diff(dict_str_1.split("\n"), dict_str_2.split("\n"))
-        print("============")
-        print("\n".join(diff))
-        if diff:
-          already_printed_nontrivial_diff = True
-    
-    # if self.j3d.mdl3 is not None:
-    #   with open("1.bin", "wb") as f: f.write(fs.read_all_bytes(self.j3d.mdl3.data))
-    #   self.j3d.mdl3.generate_from_mat3(self.j3d.mat3, self.j3d.tex1)
-    #   with open("2.bin", "wb") as f: f.write(fs.read_all_bytes(self.j3d.mdl3.data))
-    
-    # if j3d_name == "cl":
-    #   import json
-    #   mat_idx = 0x17
-    #   entry_1 = self.j3d.mdl3.entries[mat_idx].copy()
-    #   dict_1 = self.j3d.mdl3.entries[mat_idx].asdict()
-    #   print(self.j3d.mdl3.entries[mat_idx].bp_commands[0].texture_index)
-    #   with open("1.json", "w") as f: json.dump(dict_1, f, indent=4)
-    #   self.j3d.mdl3.entries[mat_idx].generate_from_material(self.j3d.mat3.materials[mat_idx], self.j3d.tex1)
-    #   self.j3d.mdl3.entries[mat_idx].save(0)
-    #   entry_2 = self.j3d.mdl3.entries[mat_idx].copy()
-    #   dict_2 = self.j3d.mdl3.entries[mat_idx].asdict()
-    #   with open("2.json", "w") as f: json.dump(dict_2, f, indent=4)
-    #   # from deepdiff import DeepDiff, Delta
-    #   # from pprint import pprint, pformat
-    #   # diff = DeepDiff(dict_1, dict_2, ignore_type_in_groups=[(int, fs.u8)], ignore_type_subclasses=True)
-    #   # # pprint(diff)
-    #   # # print(Delta(diff).to_dict())
-    #   # with open("diff.json", "w") as f: f.write(pformat(Delta(diff).to_flat_dicts()))
     
     self.reload_j3d_chunks_tree()
     
@@ -374,9 +313,6 @@ class J3DTab(BunfoeEditor):
       return
     item = selected_items[0]
     obj = self.tree_widget_item_to_object.get(item)
-    
-    # TODO important: need to access items dynamically via indexing into lists via the bunfoe 'paths' system
-    # right now we're preserving references to old MDL3 entries after they get regenerated...
     
     # import cProfile, pstats
     # profiler = cProfile.Profile()
@@ -552,14 +488,11 @@ class J3DTab(BunfoeEditor):
   def mdl_entry_selected(self, mdl_entry: MDLEntry):
     layout = self.ui.scrollAreaWidgetContents.layout()
     
-    # TODO: this index doesn't work if the MDL3 has been regenned because it's different instances of entries...
-    # gotta update the MDL3 section of the tree after regenning?
-    # or maybe the mdl3 entry should have the mat name there...
-    # entry_index = self.j3d.mdl3.entries.index(mdl_entry)
-    # mat_name = self.j3d.mat3.mat_names[entry_index]
-    # self.ui.j3d_sidebar_label.setText("Showing material display list for: %s" % mat_name)
-    
-    # TODO: text should show a warning that you don't want to manually edit MDL3
+    entry_index = self.j3d.mdl3.entries.index(mdl_entry)
+    mat_name = self.j3d.mat3.mat_names[entry_index]
+    sidebar_label_text = "Showing material display list for: %s" % mat_name
+    sidebar_label_text += "\n(MDL3 is generated automatically from MAT3.)"
+    self.ui.j3d_sidebar_label.setText(sidebar_label_text)
     
     bp_commands_widget = QWidget()
     bp_commands_layout = QFormLayout(bp_commands_widget)
@@ -580,17 +513,6 @@ class J3DTab(BunfoeEditor):
     layout.addWidget(tab_widget)
     
     for bp_command in mdl_entry.bp_commands:
-      # if isinstance(bp_command, BP.RAS1_TREF):
-      #   mat_index = self.j3d.mdl3.entries.index(mdl_entry)
-      #   mat = self.j3d.mat3.materials[mat_index]
-      #   last_tev_order_index = None
-      #   for i, tev_order in enumerate(mat.tev_orders):
-      #     if tev_order is not None:
-      #       last_tev_order_index = i
-      #   # last_tev_order_index = next(mat.tev_orders.index(tev_order) for tev_order in reversed(mat.tev_orders) if tev_order is not None)
-      #   print(repr(last_tev_order_index))
-      #   if last_tev_order_index % 2 == 0 and bp_command.VALID_REGISTERS.index(bp_command.register) == last_tev_order_index//2:
-      #     bp_command.channel_id_1 = BP.MDLColorChannelID.COLOR_ZERO
       if bp_command.register in [entry.value for entry in BPRegister]:
         reg_name = BPRegister(bp_command.register).name
       else:
@@ -610,7 +532,6 @@ class J3DTab(BunfoeEditor):
       else:
         reg_name = f"0x{xf_command.register:04X}"
       
-      # print(xf_command)
       command_text = ", ".join([f"0x{arg.bitfield:08X}" for arg in xf_command.args])
       field_widget = QPushButton(command_text)
       field_widget.setProperty('mdl_command', xf_command)
@@ -621,8 +542,7 @@ class J3DTab(BunfoeEditor):
   
   def open_mdl_command_editor(self):
     button: QPushButton = self.sender()
-    # mdl_command: MDLCommand = button.property('mdl_command')
-    mdl_command = button.property('mdl_command')
+    mdl_command: MDLCommand = button.property('mdl_command')
     print(mdl_command)
     
     BunfoeDialog.show_dialog_for_bunfoe(mdl_command, self, "Edit MDL Command")
