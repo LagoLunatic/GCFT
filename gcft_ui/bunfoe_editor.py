@@ -209,7 +209,7 @@ class BunfoeEditor(QWidget):
     if not all(at == arg_type for at in type_args):
       # Can't use a dynamic layout if the args aren't all the same type.
       use_static_layout = True
-    elif issubclass(arg_type, RGBA) or issubclass(arg_type, bool):
+    elif issubclass(arg_type, RGBA) or arg_type == bool or issubclass(arg_type, fs.MappedBool):
       # The widgets for these types are small and simple, so allow showing multiple at once.
       use_static_layout = True
     # if len(type_args) > 4:
@@ -309,7 +309,7 @@ class BunfoeEditor(QWidget):
       widget = self.make_spinbox_for_int(field_type)
     elif issubclass(field_type, float):
       widget = self.make_spinbox_for_float(field_type)
-    elif issubclass(field_type, bool):
+    elif field_type == bool or issubclass(field_type, fs.MappedBool):
       widget = self.make_checkbox_for_bool(field_type)
     elif issubclass(field_type, fs.u16Rot):
       widget = self.make_spinbox_for_rotation(field_type)
@@ -349,8 +349,8 @@ class BunfoeEditor(QWidget):
       assert issubclass(field_type, float)
       widget.setValue(value)
     elif isinstance(widget, QCheckBox):
-      assert issubclass(field_type, bool)
-      widget.setChecked(value)
+      assert field_type == bool or issubclass(field_type, fs.MappedBool)
+      widget.setChecked(bool(value))
     elif isinstance(widget, QLineEdit):
       assert issubclass(field_type, str)
       widget.setText(value)
