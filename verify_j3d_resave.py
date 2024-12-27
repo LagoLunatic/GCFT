@@ -11,7 +11,7 @@ from collections import Counter
 # TODO: verify that fog_type can be read for all files in all games.
 # are there any where it fails because they have & 0x80 set? for orthographic? idk if that's real or not.
 
-iso_path = r"D:\WW\Vanilla ISOs\The Legend of Zelda - The Wind Waker.iso"
+iso_path = "/media/data/Emulation/GC/#Games/Wind Waker/GZLE01.iso"
 # iso_path = r"D:\Emulation\GC\#Games\Legend of Zelda, The - Twilight Princess (USA).iso"
 # iso_path = r"D:\Emulation\GC\#Games\Super Mario Sunshine (USA)\Super Mario Sunshine (USA).iso"
 

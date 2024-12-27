@@ -154,9 +154,7 @@ def print_mdl3_diff_for_file(file_path, file_data):
       dict_1 = entry.asdict()
       dict_1s.append(dict_1)
     
-    # orig_j3d.mdl3.generate_from_mat3(orig_j3d.mat3, orig_j3d.tex1)
-    
-    for i, entry in enumerate(orig_j3d.mdl3.entries):
+    for i, entry in enumerate(new_j3d.mdl3.entries):
       mat_name = orig_j3d.mdl3.mat_names[i]
       sanitized_mat_name = mat_name.replace(":", "_")
       out_diff_path_for_mat = os.path.join(out_diffs_dir_for_j3d, sanitized_mat_name)
@@ -183,6 +181,10 @@ def print_mdl3_diff_for_file(file_path, file_data):
       #   ], stdout=f)
       
       diff = difflib.unified_diff(dict_str_1.split("\n"), dict_str_2.split("\n"))
+      total_chunk_types["mdlmats"] += 1
+      if dict_str_1 != dict_str_2:
+        print(file_path, mat_name)
+        nonmatching_chunk_types["mdlmats"] += 1
       with open(out_diff_path_for_mat + ".patch", "w", newline="\n") as f:
         f.write("\n".join(diff))
     

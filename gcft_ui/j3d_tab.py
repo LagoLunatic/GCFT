@@ -169,7 +169,7 @@ class J3DTab(BunfoeEditor):
     if self.j3d.file_type[:3] in ["bmd", "bdl"]:
       self.model_loaded = True
     
-    if False:#self.j3d.mdl3 is not None:
+    if self.j3d.mdl3 is not None:
       import json
       # from deepdiff import DeepDiff
       from pprint import pprint
