@@ -42,12 +42,12 @@ jobs:
       MACOSX_DEPLOYMENT_TARGET: 10.15
     
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Set up Python
         id: setup-py
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
           architecture: ${{ matrix.architecture }}
@@ -57,7 +57,7 @@ jobs:
           git submodule status ./PyJ3DUltra > pyj3dultra_submodule_status.txt
       - name: Cache PyJ3DUltra
         id: cache-pyj3dultra
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: '${{ github.workspace }}/PyJ3DUltra/build'
           key: pyj3dultra-${{ runner.os }}-py${{ steps.setup-py.outputs.python-version  }}-${{ hashFiles('pyj3dultra_submodule_status.txt') }}
@@ -69,9 +69,9 @@ jobs:
         uses: lukka/get-cmake@latest
       - name: Setup vcpkg
         if: runner.os == 'Windows' && steps.cache-pyj3dultra.outputs.cache-hit != 'true'
-        uses: lukka/run-vcpkg@v11.1
+        uses: lukka/run-vcpkg@v11.5
         with:
-          vcpkgGitCommitId: 'ad46340bfce415333d6a2139592c22a499fb0df0'
+          vcpkgGitCommitId: '80d54ff62d528339c626a6fbc3489a7f25956ade'
           vcpkgDirectory: '${{ github.workspace }}/vcpkg'
           vcpkgJsonGlob: '**/PyJ3DUltra/vcpkg.json'
       - name: Integrate vcpkg
@@ -113,7 +113,7 @@ jobs:
       - name: Bundle Python App
         run: python build.py
       - name: Upload Python App
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: gcft-${{ steps.vars.outputs.full_version }}-${{ matrix.artifact }}-${{ matrix.architecture }}
           path: dist/release_archive_${{ steps.vars.outputs.full_version }}_${{ matrix.architecture }}${{ matrix.upload_path_suffix }}
