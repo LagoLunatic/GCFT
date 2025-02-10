@@ -728,12 +728,16 @@ class GCMTab(QWidget):
       item.setText(file_entry.name)
       return
     
+    changed_file_data = None
     if file_entry.is_dir:
       del self.gcm.dirs_by_path[file_entry.file_path]
       del self.gcm.dirs_by_path_lowercase[file_entry.file_path.lower()]
     else:
       del self.gcm.files_by_path[file_entry.file_path]
       del self.gcm.files_by_path_lowercase[file_entry.file_path.lower()]
+      if file_entry.file_path in self.gcm.changed_files:
+        changed_file_data = self.gcm.changed_files[file_entry.file_path]
+        del self.gcm.changed_files[file_entry.file_path]
     
     file_entry.name = new_file_name
     file_entry.file_path = file_entry.file_path.rsplit("/", 1)[0] + "/" + new_file_name
@@ -744,6 +748,7 @@ class GCMTab(QWidget):
     else:
       self.gcm.files_by_path[file_entry.file_path] = file_entry
       self.gcm.files_by_path_lowercase[file_entry.file_path.lower()] = file_entry
+      self.gcm.changed_files[file_entry.file_path] = changed_file_data
     
     item.setText(new_file_name)
   
