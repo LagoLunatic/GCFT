@@ -129,8 +129,8 @@ class GCFTWindow(QMainWindow):
       self, op_callback: Callable, is_opening: bool, is_saving: bool, is_folder: bool,
       file_type: str, file_filters: list=[], default_file_name: Optional[str]=None
     ):
-    if "All files (*.*)" not in file_filters:
-      file_filters.append("All files (*.*)")
+    if "All files (*)" not in file_filters:
+      file_filters.append("All files (*)")
     file_filters_str = ";;".join(file_filters)
     
     if not is_opening and not is_saving:
