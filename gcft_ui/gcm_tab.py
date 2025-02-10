@@ -713,42 +713,12 @@ class GCMTab(QWidget):
     file_entry: GCMBaseFile = item.data()
     new_file_name = item.text()
     
-    if len(new_file_name) == 0:
-      QMessageBox.warning(self, "Invalid file name", "File name cannot be empty.")
-      item.setText(file_entry.name)
+    try:
+      self.gcm.rename_file_or_directory(file_entry, new_file_name)
+    except Exception as e:
+      QMessageBox.warning(self, "Invalid file name", str(e))
+      item.setText(file_entry.name) # Revert changed file name in the GUI
       return
-    
-    other_file_entry = next((fe for fe in file_entry.parent.children if fe.name == new_file_name), None)
-    if other_file_entry == file_entry:
-      # File name not changed
-      return
-    
-    if other_file_entry is not None:
-      QMessageBox.warning(self, "Duplicate file name", "The file name you entered is already used by another file or folder in this directory.")
-      item.setText(file_entry.name)
-      return
-    
-    changed_file_data = None
-    if file_entry.is_dir:
-      del self.gcm.dirs_by_path[file_entry.file_path]
-      del self.gcm.dirs_by_path_lowercase[file_entry.file_path.lower()]
-    else:
-      del self.gcm.files_by_path[file_entry.file_path]
-      del self.gcm.files_by_path_lowercase[file_entry.file_path.lower()]
-      if file_entry.file_path in self.gcm.changed_files:
-        changed_file_data = self.gcm.changed_files[file_entry.file_path]
-        del self.gcm.changed_files[file_entry.file_path]
-    
-    file_entry.name = new_file_name
-    file_entry.file_path = file_entry.file_path.rsplit("/", 1)[0] + "/" + new_file_name
-    
-    if file_entry.is_dir:
-      self.gcm.dirs_by_path[file_entry.file_path] = file_entry
-      self.gcm.dirs_by_path_lowercase[file_entry.file_path.lower()] = file_entry
-    else:
-      self.gcm.files_by_path[file_entry.file_path] = file_entry
-      self.gcm.files_by_path_lowercase[file_entry.file_path.lower()] = file_entry
-      self.gcm.changed_files[file_entry.file_path] = changed_file_data
     
     item.setText(new_file_name)
   
