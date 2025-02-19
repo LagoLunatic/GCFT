@@ -141,6 +141,7 @@ class J3DViewer(QOpenGLWidget):
     
     self.init_lights()
     
+    glDepthMask(True)
     glClearColor(0.25, 0.3, 0.4, 1.0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
@@ -156,6 +157,10 @@ class J3DViewer(QOpenGLWidget):
     self.update()
   
   def paintGL(self):
+    glDepthMask(True) # Make sure the depth mask is on at the start of every frame (important!)
+    glClearColor(0.25, 0.3, 0.4, 1.0)
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    
     if self.show_widgets:
       self.draw_grid_widget()
     
