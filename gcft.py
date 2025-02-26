@@ -17,7 +17,7 @@ import signal
 signal.signal(signal.SIGINT, signal_handler)
 
 try:
-  from sys import _MEIPASS # @IgnoreException
+  from sys import _MEIPASS # pyright: ignore [reportAttributeAccessIssue]
 except ImportError:
   # Setting the app user model ID is necessary for Windows to display a custom taskbar icon when running from source.
   import ctypes

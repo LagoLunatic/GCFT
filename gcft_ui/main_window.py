@@ -17,7 +17,7 @@ from gclib import fs_helpers as fs
 from gcft_ui.uic.ui_main import Ui_MainWindow
 from gcft_ui.gcft_common import GCFTThread, GCFTProgressDialog
 from version import VERSION
-from gcft_paths import ASSETS_PATH, IS_RUNNING_FROM_SOURCE
+from gcft_paths import ASSETS_PATH, SETTINGS_PATH
 
 import yaml
 
@@ -76,9 +76,8 @@ class GCFTWindow(QMainWindow):
     self.show()
   
   def load_settings(self):
-    self.settings_path = "settings.txt"
-    if os.path.isfile(self.settings_path):
-      with open(self.settings_path) as f:
+    if os.path.isfile(SETTINGS_PATH):
+      with open(SETTINGS_PATH) as f:
         self.settings = yaml.safe_load(f)
       if self.settings is None:
         self.settings = {}
@@ -86,7 +85,7 @@ class GCFTWindow(QMainWindow):
       self.settings = {}
   
   def save_settings(self):
-    with open(self.settings_path, "w") as f:
+    with open(SETTINGS_PATH, "w") as f:
       yaml.dump(self.settings, f, default_flow_style=False, sort_keys=False)
   
   def save_last_used_tab(self, tab_index):
