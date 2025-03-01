@@ -18,7 +18,7 @@ from gcft_paths import GCFT_ROOT_PATH
 if os.environ["QT_API"] == "pyside6":
   from gcft_ui.uic.ui_gcm_tab import Ui_GCMTab
 else:
-  Ui_GCMTab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "uic", "ui_gcm_tab.ui"))
+  Ui_GCMTab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "gcm_tab.ui"))
 
 class GCMTab(QWidget):
   def __init__(self):

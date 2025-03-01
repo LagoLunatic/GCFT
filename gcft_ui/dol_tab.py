@@ -14,7 +14,7 @@ from gcft_paths import GCFT_ROOT_PATH
 if os.environ["QT_API"] == "pyside6":
   from gcft_ui.uic.ui_dol_tab import Ui_DOLTab
 else:
-  Ui_DOLTab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "uic", "ui_dol_tab.ui"))
+  Ui_DOLTab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "dol_tab.ui"))
 
 class DOLTab(QWidget):
   def __init__(self):

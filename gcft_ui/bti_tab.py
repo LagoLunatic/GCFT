@@ -18,7 +18,7 @@ from gcft_paths import GCFT_ROOT_PATH
 if os.environ["QT_API"] == "pyside6":
   from gcft_ui.uic.ui_bti_tab import Ui_BTITab
 else:
-  Ui_BTITab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "uic", "ui_bti_tab.ui"))
+  Ui_BTITab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "bti_tab.ui"))
 
 BTI_ENUM_FIELDS = {
   "image_format": ImageFormat,

@@ -19,7 +19,7 @@ from gcft_paths import GCFT_ROOT_PATH
 if os.environ["QT_API"] == "pyside6":
   from gcft_ui.uic.ui_rarc_tab import Ui_RARCTab
 else:
-  Ui_RARCTab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "uic", "ui_rarc_tab.ui"))
+  Ui_RARCTab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "rarc_tab.ui"))
 
 class RARCTab(QWidget):
   FILE_ENTRY_ROLE = Qt.ItemDataRole.UserRole + 0

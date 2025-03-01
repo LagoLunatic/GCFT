@@ -37,7 +37,7 @@ from gcft_paths import GCFT_ROOT_PATH
 if os.environ["QT_API"] == "pyside6":
   from gcft_ui.uic.ui_j3d_tab import Ui_J3DTab
 else:
-  Ui_J3DTab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "uic", "ui_j3d_tab.ui"))
+  Ui_J3DTab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "j3d_tab.ui"))
 
 class J3DTab(BunfoeEditor):
   def __init__(self):

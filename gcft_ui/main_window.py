@@ -24,7 +24,7 @@ from gcft_paths import GCFT_ROOT_PATH
 if os.environ["QT_API"] == "pyside6":
   from gcft_ui.uic.ui_main import Ui_MainWindow
 else:
-  Ui_MainWindow = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "uic", "ui_main.ui"))
+  Ui_MainWindow = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "main.ui"))
 
 GCM_FILE_EXTS = [".iso", ".gcm"]
 # RARC_FILE_EXTS = [".arc"] # Has special logic to check .szs and .szp in addition to .arc

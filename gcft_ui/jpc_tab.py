@@ -22,7 +22,7 @@ from gcft_paths import GCFT_ROOT_PATH
 if os.environ["QT_API"] == "pyside6":
   from gcft_ui.uic.ui_jpc_tab import Ui_JPCTab
 else:
-  Ui_JPCTab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "uic", "ui_jpc_tab.ui"))
+  Ui_JPCTab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "jpc_tab.ui"))
 
 class JPCTab(BunfoeEditor):
   def __init__(self):

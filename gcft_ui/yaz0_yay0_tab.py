@@ -12,7 +12,7 @@ from gcft_paths import GCFT_ROOT_PATH
 if os.environ["QT_API"] == "pyside6":
   from gcft_ui.uic.ui_yaz0_yay0_tab import Ui_Yaz0Yay0Tab
 else:
-  Ui_Yaz0Yay0Tab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "uic", "ui_yaz0_yay0_tab.ui"))
+  Ui_Yaz0Yay0Tab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "yaz0_yay0_tab.ui"))
 
 class Yaz0Yay0Tab(QWidget):
   def __init__(self):
