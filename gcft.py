@@ -2,10 +2,11 @@
 
 import sys
 import traceback
-from PySide6.QtGui import *
-from PySide6.QtCore import *
-from PySide6.QtWidgets import *
 
+from gcft_ui import qt_init
+from qtpy.QtCore import Qt, QTimer
+from qtpy.QtWidgets import QApplication, QMessageBox
+from qtpy import QT_VERSION
 from gcft_ui.main_window import GCFTWindow
 
 def signal_handler(sig, frame):
@@ -29,7 +30,7 @@ except ImportError:
     pass
 
 def get_dark_mode_palette(app) :
-  from PySide6.QtGui import QPalette, QColor
+  from qtpy.QtGui import QPalette, QColor
   pal = app.palette()
 
   pal.setColor(QPalette.ColorRole.Window, QColor("#353535"))
@@ -62,7 +63,7 @@ if __name__ == "__main__":
   # Use the Qt Fusion style on all platforms for consistency to avoid parts of the UI breaking on certain OSes.
   qApp.setStyle("Fusion")
   
-  qt_version_tuple = (6, 6, 0)#tuple(int(num) for num in QT_VERSION.split("."))
+  qt_version_tuple = tuple(int(num) for num in QT_VERSION.split("."))
   if qt_version_tuple >= (6, 5, 0) and qApp.styleHints().colorScheme() == Qt.ColorScheme.Dark:
     qApp.setPalette(get_dark_mode_palette(qApp))
   

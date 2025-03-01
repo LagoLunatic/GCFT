@@ -1,9 +1,9 @@
 
 import os
 from io import BytesIO
-from PySide6.QtGui import *
-from PySide6.QtCore import *
-from PySide6.QtWidgets import *
+from qtpy.QtGui import *
+from qtpy.QtCore import *
+from qtpy.QtWidgets import *
 
 from gclib import fs_helpers as fs
 from gclib.jpc import JPC
@@ -14,9 +14,15 @@ from gclib.jpa_chunks.ssp1 import SSP1
 from gclib.jpa_chunks.tdb1 import TDB1
 from gclib.jpa_chunks.tex1 import TEX1
 
-from gcft_ui.uic.ui_jpc_tab import Ui_JPCTab
-from gcft_ui.bunfoe_editor import BunfoeEditor, BunfoeWidget, BunfoeDialog
+from gcft_ui.bunfoe_editor import BunfoeEditor
 from gcft_ui.gcft_common import RecursiveFilterProxyModel
+
+from gcft_ui.qt_init import load_ui_file
+from gcft_paths import GCFT_ROOT_PATH
+if os.environ["QT_API"] == "pyside6":
+  from gcft_ui.uic.ui_jpc_tab import Ui_JPCTab
+else:
+  Ui_JPCTab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "uic", "ui_jpc_tab.ui"))
 
 class JPCTab(BunfoeEditor):
   def __init__(self):

@@ -1,8 +1,8 @@
 
 import traceback
-from PySide6.QtGui import *
-from PySide6.QtCore import *
-from PySide6.QtWidgets import *
+from qtpy.QtGui import *
+from qtpy.QtCore import *
+from qtpy.QtWidgets import *
 
 class GCFTProgressDialog(QProgressDialog):
   def __init__(self, title, description, max_val):

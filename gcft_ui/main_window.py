@@ -4,22 +4,27 @@ import os
 import traceback
 import colorsys
 from typing import Callable, Optional
-from PySide6.QtGui import *
-from PySide6.QtCore import *
-from PySide6.QtWidgets import *
+from qtpy.QtGui import *
+from qtpy.QtCore import *
+from qtpy.QtWidgets import *
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "gclib"))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "PyJ3DUltra", "build"))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "PyJ3DUltra", "build", "Release"))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "PyJ3DUltra", "build", "Debug"))
 
-from gclib import fs_helpers as fs
-from gcft_ui.uic.ui_main import Ui_MainWindow
 from gcft_ui.gcft_common import GCFTThread, GCFTProgressDialog
 from version import VERSION
 from gcft_paths import ASSETS_PATH, SETTINGS_PATH
 
 import yaml
+
+from gcft_ui.qt_init import load_ui_file
+from gcft_paths import GCFT_ROOT_PATH
+if os.environ["QT_API"] == "pyside6":
+  from gcft_ui.uic.ui_main import Ui_MainWindow
+else:
+  Ui_MainWindow = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "uic", "ui_main.ui"))
 
 GCM_FILE_EXTS = [".iso", ".gcm"]
 # RARC_FILE_EXTS = [".arc"] # Has special logic to check .szs and .szp in addition to .arc

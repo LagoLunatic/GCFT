@@ -15,21 +15,29 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: Windows Build
+          - name: Windows
             os: windows-latest
             architecture: x64
             artifact: windows
             upload_path_suffix: '/*'
-          - name: MacOS Build
+            reqs_file: requirements_full.txt
+          - name: Windows (Qt 5)
+            os: windows-latest
+            artifact: windows-qt5
+            upload_path_suffix: '/*'
+            reqs_file: requirements_qt5_full.txt
+          - name: MacOS
             os: macos-latest
             architecture: x64
             artifact: macos
             upload_path_suffix: '.zip'
-          - name: Linux Build
+            reqs_file: requirements_full.txt
+          - name: Linux
             os: ubuntu-latest
             architecture: x64
             artifact: linux
             upload_path_suffix: '/*'
+            reqs_file: requirements_full.txt
     
     runs-on: ${{ matrix.os }}
     
@@ -60,7 +68,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: '${{ github.workspace }}/PyJ3DUltra/build'
-          key: pyj3dultra-${{ runner.os }}-py${{ steps.setup-py.outputs.python-version  }}-${{ hashFiles('pyj3dultra_submodule_status.txt') }}
+          key: pyj3dultra-${{ runner.os }}-py${{ steps.setup-py.outputs.python-version  }}-${{ matrix.reqs_file }}-${{ hashFiles('pyj3dultra_submodule_status.txt') }}
       - name: Setup MSVC for Windows
         if: runner.os == 'Windows' && steps.cache-pyj3dultra.outputs.cache-hit != 'true'
         uses: ilammy/msvc-dev-cmd@v1
@@ -90,7 +98,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -r requirements_full.txt
+          python -m pip install -r ${{ matrix.reqs_file }}
       - name: Install any missing Qt dependencies
         if: runner.os == 'Linux'
         run: |

@@ -1,9 +1,9 @@
 import typing
 from enum import Enum
 import colorsys
-from PySide6.QtGui import *
-from PySide6.QtCore import *
-from PySide6.QtWidgets import *
+from qtpy.QtGui import *
+from qtpy.QtCore import *
+from qtpy.QtWidgets import *
 
 from gclib import fs_helpers as fs
 from gclib.bunfoe import BUNFOE, Field, fields

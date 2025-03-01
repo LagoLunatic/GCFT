@@ -3,9 +3,9 @@ import os
 from io import BytesIO
 import re
 import traceback
-from PySide6.QtGui import *
-from PySide6.QtCore import *
-from PySide6.QtWidgets import *
+from qtpy.QtGui import *
+from qtpy.QtCore import *
+from qtpy.QtWidgets import *
 from gcft_paths import ASSETS_PATH
 
 from gclib import fs_helpers as fs
@@ -30,8 +30,14 @@ from gclib.j3d_chunks.trk1 import TRK1, ColorAnimation
 from gclib.j3d_chunks.ttk1 import TTK1, UVAnimation
 from gclib.bti import BTI
 
-from gcft_ui.uic.ui_j3d_tab import Ui_J3DTab
 from gcft_ui.bunfoe_editor import BunfoeEditor, BunfoeWidget, BunfoeDialog
+
+from gcft_ui.qt_init import load_ui_file
+from gcft_paths import GCFT_ROOT_PATH
+if os.environ["QT_API"] == "pyside6":
+  from gcft_ui.uic.ui_j3d_tab import Ui_J3DTab
+else:
+  Ui_J3DTab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "uic", "ui_j3d_tab.ui"))
 
 class J3DTab(BunfoeEditor):
   def __init__(self):

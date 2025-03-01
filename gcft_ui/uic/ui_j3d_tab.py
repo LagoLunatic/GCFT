@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'j3d_tab.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.6.1
+## Created by: Qt User Interface Compiler version 6.8.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -103,7 +103,7 @@ class Ui_J3DTab(object):
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.j3d_sidebar_label = QLabel(self.j3d_sidebar)
         self.j3d_sidebar_label.setObjectName(u"j3d_sidebar_label")
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.j3d_sidebar_label.sizePolicy().hasHeightForWidth())
@@ -119,7 +119,7 @@ class Ui_J3DTab(object):
 
         self.update_j3d_preview = QPushButton(self.j3d_sidebar)
         self.update_j3d_preview.setObjectName(u"update_j3d_preview")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.update_j3d_preview.sizePolicy().hasHeightForWidth())
@@ -133,7 +133,7 @@ class Ui_J3DTab(object):
 
         self.scrollArea = QScrollArea(self.j3d_sidebar)
         self.scrollArea.setObjectName(u"scrollArea")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(5)
         sizePolicy2.setHeightForWidth(self.scrollArea.sizePolicy().hasHeightForWidth())
@@ -158,7 +158,7 @@ class Ui_J3DTab(object):
         self.verticalLayout_5.setContentsMargins(0, 0, 0, 0)
         self.j3dultra_error_area = QScrollArea(self.verticalLayoutWidget)
         self.j3dultra_error_area.setObjectName(u"j3dultra_error_area")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         sizePolicy3.setHorizontalStretch(0)
         sizePolicy3.setVerticalStretch(0)
         sizePolicy3.setHeightForWidth(self.j3dultra_error_area.sizePolicy().hasHeightForWidth())
@@ -183,7 +183,7 @@ class Ui_J3DTab(object):
 
         self.j3d_viewer = J3DViewer(self.verticalLayoutWidget)
         self.j3d_viewer.setObjectName(u"j3d_viewer")
-        sizePolicy4 = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
         sizePolicy4.setHorizontalStretch(0)
         sizePolicy4.setVerticalStretch(5)
         sizePolicy4.setHeightForWidth(self.j3d_viewer.sizePolicy().hasHeightForWidth())
@@ -215,11 +215,11 @@ class Ui_J3DTab(object):
         ___qtreewidgetitem.setText(2, QCoreApplication.translate("J3DTab", u"Size", None));
         ___qtreewidgetitem.setText(1, QCoreApplication.translate("J3DTab", u"Name", None));
         ___qtreewidgetitem.setText(0, QCoreApplication.translate("J3DTab", u"Chunk Type", None));
-        self.joint_anim_control.setProperty("anim_type", QCoreApplication.translate("J3DTab", u"joint", None))
-        self.reg_anim_control.setProperty("anim_type", QCoreApplication.translate("J3DTab", u"reg", None))
-        self.texidx_anim_control.setProperty("anim_type", QCoreApplication.translate("J3DTab", u"texidx", None))
-        self.texmtx_anim_control.setProperty("anim_type", QCoreApplication.translate("J3DTab", u"texmtx", None))
-        self.vis_anim_control.setProperty("anim_type", QCoreApplication.translate("J3DTab", u"vis", None))
+        self.joint_anim_control.setProperty(u"anim_type", QCoreApplication.translate("J3DTab", u"joint", None))
+        self.reg_anim_control.setProperty(u"anim_type", QCoreApplication.translate("J3DTab", u"reg", None))
+        self.texidx_anim_control.setProperty(u"anim_type", QCoreApplication.translate("J3DTab", u"texidx", None))
+        self.texmtx_anim_control.setProperty(u"anim_type", QCoreApplication.translate("J3DTab", u"texmtx", None))
+        self.vis_anim_control.setProperty(u"anim_type", QCoreApplication.translate("J3DTab", u"vis", None))
         self.j3d_sidebar_label.setText(QCoreApplication.translate("J3DTab", u"Extra information will be displayed here as necessary.", None))
         self.toggle_visibility.setText("")
         self.j3dultra_error_label.setText(QCoreApplication.translate("J3DTab", u"No errors to display.", None))

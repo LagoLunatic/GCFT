@@ -1,7 +1,7 @@
 
-from PySide6.QtGui import *
-from PySide6.QtCore import *
-from PySide6.QtWidgets import *
+from qtpy.QtGui import *
+from qtpy.QtCore import *
+from qtpy.QtWidgets import *
 
 # TODO: bignum spinbox should take an option to be in hexadecimal
 # spinbox.displayIntegerBase(16) setPrefix

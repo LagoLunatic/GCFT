@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'yaz0_yay0_tab.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.6.1
+## Created by: Qt User Interface Compiler version 6.8.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -98,7 +98,7 @@ class Ui_Yaz0Yay0Tab(object):
 
         self.verticalLayout.addWidget(self.groupBox)
 
-        self.verticalSpacer = QSpacerItem(20, 463, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.verticalSpacer = QSpacerItem(20, 463, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.verticalLayout.addItem(self.verticalSpacer)
 

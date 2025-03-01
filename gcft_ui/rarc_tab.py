@@ -2,18 +2,24 @@
 import os
 import re
 from io import BytesIO
-from PySide6.QtGui import *
-from PySide6.QtCore import *
-from PySide6.QtWidgets import *
+from qtpy.QtGui import *
+from qtpy.QtCore import *
+from qtpy.QtWidgets import *
 
 from gclib import fs_helpers as fs
 from gclib.rarc import RARC, RARCFileAttrType, RARCFileEntry, RARCNode
 from gclib.yaz0_yay0 import Yaz0, Yay0
 
-from gcft_ui.uic.ui_rarc_tab import Ui_RARCTab
 from gcft_ui.gcft_common import RecursiveFilterProxyModel
 from gcft_ui.custom_widgets import ComboBoxDelegate, ReadOnlyDelegate
 from asset_dumper import AssetDumper
+
+from gcft_ui.qt_init import load_ui_file
+from gcft_paths import GCFT_ROOT_PATH
+if os.environ["QT_API"] == "pyside6":
+  from gcft_ui.uic.ui_rarc_tab import Ui_RARCTab
+else:
+  Ui_RARCTab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "uic", "ui_rarc_tab.ui"))
 
 class RARCTab(QWidget):
   FILE_ENTRY_ROLE = Qt.ItemDataRole.UserRole + 0

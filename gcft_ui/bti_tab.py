@@ -3,16 +3,22 @@ import os
 import re
 import traceback
 from io import BytesIO
-from PySide6.QtGui import *
-from PySide6.QtCore import *
-from PySide6.QtWidgets import *
+from qtpy.QtGui import *
+from qtpy.QtCore import *
+from qtpy.QtWidgets import *
 
 from gclib import fs_helpers as fs
 from gclib.bti import BTI, WrapMode, FilterMode
 from gclib.texture_utils import ImageFormat, PaletteFormat, MAX_COLORS_FOR_IMAGE_FORMAT
-from gcft_ui.uic.ui_bti_tab import Ui_BTITab
 from gcft_paths import ASSETS_PATH
 from PIL import Image
+
+from gcft_ui.qt_init import load_ui_file
+from gcft_paths import GCFT_ROOT_PATH
+if os.environ["QT_API"] == "pyside6":
+  from gcft_ui.uic.ui_bti_tab import Ui_BTITab
+else:
+  Ui_BTITab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "uic", "ui_bti_tab.ui"))
 
 BTI_ENUM_FIELDS = {
   "image_format": ImageFormat,

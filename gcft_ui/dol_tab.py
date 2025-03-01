@@ -2,13 +2,19 @@
 import os
 import re
 from io import BytesIO
-from PySide6.QtGui import *
-from PySide6.QtCore import *
-from PySide6.QtWidgets import *
+from qtpy.QtGui import *
+from qtpy.QtCore import *
+from qtpy.QtWidgets import *
 
 from gclib import fs_helpers as fs
 from gclib.dol import DOL
-from gcft_ui.uic.ui_dol_tab import Ui_DOLTab
+
+from gcft_ui.qt_init import load_ui_file
+from gcft_paths import GCFT_ROOT_PATH
+if os.environ["QT_API"] == "pyside6":
+  from gcft_ui.uic.ui_dol_tab import Ui_DOLTab
+else:
+  Ui_DOLTab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "uic", "ui_dol_tab.ui"))
 
 class DOLTab(QWidget):
   def __init__(self):

@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'bti_tab.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.6.1
+## Created by: Qt User Interface Compiler version 6.8.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -107,7 +107,7 @@ class Ui_BTITab(object):
         self.gridLayout.setObjectName(u"gridLayout")
         self.bti_image_label = QLabel(self.scrollAreaWidgetContents)
         self.bti_image_label.setObjectName(u"bti_image_label")
-        sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.bti_image_label.sizePolicy().hasHeightForWidth())
@@ -234,7 +234,7 @@ class Ui_BTITab(object):
 
         self.bti_alpha_setting = QLineEdit(BTITab)
         self.bti_alpha_setting.setObjectName(u"bti_alpha_setting")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.bti_alpha_setting.sizePolicy().hasHeightForWidth())
