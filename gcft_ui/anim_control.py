@@ -10,7 +10,7 @@ from gcft_paths import GCFT_ROOT_PATH
 if os.environ["QT_API"] == "pyside6":
   from gcft_ui.uic.ui_anim_control import Ui_AnimControl
 else:
-  Ui_CosmeticTab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "anim_control.ui"))
+  Ui_AnimControl = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "anim_control.ui"))
 
 class AnimControl(QGroupBox):
   anim_type_paused_changed = Signal(str, bool)

@@ -8,7 +8,6 @@ import copy
 from qtpy.QtGui import *
 from qtpy.QtCore import *
 from qtpy.QtWidgets import *
-from qtpy.QtOpenGLWidgets import *
 
 from gcft_paths import ASSETS_PATH, IS_RUNNING_FROM_SOURCE
 from gcft_ui.nav_camera import Camera
