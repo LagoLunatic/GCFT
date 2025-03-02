@@ -29,7 +29,7 @@ except ImportError:
     # Versions of Windows before Windows 7 don't support SetCurrentProcessExplicitAppUserModelID, so just swallow the error.
     pass
 
-def get_dark_mode_palette(app) :
+def get_dark_mode_palette(app: QApplication):
   from qtpy.QtGui import QPalette, QColor
   pal = app.palette()
 
@@ -48,6 +48,10 @@ def get_dark_mode_palette(app) :
   pal.setColor(QPalette.ColorRole.Link, QColor("#2A82DA"))
   pal.setColor(QPalette.ColorRole.Highlight, QColor("#2A82DA"))
   pal.setColor(QPalette.ColorRole.HighlightedText, QColor("#D9D9D9"))
+  
+  placeholder_color = QColor("#D9D9D9")
+  placeholder_color.setAlpha(128)
+  pal.setColor(QPalette.ColorRole.PlaceholderText, placeholder_color)
 
   pal.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.WindowText, QColor("#7F7F7F"))
   pal.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Text, QColor("#7F7F7F"))
