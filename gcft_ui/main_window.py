@@ -58,9 +58,10 @@ class GCFTWindow(QMainWindow):
     self.ui.tabWidget.currentChanged.connect(self.save_last_used_tab)
     
     # Assign attributes to the main window and each tab to allow them to easily access the other tabs by name.
-    # e.g. So you can do `self.bti_tab.bti` instead of `self.window().ui.bti_tab.bti`.
+    # e.g. So you can do `self.bti_tab.bti` instead of `self.gcft_window.ui.bti_tab.bti`.
     tabs = list(map(self.ui.tabWidget.widget, range(self.ui.tabWidget.count())))
     for tab in tabs:
+      setattr(tab, "gcft_window", self)
       setattr(self, tab.objectName(), tab)
       for other_tab in tabs:
         setattr(tab, other_tab.objectName(), other_tab)

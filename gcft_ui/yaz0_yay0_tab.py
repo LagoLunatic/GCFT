@@ -7,6 +7,10 @@ from qtpy.QtWidgets import *
 
 from gclib.yaz0_yay0 import Yaz0, Yay0
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+  from gcft_ui.main_window import GCFTWindow
+
 from gcft_ui.qt_init import load_ui_file
 from gcft_paths import GCFT_ROOT_PATH
 if os.environ["QT_API"] == "pyside6":
@@ -15,6 +19,8 @@ else:
   Ui_Yaz0Yay0Tab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "yaz0_yay0_tab.ui"))
 
 class Yaz0Yay0Tab(QWidget):
+  gcft_window: 'GCFTWindow'
+  
   def __init__(self):
     super().__init__()
     self.ui = Ui_Yaz0Yay0Tab()
@@ -27,28 +33,28 @@ class Yaz0Yay0Tab(QWidget):
   
   
   def decompress_yaz0(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.decompress_yaz0_by_paths,
       is_opening=True, is_saving=True, is_folder=False,
       file_type="Yaz0", file_filters=[]
     )
   
   def compress_yaz0(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.compress_yaz0_by_paths,
       is_opening=True, is_saving=True, is_folder=False,
       file_type="Yaz0", file_filters=[]
     )
   
   def decompress_yay0(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.decompress_yay0_by_paths,
       is_opening=True, is_saving=True, is_folder=False,
       file_type="Yay0", file_filters=[]
     )
   
   def compress_yay0(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.compress_yay0_by_paths,
       is_opening=True, is_saving=True, is_folder=False,
       file_type="Yay0", file_filters=[]

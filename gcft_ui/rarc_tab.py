@@ -14,6 +14,10 @@ from gcft_ui.gcft_common import RecursiveFilterProxyModel
 from gcft_ui.custom_widgets import ComboBoxDelegate, ReadOnlyDelegate
 from asset_dumper import AssetDumper
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+  from gcft_ui.main_window import GCFTWindow
+
 from gcft_ui.qt_init import load_ui_file
 from gcft_paths import GCFT_ROOT_PATH
 if os.environ["QT_API"] == "pyside6":
@@ -22,6 +26,8 @@ else:
   Ui_RARCTab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "rarc_tab.ui"))
 
 class RARCTab(QWidget):
+  gcft_window: 'GCFTWindow'
+  
   FILE_ENTRY_ROLE = Qt.ItemDataRole.UserRole + 0
   NODE_ROLE = Qt.ItemDataRole.UserRole + 1
   
@@ -104,14 +110,14 @@ class RARCTab(QWidget):
   
   
   def import_rarc(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.import_rarc_by_path,
       is_opening=True, is_saving=False, is_folder=False,
       file_type="RARC", file_filters=["RARC files (*.arc)"],
     )
   
   def create_rarc_from_folder(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.create_rarc_from_folder_by_path,
       is_opening=True, is_saving=False, is_folder=True,
       file_type="RARC"
@@ -119,7 +125,7 @@ class RARCTab(QWidget):
   
   def export_rarc(self):
     rarc_name = self.rarc_name + ".arc"
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.export_rarc_by_path,
       is_opening=False, is_saving=True, is_folder=False,
       file_type="RARC", file_filters=["RARC files (*.arc)"],
@@ -129,14 +135,14 @@ class RARCTab(QWidget):
   def replace_all_files_in_rarc(self):
     root_node = self.rarc.nodes[0]
     self.ui.actionReplaceAllFilesInRARCFolder.setData(root_node)
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.replace_all_files_in_rarc_folder_by_path,
       is_opening=True, is_saving=False, is_folder=True,
       file_type="RARC"
     )
   
   def replace_all_files_in_rarc_folder(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.replace_all_files_in_rarc_folder_by_path,
       is_opening=True, is_saving=False, is_folder=True,
       file_type="RARC"
@@ -145,21 +151,21 @@ class RARCTab(QWidget):
   def extract_all_files_from_rarc(self):
     root_node = self.rarc.nodes[0]
     self.ui.actionExtractAllFilesFromRARCFolder.setData(root_node)
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.extract_all_files_from_rarc_folder_by_path,
       is_opening=False, is_saving=True, is_folder=True,
       file_type="RARC"
     )
   
   def extract_all_files_from_rarc_folder(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.extract_all_files_from_rarc_folder_by_path,
       is_opening=False, is_saving=True, is_folder=True,
       file_type="RARC"
     )
   
   def dump_all_rarc_textures(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.dump_all_rarc_textures_by_path,
       is_opening=False, is_saving=True, is_folder=True,
       file_type="all RARC texture"
@@ -167,7 +173,7 @@ class RARCTab(QWidget):
   
   def export_rarc_to_c_header(self):
     header_name = "res_%s.h" % self.rarc_name.lower()
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.export_rarc_to_c_header_by_path,
       is_opening=False, is_saving=True, is_folder=False,
       file_type="C header",
@@ -176,7 +182,7 @@ class RARCTab(QWidget):
   
   def extract_file_from_rarc(self):
     file: RARCFileEntry = self.ui.actionExtractRARCFile.data()
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.extract_file_from_rarc_by_path,
       is_opening=False, is_saving=True, is_folder=False,
       file_type="file",
@@ -185,7 +191,7 @@ class RARCTab(QWidget):
   
   def replace_file_in_rarc(self):
     file: RARCFileEntry = self.ui.actionReplaceRARCFile.data()
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.replace_file_in_rarc_by_path,
       is_opening=True, is_saving=False, is_folder=False,
       file_type="file",
@@ -193,7 +199,7 @@ class RARCTab(QWidget):
     )
   
   def add_file_to_rarc(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.add_file_to_rarc_by_path,
       is_opening=True, is_saving=False, is_folder=False,
       file_type="file"
@@ -299,7 +305,7 @@ class RARCTab(QWidget):
     
     if self.display_rarc_dir_indexes:
       dir_file_index = self.rarc.file_entries.index(dir_entry)
-      dir_file_index_str = self.window().stringify_number(dir_file_index, min_hex_chars=4)
+      dir_file_index_str = self.gcft_window.stringify_number(dir_file_index, min_hex_chars=4)
     else:
       dir_file_index_str = ""
     
@@ -328,10 +334,10 @@ class RARCTab(QWidget):
       self.set_node_for_model_index(name_item.index(), dir_entry.node)
   
   def add_new_tree_row_for_file_entry(self, file_entry: RARCFileEntry, parent_item: QStandardItem):
-    file_size_str = self.window().stringify_number(file_entry.data_size)
-    file_id_str = self.window().stringify_number(file_entry.id, min_hex_chars=4)
+    file_size_str = self.gcft_window.stringify_number(file_entry.data_size)
+    file_id_str = self.gcft_window.stringify_number(file_entry.id, min_hex_chars=4)
     file_index = self.rarc.file_entries.index(file_entry)
-    file_index_str = self.window().stringify_number(file_index, min_hex_chars=4)
+    file_index_str = self.gcft_window.stringify_number(file_index, min_hex_chars=4)
     
     name_item = QStandardItem(file_entry.name)
     
@@ -429,7 +435,7 @@ class RARCTab(QWidget):
     
     self.ui.rarc_files_tree.blockSignals(True)
     
-    file_size_str = self.window().stringify_number(fs.data_len(file_entry.data))
+    file_size_str = self.gcft_window.stringify_number(fs.data_len(file_entry.data))
     file_size_item.setText(file_size_str)
     
     comp_index = name_index.siblingAtColumn(self.column_names.index("Compression"))
@@ -448,10 +454,10 @@ class RARCTab(QWidget):
         continue
       
       file_index = self.rarc.file_entries.index(file_entry)
-      file_index_str = self.window().stringify_number(file_index, min_hex_chars=4)
+      file_index_str = self.gcft_window.stringify_number(file_index, min_hex_chars=4)
       self.model.setData(index.siblingAtColumn(self.column_names.index("File Index")), file_index_str)
       
-      file_id_str = self.window().stringify_number(file_entry.id, min_hex_chars=4)
+      file_id_str = self.gcft_window.stringify_number(file_entry.id, min_hex_chars=4)
       self.model.setData(index.siblingAtColumn(self.column_names.index("File ID")), file_id_str)
   
   def export_rarc_by_path(self, rarc_path):
@@ -489,7 +495,7 @@ class RARCTab(QWidget):
     dumper_generator = asset_dumper.dump_all_textures_in_rarc(self.rarc, folder_path)
     max_val = len(asset_dumper.get_all_rarc_file_paths(self.rarc))
     
-    self.window().start_texture_dumper_thread(asset_dumper, dumper_generator, max_val)
+    self.gcft_window.start_texture_dumper_thread(asset_dumper, dumper_generator, max_val)
   
   def export_rarc_to_c_header_by_path(self, header_path):
     out_str = ""
@@ -671,12 +677,12 @@ class RARCTab(QWidget):
     
     self.update_file_size_and_compression_and_preload_in_ui(file_entry)
     
-    self.window().ui.statusbar.showMessage("Replaced %s." % file_entry.name, 3000)
+    self.gcft_window.ui.statusbar.showMessage("Replaced %s." % file_entry.name, 3000)
   
   def delete_file_in_rarc(self):
     file_entry: RARCFileEntry = self.ui.actionDeleteRARCFile.data()
     
-    if not self.window().confirm_delete(file_entry.name):
+    if not self.gcft_window.confirm_delete(file_entry.name):
       return
     
     self.rarc.delete_file(file_entry)
@@ -695,7 +701,7 @@ class RARCTab(QWidget):
     data = fs.make_copy_data(file_entry.data)
     self.bti_tab.import_bti_by_data(data, bti_name)
     
-    self.window().set_tab_by_name("BTI Images")
+    self.gcft_window.set_tab_by_name("BTI Images")
   
   def replace_image_in_rarc(self):
     file_entry: RARCFileEntry = self.ui.actionReplaceRARCImage.data()
@@ -707,7 +713,7 @@ class RARCTab(QWidget):
     
     self.update_file_size_and_compression_and_preload_in_ui(file_entry)
     
-    self.window().ui.statusbar.showMessage("Replaced %s." % file_entry.name, 3000)
+    self.gcft_window.ui.statusbar.showMessage("Replaced %s." % file_entry.name, 3000)
   
   def open_j3d_in_rarc(self):
     file_entry: RARCFileEntry = self.ui.actionOpenRARCJ3D.data()
@@ -717,7 +723,7 @@ class RARCTab(QWidget):
     data = fs.make_copy_data(file_entry.data)
     self.j3d_tab.import_j3d_by_data(data, j3d_name)
     
-    self.window().set_tab_by_name("J3D Files")
+    self.gcft_window.set_tab_by_name("J3D Files")
   
   def replace_j3d_in_rarc(self):
     file_entry: RARCFileEntry = self.ui.actionReplaceRARCJ3D.data()
@@ -729,7 +735,7 @@ class RARCTab(QWidget):
     
     self.update_file_size_and_compression_and_preload_in_ui(file_entry)
     
-    self.window().ui.statusbar.showMessage("Replaced %s." % file_entry.name, 3000)
+    self.gcft_window.ui.statusbar.showMessage("Replaced %s." % file_entry.name, 3000)
   
   def load_j3d_anim(self):
     file_entry: RARCFileEntry = self.ui.actionLoadJ3DAnim.data()
@@ -739,7 +745,7 @@ class RARCTab(QWidget):
     data = fs.make_copy_data(file_entry.data)
     self.j3d_tab.load_anim_by_data(data, j3d_name)
     
-    self.window().set_tab_by_name("J3D Files")
+    self.gcft_window.set_tab_by_name("J3D Files")
   
   def add_file_to_rarc_by_path(self, file_path):
     parent_node: RARCNode = self.ui.actionAddRARCFile.data()
@@ -802,7 +808,7 @@ class RARCTab(QWidget):
   def delete_folder_in_rarc(self):
     node: RARCNode = self.ui.actionDeleteRARCFolder.data()
     
-    if not self.window().confirm_delete(node.name, is_folder=True):
+    if not self.gcft_window.confirm_delete(node.name, is_folder=True):
       return
     
     dir_entry = node.dir_entry
@@ -928,13 +934,13 @@ class RARCTab(QWidget):
     new_file_id_str = file_id_index.model().data(file_id_index, Qt.ItemDataRole.EditRole)
     file_entry = self.get_file_entry_for_model_index(file_id_index)
     
-    if self.window().display_hexadecimal_numbers:
+    if self.gcft_window.display_hexadecimal_numbers:
       hexadecimal_match = re.search(r"^\s*(?:0x)?([0-9a-f]+)\s*$", new_file_id_str, re.IGNORECASE)
       if hexadecimal_match:
         new_file_id = int(hexadecimal_match.group(1), 16)
       else:
         QMessageBox.warning(self, "Invalid file ID", "\"%s\" is not a valid hexadecimal number." % new_file_id_str)
-        file_id_str = self.window().stringify_number(file_entry.id, min_hex_chars=4)
+        file_id_str = self.gcft_window.stringify_number(file_entry.id, min_hex_chars=4)
         self.model.setData(file_id_index, file_id_str)
         return
     else:
@@ -943,13 +949,13 @@ class RARCTab(QWidget):
         new_file_id = int(decimal_match.group(1))
       else:
         QMessageBox.warning(self, "Invalid file ID", "\"%s\" is not a valid decimal number." % new_file_id_str)
-        file_id_str = self.window().stringify_number(file_entry.id, min_hex_chars=4)
+        file_id_str = self.gcft_window.stringify_number(file_entry.id, min_hex_chars=4)
         self.model.setData(file_id_index, file_id_str)
         return
     
     if new_file_id >= 0xFFFF:
       QMessageBox.warning(self, "Invalid file ID", "\"%s\" is too large to be a file ID. It must be in the range 0x0000-0xFFFE." % new_file_id_str)
-      file_id_str = self.window().stringify_number(file_entry.id, min_hex_chars=4)
+      file_id_str = self.gcft_window.stringify_number(file_entry.id, min_hex_chars=4)
       self.model.setData(file_id_index, file_id_str)
       return
     
@@ -957,19 +963,19 @@ class RARCTab(QWidget):
     
     if other_file_entry == file_entry:
       # File ID not changed
-      file_id_str = self.window().stringify_number(file_entry.id, min_hex_chars=4)
+      file_id_str = self.gcft_window.stringify_number(file_entry.id, min_hex_chars=4)
       self.model.setData(file_id_index, file_id_str)
       return
     
     if other_file_entry is not None:
       QMessageBox.warning(self, "Duplicate file ID", "The file ID you entered is already used by the file \"%s\"." % other_file_entry.name)
-      file_id_str = self.window().stringify_number(file_entry.id, min_hex_chars=4)
+      file_id_str = self.gcft_window.stringify_number(file_entry.id, min_hex_chars=4)
       self.model.setData(file_id_index, file_id_str)
       return
     
     file_entry.id = new_file_id
     
-    file_id_str = self.window().stringify_number(file_entry.id, min_hex_chars=4)
+    file_id_str = self.gcft_window.stringify_number(file_entry.id, min_hex_chars=4)
     self.model.setData(file_id_index, file_id_str)
   
   def change_rarc_file_compression_type(self, comp_index: QModelIndex):

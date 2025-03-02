@@ -13,6 +13,10 @@ from gclib.texture_utils import ImageFormat
 from gcft_ui.gcft_common import RecursiveFilterProxyModel
 from asset_dumper import AssetDumper
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+  from gcft_ui.main_window import GCFTWindow
+
 from gcft_ui.qt_init import load_ui_file
 from gcft_paths import GCFT_ROOT_PATH
 if os.environ["QT_API"] == "pyside6":
@@ -21,12 +25,14 @@ else:
   Ui_GCMTab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "gcm_tab.ui"))
 
 class GCMTab(QWidget):
+  gcft_window: 'GCFTWindow'
+  
   def __init__(self):
     super().__init__()
     self.ui = Ui_GCMTab()
     self.ui.setupUi(self)
     
-    self.gcm = None
+    self.gcm: GCM | None = None
     
     self.column_names = [
       "File Name",
@@ -81,14 +87,14 @@ class GCMTab(QWidget):
   
   
   def import_gcm(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.import_gcm_by_path,
       is_opening=True, is_saving=False, is_folder=False,
       file_type="GCM", file_filters=["GC ISO Files (*.iso *.gcm)"],
     )
   
   def export_gcm(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.export_gcm_by_path,
       is_opening=False, is_saving=True, is_folder=False,
       file_type="GCM", file_filters=["GC ISO Files (*.iso *.gcm)"],
@@ -96,14 +102,14 @@ class GCMTab(QWidget):
   
   def replace_all_files_in_gcm(self):
     self.ui.actionReplaceAllFilesInGCMFolder.setData(None) # All files
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.replace_all_files_in_gcm_folder_by_path,
       is_opening=True, is_saving=False, is_folder=True,
       file_type="GCM"
     )
   
   def replace_all_files_in_gcm_folder(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.replace_all_files_in_gcm_folder_by_path,
       is_opening=True, is_saving=False, is_folder=True,
       file_type="GCM"
@@ -111,21 +117,21 @@ class GCMTab(QWidget):
   
   def extract_all_files_from_gcm(self):
     self.ui.actionExtractAllFilesFromGCMFolder.setData(None) # All files
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.extract_all_files_from_gcm_folder_by_path,
       is_opening=False, is_saving=True, is_folder=True,
       file_type="GCM"
     )
   
   def extract_all_files_from_gcm_folder(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.extract_all_files_from_gcm_folder_by_path,
       is_opening=False, is_saving=True, is_folder=True,
       file_type="GCM"
     )
   
   def dump_all_gcm_textures(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.dump_all_gcm_textures_by_path,
       is_opening=False, is_saving=True, is_folder=True,
       file_type="all GCM texture"
@@ -133,14 +139,14 @@ class GCMTab(QWidget):
   
   def add_replace_gcm_files_from_folder(self):
     self.ui.actionAddReplaceFilesForFolder.setData(None) # All files
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.add_replace_files_from_folder_by_path,
       is_opening=True, is_saving=False, is_folder=True,
       file_type="GCM"
     )
   
   def add_replace_gcm_folder_files_from_folder(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.add_replace_files_from_folder_by_path,
       is_opening=True, is_saving=False, is_folder=True,
       file_type="GCM"
@@ -148,7 +154,7 @@ class GCMTab(QWidget):
   
   def extract_file_from_gcm(self):
     file = self.ui.actionExtractGCMFile.data()
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.extract_file_from_gcm_by_path,
       is_opening=False, is_saving=True, is_folder=False,
       file_type="file",
@@ -157,7 +163,7 @@ class GCMTab(QWidget):
   
   def replace_file_in_gcm(self):
     file = self.ui.actionReplaceGCMFile.data()
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.replace_file_in_gcm_by_path,
       is_opening=True, is_saving=False, is_folder=False,
       file_type="file",
@@ -165,7 +171,7 @@ class GCMTab(QWidget):
     )
   
   def add_file_to_gcm(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.add_file_to_gcm_by_path,
       is_opening=True, is_saving=False, is_folder=False,
       file_type="file"
@@ -235,7 +241,7 @@ class GCMTab(QWidget):
       file_size_str = ""
     else:
       file_size = self.gcm.get_changed_file_size(file_entry.file_path)
-      file_size_str = self.window().stringify_number(file_size)
+      file_size_str = self.gcft_window.stringify_number(file_size)
     
     size_item = QStandardItem(file_size_str)
     size_item.setData(file_entry)
@@ -277,7 +283,7 @@ class GCMTab(QWidget):
     generator = self.gcm.export_disc_to_iso_with_changed_files(gcm_path)
     max_val = len(self.gcm.files_by_path)
     
-    self.window().start_progress_thread(
+    self.gcft_window.start_progress_thread(
       generator, "Saving ISO", max_val,
       self.export_gcm_by_path_complete
     )
@@ -312,7 +318,7 @@ class GCMTab(QWidget):
     generator = self.gcm.import_files_from_disk_by_paths(folder_path, replace_paths, [], base_dir=base_dir)
     max_val = len(replace_paths)
     
-    self.window().start_progress_thread(
+    self.gcft_window.start_progress_thread(
       generator, "Replacing files", max_val,
       self.replace_all_files_in_gcm_by_path_complete
     )
@@ -329,7 +335,7 @@ class GCMTab(QWidget):
     generator = self.gcm.export_disc_to_folder_with_changed_files(folder_path, base_dir=base_dir)
     max_val = self.gcm.get_num_files(base_dir)
     
-    self.window().start_progress_thread(
+    self.gcft_window.start_progress_thread(
       generator, "Extracting files", max_val,
       self.extract_all_files_from_gcm_by_path_complete
     )
@@ -342,7 +348,7 @@ class GCMTab(QWidget):
     dumper_generator = asset_dumper.dump_all_textures_in_gcm(self.gcm, folder_path)
     max_val = len(asset_dumper.get_all_gcm_file_paths(self.gcm))
     
-    self.window().start_texture_dumper_thread(asset_dumper, dumper_generator, max_val)
+    self.gcft_window.start_texture_dumper_thread(asset_dumper, dumper_generator, max_val)
   
   def add_replace_files_from_folder_by_path(self, folder_path):
     base_dir = self.ui.actionExtractAllFilesFromGCMFolder.data()
@@ -381,7 +387,7 @@ class GCMTab(QWidget):
     generator = self.gcm.import_files_from_disk_by_paths(folder_path, replace_paths, add_paths, base_dir=base_dir)
     max_val = len(replace_paths) + len(add_paths)
     
-    self.window().start_progress_thread(
+    self.gcft_window.start_progress_thread(
       generator, "Importing files", max_val,
       self.add_replace_files_from_folder_by_path_complete
     )
@@ -504,7 +510,7 @@ class GCMTab(QWidget):
   
   def update_changed_file_size_in_gcm(self, file):
     file_size = self.gcm.get_changed_file_size(file.file_path)
-    file_size_str = self.window().stringify_number(file_size)
+    file_size_str = self.gcft_window.stringify_number(file_size)
     item = self.find_item_by_data(self.column_names.index("File Size"), file)
     item.setText(file_size_str)
   
@@ -522,12 +528,12 @@ class GCMTab(QWidget):
     
     self.update_changed_file_size_in_gcm(file)
     
-    self.window().ui.statusbar.showMessage("Replaced %s." % file.file_path, 3000)
+    self.gcft_window.ui.statusbar.showMessage("Replaced %s." % file.file_path, 3000)
   
   def delete_file_in_gcm(self):
     file_entry = self.ui.actionDeleteGCMFile.data()
     
-    if not self.window().confirm_delete(file_entry.name):
+    if not self.gcft_window.confirm_delete(file_entry.name):
       return
     
     self.gcm.delete_file(file_entry)
@@ -538,7 +544,7 @@ class GCMTab(QWidget):
   def delete_folder_in_gcm(self):
     dir_entry = self.ui.actionDeleteGCMFolder.data()
     
-    if not self.window().confirm_delete(dir_entry.name):
+    if not self.gcft_window.confirm_delete(dir_entry.name):
       return
     
     parent_dir_entry = dir_entry.parent
@@ -558,7 +564,7 @@ class GCMTab(QWidget):
     
     self.rarc_tab.import_rarc_by_data(data, rarc_name)
     
-    self.window().set_tab_by_name("RARC Archives")
+    self.gcft_window.set_tab_by_name("RARC Archives")
   
   def replace_rarc_in_gcm(self):
     file_entry = self.ui.actionReplaceGCMRARC.data()
@@ -570,7 +576,7 @@ class GCMTab(QWidget):
     
     self.update_changed_file_size_in_gcm(file_entry)
     
-    self.window().ui.statusbar.showMessage("Replaced %s." % file_entry.file_path, 3000)
+    self.gcft_window.ui.statusbar.showMessage("Replaced %s." % file_entry.file_path, 3000)
   
   def open_image_in_gcm(self):
     file_entry = self.ui.actionOpenGCMImage.data()
@@ -585,7 +591,7 @@ class GCMTab(QWidget):
       bti_name = os.path.splitext(file_entry.name)[0]
       self.bti_tab.import_bti_by_data(data, bti_name)
     
-    self.window().set_tab_by_name("BTI Images")
+    self.gcft_window.set_tab_by_name("BTI Images")
   
   def replace_image_in_gcm(self):
     file_entry = self.ui.actionReplaceGCMImage.data()
@@ -607,7 +613,7 @@ class GCMTab(QWidget):
     
     self.update_changed_file_size_in_gcm(file_entry)
     
-    self.window().ui.statusbar.showMessage("Replaced %s." % file_entry.file_path, 3000)
+    self.gcft_window.ui.statusbar.showMessage("Replaced %s." % file_entry.file_path, 3000)
   
   def open_jpc_in_gcm(self):
     file_entry = self.ui.actionOpenGCMJPC.data()
@@ -619,7 +625,7 @@ class GCMTab(QWidget):
     
     self.jpc_tab.import_jpc_by_data(data, jpc_name)
     
-    self.window().set_tab_by_name("JPC Particle Archives")
+    self.gcft_window.set_tab_by_name("JPC Particle Archives")
   
   def replace_jpc_in_gcm(self):
     file_entry = self.ui.actionReplaceGCMJPC.data()
@@ -631,7 +637,7 @@ class GCMTab(QWidget):
     
     self.update_changed_file_size_in_gcm(file_entry)
     
-    self.window().ui.statusbar.showMessage("Replaced %s." % file_entry.file_path, 3000)
+    self.gcft_window.ui.statusbar.showMessage("Replaced %s." % file_entry.file_path, 3000)
   
   def open_dol_in_gcm(self):
     file_entry = self.ui.actionOpenGCMDOL.data()
@@ -643,7 +649,7 @@ class GCMTab(QWidget):
     
     self.dol_tab.import_dol_by_data(data, dol_name)
     
-    self.window().set_tab_by_name("DOL Executables")
+    self.gcft_window.set_tab_by_name("DOL Executables")
   
   def replace_dol_in_gcm(self):
     file_entry = self.ui.actionReplaceGCMDOL.data()
@@ -655,7 +661,7 @@ class GCMTab(QWidget):
     
     self.update_changed_file_size_in_gcm(file_entry)
     
-    self.window().ui.statusbar.showMessage("Replaced %s." % file_entry.file_path, 3000)
+    self.gcft_window.ui.statusbar.showMessage("Replaced %s." % file_entry.file_path, 3000)
   
   def add_file_to_gcm_by_path(self, file_path):
     dir_entry = self.ui.actionAddGCMFile.data()
@@ -663,8 +669,6 @@ class GCMTab(QWidget):
     file_name = os.path.basename(file_path)
     with open(file_path, "rb") as f:
       file_data = BytesIO(f.read())
-    file_size = fs.data_len(file_data)
-    file_size_str = self.window().stringify_number(file_size)
     
     gcm_file_path = dir_entry.file_path + "/" + file_name
     if gcm_file_path.lower() in self.gcm.files_by_path_lowercase:

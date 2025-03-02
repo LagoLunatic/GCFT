@@ -138,7 +138,7 @@ class J3DTab(BunfoeEditor):
       "Models and material tables (*.bmd *.bdl *.bmt)",
     ]
     
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.import_j3d_by_path,
       is_opening=True, is_saving=False, is_folder=False,
       file_type="J3D file", file_filters=filters,
@@ -154,7 +154,7 @@ class J3DTab(BunfoeEditor):
     filters.append("All J3D files (*.bmd *.bdl *.bmt *.bls *.btk *.bck *.brk *.bpk *.btp *.bca *.bva *.bla)")
     
     j3d_name = "%s.%s" % (self.j3d_name, self.j3d.file_type[:3])
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.export_j3d_by_path,
       is_opening=False, is_saving=True, is_folder=False,
       file_type="J3D file", file_filters=filters,
@@ -165,7 +165,7 @@ class J3DTab(BunfoeEditor):
     filters = []
     filters.append("J3D animations (*.bmt *.bls *.btk *.bck *.brk *.bpk *.btp *.bca *.bva *.bla)")
     
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.load_anim_by_path,
       is_opening=True, is_saving=False, is_folder=False,
       file_type="J3D animation", file_filters=filters,
@@ -267,7 +267,7 @@ class J3DTab(BunfoeEditor):
       self.toggle_isolated_visibility(update_preview=False)
     
     for chunk in self.j3d.chunks:
-      chunk_size_str = self.window().stringify_number(chunk.size, min_hex_chars=5)
+      chunk_size_str = self.gcft_window.stringify_number(chunk.size, min_hex_chars=5)
       
       chunk_item = QStandardItem(chunk.magic)
       chunk_item.setEditable(False)
@@ -398,7 +398,7 @@ class J3DTab(BunfoeEditor):
       type_name = "Shape"
       names_list = self.j3d.shp1.shape_names
     
-    index_str = self.window().stringify_number(inf1_node.index, min_hex_chars=2)
+    index_str = self.gcft_window.stringify_number(inf1_node.index, min_hex_chars=2)
     if type_name is None:
       node_name = ""
     elif names_list is None:
@@ -417,7 +417,7 @@ class J3DTab(BunfoeEditor):
         vtx_fmt_size_str = ""
       else:
         vtx_fmt_size = vtx_fmt.component_size * vtx_fmt.component_count * len(vtx1.attributes[vtx_fmt.attribute_type])
-        vtx_fmt_size_str = self.window().stringify_number(vtx_fmt_size, min_hex_chars=2)
+        vtx_fmt_size_str = self.gcft_window.stringify_number(vtx_fmt_size, min_hex_chars=2)
       self.make_tree_model_item(vtx_fmt, chunk_item, ["", vtx_fmt.attribute_type.name, vtx_fmt_size_str])
   
   # def add_evp1_chunk_to_tree(self, evp1: EVP1, chunk_item: QStandardItem):
@@ -428,13 +428,13 @@ class J3DTab(BunfoeEditor):
   
   def add_jnt1_chunk_to_tree(self, jnt1: JNT1, chunk_item: QStandardItem):
     for joint_index, joint in enumerate(jnt1.joints):
-      joint_index_str = self.window().stringify_number(joint_index, min_hex_chars=2)
+      joint_index_str = self.gcft_window.stringify_number(joint_index, min_hex_chars=2)
       joint_name = jnt1.joint_names[joint_index]
       self.make_tree_model_item(joint, chunk_item, ["", f"{joint_index_str}: {joint_name}", ""])
   
   def add_shp1_chunk_to_tree(self, shp1: SHP1, chunk_item: QStandardItem):
     for shape_index, shape in enumerate(shp1.shapes):
-      shape_index_str = self.window().stringify_number(shape_index, min_hex_chars=2)
+      shape_index_str = self.gcft_window.stringify_number(shape_index, min_hex_chars=2)
       self.make_tree_model_item(shape, chunk_item, ["", shape_index_str, ""])
   
   def add_mat3_chunk_to_tree(self, mat3: MAT3, chunk_item: QStandardItem):
@@ -470,7 +470,7 @@ class J3DTab(BunfoeEditor):
       if texture_total_size == 0:
         texture_size_str = ""
       else:
-        texture_size_str = self.window().stringify_number(texture_total_size, min_hex_chars=5)
+        texture_size_str = self.gcft_window.stringify_number(texture_total_size, min_hex_chars=5)
       
       self.make_tree_model_item(texture, chunk_item, ["", texture_name, texture_size_str])
   
@@ -821,7 +821,7 @@ class J3DTab(BunfoeEditor):
     
     self.bti_tab.import_bti_by_data(data, bti_name)
     
-    self.window().set_tab_by_name("BTI Images")
+    self.gcft_window.set_tab_by_name("BTI Images")
   
   def replace_image_in_j3d(self):
     assert self.j3d is not None
@@ -849,7 +849,7 @@ class J3DTab(BunfoeEditor):
     
     texture_index = self.j3d.tex1.textures.index(texture)
     texture_name = self.j3d.tex1.texture_names[texture_index]
-    self.window().ui.statusbar.showMessage("Replaced %s." % texture_name, 3000)
+    self.gcft_window.ui.statusbar.showMessage("Replaced %s." % texture_name, 3000)
   
   def try_show_model_preview(self, *, reload_same_model: bool):
     assert self.j3d is not None

@@ -9,6 +9,10 @@ from qtpy.QtWidgets import *
 from gclib import fs_helpers as fs
 from gclib.dol import DOL
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+  from gcft_ui.main_window import GCFTWindow
+
 from gcft_ui.qt_init import load_ui_file
 from gcft_paths import GCFT_ROOT_PATH
 if os.environ["QT_API"] == "pyside6":
@@ -17,12 +21,14 @@ else:
   Ui_DOLTab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "dol_tab.ui"))
 
 class DOLTab(QWidget):
+  gcft_window: 'GCFTWindow'
+  
   def __init__(self):
     super().__init__()
     self.ui = Ui_DOLTab()
     self.ui.setupUi(self)
     
-    self.dol = None
+    self.dol: DOL | None = None
     self.dolname = None
     
     self.ui.export_dol.setDisabled(True)
@@ -40,7 +46,7 @@ class DOLTab(QWidget):
   
   
   def import_dol(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.import_dol_by_path,
       is_opening=True, is_saving=False, is_folder=False,
       file_type="DOL executable", file_filters=["DOL Executables (*.dol)"],
@@ -48,7 +54,7 @@ class DOLTab(QWidget):
   
   def export_dol(self):
     dol_name = self.dol_name + ".dol"
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.export_dol_by_path,
       is_opening=False, is_saving=True, is_folder=False,
       file_type="DOL executable", file_filters=["DOL Executables (*.dol)"],
@@ -79,6 +85,8 @@ class DOLTab(QWidget):
     self.ui.dol_address.setDisabled(False)
   
   def reload_dol_sections_tree(self):
+    assert self.dol is not None
+    
     self.ui.dol_sections_tree.clear()
     
     for section_index, section in enumerate(self.dol.sections):
@@ -95,6 +103,8 @@ class DOLTab(QWidget):
       self.ui.dol_sections_tree.addTopLevelItem(section_item)
   
   def export_dol_by_path(self, dol_path):
+    assert self.dol is not None
+    
     self.dol.save_changes()
     
     with open(dol_path, "wb") as f:
@@ -106,6 +116,8 @@ class DOLTab(QWidget):
     QMessageBox.information(self, "DOL saved", "Successfully saved DOL.")
   
   def convert_from_dol_offset(self):
+    assert self.dol is not None
+    
     offset_str = self.ui.dol_offset.text().strip()
     if not offset_str:
       QMessageBox.warning(self, "Conversion failed", "No offset given.")
@@ -133,6 +145,8 @@ class DOLTab(QWidget):
     self.ui.dol_offset.setText("%06X" % offset)
   
   def convert_from_dol_address(self):
+    assert self.dol is not None
+    
     address_str = self.ui.dol_address.text().strip()
     if not address_str:
       QMessageBox.warning(self, "Conversion failed", "No address given.")

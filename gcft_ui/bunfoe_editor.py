@@ -11,10 +11,16 @@ from gclib.bunfoe import BUNFOE, Field, fields
 from gcft_ui.custom_widgets import BigIntSpinbox
 from gclib.bunfoe_types import Vector, Matrix, RGBA
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+  from gcft_ui.main_window import GCFTWindow
+
 class BunfoeWidget(QWidget):
   pass
 
 class BunfoeEditor(QWidget):
+  gcft_window: 'GCFTWindow'
+  
   field_value_changed = Signal()
   
   def __init__(self):
@@ -104,7 +110,7 @@ class BunfoeEditor(QWidget):
             combobox.blockSignals(True)
             combobox.clear()
             for i in range(len(list_value)):
-              index_str = self.window().stringify_number(i, min_hex_chars=1)
+              index_str = self.gcft_window.stringify_number(i, min_hex_chars=1)
               combobox.addItem(f"Selected: {index_str}")
             combobox.blockSignals(False)
             if len(list_value) > 0:
@@ -233,7 +239,7 @@ class BunfoeEditor(QWidget):
       
       if show_indexes:
         if field_length > 10:
-          index_str = self.window().stringify_number(i, min_hex_chars=1)
+          index_str = self.gcft_window.stringify_number(i, min_hex_chars=1)
         else:
           # Force decimal for small numbers to avoid taking up space.
           index_str = str(i)
@@ -263,7 +269,7 @@ class BunfoeEditor(QWidget):
     combobox = QComboBox()
     combobox.setSizePolicy(QSizePolicy.Policy.Maximum, combobox.sizePolicy().verticalPolicy())
     for i in range(field_length):
-      index_str = self.window().stringify_number(i, min_hex_chars=1)
+      index_str = self.gcft_window.stringify_number(i, min_hex_chars=1)
       combobox.addItem(f"Selected: {index_str}")
     box_layout.addWidget(combobox)
     

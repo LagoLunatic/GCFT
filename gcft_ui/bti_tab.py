@@ -13,6 +13,10 @@ from gclib.texture_utils import ImageFormat, PaletteFormat, MAX_COLORS_FOR_IMAGE
 from gcft_paths import ASSETS_PATH
 from PIL import Image
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+  from gcft_ui.main_window import GCFTWindow
+
 from gcft_ui.qt_init import load_ui_file
 from gcft_paths import GCFT_ROOT_PATH
 if os.environ["QT_API"] == "pyside6":
@@ -38,12 +42,14 @@ BTI_INTEGER_FIELDS = {
 }
 
 class BTITab(QWidget):
+  gcft_window: 'GCFTWindow'
+  
   def __init__(self):
     super().__init__()
     self.ui = Ui_BTITab()
     self.ui.setupUi(self)
     
-    self.bti = None
+    self.bti: BTI | None = None
     self.bti_name = None
     
     self.ui.export_bti.setDisabled(True)
@@ -89,7 +95,7 @@ class BTITab(QWidget):
   
   
   def import_bti(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.import_bti_by_path,
       is_opening=True, is_saving=False, is_folder=False,
       file_type="BTI", file_filters=["BTI files (*.bti)"],
@@ -97,7 +103,7 @@ class BTITab(QWidget):
   
   def export_bti(self):
     bti_name = self.bti_name + ".bti"
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.export_bti_by_path,
       is_opening=False, is_saving=True, is_folder=False,
       file_type="BTI", file_filters=["BTI files (*.bti)"],
@@ -105,7 +111,7 @@ class BTITab(QWidget):
     )
   
   def import_bti_image(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.import_bti_image_by_path,
       is_opening=True, is_saving=False, is_folder=False,
       file_type="image", file_filters=["PNG Files (*.png)"],
@@ -113,7 +119,7 @@ class BTITab(QWidget):
   
   def export_bti_image(self):
     png_name = self.bti_name + ".png"
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.export_bti_image_by_path,
       is_opening=False, is_saving=True, is_folder=False,
       file_type="image", file_filters=["PNG Files (*.png)"],
@@ -121,14 +127,14 @@ class BTITab(QWidget):
     )
   
   def import_bti_from_bnr(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.import_bti_from_bnr_by_path,
       is_opening=True, is_saving=False, is_folder=False,
       file_type="BNR", file_filters=[],
     )
   
   def replace_bti_mipmap_image(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.replace_bti_mipmap_image_by_path,
       is_opening=True, is_saving=False, is_folder=False,
       file_type="image", file_filters=["PNG Files (*.png)"],
@@ -193,7 +199,7 @@ class BTITab(QWidget):
       line_edit_widget.setDisabled(False)
       
       value = getattr(self.bti, field_name)
-      value_str = self.window().stringify_number(value, min_hex_chars=2*byte_size)
+      value_str = self.gcft_window.stringify_number(value, min_hex_chars=2*byte_size)
       combobox_widget.blockSignals(True)
       line_edit_widget.setText(value_str)
       combobox_widget.blockSignals(False)
@@ -211,6 +217,8 @@ class BTITab(QWidget):
     self.ui.bti_curr_mipmap.setDisabled(False)
   
   def reload_bti_image(self):
+    assert self.bti is not None
+    
     selected_mipmap_index = self.ui.bti_curr_mipmap.currentIndex()
     selected_mipmap_index = max(0, selected_mipmap_index)
     selected_mipmap_index = min(self.bti.mipmap_count-1, selected_mipmap_index)
@@ -218,11 +226,11 @@ class BTITab(QWidget):
     self.bti_image = self.bti.render_mipmap(selected_mipmap_index)
     
     image_bytes = self.bti_image.tobytes('raw', 'BGRA')
-    qimage = QImage(image_bytes, self.bti_image.width, self.bti_image.height, QImage.Format_ARGB32)
+    qimage = QImage(image_bytes, self.bti_image.width, self.bti_image.height, QImage.Format.Format_ARGB32)
     pixmap = QPixmap.fromImage(qimage)
     self.ui.bti_image_label.setPixmap(pixmap)
     
-    file_size_str = self.window().stringify_number(fs.data_len(self.bti.data))
+    file_size_str = self.gcft_window.stringify_number(fs.data_len(self.bti.data))
     resolution_str = "%dx%d" % (self.bti_image.width, self.bti_image.height)
     self.ui.bti_file_size.setText(file_size_str)
     self.ui.bti_resolution.setText(resolution_str)
@@ -246,6 +254,8 @@ class BTITab(QWidget):
     self.ui.bti_curr_mipmap.blockSignals(False)
   
   def export_bti_by_path(self, bti_path):
+    assert self.bti is not None
+    
     self.bti.save_changes()
     
     with open(bti_path, "wb") as f:
@@ -329,6 +339,8 @@ class BTITab(QWidget):
     self.import_bti_by_data(data, bti_name)
   
   def replace_bti_mipmap_image_by_path(self, image_path):
+    assert self.bti is not None
+    
     _, _, width, height = self.bti.get_mipmap_offset_and_size(self.ui.bti_curr_mipmap.currentIndex())
     image = Image.open(image_path)
     if image.width != width or image.height != height:
@@ -349,6 +361,8 @@ class BTITab(QWidget):
     self.reload_bti_image()
   
   def bti_header_field_changed(self):
+    assert self.bti is not None
+    
     field_name = self.sender().objectName()
     assert field_name.startswith("bti_")
     field_name = field_name[len("bti_"):]
@@ -369,7 +383,7 @@ class BTITab(QWidget):
       
       line_edit_widget.blockSignals(True)
       
-      if self.window().display_hexadecimal_numbers:
+      if self.gcft_window.display_hexadecimal_numbers:
         hexadecimal_match = re.search(r"^\s*(?:0x)?([0-9a-f]+)\s*$", new_str_value, re.IGNORECASE)
         if hexadecimal_match:
           new_value = int(hexadecimal_match.group(1), 16)
@@ -403,7 +417,7 @@ class BTITab(QWidget):
       
       setattr(self.bti, field_name, new_value)
       
-      new_str_value = self.window().stringify_number(new_value, min_hex_chars=2*byte_size)
+      new_str_value = self.gcft_window.stringify_number(new_value, min_hex_chars=2*byte_size)
       line_edit_widget.setText(new_str_value)
       line_edit_widget.blockSignals(False)
     

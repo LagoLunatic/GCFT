@@ -34,7 +34,13 @@ except ImportError as e:
 
 REQUIRED_OPENGL_VERSION = (4, 5)
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+  from gcft_ui.main_window import GCFTWindow
+
 class J3DViewer(QOpenGLWidget):
+  gcft_window: 'GCFTWindow'
+  
   error_showing_preview = Signal(str)
   
   joint_anim_frame_changed = Signal(float)
@@ -482,8 +488,8 @@ class J3DViewer(QOpenGLWidget):
     
     if bck.ank1.anims_count != self.j3d.jnt1.joint_count:
       error_message = "This animation is not for this model.\nThe loaded BCK animation has animations for %s joints, while the currently loaded model has %s joints." % (
-        self.window().stringify_number(bck.ank1.anims_count, min_hex_chars=2),
-        self.window().stringify_number(self.j3d.jnt1.joint_count, min_hex_chars=2),
+        self.gcft_window.stringify_number(bck.ank1.anims_count, min_hex_chars=2),
+        self.gcft_window.stringify_number(self.j3d.jnt1.joint_count, min_hex_chars=2),
       )
       QMessageBox.warning(self, "Wrong joint count", error_message)
       return False

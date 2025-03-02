@@ -30,7 +30,7 @@ class JPCTab(BunfoeEditor):
     self.ui = Ui_JPCTab()
     self.ui.setupUi(self)
     
-    self.jpc = None
+    self.jpc: JPC | None = None
     self.jpc_name = None
     
     self.model = QStandardItemModel()
@@ -61,7 +61,7 @@ class JPCTab(BunfoeEditor):
   
   
   def import_jpc(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.import_jpc_by_path,
       is_opening=True, is_saving=False, is_folder=False,
       file_type="JPC", file_filters=["JPC Files (*.jpc)"],
@@ -69,7 +69,7 @@ class JPCTab(BunfoeEditor):
   
   def export_jpc(self):
     jpc_name = self.jpc_name + ".jpc"
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.export_jpc_by_path,
       is_opening=False, is_saving=True, is_folder=False,
       file_type="JPC", file_filters=["JPC Files (*.jpc)"],
@@ -77,14 +77,14 @@ class JPCTab(BunfoeEditor):
     )
   
   def add_particles_from_folder(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.add_particles_from_folder_by_path,
       is_opening=True, is_saving=False, is_folder=True,
       file_type="JPC"
     )
   
   def export_jpc_folder(self):
-    self.window().generic_do_gui_file_operation(
+    self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.export_jpc_folder_by_path,
       is_opening=False, is_saving=True, is_folder=True,
       file_type="JPC"
@@ -114,14 +114,14 @@ class JPCTab(BunfoeEditor):
     self.model.removeRows(0, self.model.rowCount())
     
     for particle in self.jpc.particles:
-      particle_id_str = self.window().stringify_number(particle.particle_id, min_hex_chars=4)
+      particle_id_str = self.gcft_window.stringify_number(particle.particle_id, min_hex_chars=4)
       
       particle_item = QStandardItem(particle_id_str)
       particle_item.setData(particle)
       self.model.appendRow(particle_item)
       
       for chunk in particle.chunks:
-        #chunk_size_str = self.window().stringify_number(chunk.size, min_hex_chars=5)
+        #chunk_size_str = self.gcft_window.stringify_number(chunk.size, min_hex_chars=5)
         
         chunk_item = QStandardItem(chunk.magic)
         chunk_item.setData(chunk)
@@ -206,8 +206,8 @@ class JPCTab(BunfoeEditor):
     
     self.ui.jpc_sidebar_label.setText("Showing BSP1 (Base Shape) chunk.")
     
-    self.window().make_color_selector_button(bsp1, "color_prm", "Color PRM", layout)
-    self.window().make_color_selector_button(bsp1, "color_env", "Color ENV", layout)
+    self.gcft_window.make_color_selector_button(bsp1, "color_prm", "Color PRM", layout)
+    self.gcft_window.make_color_selector_button(bsp1, "color_env", "Color ENV", layout)
     
     spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
     layout.addItem(spacer)
@@ -232,7 +232,7 @@ class JPCTab(BunfoeEditor):
     label.setText("Time: %d" % keyframe.time)
     layout.addWidget(label)
     
-    self.window().make_color_selector_button(keyframe, "color", "Color", layout)
+    self.gcft_window.make_color_selector_button(keyframe, "color", "Color", layout)
     
     spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
     layout.addItem(spacer)
@@ -319,7 +319,7 @@ class JPCTab(BunfoeEditor):
     
     self.bti_tab.import_bti_by_data(data, texture.filename)
     
-    self.window().set_tab_by_name("BTI Images")
+    self.gcft_window.set_tab_by_name("BTI Images")
   
   def replace_image_in_jpc(self):
     particle, texture = self.ui.actionReplaceJPCImage.data()
@@ -357,4 +357,4 @@ class JPCTab(BunfoeEditor):
     
     texture.bti.save_header_changes()
     
-    self.window().ui.statusbar.showMessage("Replaced %s." % texture.filename, 3000)
+    self.gcft_window.ui.statusbar.showMessage("Replaced %s." % texture.filename, 3000)
