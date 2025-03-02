@@ -43,6 +43,11 @@ class RecursiveFilterProxyModel(QSortFilterProxyModel):
   def __init__(self, always_show_children=False):
     super().__init__()
     self.always_show_children = always_show_children
+    # The default filter key column is 0 (only look at the first column).
+    # We switch it to -1 so it searches all columns.
+    # In the future we may want to consider searching all columns except numbers (file size, file
+    # index, etc). But QSortFilterProxyModel doesn't provide an easy way to do that.
+    self.setFilterKeyColumn(-1)
   
   def filterAcceptsRow(self, source_row: int, source_parent: QModelIndex | QPersistentModelIndex) -> bool:
     if self.always_show_children and source_parent.isValid():
