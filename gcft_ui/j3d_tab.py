@@ -3,6 +3,7 @@ import os
 from io import BytesIO
 import re
 import traceback
+from typing import Any
 from qtpy.QtGui import *
 from qtpy.QtCore import *
 from qtpy.QtWidgets import *
@@ -31,6 +32,7 @@ from gclib.j3d_chunks.ttk1 import TTK1, UVAnimation
 from gclib.bti import BTI
 
 from gcft_ui.bunfoe_editor import BunfoeEditor, BunfoeWidget, BunfoeDialog
+from gcft_ui.gcft_common import RecursiveFilterProxyModel
 
 from gcft_ui.qt_init import load_ui_file
 from gcft_paths import GCFT_ROOT_PATH
@@ -45,14 +47,27 @@ class J3DTab(BunfoeEditor):
     self.ui = Ui_J3DTab()
     self.ui.setupUi(self)
     
-    self.j3d: J3D = None
+    self.j3d: J3D | None = None
     self.j3d_name = None
     self.model_loaded = False
     
-    self.j3d_col_name_to_index = {}
-    for col in range(self.ui.j3d_chunks_tree.columnCount()):
-      column_name = self.ui.j3d_chunks_tree.headerItem().text(col)
-      self.j3d_col_name_to_index[column_name] = col
+    self.column_names = [
+      "Chunk Type",
+      "Name",
+      "Size",
+    ]
+    
+    self.model = QStandardItemModel()
+    self.model.setHorizontalHeaderLabels(self.column_names)
+    self.model.setColumnCount(len(self.column_names))
+    self.proxy = RecursiveFilterProxyModel()
+    self.proxy.setSourceModel(self.model)
+    self.proxy.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+    
+    self.ui.j3d_chunks_tree.setModel(self.proxy)
+    self.selection_model = self.ui.j3d_chunks_tree.selectionModel()
+    
+    self.ui.filter.textChanged.connect(self.filter_rows)
     
     # TODO: save to settings file?
     self.chunk_type_is_expanded = {
@@ -72,11 +87,11 @@ class J3DTab(BunfoeEditor):
     
     self.ui.load_anim.clicked.connect(self.load_anim)
     
-    self.ui.j3d_chunks_tree.itemSelectionChanged.connect(self.widget_item_selected)
-    self.ui.j3d_chunks_tree.itemExpanded.connect(self.item_expanded)
-    self.ui.j3d_chunks_tree.itemCollapsed.connect(self.item_collapsed)
+    self.selection_model.selectionChanged.connect(self.widget_item_selected)
+    self.ui.j3d_chunks_tree.expanded.connect(self.item_expanded)
+    self.ui.j3d_chunks_tree.collapsed.connect(self.item_collapsed)
     
-    self.ui.j3d_chunks_tree.setContextMenuPolicy(Qt.CustomContextMenu)
+    self.ui.j3d_chunks_tree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
     self.ui.j3d_chunks_tree.customContextMenuRequested.connect(self.show_j3d_chunks_tree_context_menu)
     self.ui.actionOpenJ3DImage.triggered.connect(self.open_image_in_j3d)
     self.ui.actionReplaceJ3DImage.triggered.connect(self.replace_image_in_j3d)
@@ -130,6 +145,8 @@ class J3DTab(BunfoeEditor):
     )
   
   def export_j3d(self):
+    assert self.j3d is not None
+    
     filters = []
     current_filter = self.get_file_filter_by_current_j3d_file_type()
     if current_filter is not None:
@@ -229,6 +246,8 @@ class J3DTab(BunfoeEditor):
       return None
   
   def try_save_j3d(self):
+    assert self.j3d is not None
+    
     try:
       self.j3d.save()
       return True
@@ -240,22 +259,26 @@ class J3DTab(BunfoeEditor):
       return False
   
   def reload_j3d_chunks_tree(self):
-    self.ui.j3d_chunks_tree.clear()
+    assert self.j3d is not None
+    
+    self.model.removeRows(0, self.model.rowCount())
     
     if self.isolated_visibility:
       self.toggle_isolated_visibility(update_preview=False)
     
-    self.tree_widget_item_to_object = {}
-    
     for chunk in self.j3d.chunks:
       chunk_size_str = self.window().stringify_number(chunk.size, min_hex_chars=5)
       
-      chunk_item = QTreeWidgetItem([chunk.magic, "", chunk_size_str])
-      self.ui.j3d_chunks_tree.addTopLevelItem(chunk_item)
-      
-      self.tree_widget_item_to_object[chunk_item] = chunk
-      
-      chunk_item.setExpanded(self.chunk_type_is_expanded.get(chunk.magic, False))
+      chunk_item = QStandardItem(chunk.magic)
+      chunk_item.setEditable(False)
+      name_item = QStandardItem("")
+      name_item.setEditable(False)
+      size_item = QStandardItem(chunk_size_str)
+      size_item.setEditable(False)
+      self.model.appendRow([chunk_item, name_item, size_item])
+      self.set_object_for_model_index(chunk_item.index(), chunk)
+      if self.chunk_type_is_expanded.get(chunk.magic, False):
+        self.expand_item(chunk_item)
       
       if isinstance(chunk, INF1):
         self.add_inf1_chunk_to_tree(chunk, chunk_item)
@@ -280,45 +303,54 @@ class J3DTab(BunfoeEditor):
       elif isinstance(chunk, TTK1):
         self.add_ttk1_chunk_to_tree(chunk, chunk_item)
     
-    self.ui.j3d_chunks_tree.setColumnWidth(1, 170)
-    self.ui.j3d_chunks_tree.setColumnWidth(2, 60)
+    self.ui.j3d_chunks_tree.setColumnWidth(self.column_names.index("Name"), 170)
+    self.ui.j3d_chunks_tree.setColumnWidth(self.column_names.index("Size"), 60)
     
     # Expand all items in the tree (for debugging):
-    #for item in self.ui.j3d_chunks_tree.findItems("*", Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive):
-    #  item.setExpanded(True)
+    # for item in self.model.findItems("*", Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive):
+    #   self.expand_item(item)
   
-  def make_tree_widget_item(self, obj, parent, item_args, expanded=False):
-    item = QTreeWidgetItem(item_args)
-    parent.addChild(item)
-    item.setExpanded(expanded)
+  def make_tree_model_item(self, obj, parent_item: QStandardItem, item_args: list[str], expanded=False):
+    assert len(item_args) == 3
+    chunk_type_arg, name_arg, size_arg = item_args
+    chunk_item = QStandardItem(chunk_type_arg)
+    chunk_item.setEditable(False)
+    name_item = QStandardItem(name_arg)
+    name_item.setEditable(False)
+    size_item = QStandardItem(size_arg)
+    size_item.setEditable(False)
+    parent_item.appendRow([chunk_item, name_item, size_item])
+    self.set_object_for_model_index(chunk_item.index(), obj)
+    if expanded:
+      self.expand_item(chunk_item)
     
-    if obj is not None:
-      self.tree_widget_item_to_object[item] = obj
-    
-    return item
+    return chunk_item
   
-  def item_expanded(self, item):
-    obj = self.tree_widget_item_to_object.get(item)
+  def item_expanded(self, index: QModelIndex):
+    index = self.proxy.mapToSource(index)
+    obj = self.get_object_for_model_index(index)
     if isinstance(obj, JChunk):
       self.chunk_type_is_expanded[obj.magic] = True
   
-  def item_collapsed(self, item):
-    obj = self.tree_widget_item_to_object.get(item)
+  def item_collapsed(self, index: QModelIndex):
+    index = self.proxy.mapToSource(index)
+    obj = self.get_object_for_model_index(index)
     if isinstance(obj, JChunk):
       self.chunk_type_is_expanded[obj.magic] = False
   
-  def widget_item_selected(self):
+  def widget_item_selected(self, selected_items: QItemSelection, deselected_items: QItemSelection):
     layout = self.ui.scrollAreaWidgetContents.layout()
     self.clear_layout_recursive(layout)
     
     self.ui.j3d_sidebar_label.setText("Extra information will be displayed here as necessary.")
     
-    
-    selected_items = self.ui.j3d_chunks_tree.selectedItems()
-    if not selected_items:
+    if selected_items.empty():
       return
-    item = selected_items[0]
-    obj = self.tree_widget_item_to_object.get(item)
+    first_index = selected_items.indexes()[0]
+    if not first_index.isValid():
+      return
+    first_index = self.proxy.mapToSource(first_index)
+    obj = self.get_object_for_model_index(first_index)
     
     # import cProfile, pstats
     # profiler = cProfile.Profile()
@@ -348,11 +380,11 @@ class J3DTab(BunfoeEditor):
     #   ps.print_stats()
   
   
-  def add_inf1_chunk_to_tree(self, inf1: INF1, chunk_item: QTreeWidgetItem):
+  def add_inf1_chunk_to_tree(self, inf1: INF1, chunk_item: QStandardItem):
     root_node = inf1.flat_hierarchy[0]
     self.add_inf1_node_to_tree_recursive(root_node, chunk_item)
   
-  def add_inf1_node_to_tree_recursive(self, inf1_node: INF1Node, parent_item: QTreeWidgetItem):
+  def add_inf1_node_to_tree_recursive(self, inf1_node: INF1Node, parent_item: QStandardItem):
     type_name = None
     names_list = None
     if inf1_node.type == INF1NodeType.JOINT:
@@ -374,52 +406,51 @@ class J3DTab(BunfoeEditor):
     else:
       node_name = f"{type_name} {index_str}: {names_list[inf1_node.index]}"
     
-    node_item = self.make_tree_widget_item(inf1_node, parent_item, [node_name, node_name, ""])
-    node_item.setExpanded(True)
+    node_item = self.make_tree_model_item(inf1_node, parent_item, [node_name, node_name, ""], expanded=True)
     
     for child_node in inf1_node.children:
       self.add_inf1_node_to_tree_recursive(child_node, node_item)
   
-  def add_vtx1_chunk_to_tree(self, vtx1: VTX1, chunk_item: QTreeWidgetItem):
+  def add_vtx1_chunk_to_tree(self, vtx1: VTX1, chunk_item: QStandardItem):
     for vtx_fmt in vtx1.vertex_formats:
       if vtx_fmt.attribute_type == GX.Attr.NULL:
         vtx_fmt_size_str = ""
       else:
         vtx_fmt_size = vtx_fmt.component_size * vtx_fmt.component_count * len(vtx1.attributes[vtx_fmt.attribute_type])
         vtx_fmt_size_str = self.window().stringify_number(vtx_fmt_size, min_hex_chars=2)
-      self.make_tree_widget_item(vtx_fmt, chunk_item, ["", vtx_fmt.attribute_type.name, vtx_fmt_size_str])
+      self.make_tree_model_item(vtx_fmt, chunk_item, ["", vtx_fmt.attribute_type.name, vtx_fmt_size_str])
   
-  # def add_evp1_chunk_to_tree(self, evp1: EVP1, chunk_item: QTreeWidgetItem):
+  # def add_evp1_chunk_to_tree(self, evp1: EVP1, chunk_item: QStandardItem):
   #   pass
   
-  # def add_drw1_chunk_to_tree(self, drw1: DRW1, chunk_item: QTreeWidgetItem):
+  # def add_drw1_chunk_to_tree(self, drw1: DRW1, chunk_item: QStandardItem):
   #   pass
   
-  def add_jnt1_chunk_to_tree(self, jnt1: JNT1, chunk_item: QTreeWidgetItem):
+  def add_jnt1_chunk_to_tree(self, jnt1: JNT1, chunk_item: QStandardItem):
     for joint_index, joint in enumerate(jnt1.joints):
       joint_index_str = self.window().stringify_number(joint_index, min_hex_chars=2)
       joint_name = jnt1.joint_names[joint_index]
-      self.make_tree_widget_item(joint, chunk_item, ["", f"{joint_index_str}: {joint_name}", ""])
+      self.make_tree_model_item(joint, chunk_item, ["", f"{joint_index_str}: {joint_name}", ""])
   
-  def add_shp1_chunk_to_tree(self, shp1: SHP1, chunk_item: QTreeWidgetItem):
+  def add_shp1_chunk_to_tree(self, shp1: SHP1, chunk_item: QStandardItem):
     for shape_index, shape in enumerate(shp1.shapes):
       shape_index_str = self.window().stringify_number(shape_index, min_hex_chars=2)
-      self.make_tree_widget_item(shape, chunk_item, ["", shape_index_str, ""])
+      self.make_tree_model_item(shape, chunk_item, ["", shape_index_str, ""])
   
-  def add_mat3_chunk_to_tree(self, mat3: MAT3, chunk_item: QTreeWidgetItem):
+  def add_mat3_chunk_to_tree(self, mat3: MAT3, chunk_item: QStandardItem):
     for mat_index, material in enumerate(mat3.materials):
       mat_name = mat3.mat_names[mat_index]
-      mat_item = self.make_tree_widget_item(material, chunk_item, ["", mat_name, ""])
+      mat_item = self.make_tree_model_item(material, chunk_item, ["", mat_name, ""])
       if len(mat3.indirects) != 0:
         indirect = mat3.indirects[mat_index]
-        self.make_tree_widget_item(indirect, mat_item, ["", f"Indirect Texturing", ""])
+        self.make_tree_model_item(indirect, mat_item, ["", f"Indirect Texturing", ""])
   
-  def add_mdl3_chunk_to_tree(self, mdl3: MDL3, chunk_item: QTreeWidgetItem):
+  def add_mdl3_chunk_to_tree(self, mdl3: MDL3, chunk_item: QStandardItem):
     for i, mdl_entry in enumerate(mdl3.entries):
       mat_name = self.j3d.mat3.mat_names[i]
-      self.make_tree_widget_item(mdl_entry, chunk_item, ["", mat_name, ""])
+      self.make_tree_model_item(mdl_entry, chunk_item, ["", mat_name, ""])
   
-  def add_tex1_chunk_to_tree(self, tex1: TEX1, chunk_item: QTreeWidgetItem):
+  def add_tex1_chunk_to_tree(self, tex1: TEX1, chunk_item: QStandardItem):
     seen_image_data_offsets = []
     seen_palette_data_offsets = []
     
@@ -441,32 +472,51 @@ class J3DTab(BunfoeEditor):
       else:
         texture_size_str = self.window().stringify_number(texture_total_size, min_hex_chars=5)
       
-      self.make_tree_widget_item(texture, chunk_item, ["", texture_name, texture_size_str])
+      self.make_tree_model_item(texture, chunk_item, ["", texture_name, texture_size_str])
   
-  def add_trk1_chunk_to_tree(self, trk1: TRK1, chunk_item: QTreeWidgetItem):
+  def add_trk1_chunk_to_tree(self, trk1: TRK1, chunk_item: QStandardItem):
     for anim_type_index, anim_type_dict in enumerate([trk1.mat_name_to_reg_anims, trk1.mat_name_to_konst_anims]):
       anim_type = ["Register", "Konstant"][anim_type_index]
-      anim_type_item = self.make_tree_widget_item(None, chunk_item, ["", anim_type, ""], True)
+      anim_type_item = self.make_tree_model_item(None, chunk_item, ["", anim_type, ""], True)
       for mat_name, anims in anim_type_dict.items():
-        mat_item = self.make_tree_widget_item(None, anim_type_item, ["", mat_name, ""])
+        mat_item = self.make_tree_model_item(None, anim_type_item, ["", mat_name, ""])
         for anim_index, anim in enumerate(anims):
-          anim_item = self.make_tree_widget_item(anim, mat_item, ["", "0x%02X" % anim_index, ""])
+          anim_item = self.make_tree_model_item(anim, mat_item, ["", "0x%02X" % anim_index, ""])
           for track_name in ["r", "g", "b", "a"]:
-            track_item = self.make_tree_widget_item(None, anim_item, ["", track_name.upper(), ""], True)
+            track_item = self.make_tree_model_item(None, anim_item, ["", track_name.upper(), ""], True)
             track = getattr(anim, track_name)
             for keyframe_index, keyframe in enumerate(track.keyframes):
-              self.make_tree_widget_item(keyframe, track_item, ["", "0x%02X" % keyframe_index, ""])
+              self.make_tree_model_item(keyframe, track_item, ["", "0x%02X" % keyframe_index, ""])
   
-  def add_ttk1_chunk_to_tree(self, ttk1: TTK1, chunk_item: QTreeWidgetItem):
-    chunk_item.setExpanded(True)
+  def add_ttk1_chunk_to_tree(self, ttk1: TTK1, chunk_item: QStandardItem):
+    self.expand_item(chunk_item)
     for mat_name, anims in ttk1.mat_name_to_anims.items():
-      mat_item = self.make_tree_widget_item(None, chunk_item, ["", mat_name, ""])
+      mat_item = self.make_tree_model_item(None, chunk_item, ["", mat_name, ""])
       for anim_index, anim in enumerate(anims):
-        anim_item = self.make_tree_widget_item(anim, mat_item, ["", "0x%02X" % anim_index, ""])
+        anim_item = self.make_tree_model_item(anim, mat_item, ["", "0x%02X" % anim_index, ""])
         for track_name, track in anim.tracks.items():
-          track_item = self.make_tree_widget_item(track, anim_item, ["", track_name.upper(), ""], True)
+          track_item = self.make_tree_model_item(track, anim_item, ["", track_name.upper(), ""], True)
           for keyframe_index, keyframe in enumerate(track.keyframes):
-            self.make_tree_widget_item(keyframe, track_item, ["", "0x%02X" % keyframe_index, ""])
+            self.make_tree_model_item(keyframe, track_item, ["", "0x%02X" % keyframe_index, ""])
+  
+  def expand_item(self, item: QStandardItem):
+    self.ui.j3d_chunks_tree.expand(self.proxy.mapFromSource(item.index()))
+  
+  def set_object_for_model_index(self, index: QModelIndex, obj: Any):
+    chunk_type_index = index.siblingAtColumn(self.column_names.index("Chunk Type"))
+    item = self.model.itemFromIndex(chunk_type_index)
+    item.setData(obj)
+  
+  def get_object_for_model_index(self, index: QModelIndex) -> Any:
+    chunk_type_index = index.siblingAtColumn(self.column_names.index("Chunk Type"))
+    item = self.model.itemFromIndex(chunk_type_index)
+    obj = item.data()
+    assert obj is not None
+    return obj
+  
+  def filter_rows(self):
+    query = self.ui.filter.text()
+    self.proxy.setFilterFixedString(query)
   
   
   def bunfoe_instance_selected(self, instance, text=None, disabled=False):
@@ -675,6 +725,8 @@ class J3DTab(BunfoeEditor):
   
   
   def export_j3d_by_path(self, j3d_path):
+    assert self.j3d is not None
+    
     success = self.try_save_j3d()
     if not success:
       return
@@ -713,12 +765,18 @@ class J3DTab(BunfoeEditor):
     else:
       return None
   
-  def show_j3d_chunks_tree_context_menu(self, pos):
+  def show_j3d_chunks_tree_context_menu(self, pos: QPoint):
     if self.j3d is None:
       return
     
-    item = self.ui.j3d_chunks_tree.itemAt(pos)
-    obj = self.tree_widget_item_to_object.get(item)
+    index = self.ui.j3d_chunks_tree.indexAt(pos)
+    if not index.isValid():
+      return
+    item = self.model.itemFromIndex(self.proxy.mapToSource(index))
+    if item is None:
+      return
+    
+    obj = self.get_object_for_model_index(item.index())
     
     if isinstance(obj, BTI):
       texture = obj
@@ -738,7 +796,7 @@ class J3DTab(BunfoeEditor):
       menu.exec_(self.ui.j3d_chunks_tree.mapToGlobal(pos))
   
   def open_image_in_j3d(self):
-    texture = self.ui.actionOpenJ3DImage.data()
+    texture: BTI = self.ui.actionOpenJ3DImage.data()
     
     # Need to make a fake standalone BTI texture data so we can load it without it being the TEX1 format.
     data = BytesIO()
@@ -766,7 +824,9 @@ class J3DTab(BunfoeEditor):
     self.window().set_tab_by_name("BTI Images")
   
   def replace_image_in_j3d(self):
-    texture = self.ui.actionReplaceJ3DImage.data()
+    assert self.j3d is not None
+    
+    texture: BTI = self.ui.actionReplaceJ3DImage.data()
     
     self.bti_tab.bti.save_changes()
     
@@ -792,6 +852,8 @@ class J3DTab(BunfoeEditor):
     self.window().ui.statusbar.showMessage("Replaced %s." % texture_name, 3000)
   
   def try_show_model_preview(self, *, reload_same_model: bool):
+    assert self.j3d is not None
+    
     self.ui.j3dultra_error_area.hide()
     self.ui.j3d_viewer.load_model(self.j3d, reload_same_model, self.get_hidden_material_indexes())
   
@@ -821,16 +883,22 @@ class J3DTab(BunfoeEditor):
       self.update_j3d_preview()
   
   def get_hidden_material_indexes(self):
+    assert self.j3d is not None
+    
     indexes = []
     if not self.isolated_visibility:
       return indexes
+    if self.j3d.mat3 is None:
+      return indexes
     
-    selected_items = self.ui.j3d_chunks_tree.selectedItems()
+    selected_model_indexes = self.ui.j3d_chunks_tree.selectedIndexes()
     selected_mat_indexes = []
-    for item in selected_items:
-      if not isinstance(self.tree_widget_item_to_object.get(item), Material):
+    for model_index in selected_model_indexes:
+      model_index = self.proxy.mapToSource(model_index)
+      obj = self.get_object_for_model_index(model_index)
+      if not isinstance(obj, Material):
         continue
-      mat_index = self.ui.j3d_chunks_tree.indexFromItem(item).row()
+      mat_index = self.j3d.mat3.materials.index(obj)
       selected_mat_indexes.append(mat_index)
     if not selected_mat_indexes:
       return indexes

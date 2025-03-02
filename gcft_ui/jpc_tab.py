@@ -54,7 +54,7 @@ class JPCTab(BunfoeEditor):
     self.ui.add_particles_from_folder.clicked.connect(self.add_particles_from_folder)
     self.ui.export_jpc_folder.clicked.connect(self.export_jpc_folder)
     
-    self.ui.jpc_particles_tree.setContextMenuPolicy(Qt.CustomContextMenu)
+    self.ui.jpc_particles_tree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
     self.ui.jpc_particles_tree.customContextMenuRequested.connect(self.show_jpc_particles_tree_context_menu)
     self.ui.actionOpenJPCImage.triggered.connect(self.open_image_in_jpc)
     self.ui.actionReplaceJPCImage.triggered.connect(self.replace_image_in_jpc)
@@ -265,7 +265,7 @@ class JPCTab(BunfoeEditor):
     QMessageBox.information(self, "JPC extracted", "Successfully extracted all JPA particles from the JPC to \"%s\"." % folder_path)
   
   
-  def show_jpc_particles_tree_context_menu(self, pos):
+  def show_jpc_particles_tree_context_menu(self, pos: QPoint):
     if self.jpc is None:
       return
     

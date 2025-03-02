@@ -49,7 +49,7 @@ class RecursiveFilterProxyModel(QSortFilterProxyModel):
       # Always show child rows if their top-level parent is shown.
       return True
     
-    # For the top-level rows (the particles), check if any of their children match the filter, recursively.
+    # For the top-level rows, check if any of their children match the filter, recursively.
     return self.check_row_recursive(source_row, source_parent)
   
   def check_row_recursive(self, source_row: int, source_parent: QModelIndex | QPersistentModelIndex) -> bool:

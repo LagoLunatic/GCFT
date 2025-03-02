@@ -568,7 +568,7 @@ class RARCTab(QWidget):
     self.update_all_displayed_file_indexes_and_ids()
   
   
-  def show_rarc_files_tree_context_menu(self, pos):
+  def show_rarc_files_tree_context_menu(self, pos: QPoint):
     if self.rarc is None:
       return
     

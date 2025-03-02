@@ -210,7 +210,7 @@ class GCMTab(QWidget):
     self.ui.dump_all_gcm_textures.setDisabled(False)
     self.ui.add_replace_files_from_folder.setDisabled(False)
     
-    self.ui.gcm_files_tree.setColumnWidth(0, 300)
+    self.ui.gcm_files_tree.setColumnWidth(self.column_names.index("File Name"), 300)
     
     self.filter_rows()
     self.expand_item(root_item)
@@ -396,7 +396,7 @@ class GCMTab(QWidget):
     self.reload_gcm_files_tree()
   
   
-  def show_gcm_files_tree_context_menu(self, pos):
+  def show_gcm_files_tree_context_menu(self, pos: QPoint):
     if self.gcm is None:
       return
     

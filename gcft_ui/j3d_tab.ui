@@ -47,28 +47,20 @@
      <widget class="QWidget" name="verticalLayoutWidget_2">
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
-        <widget class="QTreeWidget" name="j3d_chunks_tree">
+        <widget class="QLineEdit" name="filter">
+         <property name="placeholderText">
+          <string>Filter</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTreeView" name="j3d_chunks_tree">
          <property name="minimumSize">
           <size>
            <width>370</width>
            <height>0</height>
           </size>
          </property>
-         <column>
-          <property name="text">
-           <string>Chunk Type</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Name</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Size</string>
-          </property>
-         </column>
         </widget>
        </item>
        <item>
@@ -110,7 +102,16 @@
      </widget>
      <widget class="QWidget" name="j3d_sidebar" native="true">
       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1">
-       <property name="margin" stdset="0">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
         <number>0</number>
        </property>
        <item>
@@ -181,7 +182,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>369</width>
+            <width>393</width>
             <height>618</height>
            </rect>
           </property>
@@ -209,8 +210,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>308</width>
-            <height>69</height>
+            <width>298</width>
+            <height>68</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_4">

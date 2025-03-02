@@ -17,8 +17,8 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QLabel,
-    QPushButton, QScrollArea, QSizePolicy, QSplitter,
-    QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
+    QLineEdit, QPushButton, QScrollArea, QSizePolicy,
+    QSplitter, QTreeView, QVBoxLayout, QWidget)
 
 from gcft_ui.anim_control import AnimControl
 from gcft_ui.j3d_viewer import J3DViewer
@@ -62,7 +62,12 @@ class Ui_J3DTab(object):
         self.verticalLayout_6 = QVBoxLayout(self.verticalLayoutWidget_2)
         self.verticalLayout_6.setObjectName(u"verticalLayout_6")
         self.verticalLayout_6.setContentsMargins(0, 0, 0, 0)
-        self.j3d_chunks_tree = QTreeWidget(self.verticalLayoutWidget_2)
+        self.filter = QLineEdit(self.verticalLayoutWidget_2)
+        self.filter.setObjectName(u"filter")
+
+        self.verticalLayout_6.addWidget(self.filter)
+
+        self.j3d_chunks_tree = QTreeView(self.verticalLayoutWidget_2)
         self.j3d_chunks_tree.setObjectName(u"j3d_chunks_tree")
         self.j3d_chunks_tree.setMinimumSize(QSize(370, 0))
 
@@ -97,8 +102,8 @@ class Ui_J3DTab(object):
         self.j3d_sidebar = QWidget(self.splitter)
         self.j3d_sidebar.setObjectName(u"j3d_sidebar")
         self.verticalLayout_2 = QVBoxLayout(self.j3d_sidebar)
-        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.j3d_sidebar_label = QLabel(self.j3d_sidebar)
@@ -142,7 +147,7 @@ class Ui_J3DTab(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 369, 618))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 393, 618))
         self.verticalLayout_3 = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
@@ -166,7 +171,7 @@ class Ui_J3DTab(object):
         self.j3dultra_error_area.setWidgetResizable(True)
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 308, 69))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 298, 68))
         self.verticalLayout_4 = QVBoxLayout(self.scrollAreaWidgetContents_2)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.verticalLayout_4.setContentsMargins(-1, 0, -1, 0)
@@ -211,10 +216,7 @@ class Ui_J3DTab(object):
         self.import_j3d.setText(QCoreApplication.translate("J3DTab", u"Import J3D File", None))
         self.export_j3d.setText(QCoreApplication.translate("J3DTab", u"Export J3D File", None))
         self.load_anim.setText(QCoreApplication.translate("J3DTab", u"Load Animation", None))
-        ___qtreewidgetitem = self.j3d_chunks_tree.headerItem()
-        ___qtreewidgetitem.setText(2, QCoreApplication.translate("J3DTab", u"Size", None));
-        ___qtreewidgetitem.setText(1, QCoreApplication.translate("J3DTab", u"Name", None));
-        ___qtreewidgetitem.setText(0, QCoreApplication.translate("J3DTab", u"Chunk Type", None));
+        self.filter.setPlaceholderText(QCoreApplication.translate("J3DTab", u"Filter", None))
         self.joint_anim_control.setProperty(u"anim_type", QCoreApplication.translate("J3DTab", u"joint", None))
         self.reg_anim_control.setProperty(u"anim_type", QCoreApplication.translate("J3DTab", u"reg", None))
         self.texidx_anim_control.setProperty(u"anim_type", QCoreApplication.translate("J3DTab", u"texidx", None))
