@@ -52,7 +52,7 @@ def get_dark_mode_palette(app: QApplication):
   placeholder_color = QColor("#D9D9D9")
   placeholder_color.setAlpha(128)
   pal.setColor(QPalette.ColorRole.PlaceholderText, placeholder_color)
-
+  
   pal.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.WindowText, QColor("#7F7F7F"))
   pal.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Text, QColor("#7F7F7F"))
   pal.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.ButtonText, QColor("#7F7F7F"))
