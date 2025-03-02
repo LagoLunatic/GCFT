@@ -344,7 +344,7 @@ class J3DTab(BunfoeEditor):
     
     self.ui.j3d_sidebar_label.setText("Extra information will be displayed here as necessary.")
     
-    if selected_items.empty():
+    if selected_items.isEmpty():
       return
     first_index = selected_items.indexes()[0]
     if not first_index.isValid():
