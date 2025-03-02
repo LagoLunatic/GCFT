@@ -17,7 +17,6 @@ jobs:
         include:
           - name: Windows
             os: windows-latest
-            architecture: x64
             artifact: windows
             upload_path_suffix: '/*'
             reqs_file: requirements_full.txt
@@ -28,13 +27,11 @@ jobs:
             reqs_file: requirements_qt5_full.txt
           - name: MacOS
             os: macos-latest
-            architecture: x64
             artifact: macos
             upload_path_suffix: '.zip'
             reqs_file: requirements_full.txt
           - name: Linux
             os: ubuntu-latest
-            architecture: x64
             artifact: linux
             upload_path_suffix: '/*'
             reqs_file: requirements_full.txt
@@ -58,7 +55,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-          architecture: ${{ matrix.architecture }}
           cache: 'pip' # Cache all pip dependency downloads
       - name: Get PyJ3DUltra submodule status for cache
         run: |
@@ -123,5 +119,5 @@ jobs:
       - name: Upload Python App
         uses: actions/upload-artifact@v4
         with:
-          name: gcft-${{ steps.vars.outputs.full_version }}-${{ matrix.artifact }}-${{ matrix.architecture }}
-          path: dist/release_archive_${{ steps.vars.outputs.full_version }}_${{ matrix.architecture }}${{ matrix.upload_path_suffix }}
+          name: gcft-${{ steps.vars.outputs.full_version }}-${{ matrix.artifact }}
+          path: dist/release_archive_${{ steps.vars.outputs.full_version }}_x64${{ matrix.upload_path_suffix }}
