@@ -4,9 +4,9 @@
 GameCube File Tools (GCFT) is a GUI tool for editing the following common file formats used by GameCube games:
 * GCM (GameCube ISOs)
 * RARC (archives)
-* BTI (images)
-* Various J3D formats (e.g. textures in BDL and BMD models)
-* JPC (particle effect archives) (versions 1-00 and 2-10)
+* BTI (images/textures)
+* Most J3D formats (BMD/BDL models and their animations)
+* JPC (JPA particle effect archives) (versions 1-00 and 2-10)
 * Yaz0 and Yay0 (compression)
 
 Features:
@@ -20,7 +20,9 @@ Features:
 * Dump all BTI images in a GCM or a RARC to a folder as PNG
 * Edit the header attributes of BTI images (e.g. image format, palette format, wrapping, filter mode)
 * View and extract the images contained in GameCube banner files (.bnr)
-* Extract and replace the BTI textures embedded in J3D BDL and BMD models and BMT material tables, and JPC particle archives
+* Extract and replace the BTI textures embedded in J3D BMD and BDL models, BMT material tables, and JPC particle archives
+* Edit various attributes in BMD/BDL models (such as MAT3 material properties)
+* Visual previews of BMD/BDL 3D models that update in real time as the model's materials are edited
 * Import a folder of particle files onto an existing JPC, adding/overwriting all the particles from the folder to the JPC
 * Viewing DOL executable sections, and converting between offsets within the DOL file and RAM addresses in the game's memory
 * Compress and decompress Yaz0 and Yay0 files
@@ -53,10 +55,10 @@ If you're on Linux, run this command instead: `sudo apt-get install python3.12`
 Open the GCFT folder in a command prompt and install dependencies by running:  
 `py -3.12 -m pip install -r requirements.txt` (on Windows)  
 `python3 -m pip install -r requirements.txt` (on Mac)  
-`python3 -m pip install $(cat requirements.txt) --user` (on Linux)  
+`python3 -m pip install -r requirements.txt --user` (on Linux)  
 
 Then run GCFT with:  
-`py gcft.py` (on Windows)  
+`py -3.12 gcft.py` (on Windows)  
 `python3 gcft.py` (on Mac)  
 `python3 gcft.py` (on Linux)  
 
@@ -68,3 +70,5 @@ A script that automates this process is provided. Simply run the following comma
 On Windows, you must first [install vcpkg](https://vcpkg.io/en/getting-started) and [Visual Studio](https://visualstudio.microsoft.com/vs/community/) before running that command.  
 
 If the script ran successfully with no errors, then the next time you load a J3D model in GCFT you should see a 3D preview.
+
+If you are on Windows 8 or below, use `requirements_qt5.txt`/`requirements_qt5_full.txt` instead of the normal requirements files.  
