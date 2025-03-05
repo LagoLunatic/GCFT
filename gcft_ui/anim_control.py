@@ -29,7 +29,7 @@ class AnimControl(QGroupBox):
     self.ui.pause_button.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPlay))
     self.ui.pause_button.clicked.connect(self.toggle_anim_paused)
     self.ui.seek_slider.valueChanged.connect(self.update_anim_frame_by_type)
-    self.ui.detach_button.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_TitleBarCloseButton))
+    self.ui.detach_button.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_TrashIcon))
     self.ui.detach_button.clicked.connect(self.detach_anim)
     
     self.update_anim_pause_button_icon()
