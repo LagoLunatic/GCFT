@@ -120,14 +120,14 @@ class J3DTab(BunfoeEditor):
     # TODO: the J3D preview column should be collapsed whenever the preview is not visible
     self.ui.splitter.setSizes([250, 500, 500])
     
-    anim_controls = [
+    self.anim_controls = [
       self.ui.joint_anim_control,
       self.ui.reg_anim_control,
       self.ui.texidx_anim_control,
       self.ui.texmtx_anim_control,
       self.ui.vis_anim_control,
     ]
-    for anim_control in anim_controls:
+    for anim_control in self.anim_controls:
       anim_control.anim_type_paused_changed.connect(self.ui.j3d_viewer.set_anim_type_paused)
       anim_control.anim_type_slider_frame_changed.connect(self.ui.j3d_viewer.set_anim_frame_by_type)
       anim_control.anim_type_detached.connect(self.ui.j3d_viewer.detach_anim_type)
@@ -184,6 +184,12 @@ class J3DTab(BunfoeEditor):
     j3d = self.try_read_j3d(data)
     if j3d is None:
       return
+    
+    for anim_control in self.anim_controls:
+      # Detach anims for the previously loaded model.
+      anim_control.hide()
+      anim_control.detach_anim()
+    
     self.j3d = j3d
     
     self.j3d_name = j3d_name

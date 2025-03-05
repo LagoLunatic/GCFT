@@ -22,6 +22,7 @@ class AnimControl(QGroupBox):
     self.ui = Ui_AnimControl()
     self.ui.setupUi(self)
     
+    self.anim_loaded = False
     self.paused = False
     self.duration = 0
     
@@ -49,14 +50,16 @@ class AnimControl(QGroupBox):
     self.update_anim_pause_button_icon()
   
   def detach_anim(self):
-    self.anim_type_detached.emit(self.property("anim_type"))
-    self.hide()
+    if self.anim_loaded:
+      self.anim_type_detached.emit(self.property("anim_type"))
+      self.anim_loaded = False
+      self.hide()
   
   def update_anim_pause_button_icon(self):
     if self.paused:
-      self.ui.pause_button.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
+      self.ui.pause_button.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPlay))
     else:
-      self.ui.pause_button.setIcon(self.style().standardIcon(QStyle.SP_MediaPause))
+      self.ui.pause_button.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPause))
   
   def update_slider_from_anim_frame(self, frame: float):
     self.ui.seek_slider.blockSignals(True)
@@ -87,4 +90,5 @@ class AnimControl(QGroupBox):
     self.anim_type_paused_changed.emit(self.property("anim_type"), self.paused)
     self.update_anim_pause_button_icon()
     
+    self.anim_loaded = True
     self.show()
