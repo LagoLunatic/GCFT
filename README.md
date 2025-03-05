@@ -1,7 +1,7 @@
 
-## About
+## GameCube File Tools
 
-GameCube File Tools (GCFT) is a GUI tool for editing the following common file formats used by GameCube games:
+GameCube File Tools (GCFT) is a GUI multitool for editing the following common file formats used by GameCube games:
 * GCM (GameCube ISOs)
 * RARC (archives)
 * BTI (images/textures)
