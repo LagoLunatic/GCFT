@@ -14,6 +14,11 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "PyJ3DUltra", "
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "PyJ3DUltra", "build", "Debug"))
 
 from gcft_ui.gcft_common import GCFTThread, GCFTProgressDialog
+from gcft_ui.gcm_tab import GCMTab
+from gcft_ui.rarc_tab import RARCTab
+from gcft_ui.bti_tab import BTITab
+from gcft_ui.j3d_tab import J3DTab
+from gcft_ui.jpc_tab import JPCTab
 from version import VERSION
 from gcft_paths import ASSETS_PATH, SETTINGS_PATH
 
@@ -46,6 +51,12 @@ J3D_FILE_EXTS = [
 JPC_FILE_EXTS = [".jpc"]
 
 class GCFTWindow(QMainWindow):
+  gcm_tab: GCMTab
+  rarc_tab: RARCTab
+  bti_tab: BTITab
+  j3d_tab: J3DTab
+  jpc_tab: JPCTab
+  
   def __init__(self):
     super().__init__()
     self.ui = Ui_MainWindow()
@@ -223,10 +234,10 @@ class GCFTWindow(QMainWindow):
     response = QMessageBox.question(self, 
       "Confirm delete",
       message,
-      QMessageBox.Cancel | QMessageBox.Yes,
-      QMessageBox.Cancel
+      QMessageBox.StandardButton.Cancel | QMessageBox.StandardButton.Yes,
+      QMessageBox.StandardButton.Cancel
     )
-    if response == QMessageBox.Yes:
+    if response == QMessageBox.StandardButton.Yes:
       return True
     else:
       return False
@@ -284,7 +295,7 @@ class GCFTWindow(QMainWindow):
     initial_color = QColor(r, g, b, a)
     color_dialog_options = QColorDialog.ColorDialogOption(0)
     if has_alpha:
-      color_dialog_options |= QColorDialog.ShowAlphaChannel
+      color_dialog_options |= QColorDialog.ColorDialogOption.ShowAlphaChannel
     color = QColorDialog.getColor(initial_color, self, "Select color", options=color_dialog_options)
     if not color.isValid():
       return

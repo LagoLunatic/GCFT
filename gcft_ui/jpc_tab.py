@@ -111,6 +111,8 @@ class JPCTab(BunfoeEditor):
     self.ui.export_jpc_folder.setDisabled(False)
   
   def reload_jpc_particles_tree(self):
+    assert self.jpc is not None
+    
     self.model.removeRows(0, self.model.rowCount())
     
     for particle in self.jpc.particles:
@@ -170,6 +172,8 @@ class JPCTab(BunfoeEditor):
   
   
   def add_bsp1_chunk_to_tree(self, bsp1: BSP1, chunk_item: QStandardItem):
+    assert self.jpc is not None
+    
     if bsp1.color_prm_anm_table:
       anim_item = QStandardItem("Color PRM Anim")
       chunk_item.appendRow(anim_item)
@@ -187,9 +191,13 @@ class JPCTab(BunfoeEditor):
         anim_item.appendRow(keyframe_item)
   
   def add_ssp1_chunk_to_tree(self, ssp1: SSP1, chunk_item: QStandardItem):
+    assert self.jpc is not None
+    
     pass
   
   def add_tdb1_chunk_to_tree(self, tdb1: TDB1, chunk_item: QStandardItem):
+    assert self.jpc is not None
+    
     # Expand TDB1 chunks by default.
     chunk_index = self.proxy.mapFromSource(self.model.indexFromItem(chunk_item))
     self.ui.jpc_particles_tree.expand(chunk_index)
@@ -238,6 +246,8 @@ class JPCTab(BunfoeEditor):
     layout.addItem(spacer)
   
   def export_jpc_by_path(self, jpc_path):
+    assert self.jpc is not None
+    
     self.jpc.save()
     
     with open(jpc_path, "wb") as f:
@@ -249,6 +259,8 @@ class JPCTab(BunfoeEditor):
     QMessageBox.information(self, "JPC saved", "Successfully saved JPC.")
   
   def add_particles_from_folder_by_path(self, folder_path):
+    assert self.jpc is not None
+    
     num_particles_added, num_particles_overwritten, num_textures_added, num_textures_overwritten = self.jpc.import_particles_from_disk(folder_path)
     
     if num_particles_added == num_particles_overwritten == num_textures_added == num_textures_overwritten == 0:
@@ -322,6 +334,8 @@ class JPCTab(BunfoeEditor):
     self.gcft_window.set_tab_by_name("BTI Images")
   
   def replace_image_in_jpc(self):
+    assert self.jpc is not None
+    
     particle, texture = self.ui.actionReplaceJPCImage.data()
     
     num_particles_sharing_texture = 0
@@ -337,10 +351,10 @@ class JPCTab(BunfoeEditor):
       response = QMessageBox.question(self, 
         "Texture used by multiple particles",
         message,
-        QMessageBox.Cancel | QMessageBox.Yes,
-        QMessageBox.Cancel
+        QMessageBox.StandardButton.Cancel | QMessageBox.StandardButton.Yes,
+        QMessageBox.StandardButton.Cancel
       )
-      if response != QMessageBox.Yes:
+      if response != QMessageBox.StandardButton.Yes:
         return
     
     self.bti_tab.bti.save_changes()

@@ -186,6 +186,8 @@ class GCMTab(QWidget):
     self.reload_gcm_files_tree()
   
   def reload_gcm_files_tree(self):
+    assert self.gcm is not None
+    
     self.model.removeRows(0, self.model.rowCount())
     
     root_entry = self.gcm.file_entries[0]
@@ -292,6 +294,8 @@ class GCMTab(QWidget):
     QMessageBox.information(self, "GCM saved", "Successfully saved GCM.")
   
   def replace_all_files_in_gcm_folder_by_path(self, folder_path):
+    assert self.gcm is not None
+    
     base_dir = self.ui.actionReplaceAllFilesInGCMFolder.data()
     replace_paths, add_paths = self.gcm.collect_files_to_replace_and_add_from_disk(folder_path, base_dir=base_dir)
     
@@ -309,10 +313,10 @@ class GCMTab(QWidget):
     response = QMessageBox.question(self, 
       "Confirm replace files",
       message,
-      QMessageBox.Cancel | QMessageBox.Yes,
-      QMessageBox.Cancel
+      QMessageBox.StandardButton.Cancel | QMessageBox.StandardButton.Yes,
+      QMessageBox.StandardButton.Cancel
     )
-    if response != QMessageBox.Yes:
+    if response != QMessageBox.StandardButton.Yes:
       return
     
     generator = self.gcm.import_files_from_disk_by_paths(folder_path, replace_paths, [], base_dir=base_dir)
@@ -324,6 +328,8 @@ class GCMTab(QWidget):
     )
   
   def replace_all_files_in_gcm_by_path_complete(self):
+    assert self.gcm is not None
+    
     QMessageBox.information(self, "Files replaced", "Successfully overwrote all matching files in the GCM.")
     
     for file_path in self.gcm.changed_files:
@@ -331,6 +337,8 @@ class GCMTab(QWidget):
       self.update_changed_file_size_in_gcm(file)
   
   def extract_all_files_from_gcm_folder_by_path(self, folder_path):
+    assert self.gcm is not None
+    
     base_dir = self.ui.actionExtractAllFilesFromGCMFolder.data()
     generator = self.gcm.export_disc_to_folder_with_changed_files(folder_path, base_dir=base_dir)
     max_val = self.gcm.get_num_files(base_dir)
@@ -344,6 +352,8 @@ class GCMTab(QWidget):
     QMessageBox.information(self, "GCM extracted", "Successfully extracted GCM contents.")
   
   def dump_all_gcm_textures_by_path(self, folder_path):
+    assert self.gcm is not None
+    
     asset_dumper = AssetDumper()
     dumper_generator = asset_dumper.dump_all_textures_in_gcm(self.gcm, folder_path)
     max_val = len(asset_dumper.get_all_gcm_file_paths(self.gcm))
@@ -351,6 +361,8 @@ class GCMTab(QWidget):
     self.gcft_window.start_texture_dumper_thread(asset_dumper, dumper_generator, max_val)
   
   def add_replace_files_from_folder_by_path(self, folder_path):
+    assert self.gcm is not None
+    
     base_dir = self.ui.actionExtractAllFilesFromGCMFolder.data()
     
     root_names = set(os.listdir(folder_path))
@@ -378,10 +390,10 @@ class GCMTab(QWidget):
     response = QMessageBox.question(self, 
       "Confirm import files",
       message,
-      QMessageBox.Cancel | QMessageBox.Yes,
-      QMessageBox.Cancel
+      QMessageBox.StandardButton.Cancel | QMessageBox.StandardButton.Yes,
+      QMessageBox.StandardButton.Cancel
     )
-    if response != QMessageBox.Yes:
+    if response != QMessageBox.StandardButton.Yes:
       return
     
     generator = self.gcm.import_files_from_disk_by_paths(folder_path, replace_paths, add_paths, base_dir=base_dir)
