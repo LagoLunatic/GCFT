@@ -829,26 +829,24 @@ class RARCTab(QWidget):
   def check_file_path_is_rarc(self, file_path: str) -> bool:
     try:
       _, file_ext = os.path.splitext(os.path.basename(file_path))
-      if file_ext == ".arc":
+      if file_ext in [".arc", ".szs", ".szp"]:
         with open(file_path, "rb") as f:
-          file_data = BytesIO(f.read(4))
-        if RARC.check_file_is_rarc(file_data):
-          return True
-      elif file_ext == ".szs":
-        with open(file_path, "rb") as f:
-          file_data = BytesIO(f.read(0x15))
+          file_data = BytesIO(f.read(0x11 + 4))
         if Yaz0.check_is_compressed(file_data):
           magic = fs.read_str(file_data, 0x11, 4)
           if magic == "RARC":
             return True
-      elif file_ext == ".szp":
-        with open(file_path, "rb") as f:
-          file_data = BytesIO(f.read())
-        if Yay0.check_is_compressed(file_data):
+        elif Yay0.check_is_compressed(file_data):
           chunk_offset = fs.read_u32(file_data, 0xC)
+          with open(file_path, "rb") as f:
+            file_data = BytesIO(f.read(chunk_offset + 4))
           magic = fs.read_str(file_data, chunk_offset, 4)
           if magic == "RARC":
             return True
+        elif RARC.check_file_is_rarc(file_data):
+          return True
+        with open(file_path, "rb") as f:
+          file_data = BytesIO(f.read())
     except Exception as e:
       pass
     return False
