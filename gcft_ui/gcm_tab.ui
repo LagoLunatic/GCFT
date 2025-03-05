@@ -169,6 +169,21 @@
     <enum>QAction::NoRole</enum>
    </property>
   </action>
+  <action name="actionOpenGCMJ3D">
+   <property name="text">
+    <string>Open J3D</string>
+   </property>
+  </action>
+  <action name="actionReplaceGCMJ3D">
+   <property name="text">
+    <string>Replace J3D</string>
+   </property>
+  </action>
+  <action name="actionLoadJ3DAnim">
+   <property name="text">
+    <string>Load J3D Animation</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

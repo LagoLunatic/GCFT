@@ -75,6 +75,9 @@ class GCMTab(QWidget):
     self.ui.actionReplaceGCMRARC.triggered.connect(self.replace_rarc_in_gcm)
     self.ui.actionOpenGCMImage.triggered.connect(self.open_image_in_gcm)
     self.ui.actionReplaceGCMImage.triggered.connect(self.replace_image_in_gcm)
+    self.ui.actionOpenGCMJ3D.triggered.connect(self.open_j3d_in_gcm)
+    self.ui.actionReplaceGCMJ3D.triggered.connect(self.replace_j3d_in_gcm)
+    self.ui.actionLoadJ3DAnim.triggered.connect(self.load_j3d_anim)
     self.ui.actionOpenGCMJPC.triggered.connect(self.open_jpc_in_gcm)
     self.ui.actionReplaceGCMJPC.triggered.connect(self.replace_jpc_in_gcm)
     self.ui.actionOpenGCMDOL.triggered.connect(self.open_dol_in_gcm)
@@ -450,8 +453,18 @@ class GCMTab(QWidget):
       menu = QMenu(self)
       
       basename, file_ext = os.path.splitext(file.name)
-      
+      image_selected = False
+      j3d_selected = False
+      j3d_anim_selected = False
       if file_ext == ".bti" or self.is_banner_filename(file.name):
+        image_selected = True
+      elif file_ext in [".bdl", ".bmd"]:
+        j3d_selected = True
+      elif file_ext in [".bmt", ".btk", ".bck", ".brk", ".btp", ".bca", ".bva"]:
+        j3d_selected = True
+        j3d_anim_selected = True
+      
+      if image_selected:
         menu.addAction(self.ui.actionOpenGCMImage)
         self.ui.actionOpenGCMImage.setData(file)
         
@@ -461,7 +474,8 @@ class GCMTab(QWidget):
           self.ui.actionReplaceGCMImage.setDisabled(True)
         else:
           self.ui.actionReplaceGCMImage.setDisabled(False)
-      elif self.gcm.check_file_is_rarc(file.file_path):
+      
+      if self.gcm.check_file_is_rarc(file.file_path):
         menu.addAction(self.ui.actionOpenGCMRARC)
         self.ui.actionOpenGCMRARC.setData(file)
         
@@ -471,7 +485,27 @@ class GCMTab(QWidget):
           self.ui.actionReplaceGCMRARC.setDisabled(True)
         else:
           self.ui.actionReplaceGCMRARC.setDisabled(False)
-      elif file_ext == ".jpc":
+      
+      if j3d_anim_selected:
+        menu.addAction(self.ui.actionLoadJ3DAnim)
+        self.ui.actionLoadJ3DAnim.setData(file)
+        if not self.j3d_tab.model_loaded:
+          self.ui.actionLoadJ3DAnim.setDisabled(True)
+        else:
+          self.ui.actionLoadJ3DAnim.setDisabled(False)
+      
+      if j3d_selected:
+        menu.addAction(self.ui.actionOpenGCMJ3D)
+        self.ui.actionOpenGCMJ3D.setData(file)
+        
+        menu.addAction(self.ui.actionReplaceGCMJ3D)
+        self.ui.actionReplaceGCMJ3D.setData(file)
+        if self.j3d_tab.j3d is None:
+          self.ui.actionReplaceGCMJ3D.setDisabled(True)
+        else:
+          self.ui.actionReplaceGCMJ3D.setDisabled(False)
+      
+      if file_ext == ".jpc":
         menu.addAction(self.ui.actionOpenGCMJPC)
         self.ui.actionOpenGCMJPC.setData(file)
         
@@ -481,7 +515,8 @@ class GCMTab(QWidget):
           self.ui.actionReplaceGCMJPC.setDisabled(True)
         else:
           self.ui.actionReplaceGCMJPC.setDisabled(False)
-      elif file.file_path == "sys/main.dol":
+      
+      if file.file_path == "sys/main.dol":
         menu.addAction(self.ui.actionOpenGCMDOL)
         self.ui.actionOpenGCMDOL.setData(file)
         
@@ -626,6 +661,42 @@ class GCMTab(QWidget):
     self.update_changed_file_size_in_gcm(file_entry)
     
     self.gcft_window.ui.statusbar.showMessage("Replaced %s." % file_entry.file_path, 3000)
+  
+  def open_j3d_in_gcm(self):
+    file_entry = self.ui.actionOpenGCMJ3D.data()
+    
+    data = self.gcm.get_changed_file_data(file_entry.file_path)
+    data = fs.make_copy_data(data)
+    
+    j3d_name = os.path.splitext(file_entry.name)[0]
+    
+    self.j3d_tab.import_j3d_by_data(data, j3d_name)
+    
+    self.gcft_window.set_tab_by_name("J3D Files")
+  
+  def replace_j3d_in_gcm(self):
+    file_entry = self.ui.actionReplaceGCMJ3D.data()
+    
+    self.j3d_tab.j3d.save()
+    data = fs.make_copy_data(self.j3d_tab.j3d.data)
+    
+    self.gcm.changed_files[file_entry.file_path] = data
+    
+    self.update_changed_file_size_in_gcm(file_entry)
+    
+    self.gcft_window.ui.statusbar.showMessage("Replaced %s." % file_entry.file_path, 3000)
+  
+  def load_j3d_anim(self):
+    file_entry = self.ui.actionLoadJ3DAnim.data()
+    
+    data = self.gcm.get_changed_file_data(file_entry.file_path)
+    data = fs.make_copy_data(data)
+    
+    j3d_name = os.path.splitext(file_entry.name)[0]
+    
+    self.j3d_tab.load_anim_by_data(data, j3d_name)
+    
+    self.gcft_window.set_tab_by_name("J3D Files")
   
   def open_jpc_in_gcm(self):
     file_entry = self.ui.actionOpenGCMJPC.data()
