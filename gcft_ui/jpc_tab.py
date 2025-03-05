@@ -34,7 +34,7 @@ class JPCTab(BunfoeEditor):
     self.jpc_name = None
     
     self.model = QStandardItemModel()
-    self.proxy = RecursiveFilterProxyModel(always_show_children=True)
+    self.proxy = RecursiveFilterProxyModel()
     self.proxy.setSourceModel(self.model)
     self.proxy.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
     

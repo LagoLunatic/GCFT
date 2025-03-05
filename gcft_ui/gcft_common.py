@@ -40,9 +40,9 @@ class GCFTThread(QThread):
     self.action_complete.emit()
 
 class RecursiveFilterProxyModel(QSortFilterProxyModel):
-  def __init__(self, always_show_children=False):
+  def __init__(self):
     super().__init__()
-    self.always_show_children = always_show_children
+    
     # The default filter key column is 0 (only look at the first column).
     # We switch it to -1 so it searches all columns.
     # In the future we may want to consider searching all columns except numbers (file size, file
@@ -50,21 +50,35 @@ class RecursiveFilterProxyModel(QSortFilterProxyModel):
     self.setFilterKeyColumn(-1)
   
   def filterAcceptsRow(self, source_row: int, source_parent: QModelIndex | QPersistentModelIndex) -> bool:
-    if self.always_show_children and source_parent.isValid():
-      # Always show child rows if their top-level parent is shown.
+    # Consider a row matching if any of itself or any of its parents or children directly match the filter.
+    # Note that when the current row doesn't directly match and neither do its parents, but one of the parents
+    # indirectly matches because a *different* child matches, we do not want that to be included.
+    if self.check_row_parents_recursive(source_row, source_parent):
+      return True
+    if self.check_row_children_recursive(source_row, source_parent):
+      return True
+    return False
+  
+  def check_row_parents_recursive(self, source_row: int, source_parent: QModelIndex | QPersistentModelIndex) -> bool:
+    if super().filterAcceptsRow(source_row, source_parent):
+      # The current row itself matches the filter.
       return True
     
-    # For the top-level rows, check if any of their children match the filter, recursively.
-    return self.check_row_recursive(source_row, source_parent)
-  
-  def check_row_recursive(self, source_row: int, source_parent: QModelIndex | QPersistentModelIndex) -> bool:
+    if source_parent == QModelIndex():
+      # No parent, top-level row.
+      return False
+    
+    # If the row doesn't match but does have a parent, check if any of its parents match.
+    return self.check_row_parents_recursive(source_parent.row(), source_parent.parent())
+
+  def check_row_children_recursive(self, source_row: int, source_parent: QModelIndex | QPersistentModelIndex) -> bool:
     if super().filterAcceptsRow(source_row, source_parent):
       # The current row itself matches the filter.
       return True
     
     source_index = self.sourceModel().index(source_row, 0, source_parent)
     for child_row in range(self.sourceModel().rowCount(source_index)):
-      if self.check_row_recursive(child_row, source_index):
+      if self.check_row_children_recursive(child_row, source_index):
         # One of the current row's children (recursive) matches the filter.
         return True
     
