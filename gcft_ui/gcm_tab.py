@@ -815,23 +815,29 @@ class GCMTab(QWidget):
     item.setText(new_file_name)
   
   
-  def keyPressEvent(self, event):
+  def keyPressEvent(self, event: QKeyEvent):
     event.ignore()
     if event.matches(QKeySequence.StandardKey.Copy):
-      selected_index = self.selection_model.currentIndex()
-      if not selected_index.isValid():
-        return
-      selected_index = self.proxy.mapToSource(selected_index)
-      if selected_index.column() != self.column_names.index("File Name"):
-        return
-      item = self.model.itemFromIndex(selected_index)
-      if item is None:
-        return
-      file_entry = item.data()
-      if not isinstance(file_entry, GCMBaseFile):
-        return
+      selected_indexes = self.selection_model.selectedIndexes()
+      if not selected_indexes:
+        selected_indexes = [self.selection_model.currentIndex()]
       
-      file_path = file_entry.file_path
+      full_file_paths = []
+      for selected_index in selected_indexes:
+        if not selected_index.isValid():
+          continue
+        selected_index = self.proxy.mapToSource(selected_index)
+        if selected_index.column() != self.column_names.index("File Name"):
+          continue
+        item = self.model.itemFromIndex(selected_index)
+        if item is None:
+          continue
+        file_entry = item.data()
+        if not isinstance(file_entry, GCMBaseFile):
+          continue
+          
+        full_file_paths.append(file_entry.file_path)
       
-      QApplication.clipboard().setText(file_path)
+      joined_paths = "\n".join(full_file_paths)
+      QApplication.clipboard().setText(joined_paths)
       event.accept()

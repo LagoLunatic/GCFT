@@ -16,9 +16,9 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QLabel,
-    QLineEdit, QPushButton, QScrollArea, QSizePolicy,
-    QTreeView, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractItemView, QApplication, QHBoxLayout, QHeaderView,
+    QLabel, QLineEdit, QPushButton, QScrollArea,
+    QSizePolicy, QTreeView, QVBoxLayout, QWidget)
 
 class Ui_JPCTab(object):
     def setupUi(self, JPCTab):
@@ -65,6 +65,7 @@ class Ui_JPCTab(object):
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.jpc_particles_tree = QTreeView(JPCTab)
         self.jpc_particles_tree.setObjectName(u"jpc_particles_tree")
+        self.jpc_particles_tree.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
         self.horizontalLayout.addWidget(self.jpc_particles_tree)
 
@@ -72,8 +73,8 @@ class Ui_JPCTab(object):
         self.jpc_sidebar.setObjectName(u"jpc_sidebar")
         self.jpc_sidebar.setMaximumSize(QSize(300, 16777215))
         self.verticalLayout_3 = QVBoxLayout(self.jpc_sidebar)
-        self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.jpc_sidebar_label = QLabel(self.jpc_sidebar)
         self.jpc_sidebar_label.setObjectName(u"jpc_sidebar_label")
 
@@ -84,7 +85,7 @@ class Ui_JPCTab(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 298, 411))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 298, 409))
         self.verticalLayout_2 = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)

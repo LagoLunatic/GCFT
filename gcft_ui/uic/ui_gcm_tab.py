@@ -16,9 +16,9 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QLineEdit,
-    QPushButton, QSizePolicy, QTreeView, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QAbstractItemView, QApplication, QHBoxLayout, QHeaderView,
+    QLineEdit, QPushButton, QSizePolicy, QTreeView,
+    QVBoxLayout, QWidget)
 
 class Ui_GCMTab(object):
     def setupUi(self, GCMTab):
@@ -117,6 +117,7 @@ class Ui_GCMTab(object):
 
         self.gcm_files_tree = QTreeView(GCMTab)
         self.gcm_files_tree.setObjectName(u"gcm_files_tree")
+        self.gcm_files_tree.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
         self.verticalLayout.addWidget(self.gcm_files_tree)
 

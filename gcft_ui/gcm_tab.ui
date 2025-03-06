@@ -72,7 +72,11 @@
     </widget>
    </item>
    <item>
-    <widget class="QTreeView" name="gcm_files_tree"/>
+    <widget class="QTreeView" name="gcm_files_tree">
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ExtendedSelection</enum>
+     </property>
+    </widget>
    </item>
   </layout>
   <action name="actionReplaceGCMFile">

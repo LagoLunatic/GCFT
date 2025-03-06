@@ -3,7 +3,7 @@ import sys
 import os
 import traceback
 import colorsys
-from typing import Callable, Optional
+from typing import Callable
 from qtpy.QtGui import *
 from qtpy.QtCore import *
 from qtpy.QtWidgets import *
@@ -140,7 +140,7 @@ class GCFTWindow(QMainWindow):
   
   def generic_do_gui_file_operation(
       self, op_callback: Callable, is_opening: bool, is_saving: bool, is_folder: bool,
-      file_type: str, file_filters: list=[], default_file_name: Optional[str]=None
+      file_type: str, file_filters: list=[], default_file_name: str | None = None
     ):
     if "All files (*)" not in file_filters:
       file_filters.append("All files (*)")

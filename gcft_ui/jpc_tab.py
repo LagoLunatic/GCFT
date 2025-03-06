@@ -372,3 +372,35 @@ class JPCTab(BunfoeEditor):
     texture.bti.save_header_changes()
     
     self.gcft_window.ui.statusbar.showMessage("Replaced %s." % texture.filename, 3000)
+  
+  
+  def keyPressEvent(self, event: QKeyEvent):
+    event.ignore()
+    if event.matches(QKeySequence.StandardKey.Copy):
+      selected_indexes = self.selection_model.selectedIndexes()
+      if not selected_indexes:
+        selected_indexes = [self.selection_model.currentIndex()]
+      
+      particle_id_strs = []
+      for selected_index in selected_indexes:
+        if not selected_index.isValid():
+          continue
+        selected_index = self.proxy.mapToSource(selected_index)
+        # if selected_index.column() != self.column_names.index("Particle ID"):
+        #   continue
+        item = self.model.itemFromIndex(selected_index)
+        if item is None:
+          continue
+        particle = item.data()
+        if not isinstance(particle, JParticle):
+          continue
+        
+        particle_id_str = self.gcft_window.stringify_number(particle.particle_id, min_hex_chars=4)
+        particle_id_strs.append(particle_id_str)
+      
+      if not particle_id_strs:
+        return
+      
+      joined_paths = "\n".join(particle_id_strs)
+      QApplication.clipboard().setText(joined_paths)
+      event.accept()

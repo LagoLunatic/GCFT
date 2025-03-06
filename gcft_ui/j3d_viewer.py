@@ -900,7 +900,7 @@ class J3DViewer(QOpenGLWidget):
     self.camera.zoom(adjusted_zoom_amount)
     self.should_update_render = True
   
-  def keyPressEvent(self, event):
+  def keyPressEvent(self, event: QKeyEvent):
     if event.key() == Qt.Key.Key_R:
       self.reset_camera()
       event.accept()

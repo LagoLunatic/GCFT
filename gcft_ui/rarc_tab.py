@@ -1043,27 +1043,38 @@ class RARCTab(QWidget):
       file_entry.type |= RARCFileAttrType.LOAD_FROM_DVD
   
   
-  def keyPressEvent(self, event):
+  def keyPressEvent(self, event: QKeyEvent):
     event.ignore()
     if event.matches(QKeySequence.StandardKey.Copy):
-      selected_index = self.selection_model.currentIndex()
-      if not selected_index.isValid():
-        return
-      selected_index = self.proxy.mapToSource(selected_index)
-      if selected_index.column() != self.column_names.index("File Name"):
-        return
-      item = self.model.itemFromIndex(selected_index)
-      if item is None:
-        return
-      file_entry = self.get_file_entry_for_model_index(item.index())
-      if not isinstance(file_entry, RARCFileEntry):
+      selected_indexes = self.selection_model.selectedIndexes()
+      if not selected_indexes:
+        selected_indexes = [self.selection_model.currentIndex()]
+      
+      full_file_paths = []
+      for selected_index in selected_indexes:
+        if not selected_index.isValid():
+          continue
+        selected_index = self.proxy.mapToSource(selected_index)
+        if selected_index.column() != self.column_names.index("File Name"):
+          continue
+        item = self.model.itemFromIndex(selected_index)
+        if item is None:
+          continue
+        file_entry = self.get_file_entry_for_model_index(item.index())
+        if not isinstance(file_entry, RARCFileEntry):
+          continue
+        
+        file_path = file_entry.name
+        dir_entry: RARCFileEntry | None = file_entry.parent_node.dir_entry
+        while dir_entry is not None:
+          file_path = dir_entry.name + "/" + file_path
+          dir_entry = dir_entry.parent_node.dir_entry
+        
+        full_file_paths.append(file_path)
+      
+      if not full_file_paths:
         return
       
-      file_path = file_entry.name
-      dir_entry: RARCFileEntry = file_entry.parent_node.dir_entry
-      while dir_entry is not None:
-        file_path = dir_entry.name + "/" + file_path
-        dir_entry = dir_entry.parent_node.dir_entry
-      
-      QApplication.clipboard().setText(file_path)
+      joined_paths = "\n".join(full_file_paths)
+      QApplication.clipboard().setText(joined_paths)
       event.accept()
