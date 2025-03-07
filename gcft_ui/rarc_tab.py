@@ -220,7 +220,6 @@ class RARCTab(QWidget):
   
   def import_rarc_by_data(self, data, rarc_name):
     self.rarc = RARC(data)
-    self.rarc.read()
     
     self.rarc_name = rarc_name
     

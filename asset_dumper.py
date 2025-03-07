@@ -48,7 +48,6 @@ class AssetDumper:
         if file_ext == ".arc":
           out_path = os.path.join(out_dir, rel_dir, base_name)
           rarc = RARC(gcm.get_changed_file_data(file_path))
-          rarc.read()
           for _ in self.dump_all_textures_in_rarc(rarc, out_path, display_path_prefix=file_path):
             continue
         elif file_ext == ".bti":
