@@ -107,6 +107,7 @@ class RARCTab(QWidget):
     self.ui.actionOpenRARCJ3D.triggered.connect(self.open_j3d_in_rarc)
     self.ui.actionReplaceRARCJ3D.triggered.connect(self.replace_j3d_in_rarc)
     self.ui.actionLoadJ3DAnim.triggered.connect(self.load_j3d_anim)
+    self.ui.actionOpenRARCRARC.triggered.connect(self.open_rarc_in_rarc)
   
   
   def import_rarc(self):
@@ -647,6 +648,10 @@ class RARCTab(QWidget):
           else:
             self.ui.actionReplaceRARCImage.setDisabled(False)
         
+        if file_entry.check_is_nested_rarc():
+          menu.addAction(self.ui.actionOpenRARCRARC)
+          self.ui.actionOpenRARCRARC.setData(file_entry)
+        
         if j3d_anim_selected:
           menu.addAction(self.ui.actionLoadJ3DAnim)
           self.ui.actionLoadJ3DAnim.setData(file_entry)
@@ -763,6 +768,26 @@ class RARCTab(QWidget):
     self.j3d_tab.load_anim_by_data(data, j3d_name)
     
     self.gcft_window.set_tab_by_name("J3D Files")
+  
+  def open_rarc_in_rarc(self):
+    message = "This nested RARC will be opened in the same tab as the current RARC, so you will lose any unsaved changes to the current RARC.\n\nOpen anyway?"
+    response = QMessageBox.question(self, 
+      "Confirm open nested RARC",
+      message,
+      QMessageBox.StandardButton.Cancel | QMessageBox.StandardButton.Yes,
+      QMessageBox.StandardButton.Cancel
+    )
+    if response != QMessageBox.StandardButton.Yes:
+      return
+    
+    file_entry: RARCFileEntry = self.ui.actionOpenRARCRARC.data()
+    
+    rarc_name = os.path.splitext(file_entry.name)[0]
+    
+    data = fs.make_copy_data(file_entry.data)
+    self.rarc_tab.import_rarc_by_data(data, rarc_name)
+    
+    self.gcft_window.set_tab_by_name("RARC Archives")
   
   def add_file_to_rarc_by_path(self, file_path):
     parent_node: RARCNode = self.ui.actionAddRARCFile.data()

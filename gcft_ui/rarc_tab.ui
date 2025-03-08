@@ -175,6 +175,11 @@
     <enum>QAction::NoRole</enum>
    </property>
   </action>
+  <action name="actionOpenRARCRARC">
+   <property name="text">
+    <string>Open RARC</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
