@@ -85,28 +85,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QTreeWidget" name="dol_sections_tree">
-     <column>
-      <property name="text">
-       <string>Section Name</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Offset</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Address</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Size</string>
-      </property>
-     </column>
-    </widget>
+    <widget class="QTreeView" name="dol_sections_tree"/>
    </item>
   </layout>
  </widget>

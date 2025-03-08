@@ -31,6 +31,19 @@ class DOLTab(QWidget):
     self.dol: DOL | None = None
     self.dolname = None
     
+    self.column_names = [
+      "Section Name",
+      "Offset",
+      "RAM Address",
+      "Size",
+    ]
+    
+    self.model = QStandardItemModel()
+    self.model.setHorizontalHeaderLabels(self.column_names)
+    self.model.setColumnCount(len(self.column_names))
+    
+    self.ui.dol_sections_tree.setModel(self.model)
+    
     self.ui.export_dol.setDisabled(True)
     self.ui.convert_from_dol_offset.setDisabled(True)
     self.ui.convert_from_dol_address.setDisabled(True)
@@ -87,7 +100,7 @@ class DOLTab(QWidget):
   def reload_dol_sections_tree(self):
     assert self.dol is not None
     
-    self.ui.dol_sections_tree.clear()
+    self.model.removeRows(0, self.model.rowCount())
     
     for section_index, section in enumerate(self.dol.sections):
       if section_index < DOL.TEXT_SECTION_COUNT:
@@ -95,12 +108,19 @@ class DOLTab(QWidget):
       else:
         section_name = ".data%d" % (section_index-DOL.TEXT_SECTION_COUNT)
       
+      section_name_item = QStandardItem(section_name)
+      section_name_item.setEditable(False)
       if section.offset == section.address == section.size == 0:
         section_columns = [section_name, "", "", ""]
+        self.model.appendRow(section_name_item)
       else:
-        section_columns = [section_name, "0x%06X" % section.offset, "0x%08X" % section.address, "0x%06X" % section.size]
-      section_item = QTreeWidgetItem(section_columns)
-      self.ui.dol_sections_tree.addTopLevelItem(section_item)
+        offset_item = QStandardItem("0x%06X" % section.offset)
+        offset_item.setEditable(False)
+        address_item = QStandardItem("0x%08X" % section.address)
+        address_item.setEditable(False)
+        size_item = QStandardItem("0x%06X" % section.size)
+        size_item.setEditable(False)
+        self.model.appendRow([section_name_item, offset_item, address_item, size_item])
   
   def export_dol_by_path(self, dol_path):
     assert self.dol is not None

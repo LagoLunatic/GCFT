@@ -17,7 +17,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QFormLayout, QHBoxLayout, QHeaderView,
     QLabel, QLineEdit, QPushButton, QSizePolicy,
-    QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
+    QTreeView, QVBoxLayout, QWidget)
 
 class Ui_DOLTab(object):
     def setupUi(self, DOLTab):
@@ -88,7 +88,7 @@ class Ui_DOLTab(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_10)
 
-        self.dol_sections_tree = QTreeWidget(DOLTab)
+        self.dol_sections_tree = QTreeView(DOLTab)
         self.dol_sections_tree.setObjectName(u"dol_sections_tree")
 
         self.verticalLayout.addWidget(self.dol_sections_tree)
@@ -107,10 +107,5 @@ class Ui_DOLTab(object):
         self.convert_from_dol_offset.setText(QCoreApplication.translate("DOLTab", u"<- Convert offset to address", None))
         self.convert_from_dol_address.setText(QCoreApplication.translate("DOLTab", u"Convert address to offset ->", None))
         self.label_14.setText(QCoreApplication.translate("DOLTab", u"Offset in DOL: 0x", None))
-        ___qtreewidgetitem = self.dol_sections_tree.headerItem()
-        ___qtreewidgetitem.setText(3, QCoreApplication.translate("DOLTab", u"Size", None));
-        ___qtreewidgetitem.setText(2, QCoreApplication.translate("DOLTab", u"Address", None));
-        ___qtreewidgetitem.setText(1, QCoreApplication.translate("DOLTab", u"Offset", None));
-        ___qtreewidgetitem.setText(0, QCoreApplication.translate("DOLTab", u"Section Name", None));
     # retranslateUi
 
