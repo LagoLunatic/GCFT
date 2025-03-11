@@ -605,10 +605,12 @@ class J3DTab(BunfoeEditor):
   def open_mdl_command_editor(self):
     button: QPushButton = self.sender()
     mdl_command: MDLCommand = button.property('mdl_command')
-    print(mdl_command)
+    # print(mdl_command)
     
-    BunfoeDialog.show_dialog_for_bunfoe(mdl_command, self, "Edit MDL Command")
-    
+    dialog = BunfoeDialog.show_dialog_for_bunfoe(mdl_command, self, "Edit MDL Command")
+    dialog.finished.connect(lambda result: self.mdl_command_editor_closed(mdl_command, button))
+  
+  def mdl_command_editor_closed(self, mdl_command: MDLCommand, button: QPushButton):
     # Update the text on the button.
     self.j3d.mdl3.save()
     if isinstance(mdl_command, BP.BPCommand):
