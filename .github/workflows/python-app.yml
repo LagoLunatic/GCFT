@@ -7,9 +7,6 @@ on:
   pull_request:
     branches: [ master ]
   workflow_dispatch:
-    inputs:
-      version:
-        description: Version
 
 jobs:
   build:
@@ -105,10 +102,15 @@ jobs:
       - name: Set variables
         id: vars
         run: |
-          USER_INPUT_VERSION=${{ github.event.inputs.version }}
           TXT_VERSION=$(cat version.txt)
           GIT_SHA_SHORT=$(git rev-parse --short=7 ${{ github.sha }})
-          echo "full_version=${USER_INPUT_VERSION:-${TXT_VERSION}_${GIT_SHA_SHORT}}" >> $GITHUB_OUTPUT
+          if [[ $GITHUB_REF == refs/tags/* ]];
+          then
+            version=$TXT_VERSION
+          else
+            version=${TXT_VERSION}_${GIT_SHA_SHORT}
+          fi
+          echo "full_version=${version}" >> $GITHUB_OUTPUT
       - name: Set version
         id: version
         run: |
@@ -151,9 +153,22 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
+      - name: Zip artifacts
+        working-directory: artifacts
+        run: |
+          set -euo pipefail
+          mkdir ../out
+          for dir in */; do
+            echo $dir
+            cd $dir
+            arch="${dir%/}" # remove trailing slash
+            zip -r ../../out/${arch}.zip . 
+            cd ../
+          done
+          ls -R ../out
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/*
+          files: out/*
           draft: true
           generate_release_notes: true
