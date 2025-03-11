@@ -396,6 +396,8 @@ class GCFTWindow(QMainWindow):
     if mime_data.hasUrls():
       url = mime_data.urls()[0]
       file_path = url.toLocalFile()
+      if not file_path:
+        return
       open_action = self.get_open_func_and_tab_name_for_file_path(file_path)
       if open_action is not None:
         event.acceptProposedAction()
@@ -405,6 +407,8 @@ class GCFTWindow(QMainWindow):
     if mime_data.hasUrls():
       url = mime_data.urls()[0]
       file_path = url.toLocalFile()
+      if not file_path:
+        return
       try:
         self.open_file_by_path(file_path)
       except Exception as e:
