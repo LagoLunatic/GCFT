@@ -161,8 +161,11 @@ jobs:
           for dir in */; do
             echo $dir
             cd $dir
-            arch="${dir%/}" # remove trailing slash
-            zip -r ../../out/${arch}.zip . 
+            artifact_name="${dir%/}" # remove trailing slash
+            if [[ $artifact_name == *-linux ]]; then
+              chmod +x "GameCube File Tools"
+            fi
+            zip -r ../../out/${artifact_name}.zip . 
             cd ../
           done
           ls -R ../out
