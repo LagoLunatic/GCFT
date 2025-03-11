@@ -907,22 +907,22 @@ class J3DViewer(QOpenGLWidget):
     else:
       event.ignore()
   
-  def keyReleaseEvent(self, event):
+  def keyReleaseEvent(self, event: QKeyEvent):
     if event.key() in self.key_is_held:
       self.key_is_held[event.key()] = False
       event.accept()
     else:
       event.ignore()
     
-  def mousePressEvent(self, event):
+  def mousePressEvent(self, event: QMouseEvent):
     self.prev_mouse_pos = event.position()
     
     super().mousePressEvent(event)
   
-  def mouseMoveEvent(self, event):
+  def mouseMoveEvent(self, event: QMouseEvent):
     if self.prev_mouse_pos is not None:
       delta_pos = event.position() - self.prev_mouse_pos
-      if event.buttons() == Qt.RightButton:
+      if event.buttons() == Qt.MouseButton.RightButton:
         self.rotate_camera_look(delta_pos.y(), -delta_pos.x())
       else:
         self.rotate_camera_orbit(delta_pos.y(), -delta_pos.x())
@@ -931,14 +931,14 @@ class J3DViewer(QOpenGLWidget):
     
     super().mouseMoveEvent(event)
   
-  def mouseReleaseEvent(self, event):
+  def mouseReleaseEvent(self, event: QMouseEvent):
     self.prev_mouse_pos = None
     
     super().mouseReleaseEvent(event)
   
-  def wheelEvent(self, event):
+  def wheelEvent(self, event: QWheelEvent):
     delta = event.angleDelta().y()
-    if event.buttons() == Qt.RightButton:
+    if event.buttons() == Qt.MouseButton.RightButton:
       if delta > 0:
         self.base_cam_move_speed += 4
       elif delta < 0:
@@ -955,7 +955,7 @@ class J3DViewer(QOpenGLWidget):
     
     super().focusOutEvent(event)
   
-  def closeEvent(self, event):
+  def closeEvent(self, event: QCloseEvent):
     if not self.enable_j3dultra:
       return
     

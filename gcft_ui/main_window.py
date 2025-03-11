@@ -388,10 +388,10 @@ class GCFTWindow(QMainWindow):
       QMessageBox.warning(self, "Failed to dump textures", failed_dump_message)
   
   
-  def closeEvent(self, event):
+  def closeEvent(self, event: QCloseEvent):
     self.save_settings()
   
-  def dragEnterEvent(self, event):
+  def dragEnterEvent(self, event: QDragEnterEvent):
     mime_data = event.mimeData()
     if mime_data.hasUrls:
       url = mime_data.urls()[0]
@@ -400,7 +400,7 @@ class GCFTWindow(QMainWindow):
       if open_action is not None:
         event.acceptProposedAction()
   
-  def dropEvent(self, event):
+  def dropEvent(self, event: QDropEvent):
     mime_data = event.mimeData()
     if mime_data.hasUrls:
       url = mime_data.urls()[0]
