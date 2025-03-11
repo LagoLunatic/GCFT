@@ -393,7 +393,7 @@ class GCFTWindow(QMainWindow):
   
   def dragEnterEvent(self, event: QDragEnterEvent):
     mime_data = event.mimeData()
-    if mime_data.hasUrls:
+    if mime_data.hasUrls():
       url = mime_data.urls()[0]
       file_path = url.toLocalFile()
       open_action = self.get_open_func_and_tab_name_for_file_path(file_path)
@@ -402,7 +402,7 @@ class GCFTWindow(QMainWindow):
   
   def dropEvent(self, event: QDropEvent):
     mime_data = event.mimeData()
-    if mime_data.hasUrls:
+    if mime_data.hasUrls():
       url = mime_data.urls()[0]
       file_path = url.toLocalFile()
       try:
