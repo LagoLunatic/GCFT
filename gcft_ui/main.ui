@@ -45,6 +45,11 @@
         <string>JPC Particle Archives</string>
        </attribute>
       </widget>
+      <widget class="BMGTab" name="bmg_tab">
+       <attribute name="title">
+        <string>BMG Messages</string>
+       </attribute>
+      </widget>
       <widget class="DOLTab" name="dol_tab">
        <attribute name="title">
         <string>DOL Executables</string>
@@ -65,7 +70,7 @@
      <x>0</x>
      <y>0</y>
      <width>1280</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
@@ -112,6 +117,12 @@
    <class>Yaz0Yay0Tab</class>
    <extends>QWidget</extends>
    <header>gcft_ui.yaz0_yay0_tab</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>BMGTab</class>
+   <extends>QWidget</extends>
+   <header>gcft_ui.bmg_tab</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -29,7 +29,7 @@ class DOLTab(QWidget):
     self.ui.setupUi(self)
     
     self.dol: DOL | None = None
-    self.dolname = None
+    self.dol_name = None
     
     self.column_names = [
       "Section Name",

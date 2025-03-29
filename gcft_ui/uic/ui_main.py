@@ -18,6 +18,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QApplication, QMainWindow, QMenuBar, QSizePolicy,
     QStatusBar, QTabWidget, QVBoxLayout, QWidget)
 
+from gcft_ui.bmg_tab import BMGTab
 from gcft_ui.bti_tab import BTITab
 from gcft_ui.dol_tab import DOLTab
 from gcft_ui.gcm_tab import GCMTab
@@ -52,6 +53,9 @@ class Ui_MainWindow(object):
         self.jpc_tab = JPCTab()
         self.jpc_tab.setObjectName(u"jpc_tab")
         self.tabWidget.addTab(self.jpc_tab, "")
+        self.bmg_tab = BMGTab()
+        self.bmg_tab.setObjectName(u"bmg_tab")
+        self.tabWidget.addTab(self.bmg_tab, "")
         self.dol_tab = DOLTab()
         self.dol_tab.setObjectName(u"dol_tab")
         self.tabWidget.addTab(self.dol_tab, "")
@@ -64,7 +68,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1280, 22))
+        self.menubar.setGeometry(QRect(0, 0, 1280, 21))
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
@@ -85,6 +89,7 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.bti_tab), QCoreApplication.translate("MainWindow", u"BTI Images", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.j3d_tab), QCoreApplication.translate("MainWindow", u"J3D Files", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.jpc_tab), QCoreApplication.translate("MainWindow", u"JPC Particle Archives", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.bmg_tab), QCoreApplication.translate("MainWindow", u"BMG Messages", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.dol_tab), QCoreApplication.translate("MainWindow", u"DOL Executables", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.yaz0_yay0_tab), QCoreApplication.translate("MainWindow", u"Yaz0/Yay0 Compression", None))
     # retranslateUi

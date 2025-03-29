@@ -19,6 +19,9 @@ from gcft_ui.rarc_tab import RARCTab
 from gcft_ui.bti_tab import BTITab
 from gcft_ui.j3d_tab import J3DTab
 from gcft_ui.jpc_tab import JPCTab
+from gcft_ui.bmg_tab import BMGTab
+from gcft_ui.dol_tab import DOLTab
+from gcft_ui.yaz0_yay0_tab import Yaz0Yay0Tab
 from version import VERSION
 from gcft_paths import ASSETS_PATH, SETTINGS_PATH
 
@@ -49,6 +52,8 @@ J3D_FILE_EXTS = [
   ".bla",
 ]
 JPC_FILE_EXTS = [".jpc"]
+BMG_FILE_EXTS = [".bmg"]
+DOL_FILE_EXTS = [".dol"]
 
 class GCFTWindow(QMainWindow):
   gcm_tab: GCMTab
@@ -56,6 +61,9 @@ class GCFTWindow(QMainWindow):
   bti_tab: BTITab
   j3d_tab: J3DTab
   jpc_tab: JPCTab
+  bmg_tab: BMGTab
+  dol_tab: DOLTab
+  yaz0_yay0_tab: Yaz0Yay0Tab
   
   def __init__(self):
     super().__init__()
@@ -128,6 +136,10 @@ class GCFTWindow(QMainWindow):
       return (self.j3d_tab.import_j3d_by_path, "J3D Files")
     elif file_ext in JPC_FILE_EXTS:
       return (self.jpc_tab.import_jpc_by_path, "JPC Particle Archives")
+    elif file_ext in BMG_FILE_EXTS:
+      return (self.bmg_tab.import_bmg_by_path, "BMG Messages")
+    elif file_ext in DOL_FILE_EXTS:
+      return (self.dol_tab.import_dol_by_path, "DOL Executables")
   
   def open_file_by_path(self, file_path):
     open_action = self.get_open_func_and_tab_name_for_file_path(file_path)

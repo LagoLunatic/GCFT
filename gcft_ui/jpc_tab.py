@@ -42,7 +42,7 @@ class JPCTab(BunfoeEditor):
     self.selection_model = self.ui.jpc_particles_tree.selectionModel()
     self.ui.jpc_particles_tree.setHeaderHidden(True)
     
-    self.selection_model.selectionChanged.connect(self.widget_item_selected)
+    self.selection_model.currentChanged.connect(self.widget_item_selected)
     self.ui.filter.textChanged.connect(self.filter_particles)
     
     self.ui.export_jpc.setDisabled(True)
@@ -142,17 +142,16 @@ class JPCTab(BunfoeEditor):
     query = self.ui.filter.text()
     self.proxy.setFilterFixedString(query)
   
-  def widget_item_selected(self):
+  def widget_item_selected(self, current_index: QModelIndex, previous_index: QModelIndex):
     layout = self.ui.scrollAreaWidgetContents.layout()
     self.clear_layout_recursive(layout)
     
     self.ui.jpc_sidebar_label.setText("Extra information will be displayed here as necessary.")
     
-    selected_index = self.selection_model.currentIndex()
-    if not selected_index.isValid():
+    if not current_index.isValid():
       return
-    selected_index = self.proxy.mapToSource(selected_index)
-    item = self.model.itemFromIndex(selected_index)
+    current_index = self.proxy.mapToSource(current_index)
+    item = self.model.itemFromIndex(current_index)
     if item is None:
       return
     

@@ -87,7 +87,7 @@ class J3DTab(BunfoeEditor):
     
     self.ui.load_anim.clicked.connect(self.load_anim)
     
-    self.selection_model.selectionChanged.connect(self.widget_item_selected)
+    self.selection_model.currentChanged.connect(self.widget_item_selected)
     self.ui.j3d_chunks_tree.expanded.connect(self.item_expanded)
     self.ui.j3d_chunks_tree.collapsed.connect(self.item_collapsed)
     
@@ -344,19 +344,16 @@ class J3DTab(BunfoeEditor):
     if isinstance(obj, JChunk):
       self.chunk_type_is_expanded[obj.magic] = False
   
-  def widget_item_selected(self, selected_items: QItemSelection, deselected_items: QItemSelection):
+  def widget_item_selected(self, current_index: QModelIndex, previous_index: QModelIndex):
     layout = self.ui.scrollAreaWidgetContents.layout()
     self.clear_layout_recursive(layout)
     
     self.ui.j3d_sidebar_label.setText("Extra information will be displayed here as necessary.")
     
-    if selected_items.isEmpty():
+    if not current_index.isValid():
       return
-    first_index = selected_items.indexes()[0]
-    if not first_index.isValid():
-      return
-    first_index = self.proxy.mapToSource(first_index)
-    obj = self.get_object_for_model_index(first_index)
+    current_index = self.proxy.mapToSource(current_index)
+    obj = self.get_object_for_model_index(current_index)
     
     # import cProfile, pstats
     # profiler = cProfile.Profile()
