@@ -896,7 +896,8 @@ class J3DTab(BunfoeEditor):
     if self.j3d.mat3 is None:
       return indexes
     
-    selected_model_indexes = self.ui.j3d_chunks_tree.selectedIndexes()
+    # selected_model_indexes = self.ui.j3d_chunks_tree.selectedIndexes()
+    selected_model_indexes = [self.selection_model.currentIndex()]
     selected_mat_indexes = []
     for model_index in selected_model_indexes:
       model_index = self.proxy.mapToSource(model_index)
