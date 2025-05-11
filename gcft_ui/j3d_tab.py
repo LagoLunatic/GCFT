@@ -407,7 +407,11 @@ class J3DTab(BunfoeEditor):
     elif names_list is None:
       node_name = f"{type_name} {index_str}"
     else:
-      node_name = f"{type_name} {index_str}: {names_list[inf1_node.index]}"
+      node_name = f"{type_name} {index_str}: "
+      if inf1_node.index >= len(names_list):
+        node_name += "<INVALID>"
+      else:
+        node_name += f"{names_list[inf1_node.index]}"
     
     node_item = self.make_tree_model_item(inf1_node, parent_item, [node_name, node_name, ""], expanded=True)
     
