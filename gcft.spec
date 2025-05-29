@@ -46,7 +46,9 @@ a = Analysis(['gcft.py'],
                'version.txt',
                'gcft_ui/*.ui',
              ]),
-             hiddenimports=[],
+             hiddenimports=[
+              '_cffi_backend', # For imagequant (gclib)
+             ],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
