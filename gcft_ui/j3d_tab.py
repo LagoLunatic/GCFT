@@ -515,6 +515,7 @@ class J3DTab(BunfoeEditor):
     item.setData(obj)
   
   def get_object_for_model_index(self, index: QModelIndex) -> Any:
+    assert index.isValid()
     chunk_type_index = index.siblingAtColumn(self.column_names.index("Chunk Type"))
     item = self.model.itemFromIndex(chunk_type_index)
     obj = item.data()
@@ -904,6 +905,8 @@ class J3DTab(BunfoeEditor):
     selected_model_indexes = [self.selection_model.currentIndex()]
     selected_mat_indexes = []
     for model_index in selected_model_indexes:
+      if not model_index.isValid():
+        continue
       model_index = self.proxy.mapToSource(model_index)
       obj = self.get_object_for_model_index(model_index)
       if isinstance(obj, INF1Node) and obj.type == INF1NodeType.MATERIAL:
