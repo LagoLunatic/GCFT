@@ -908,7 +908,8 @@ class J3DTab(BunfoeEditor):
       obj = self.get_object_for_model_index(model_index)
       if not isinstance(obj, Material):
         continue
-      mat_index = self.j3d.mat3.materials.index(obj)
+      # Need to check the ids to avoid using the __eq__ method that checks for materials with identical attributes.
+      mat_index = [id(mat) for mat in self.j3d.mat3.materials].index(id(obj))
       selected_mat_indexes.append(mat_index)
     if not selected_mat_indexes:
       return indexes
