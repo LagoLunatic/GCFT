@@ -906,10 +906,17 @@ class J3DTab(BunfoeEditor):
     for model_index in selected_model_indexes:
       model_index = self.proxy.mapToSource(model_index)
       obj = self.get_object_for_model_index(model_index)
-      if not isinstance(obj, Material):
+      if isinstance(obj, INF1Node) and obj.type == INF1NodeType.MATERIAL:
+        mat_index = obj.index
+      elif isinstance(obj, Material):
+        # Need to check the ids to avoid using the __eq__ method that checks for materials with identical attributes.
+        mat_index = [id(mat) for mat in self.j3d.mat3.materials].index(id(obj))
+      elif isinstance(obj, MDLEntry):
+        # # Need to check the ids to avoid using the __eq__ method that checks for materials with identical attributes.
+        assert self.j3d.mdl3 is not None
+        mat_index = [id(mat) for mat in self.j3d.mdl3.entries].index(id(obj))
+      else:
         continue
-      # Need to check the ids to avoid using the __eq__ method that checks for materials with identical attributes.
-      mat_index = [id(mat) for mat in self.j3d.mat3.materials].index(id(obj))
       selected_mat_indexes.append(mat_index)
     if not selected_mat_indexes:
       return indexes
