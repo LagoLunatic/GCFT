@@ -185,6 +185,8 @@ class J3DTab(BunfoeEditor):
     if j3d is None:
       return
     
+    self.clear_sidebar()
+    
     for anim_control in self.anim_controls:
       # Detach anims for the previously loaded model.
       anim_control.hide()
@@ -344,11 +346,14 @@ class J3DTab(BunfoeEditor):
     if isinstance(obj, JChunk):
       self.chunk_type_is_expanded[obj.magic] = False
   
-  def widget_item_selected(self, current_index: QModelIndex, previous_index: QModelIndex):
+  def clear_sidebar(self):
     layout = self.ui.scrollAreaWidgetContents.layout()
     self.clear_layout_recursive(layout)
     
     self.ui.j3d_sidebar_label.setText("Extra information will be displayed here as necessary.")
+  
+  def widget_item_selected(self, current_index: QModelIndex, previous_index: QModelIndex):
+    self.clear_sidebar()
     
     if not current_index.isValid():
       return
