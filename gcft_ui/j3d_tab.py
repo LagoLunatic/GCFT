@@ -524,7 +524,6 @@ class J3DTab(BunfoeEditor):
     chunk_type_index = index.siblingAtColumn(self.column_names.index("Chunk Type"))
     item = self.model.itemFromIndex(chunk_type_index)
     obj = item.data()
-    assert obj is not None
     return obj
   
   def filter_rows(self):
