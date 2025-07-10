@@ -322,7 +322,7 @@ class GCMTab(QWidget):
     if response != QMessageBox.StandardButton.Yes:
       return
     
-    generator = self.gcm.import_files_from_disk_by_paths(folder_path, replace_paths, [], base_dir=base_dir)
+    generator = self.gcm.import_files_from_disk_by_paths(replace_paths, [])
     max_val = len(replace_paths)
     
     self.gcft_window.start_progress_thread(
@@ -333,11 +333,11 @@ class GCMTab(QWidget):
   def replace_all_files_in_gcm_by_path_complete(self):
     assert self.gcm is not None
     
-    QMessageBox.information(self, "Files replaced", "Successfully overwrote all matching files in the GCM.")
-    
     for file_path in self.gcm.changed_files:
       file = self.gcm.files_by_path[file_path]
       self.update_changed_file_size_in_gcm(file)
+    
+    QMessageBox.information(self, "Files replaced", "Successfully overwrote all matching files in the GCM.")
   
   def extract_all_files_from_gcm_folder_by_path(self, folder_path):
     assert self.gcm is not None
@@ -399,7 +399,7 @@ class GCMTab(QWidget):
     if response != QMessageBox.StandardButton.Yes:
       return
     
-    generator = self.gcm.import_files_from_disk_by_paths(folder_path, replace_paths, add_paths, base_dir=base_dir)
+    generator = self.gcm.import_files_from_disk_by_paths(replace_paths, add_paths)
     max_val = len(replace_paths) + len(add_paths)
     
     self.gcft_window.start_progress_thread(
