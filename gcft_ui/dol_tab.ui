@@ -36,6 +36,9 @@
     <layout class="QHBoxLayout" name="horizontalLayout_10">
      <item>
       <layout class="QFormLayout" name="formLayout_2">
+       <property name="formAlignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       </property>
        <property name="horizontalSpacing">
         <number>0</number>
        </property>
@@ -52,21 +55,28 @@
       </layout>
      </item>
      <item>
-      <widget class="QPushButton" name="convert_from_dol_offset">
-       <property name="text">
-        <string>&lt;- Convert offset to address</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="convert_from_dol_address">
-       <property name="text">
-        <string>Convert address to offset -&gt;</string>
-       </property>
-      </widget>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QPushButton" name="convert_from_dol_offset">
+         <property name="text">
+          <string>&lt;- Convert offset to address &lt;-</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="convert_from_dol_address">
+         <property name="text">
+          <string>-&gt; Convert address to offset -&gt;</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
       <layout class="QFormLayout" name="formLayout_3">
+       <property name="formAlignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       </property>
        <property name="horizontalSpacing">
         <number>0</number>
        </property>

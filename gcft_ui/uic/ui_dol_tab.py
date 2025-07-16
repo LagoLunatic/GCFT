@@ -45,6 +45,7 @@ class Ui_DOLTab(object):
         self.horizontalLayout_10.setObjectName(u"horizontalLayout_10")
         self.formLayout_2 = QFormLayout()
         self.formLayout_2.setObjectName(u"formLayout_2")
+        self.formLayout_2.setFormAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignVCenter)
         self.formLayout_2.setHorizontalSpacing(0)
         self.label_13 = QLabel(DOLTab)
         self.label_13.setObjectName(u"label_13")
@@ -59,18 +60,24 @@ class Ui_DOLTab(object):
 
         self.horizontalLayout_10.addLayout(self.formLayout_2)
 
+        self.verticalLayout_2 = QVBoxLayout()
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.convert_from_dol_offset = QPushButton(DOLTab)
         self.convert_from_dol_offset.setObjectName(u"convert_from_dol_offset")
 
-        self.horizontalLayout_10.addWidget(self.convert_from_dol_offset)
+        self.verticalLayout_2.addWidget(self.convert_from_dol_offset)
 
         self.convert_from_dol_address = QPushButton(DOLTab)
         self.convert_from_dol_address.setObjectName(u"convert_from_dol_address")
 
-        self.horizontalLayout_10.addWidget(self.convert_from_dol_address)
+        self.verticalLayout_2.addWidget(self.convert_from_dol_address)
+
+
+        self.horizontalLayout_10.addLayout(self.verticalLayout_2)
 
         self.formLayout_3 = QFormLayout()
         self.formLayout_3.setObjectName(u"formLayout_3")
+        self.formLayout_3.setFormAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignVCenter)
         self.formLayout_3.setHorizontalSpacing(0)
         self.label_14 = QLabel(DOLTab)
         self.label_14.setObjectName(u"label_14")
@@ -104,8 +111,8 @@ class Ui_DOLTab(object):
         self.import_dol.setText(QCoreApplication.translate("DOLTab", u"Import DOL", None))
         self.export_dol.setText(QCoreApplication.translate("DOLTab", u"Export DOL", None))
         self.label_13.setText(QCoreApplication.translate("DOLTab", u"RAM Address: 0x", None))
-        self.convert_from_dol_offset.setText(QCoreApplication.translate("DOLTab", u"<- Convert offset to address", None))
-        self.convert_from_dol_address.setText(QCoreApplication.translate("DOLTab", u"Convert address to offset ->", None))
+        self.convert_from_dol_offset.setText(QCoreApplication.translate("DOLTab", u"<- Convert offset to address <-", None))
+        self.convert_from_dol_address.setText(QCoreApplication.translate("DOLTab", u"-> Convert address to offset ->", None))
         self.label_14.setText(QCoreApplication.translate("DOLTab", u"Offset in DOL: 0x", None))
     # retranslateUi
 
