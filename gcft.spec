@@ -47,7 +47,9 @@ a = Analysis(['gcft.py'],
                'gcft_ui/*.ui',
              ]),
              hiddenimports=[
-              '_cffi_backend', # For imagequant (gclib)
+               '_cffi_backend', # For imagequant (gclib)
+               'OpenGL.platform.glx', # For Linux X11 support
+               'OpenGL.platform.egl', # For Linux Wayland support
              ],
              hookspath=[],
              runtime_hooks=[],
