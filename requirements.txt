@@ -5,5 +5,5 @@ pillow>=11.1.0
 appdirs==1.4.4
 -r ./gclib/requirements.txt
 numpy==2.2.3
-PyOpenGL>=3.1.0,<3.1.7
+PyOpenGL>=3.1.9
 pyrr==0.10.3
