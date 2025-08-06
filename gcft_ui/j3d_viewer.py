@@ -162,6 +162,9 @@ class J3DViewer(QOpenGLWidget):
     self.update()
   
   def paintGL(self):
+    if not self.enable_j3dultra:
+      return
+    
     glDepthMask(True) # Make sure the depth mask is on at the start of every frame (important!)
     glClearColor(0.25, 0.3, 0.4, 1.0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
