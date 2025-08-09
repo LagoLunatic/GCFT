@@ -25,7 +25,7 @@ from gcft_ui.gcft_common import RecursiveFilterProxyModel
 
 from gcft_ui.qt_init import load_ui_file
 from gcft_paths import GCFT_ROOT_PATH
-if os.environ["QT_API"] == "pyside6":
+if os.environ["QT_API"] == "pyside6" or TYPE_CHECKING:
   from gcft_ui.uic.ui_jpc_tab import Ui_JPCTab
 else:
   Ui_JPCTab = load_ui_file(os.path.join(GCFT_ROOT_PATH, "gcft_ui", "jpc_tab.ui"))
@@ -72,6 +72,11 @@ class JPCTab(BunfoeEditor):
   
   def get_particle_id_str(self, particle: JParticle):
     return self.gcft_window.stringify_number(particle.particle_id, min_hex_chars=4)
+  
+  def get_extra_info_layout(self):
+    layout = self.ui.scrollAreaWidgetContents.layout()
+    assert layout is not None
+    return layout
   
   
   def import_jpc(self):
@@ -222,7 +227,7 @@ class JPCTab(BunfoeEditor):
     self.proxy.setFilterFixedString(query)
   
   def widget_item_selected(self, current_index: QModelIndex, previous_index: QModelIndex):
-    layout = self.ui.scrollAreaWidgetContents.layout()
+    layout = self.get_extra_info_layout()
     self.clear_layout_recursive(layout)
     
     self.ui.jpc_sidebar_label.setText("Extra information will be displayed here as necessary.")
@@ -321,62 +326,62 @@ class JPCTab(BunfoeEditor):
   
   
   def bem1_chunk_selected(self, bem1: BEM1):
-    layout = self.ui.scrollAreaWidgetContents.layout()
+    layout = self.get_extra_info_layout()
     
     self.ui.jpc_sidebar_label.setText("Showing BEM1 (Dynamics Block) chunk with emitter/simulation settings.")
     
     bunfoe_editor_widget = super().setup_editor_widget_for_bunfoe_instance(bem1)
     layout.addWidget(bunfoe_editor_widget)
     
-    spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+    spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
     layout.addItem(spacer)
   
   def bsp1_chunk_selected(self, bsp1: BSP1):
-    layout = self.ui.scrollAreaWidgetContents.layout()
+    layout = self.get_extra_info_layout()
     
     self.ui.jpc_sidebar_label.setText("Showing BSP1 (Base Shape) chunk with particle draw settings.")
     
     self.gcft_window.make_color_selector_button(bsp1, "color_prm", "Color PRM", layout)
     self.gcft_window.make_color_selector_button(bsp1, "color_env", "Color ENV", layout)
     
-    spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+    spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
     layout.addItem(spacer)
   
   def esp1_chunk_selected(self, esp1: ESP1):
-    layout = self.ui.scrollAreaWidgetContents.layout()
+    layout = self.get_extra_info_layout()
     
     self.ui.jpc_sidebar_label.setText("Showing ESP1 (Extra Shape) chunk with misc extra particle draw settings.")
     
     bunfoe_editor_widget = super().setup_editor_widget_for_bunfoe_instance(esp1)
     layout.addWidget(bunfoe_editor_widget)
     
-    spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+    spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
     layout.addItem(spacer)
   
   def etx1_chunk_selected(self, etx1: ETX1):
-    layout = self.ui.scrollAreaWidgetContents.layout()
+    layout = self.get_extra_info_layout()
     
     self.ui.jpc_sidebar_label.setText("Showing ETX1 (Extra Texture Shape) chunk with extra texture draw settings.")
     
     bunfoe_editor_widget = super().setup_editor_widget_for_bunfoe_instance(etx1)
     layout.addWidget(bunfoe_editor_widget)
     
-    spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+    spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
     layout.addItem(spacer)
   
   def ssp1_chunk_selected(self, ssp1: SSP1):
-    layout = self.ui.scrollAreaWidgetContents.layout()
+    layout = self.get_extra_info_layout()
     
     self.ui.jpc_sidebar_label.setText("Showing SSP1 (Child Shape) chunk with child particle draw settings.")
     
     bunfoe_editor_widget = super().setup_editor_widget_for_bunfoe_instance(ssp1)
     layout.addWidget(bunfoe_editor_widget)
     
-    spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+    spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
     layout.addItem(spacer)
   
   def color_anim_keyframe_selected(self, keyframe):
-    layout = self.ui.scrollAreaWidgetContents.layout()
+    layout = self.get_extra_info_layout()
     
     self.ui.jpc_sidebar_label.setText("Showing color animation keyframe.")
     
@@ -386,7 +391,7 @@ class JPCTab(BunfoeEditor):
     
     self.gcft_window.make_color_selector_button(keyframe, "color", "Color", layout)
     
-    spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+    spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
     layout.addItem(spacer)
   
   def export_jpc_by_path(self, jpc_path):
@@ -515,7 +520,7 @@ class JPCTab(BunfoeEditor):
         
       menu.addAction(self.ui.actionReplaceJPCImage)
       self.ui.actionReplaceJPCImage.setData((particle, texture))
-      if self.bti_tab.bti is None:
+      if self.gcft_window.bti_tab.bti is None:
         self.ui.actionReplaceJPCImage.setDisabled(True)
       else:
         self.ui.actionReplaceJPCImage.setDisabled(False)
@@ -568,7 +573,7 @@ class JPCTab(BunfoeEditor):
     assert self.model.removeRow(item.row())
   
   def open_image_in_jpc(self):
-    texture = self.ui.actionOpenJPCImage.data()
+    texture: TEX1 = self.ui.actionOpenJPCImage.data()
     
     # Need to make a fake standalone BTI texture data so we can load it without it being the TEX1 format.
     data = BytesIO()
@@ -588,13 +593,15 @@ class JPCTab(BunfoeEditor):
       palette_data_offset = 0x20 + fs.data_len(texture.bti.image_data)
     fs.write_u32(data, 0x0C, palette_data_offset)
     
-    self.bti_tab.import_bti_by_data(data, texture.filename)
+    self.gcft_window.bti_tab.import_bti_by_data(data, texture.filename)
     
     self.gcft_window.set_tab_by_name("BTI Images")
   
   def replace_image_in_jpc(self):
     assert self.jpc is not None
     
+    particle: JParticle
+    texture: TEX1
     particle, texture = self.ui.actionReplaceJPCImage.data()
     
     num_particles_sharing_texture = 0
@@ -616,17 +623,17 @@ class JPCTab(BunfoeEditor):
       if response != QMessageBox.StandardButton.Yes:
         return
     
-    self.bti_tab.bti.save_changes()
+    self.gcft_window.bti_tab.bti.save_changes()
     
     # Need to make a fake BTI header for it to read from.
     data = BytesIO()
-    bti_header_bytes = fs.read_bytes(self.bti_tab.bti.data, self.bti_tab.bti.header_offset, 0x20)
+    bti_header_bytes = fs.read_bytes(self.gcft_window.bti_tab.bti.data, self.gcft_window.bti_tab.bti.header_offset, 0x20)
     fs.write_bytes(data, 0x00, bti_header_bytes)
     
     texture.bti.read_header(data)
     
-    texture.bti.image_data = fs.make_copy_data(self.bti_tab.bti.image_data)
-    texture.bti.palette_data = fs.make_copy_data(self.bti_tab.bti.palette_data)
+    texture.bti.image_data = fs.make_copy_data(self.gcft_window.bti_tab.bti.image_data)
+    texture.bti.palette_data = fs.make_copy_data(self.gcft_window.bti_tab.bti.palette_data)
     
     texture.bti.save_header_changes()
     

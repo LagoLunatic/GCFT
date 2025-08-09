@@ -6,7 +6,8 @@ import traceback
 from gcft_ui import qt_init
 from qtpy.QtCore import Qt, QTimer
 from qtpy.QtWidgets import QApplication, QMessageBox
-from qtpy import QT_VERSION
+from qtpy import QT_VERSION # pyright: ignore [reportAttributeAccessIssue]
+QT_VERSION: str
 from gcft_ui.main_window import GCFTWindow
 
 def signal_handler(sig, frame):
