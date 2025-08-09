@@ -1,13 +1,13 @@
 QtPy==2.4.3
-PySide6~=6.8.2.1
-PyYAML==6.0.1
+PySide6~=6.9.1
+PyYAML==6.0.2
 pillow>=11.1.0
 appdirs==1.4.4
 -r ./gclib/requirements_full.txt
 numpy==2.2.3
 PyOpenGL>=3.1.9
 pyrr==0.10.3
-pyinstaller~=6.12.0
-pytest~=8.3.4
-pytest-cov~=6.0.0
-pytest-qt~=4.4.0
+pyinstaller~=6.15.0
+pytest~=8.4.1
+pytest-cov~=6.2.1
+pytest-qt~=4.5.0
