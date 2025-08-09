@@ -24,6 +24,24 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="add_particles_from_folder">
+       <property name="text">
+        <string>Add/Replace All Particles From Folder</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="add_particle">
+       <property name="text">
+        <string>Add Particle</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
       <widget class="QPushButton" name="export_jpc">
        <property name="text">
         <string>Export JPC</string>
@@ -31,18 +49,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="add_particles_from_folder">
+      <widget class="QPushButton" name="export_jpc_folder">
        <property name="text">
-        <string>Add Particles From Folder</string>
+        <string>Extract All Particles To Folder</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="export_jpc_folder">
-       <property name="text">
-        <string>Export Folder</string>
-       </property>
-      </widget>
+      <widget class="QWidget" name="widget" native="true"/>
      </item>
     </layout>
    </item>
@@ -101,7 +115,7 @@
              <x>0</x>
              <y>0</y>
              <width>298</width>
-             <height>409</height>
+             <height>377</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_2"/>
@@ -122,6 +136,21 @@
   <action name="actionReplaceJPCImage">
    <property name="text">
     <string>Replace Image</string>
+   </property>
+  </action>
+  <action name="actionExtract_Particle">
+   <property name="text">
+    <string>Extract Particle</string>
+   </property>
+  </action>
+  <action name="actionReplace_Particle">
+   <property name="text">
+    <string>Replace Particle</string>
+   </property>
+  </action>
+  <action name="actionDelete_Particle">
+   <property name="text">
+    <string>Delete Particle</string>
    </property>
   </action>
  </widget>

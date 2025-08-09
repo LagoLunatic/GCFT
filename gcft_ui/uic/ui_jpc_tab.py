@@ -29,6 +29,12 @@ class Ui_JPCTab(object):
         self.actionOpenJPCImage.setObjectName(u"actionOpenJPCImage")
         self.actionReplaceJPCImage = QAction(JPCTab)
         self.actionReplaceJPCImage.setObjectName(u"actionReplaceJPCImage")
+        self.actionExtract_Particle = QAction(JPCTab)
+        self.actionExtract_Particle.setObjectName(u"actionExtract_Particle")
+        self.actionReplace_Particle = QAction(JPCTab)
+        self.actionReplace_Particle.setObjectName(u"actionReplace_Particle")
+        self.actionDelete_Particle = QAction(JPCTab)
+        self.actionDelete_Particle.setObjectName(u"actionDelete_Particle")
         self.verticalLayout = QVBoxLayout(JPCTab)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout_4 = QHBoxLayout()
@@ -38,23 +44,38 @@ class Ui_JPCTab(object):
 
         self.horizontalLayout_4.addWidget(self.import_jpc)
 
-        self.export_jpc = QPushButton(JPCTab)
-        self.export_jpc.setObjectName(u"export_jpc")
-
-        self.horizontalLayout_4.addWidget(self.export_jpc)
-
         self.add_particles_from_folder = QPushButton(JPCTab)
         self.add_particles_from_folder.setObjectName(u"add_particles_from_folder")
 
         self.horizontalLayout_4.addWidget(self.add_particles_from_folder)
 
-        self.export_jpc_folder = QPushButton(JPCTab)
-        self.export_jpc_folder.setObjectName(u"export_jpc_folder")
+        self.add_particle = QPushButton(JPCTab)
+        self.add_particle.setObjectName(u"add_particle")
 
-        self.horizontalLayout_4.addWidget(self.export_jpc_folder)
+        self.horizontalLayout_4.addWidget(self.add_particle)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout_4)
+
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.export_jpc = QPushButton(JPCTab)
+        self.export_jpc.setObjectName(u"export_jpc")
+
+        self.horizontalLayout_2.addWidget(self.export_jpc)
+
+        self.export_jpc_folder = QPushButton(JPCTab)
+        self.export_jpc_folder.setObjectName(u"export_jpc_folder")
+
+        self.horizontalLayout_2.addWidget(self.export_jpc_folder)
+
+        self.widget = QWidget(JPCTab)
+        self.widget.setObjectName(u"widget")
+
+        self.horizontalLayout_2.addWidget(self.widget)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_2)
 
         self.filter = QLineEdit(JPCTab)
         self.filter.setObjectName(u"filter")
@@ -85,7 +106,7 @@ class Ui_JPCTab(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 298, 409))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 298, 377))
         self.verticalLayout_2 = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
@@ -108,10 +129,14 @@ class Ui_JPCTab(object):
         JPCTab.setWindowTitle(QCoreApplication.translate("JPCTab", u"Form", None))
         self.actionOpenJPCImage.setText(QCoreApplication.translate("JPCTab", u"Open Image", None))
         self.actionReplaceJPCImage.setText(QCoreApplication.translate("JPCTab", u"Replace Image", None))
+        self.actionExtract_Particle.setText(QCoreApplication.translate("JPCTab", u"Extract Particle", None))
+        self.actionReplace_Particle.setText(QCoreApplication.translate("JPCTab", u"Replace Particle", None))
+        self.actionDelete_Particle.setText(QCoreApplication.translate("JPCTab", u"Delete Particle", None))
         self.import_jpc.setText(QCoreApplication.translate("JPCTab", u"Import JPC", None))
+        self.add_particles_from_folder.setText(QCoreApplication.translate("JPCTab", u"Add/Replace All Particles From Folder", None))
+        self.add_particle.setText(QCoreApplication.translate("JPCTab", u"Add Particle", None))
         self.export_jpc.setText(QCoreApplication.translate("JPCTab", u"Export JPC", None))
-        self.add_particles_from_folder.setText(QCoreApplication.translate("JPCTab", u"Add Particles From Folder", None))
-        self.export_jpc_folder.setText(QCoreApplication.translate("JPCTab", u"Export Folder", None))
+        self.export_jpc_folder.setText(QCoreApplication.translate("JPCTab", u"Extract All Particles To Folder", None))
         self.filter.setPlaceholderText(QCoreApplication.translate("JPCTab", u"Filter", None))
         self.jpc_sidebar_label.setText(QCoreApplication.translate("JPCTab", u"Extra information will be displayed here as necessary.", None))
     # retranslateUi

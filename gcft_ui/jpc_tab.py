@@ -1,5 +1,6 @@
 
 import os
+import glob
 from io import BytesIO
 from qtpy.QtGui import *
 from qtpy.QtCore import *
@@ -48,16 +49,24 @@ class JPCTab(BunfoeEditor):
     self.ui.export_jpc.setDisabled(True)
     self.ui.add_particles_from_folder.setDisabled(True)
     self.ui.export_jpc_folder.setDisabled(True)
+    self.ui.add_particle.setDisabled(True)
     
     self.ui.import_jpc.clicked.connect(self.import_jpc)
     self.ui.export_jpc.clicked.connect(self.export_jpc)
     self.ui.add_particles_from_folder.clicked.connect(self.add_particles_from_folder)
     self.ui.export_jpc_folder.clicked.connect(self.export_jpc_folder)
+    self.ui.add_particle.clicked.connect(self.add_particle)
     
     self.ui.jpc_particles_tree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
     self.ui.jpc_particles_tree.customContextMenuRequested.connect(self.show_jpc_particles_tree_context_menu)
+    self.ui.actionExtract_Particle.triggered.connect(self.extract_particle)
+    self.ui.actionReplace_Particle.triggered.connect(self.replace_particle)
+    self.ui.actionDelete_Particle.triggered.connect(self.delete_particle)
     self.ui.actionOpenJPCImage.triggered.connect(self.open_image_in_jpc)
     self.ui.actionReplaceJPCImage.triggered.connect(self.replace_image_in_jpc)
+  
+  def get_particle_id_str(self, particle: JParticle):
+    return self.gcft_window.stringify_number(particle.particle_id, min_hex_chars=4)
   
   
   def import_jpc(self):
@@ -76,6 +85,26 @@ class JPCTab(BunfoeEditor):
       default_file_name=jpc_name
     )
   
+  def extract_particle(self):
+    particle: JParticle = self.ui.actionExtract_Particle.data()
+    particle_filename = "%04X.jpa" % particle.particle_id
+    self.gcft_window.generic_do_gui_file_operation(
+      op_callback=self.extract_particle_by_path,
+      is_opening=False, is_saving=True, is_folder=False,
+      file_type="JPA", file_filters=["JPA Files (*.jpa)"],
+      default_file_name=particle_filename
+    )
+  
+  def replace_particle(self):
+    particle: JParticle = self.ui.actionExtract_Particle.data()
+    particle_filename = "%04X.jpa" % particle.particle_id
+    self.gcft_window.generic_do_gui_file_operation(
+      op_callback=self.replace_particle_by_path,
+      is_opening=True, is_saving=False, is_folder=False,
+      file_type="JPA", file_filters=["JPA Files (*.jpa)"],
+      default_file_name=particle_filename
+    )
+  
   def add_particles_from_folder(self):
     self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.add_particles_from_folder_by_path,
@@ -88,6 +117,13 @@ class JPCTab(BunfoeEditor):
       op_callback=self.export_jpc_folder_by_path,
       is_opening=False, is_saving=True, is_folder=True,
       file_type="JPC"
+    )
+  
+  def add_particle(self):
+    self.gcft_window.generic_do_gui_file_operation(
+      op_callback=self.add_particle_by_path,
+      is_opening=True, is_saving=False, is_folder=False,
+      file_type="JPA", file_filters=["JPA Files (*.jpa)"],
     )
   
   
@@ -109,6 +145,7 @@ class JPCTab(BunfoeEditor):
     self.ui.export_jpc.setDisabled(False)
     self.ui.add_particles_from_folder.setDisabled(False)
     self.ui.export_jpc_folder.setDisabled(False)
+    self.ui.add_particle.setDisabled(False)
   
   def reload_jpc_particles_tree(self):
     assert self.jpc is not None
@@ -116,27 +153,54 @@ class JPCTab(BunfoeEditor):
     self.model.removeRows(0, self.model.rowCount())
     
     for particle in self.jpc.particles:
-      particle_id_str = self.gcft_window.stringify_number(particle.particle_id, min_hex_chars=4)
-      
-      particle_item = QStandardItem(particle_id_str)
-      particle_item.setData(particle)
-      self.model.appendRow(particle_item)
-      
-      for chunk in particle.chunks:
-        #chunk_size_str = self.gcft_window.stringify_number(chunk.size, min_hex_chars=5)
-        
-        chunk_item = QStandardItem(chunk.magic)
-        chunk_item.setData(chunk)
-        particle_item.appendRow(chunk_item)
-        
-        if isinstance(chunk, BSP1):
-          self.add_bsp1_chunk_to_tree(chunk, chunk_item)
-        elif isinstance(chunk, SSP1):
-          self.add_ssp1_chunk_to_tree(chunk, chunk_item)
-        elif isinstance(chunk, TDB1):
-          self.add_tdb1_chunk_to_tree(chunk, chunk_item)
+      self.add_new_tree_row_for_particle(particle)
     
     self.filter_particles()
+  
+  def add_new_tree_row_for_particle(self, particle: JParticle, row_index: int | None = None):
+    particle_id_str = self.get_particle_id_str(particle)
+    
+    particle_item = QStandardItem(particle_id_str)
+    particle_item.setData(particle)
+    if row_index is None:
+      # Add to the end by default.
+      self.model.appendRow(particle_item)
+    else:
+      # Insert at a specific index.
+      self.model.insertRow(row_index, particle_item)
+    
+    for chunk in particle.chunks:
+      #chunk_size_str = self.gcft_window.stringify_number(chunk.size, min_hex_chars=5)
+      
+      chunk_item = QStandardItem(chunk.magic)
+      chunk_item.setData(chunk)
+      particle_item.appendRow(chunk_item)
+      
+      if isinstance(chunk, BSP1):
+        self.add_bsp1_chunk_to_tree(chunk, chunk_item)
+      elif isinstance(chunk, SSP1):
+        self.add_ssp1_chunk_to_tree(chunk, chunk_item)
+      elif isinstance(chunk, TDB1):
+        self.add_tdb1_chunk_to_tree(chunk, chunk_item)
+    
+    return particle_item
+  
+  def expand_item(self, item: QStandardItem):
+    self.ui.jpc_particles_tree.expand(self.proxy.mapFromSource(item.index()))
+  
+  def is_expanded(self, item: QStandardItem):
+    return self.ui.jpc_particles_tree.isExpanded(self.proxy.mapFromSource(item.index()))
+  
+  def find_item_by_data(self, column, value):
+    matched_indexes = self.model.match(
+      self.model.index(0, column),
+      Qt.ItemDataRole.UserRole + 1, # Equivalent to item.data()
+      value,
+      1,
+      Qt.MatchFlag.MatchRecursive
+    )
+    assert len(matched_indexes) == 1
+    return self.model.itemFromIndex(matched_indexes[0])
   
   def filter_particles(self):
     query = self.ui.filter.text()
@@ -260,7 +324,11 @@ class JPCTab(BunfoeEditor):
   def add_particles_from_folder_by_path(self, folder_path):
     assert self.jpc is not None
     
-    num_particles_added, num_particles_overwritten, num_textures_added, num_textures_overwritten = self.jpc.import_particles_from_disk(folder_path)
+    all_jpa_file_paths = glob.glob(glob.escape(folder_path) + "/*.jpa")
+    jpa_paths_to_particle_ids: dict[str, int | None] = {
+      jpa_path: None for jpa_path in all_jpa_file_paths
+    }
+    num_particles_added, num_particles_overwritten, num_textures_added, num_textures_overwritten = self.jpc.add_or_replace_particles_from_disk(jpa_paths_to_particle_ids)
     
     if num_particles_added == num_particles_overwritten == num_textures_added == num_textures_overwritten == 0:
       QMessageBox.warning(self, "No matching files found", "The selected folder does not contain any files with the extension .jpa. No particles imported.")
@@ -275,6 +343,59 @@ class JPCTab(BunfoeEditor):
     
     QMessageBox.information(self, "JPC extracted", "Successfully extracted all JPA particles from the JPC to \"%s\"." % folder_path)
   
+  def add_particle_by_path(self, file_path: str):
+    assert self.jpc is not None
+    
+    with open(file_path, "rb") as f:
+      jpa_data = BytesIO(f.read())
+    particle = JParticle(jpa_data, 0, self.jpc.version)
+    
+    particle_id_str, confirmed = QInputDialog.getText(
+      self, "Input Particle ID", "What particle ID to give the new particle? (The default value is the ID from the file you just imported.)",
+      text="%04X" % particle.particle_id,
+      flags=Qt.WindowType.WindowSystemMenuHint | Qt.WindowType.WindowTitleHint,
+    )
+    if not confirmed:
+      return
+    
+    particle_id = int(particle_id_str, 16)
+    
+    replacing = False
+    orig_particle = None
+    if particle_id in self.jpc.particles_by_id:
+      message = ("A particle with ID 0x%04X already exists in this JPC.\n\n" + \
+        "Do you want to replace it with the particle you just imported?") % (particle_id)
+      response = QMessageBox.question(self, 
+        "Confirm replace files",
+        message,
+        QMessageBox.StandardButton.Cancel | QMessageBox.StandardButton.Yes,
+        QMessageBox.StandardButton.Cancel
+      )
+      if response != QMessageBox.StandardButton.Yes:
+        return
+      replacing = True
+      orig_particle = self.jpc.particles_by_id[particle_id]
+    
+    self.jpc.add_or_replace_particle_from_disk(file_path, particle_id)
+    new_particle = self.jpc.particles_by_id[particle_id]
+    
+    if replacing:
+      orig_item = self.find_item_by_data(0, orig_particle)
+      row_index = orig_item.row()
+      orig_was_expanded = self.is_expanded(orig_item)
+      # Add the new item at the old one's index, then delete the old one afterwards.
+      # Doing it in this order preserves the user's selection on the now-replaced row.
+      new_item = self.add_new_tree_row_for_particle(new_particle, row_index)
+      assert self.model.removeRow(orig_item.row())
+      if orig_was_expanded:
+        self.expand_item(new_item)
+    else:
+      self.add_new_tree_row_for_particle(new_particle)
+    
+    action_verb = "Replaced" if replacing else "Added"
+    particle_id_str = self.get_particle_id_str(new_particle)
+    self.gcft_window.ui.statusbar.showMessage("%s %s." % (action_verb, particle_id_str), 3000)
+  
   
   def show_jpc_particles_tree_context_menu(self, pos: QPoint):
     if self.jpc is None:
@@ -288,7 +409,20 @@ class JPCTab(BunfoeEditor):
       return
     
     data = item.data()
-    if isinstance(data, TEX1):
+    if isinstance(data, JParticle):
+      particle = data
+      
+      menu = QMenu(self)
+      
+      menu.addAction(self.ui.actionExtract_Particle)
+      self.ui.actionExtract_Particle.setData(particle)
+      menu.addAction(self.ui.actionReplace_Particle)
+      self.ui.actionReplace_Particle.setData(particle)
+      menu.addAction(self.ui.actionDelete_Particle)
+      self.ui.actionDelete_Particle.setData(particle)
+      
+      menu.exec_(self.ui.jpc_particles_tree.mapToGlobal(pos))
+    elif isinstance(data, TEX1):
       texture = data
       particle_item = item.parent().parent()
       particle: JParticle = particle_item.data()
@@ -306,6 +440,51 @@ class JPCTab(BunfoeEditor):
         self.ui.actionReplaceJPCImage.setDisabled(False)
       
       menu.exec_(self.ui.jpc_particles_tree.mapToGlobal(pos))
+  
+  def extract_particle_by_path(self, file_path: str):
+    assert self.jpc is not None
+    
+    particle: JParticle = self.ui.actionDelete_Particle.data()
+    particle_id_str = self.get_particle_id_str(particle)
+    
+    self.jpc.extract_particle_to_disk(file_path, particle.particle_id)
+    
+    self.gcft_window.ui.statusbar.showMessage("Extracted particle %s." % particle_id_str, 3000)
+  
+  def replace_particle_by_path(self, file_path: str):
+    assert self.jpc is not None
+    
+    orig_particle: JParticle = self.ui.actionDelete_Particle.data()
+    
+    self.jpc.add_or_replace_particle_from_disk(file_path, orig_particle.particle_id)
+    new_particle = self.jpc.particles_by_id[orig_particle.particle_id]
+    
+    orig_item = self.find_item_by_data(0, orig_particle)
+    row_index = orig_item.row()
+    orig_was_expanded = self.is_expanded(orig_item)
+    # Add the new item at the old one's index, then delete the old one afterwards.
+    # Doing it in this order preserves the user's selection on the now-replaced row.
+    new_item = self.add_new_tree_row_for_particle(new_particle, row_index)
+    assert self.model.removeRow(orig_item.row())
+    if orig_was_expanded:
+      self.expand_item(new_item)
+    
+    particle_id_str = self.get_particle_id_str(new_particle)
+    self.gcft_window.ui.statusbar.showMessage("Replaced %s." % particle_id_str, 3000)
+  
+  def delete_particle(self):
+    assert self.jpc is not None
+    
+    particle: JParticle = self.ui.actionDelete_Particle.data()
+    particle_id_str = self.get_particle_id_str(particle)
+    
+    if not self.gcft_window.confirm_delete(particle_id_str):
+      return
+    
+    self.jpc.delete_particle(particle.particle_id)
+    
+    item = self.find_item_by_data(0, particle)
+    assert self.model.removeRow(item.row())
   
   def open_image_in_jpc(self):
     texture = self.ui.actionOpenJPCImage.data()
@@ -394,7 +573,7 @@ class JPCTab(BunfoeEditor):
         if not isinstance(particle, JParticle):
           continue
         
-        particle_id_str = self.gcft_window.stringify_number(particle.particle_id, min_hex_chars=4)
+        particle_id_str = self.get_particle_id_str(particle)
         particle_id_strs.append(particle_id_str)
       
       if not particle_id_strs:
