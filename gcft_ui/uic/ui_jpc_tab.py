@@ -92,7 +92,7 @@ class Ui_JPCTab(object):
 
         self.jpc_sidebar = QWidget(JPCTab)
         self.jpc_sidebar.setObjectName(u"jpc_sidebar")
-        self.jpc_sidebar.setMaximumSize(QSize(300, 16777215))
+        self.jpc_sidebar.setMaximumSize(QSize(450, 16777215))
         self.verticalLayout_3 = QVBoxLayout(self.jpc_sidebar)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
@@ -106,7 +106,7 @@ class Ui_JPCTab(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 298, 377))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 373, 377))
         self.verticalLayout_2 = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)

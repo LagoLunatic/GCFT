@@ -80,7 +80,7 @@
       <widget class="QWidget" name="jpc_sidebar" native="true">
        <property name="maximumSize">
         <size>
-         <width>300</width>
+         <width>450</width>
          <height>16777215</height>
         </size>
        </property>
@@ -114,7 +114,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>298</width>
+             <width>373</width>
              <height>377</height>
             </rect>
            </property>

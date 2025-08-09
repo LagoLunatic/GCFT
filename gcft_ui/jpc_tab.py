@@ -10,8 +10,13 @@ from gclib import fs_helpers as fs
 from gclib.jpc import JPC
 from gclib.jpa import JParticle
 from gclib.jchunk import JPAChunk
+# from gclib.jpa_chunks.bem1 import BEM1
 from gclib.jpa_chunks.bsp1 import BSP1, ColorAnimationKeyframe
+from gclib.jpa_chunks.esp1 import ESP1
+# from gclib.jpa_chunks.etx1 import ETX1
 from gclib.jpa_chunks.ssp1 import SSP1
+# from gclib.jpa_chunks.fld1 import FLD1
+# from gclib.jpa_chunks.kfa1 import KFA1
 from gclib.jpa_chunks.tdb1 import TDB1
 from gclib.jpa_chunks.tex1 import TEX1
 
@@ -176,10 +181,20 @@ class JPCTab(BunfoeEditor):
       chunk_item.setData(chunk)
       particle_item.appendRow(chunk_item)
       
+      # if isinstance(chunk, BEM1):
+      #   self.add_bem1_chunk_to_tree(chunk, chunk_item)
       if isinstance(chunk, BSP1):
         self.add_bsp1_chunk_to_tree(chunk, chunk_item)
+      elif isinstance(chunk, ESP1):
+        self.add_esp1_chunk_to_tree(chunk, chunk_item)
+      # elif isinstance(chunk, ETX1):
+      #   self.add_etx1_chunk_to_tree(chunk, chunk_item)
       elif isinstance(chunk, SSP1):
         self.add_ssp1_chunk_to_tree(chunk, chunk_item)
+      # elif isinstance(chunk, FLD1):
+      #   self.add_fld1_chunk_to_tree(chunk, chunk_item)
+      # elif isinstance(chunk, KFA1):
+      #   self.add_kfa1_chunk_to_tree(chunk, chunk_item)
       elif isinstance(chunk, TDB1):
         self.add_tdb1_chunk_to_tree(chunk, chunk_item)
     
@@ -222,12 +237,30 @@ class JPCTab(BunfoeEditor):
     data = item.data()
     if isinstance(data, JPAChunk):
       chunk = data
-      if chunk.magic == "BSP1":
+      # if isinstance(chunk, BEM1):
+      #   self.bem1_chunk_selected(chunk)
+      #   return
+      if isinstance(chunk, BSP1):
         self.bsp1_chunk_selected(chunk)
         return
-      elif chunk.magic == "SSP1":
+      elif isinstance(chunk, ESP1):
+        self.esp1_chunk_selected(chunk)
+        return
+      # elif isinstance(chunk, ETX1):
+      #   self.etx1_chunk_selected(chunk)
+      #   return
+      elif isinstance(chunk, SSP1):
         self.ssp1_chunk_selected(chunk)
         return
+      # elif isinstance(chunk, FLD1):
+      #   self.fld1_chunk_selected(chunk)
+      #   return
+      # elif isinstance(chunk, KFA1):
+      #   self.kfa1_chunk_selected(chunk)
+      #   return
+      # elif isinstance(chunk, TDB1):
+      #   self.tdb1_chunk_selected(chunk)
+      #   return
     elif isinstance(data, ColorAnimationKeyframe):
       keyframe = data
       self.color_anim_keyframe_selected(keyframe)
@@ -253,6 +286,11 @@ class JPCTab(BunfoeEditor):
         keyframe_item.setData(keyframe)
         anim_item.appendRow(keyframe_item)
   
+  def add_esp1_chunk_to_tree(self, esp1: ESP1, chunk_item: QStandardItem):
+    assert self.jpc is not None
+    
+    pass
+  
   def add_ssp1_chunk_to_tree(self, ssp1: SSP1, chunk_item: QStandardItem):
     assert self.jpc is not None
     
@@ -272,10 +310,10 @@ class JPCTab(BunfoeEditor):
       chunk_item.appendRow(texture_item)
   
   
-  def bsp1_chunk_selected(self, bsp1):
+  def bsp1_chunk_selected(self, bsp1: BSP1):
     layout = self.ui.scrollAreaWidgetContents.layout()
     
-    self.ui.jpc_sidebar_label.setText("Showing BSP1 (Base Shape) chunk.")
+    self.ui.jpc_sidebar_label.setText("Showing BSP1 (Base Shape) chunk with particle draw settings.")
     
     self.gcft_window.make_color_selector_button(bsp1, "color_prm", "Color PRM", layout)
     self.gcft_window.make_color_selector_button(bsp1, "color_env", "Color ENV", layout)
@@ -283,10 +321,21 @@ class JPCTab(BunfoeEditor):
     spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
     layout.addItem(spacer)
   
-  def ssp1_chunk_selected(self, ssp1):
+  def esp1_chunk_selected(self, esp1: ESP1):
     layout = self.ui.scrollAreaWidgetContents.layout()
     
-    self.ui.jpc_sidebar_label.setText("Showing SSP1 (Child Shape) chunk.")
+    self.ui.jpc_sidebar_label.setText("Showing ESP1 (Extra Shape) chunk with misc extra particle draw settings.")
+    
+    bunfoe_editor_widget = super().setup_editor_widget_for_bunfoe_instance(esp1)
+    layout.addWidget(bunfoe_editor_widget)
+    
+    spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+    layout.addItem(spacer)
+  
+  def ssp1_chunk_selected(self, ssp1: SSP1):
+    layout = self.ui.scrollAreaWidgetContents.layout()
+    
+    self.ui.jpc_sidebar_label.setText("Showing SSP1 (Child Shape) chunk with child particle draw settings.")
     
     bunfoe_editor_widget = super().setup_editor_widget_for_bunfoe_instance(ssp1)
     layout.addWidget(bunfoe_editor_widget)
