@@ -10,7 +10,7 @@ from gclib import fs_helpers as fs
 from gclib.jpc import JPC
 from gclib.jpa import JParticle
 from gclib.jchunk import JPAChunk
-# from gclib.jpa_chunks.bem1 import BEM1
+from gclib.jpa_chunks.bem1 import BEM1
 from gclib.jpa_chunks.bsp1 import BSP1, ColorAnimationKeyframe
 from gclib.jpa_chunks.esp1 import ESP1
 # from gclib.jpa_chunks.etx1 import ETX1
@@ -181,9 +181,9 @@ class JPCTab(BunfoeEditor):
       chunk_item.setData(chunk)
       particle_item.appendRow(chunk_item)
       
-      # if isinstance(chunk, BEM1):
-      #   self.add_bem1_chunk_to_tree(chunk, chunk_item)
-      if isinstance(chunk, BSP1):
+      if isinstance(chunk, BEM1):
+        self.add_bem1_chunk_to_tree(chunk, chunk_item)
+      elif isinstance(chunk, BSP1):
         self.add_bsp1_chunk_to_tree(chunk, chunk_item)
       elif isinstance(chunk, ESP1):
         self.add_esp1_chunk_to_tree(chunk, chunk_item)
@@ -237,10 +237,10 @@ class JPCTab(BunfoeEditor):
     data = item.data()
     if isinstance(data, JPAChunk):
       chunk = data
-      # if isinstance(chunk, BEM1):
-      #   self.bem1_chunk_selected(chunk)
-      #   return
-      if isinstance(chunk, BSP1):
+      if isinstance(chunk, BEM1):
+        self.bem1_chunk_selected(chunk)
+        return
+      elif isinstance(chunk, BSP1):
         self.bsp1_chunk_selected(chunk)
         return
       elif isinstance(chunk, ESP1):
@@ -266,6 +266,11 @@ class JPCTab(BunfoeEditor):
       self.color_anim_keyframe_selected(keyframe)
       return
   
+  
+  def add_bem1_chunk_to_tree(self, bem1: BEM1, chunk_item: QStandardItem):
+    assert self.jpc is not None
+    
+    pass
   
   def add_bsp1_chunk_to_tree(self, bsp1: BSP1, chunk_item: QStandardItem):
     assert self.jpc is not None
@@ -309,6 +314,17 @@ class JPCTab(BunfoeEditor):
       texture_item.setData(texture)
       chunk_item.appendRow(texture_item)
   
+  
+  def bem1_chunk_selected(self, bem1: BEM1):
+    layout = self.ui.scrollAreaWidgetContents.layout()
+    
+    self.ui.jpc_sidebar_label.setText("Showing BEM1 (Dynamics Block) chunk with emitter/simulation settings.")
+    
+    bunfoe_editor_widget = super().setup_editor_widget_for_bunfoe_instance(bem1)
+    layout.addWidget(bunfoe_editor_widget)
+    
+    spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+    layout.addItem(spacer)
   
   def bsp1_chunk_selected(self, bsp1: BSP1):
     layout = self.ui.scrollAreaWidgetContents.layout()
