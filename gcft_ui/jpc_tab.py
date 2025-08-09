@@ -13,7 +13,7 @@ from gclib.jchunk import JPAChunk
 from gclib.jpa_chunks.bem1 import BEM1
 from gclib.jpa_chunks.bsp1 import BSP1, ColorAnimationKeyframe
 from gclib.jpa_chunks.esp1 import ESP1
-# from gclib.jpa_chunks.etx1 import ETX1
+from gclib.jpa_chunks.etx1 import ETX1
 from gclib.jpa_chunks.ssp1 import SSP1
 # from gclib.jpa_chunks.fld1 import FLD1
 # from gclib.jpa_chunks.kfa1 import KFA1
@@ -187,8 +187,8 @@ class JPCTab(BunfoeEditor):
         self.add_bsp1_chunk_to_tree(chunk, chunk_item)
       elif isinstance(chunk, ESP1):
         self.add_esp1_chunk_to_tree(chunk, chunk_item)
-      # elif isinstance(chunk, ETX1):
-      #   self.add_etx1_chunk_to_tree(chunk, chunk_item)
+      elif isinstance(chunk, ETX1):
+        self.add_etx1_chunk_to_tree(chunk, chunk_item)
       elif isinstance(chunk, SSP1):
         self.add_ssp1_chunk_to_tree(chunk, chunk_item)
       # elif isinstance(chunk, FLD1):
@@ -246,9 +246,9 @@ class JPCTab(BunfoeEditor):
       elif isinstance(chunk, ESP1):
         self.esp1_chunk_selected(chunk)
         return
-      # elif isinstance(chunk, ETX1):
-      #   self.etx1_chunk_selected(chunk)
-      #   return
+      elif isinstance(chunk, ETX1):
+        self.etx1_chunk_selected(chunk)
+        return
       elif isinstance(chunk, SSP1):
         self.ssp1_chunk_selected(chunk)
         return
@@ -292,6 +292,11 @@ class JPCTab(BunfoeEditor):
         anim_item.appendRow(keyframe_item)
   
   def add_esp1_chunk_to_tree(self, esp1: ESP1, chunk_item: QStandardItem):
+    assert self.jpc is not None
+    
+    pass
+  
+  def add_etx1_chunk_to_tree(self, etx1: ETX1, chunk_item: QStandardItem):
     assert self.jpc is not None
     
     pass
@@ -343,6 +348,17 @@ class JPCTab(BunfoeEditor):
     self.ui.jpc_sidebar_label.setText("Showing ESP1 (Extra Shape) chunk with misc extra particle draw settings.")
     
     bunfoe_editor_widget = super().setup_editor_widget_for_bunfoe_instance(esp1)
+    layout.addWidget(bunfoe_editor_widget)
+    
+    spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+    layout.addItem(spacer)
+  
+  def etx1_chunk_selected(self, etx1: ETX1):
+    layout = self.ui.scrollAreaWidgetContents.layout()
+    
+    self.ui.jpc_sidebar_label.setText("Showing ETX1 (Extra Texture Shape) chunk with extra texture draw settings.")
+    
+    bunfoe_editor_widget = super().setup_editor_widget_for_bunfoe_instance(etx1)
     layout.addWidget(bunfoe_editor_widget)
     
     spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
