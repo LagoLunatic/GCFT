@@ -116,6 +116,8 @@ class BunfoeEditor(QWidget):
             if len(list_value) > 0:
               value = self.get_instance_value(instance, access_path)
               self.set_widget_value(widget, value, field_type, instance, disabled=disabled)
+            else:
+              self.set_widget_value(widget, None, field_type, instance, disabled=disabled)
           else:
             value = self.get_instance_value(instance, access_path)
             self.set_widget_value(widget, value, field_type, instance, disabled=disabled)
