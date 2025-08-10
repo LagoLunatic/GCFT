@@ -11,7 +11,7 @@ from gclib.jpc import JPC
 from gclib.jpa import JParticle
 from gclib.jchunk import JPAChunk
 from gclib.jpa_chunks.bem1 import BEM1
-from gclib.jpa_chunks.bsp1 import BSP1, ColorAnimationKeyframe
+from gclib.jpa_chunks.bsp1 import BSP1
 from gclib.jpa_chunks.esp1 import ESP1
 from gclib.jpa_chunks.etx1 import ETX1
 from gclib.jpa_chunks.ssp1 import SSP1
@@ -266,10 +266,6 @@ class JPCTab(BunfoeEditor):
       # elif isinstance(chunk, TDB1):
       #   self.tdb1_chunk_selected(chunk)
       #   return
-    elif isinstance(data, ColorAnimationKeyframe):
-      keyframe = data
-      self.color_anim_keyframe_selected(keyframe)
-      return
   
   
   def add_bem1_chunk_to_tree(self, bem1: BEM1, chunk_item: QStandardItem):
@@ -280,21 +276,7 @@ class JPCTab(BunfoeEditor):
   def add_bsp1_chunk_to_tree(self, bsp1: BSP1, chunk_item: QStandardItem):
     assert self.jpc is not None
     
-    if bsp1.color_prm_anm_table:
-      anim_item = QStandardItem("Color PRM Anim")
-      chunk_item.appendRow(anim_item)
-      for keyframe_index, keyframe in enumerate(bsp1.color_prm_anm_table):
-        keyframe_item = QStandardItem("0x%02X" % keyframe_index)
-        keyframe_item.setData(keyframe)
-        anim_item.appendRow(keyframe_item)
-    
-    if bsp1.color_env_anm_table:
-      anim_item = QStandardItem("Color ENV Anim")
-      chunk_item.appendRow(anim_item)
-      for keyframe_index, keyframe in enumerate(bsp1.color_env_anm_table):
-        keyframe_item = QStandardItem("0x%02X" % keyframe_index)
-        keyframe_item.setData(keyframe)
-        anim_item.appendRow(keyframe_item)
+    pass
   
   def add_esp1_chunk_to_tree(self, esp1: ESP1, chunk_item: QStandardItem):
     assert self.jpc is not None
@@ -341,8 +323,8 @@ class JPCTab(BunfoeEditor):
     
     self.ui.jpc_sidebar_label.setText("Showing BSP1 (Base Shape) chunk with particle draw settings.")
     
-    self.gcft_window.make_color_selector_button(bsp1, "color_prm", "Color PRM", layout)
-    self.gcft_window.make_color_selector_button(bsp1, "color_env", "Color ENV", layout)
+    bunfoe_editor_widget = super().setup_editor_widget_for_bunfoe_instance(bsp1)
+    layout.addWidget(bunfoe_editor_widget)
     
     spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
     layout.addItem(spacer)
@@ -376,20 +358,6 @@ class JPCTab(BunfoeEditor):
     
     bunfoe_editor_widget = super().setup_editor_widget_for_bunfoe_instance(ssp1)
     layout.addWidget(bunfoe_editor_widget)
-    
-    spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-    layout.addItem(spacer)
-  
-  def color_anim_keyframe_selected(self, keyframe):
-    layout = self.get_extra_info_layout()
-    
-    self.ui.jpc_sidebar_label.setText("Showing color animation keyframe.")
-    
-    label = QLabel()
-    label.setText("Time: %d" % keyframe.time)
-    layout.addWidget(label)
-    
-    self.gcft_window.make_color_selector_button(keyframe, "color", "Color", layout)
     
     spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
     layout.addItem(spacer)
