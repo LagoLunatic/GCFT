@@ -303,7 +303,7 @@ class BunfoeEditor(QWidget):
     self.set_widget_value(indexed_widget, value, field_type, instance)
   
   def make_widget_for_field(self, field: Field):
-    if field.name.startswith('_padding') or field.assert_default:
+    if field.name.startswith('_padding') or field.assert_default or field.bitfield:
       # No need to show these.
       return None
     
