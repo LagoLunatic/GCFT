@@ -149,7 +149,7 @@ class J3DViewer(QOpenGLWidget):
     glDepthMask(True)
     glClearColor(0.25, 0.3, 0.4, 1.0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-
+    
     width = self.width()
     height = self.height()
     self.aspect = width / height
@@ -261,7 +261,7 @@ class J3DViewer(QOpenGLWidget):
     
     if self.context() is None:
       # OpenGL has not yet been initialized.
-      # It will be initialized whenever the widget actually gets shown on the users screen, so just
+      # It will be initialized whenever the widget actually gets shown on the user's screen, so just
       # queue the model to load whenever initializeGL gets called.
       self.load_model_is_queued = True
     else:
