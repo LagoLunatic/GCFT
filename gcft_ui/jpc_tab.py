@@ -148,6 +148,8 @@ class JPCTab(BunfoeEditor):
   def import_jpc_by_data(self, data, jpc_name):
     self.jpc = JPC(data)
     
+    self.clear_sidebar()
+    
     self.jpc_name = jpc_name
     
     self.reload_jpc_particles_tree()
@@ -226,11 +228,14 @@ class JPCTab(BunfoeEditor):
     query = self.ui.filter.text()
     self.proxy.setFilterFixedString(query)
   
-  def widget_item_selected(self, current_index: QModelIndex, previous_index: QModelIndex):
+  def clear_sidebar(self):
     layout = self.get_extra_info_layout()
     self.clear_layout_recursive(layout)
     
     self.ui.jpc_sidebar_label.setText("Extra information will be displayed here as necessary.")
+    
+  def widget_item_selected(self, current_index: QModelIndex, previous_index: QModelIndex):
+    self.clear_sidebar()
     
     if not current_index.isValid():
       return
