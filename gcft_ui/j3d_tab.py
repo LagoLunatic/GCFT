@@ -390,9 +390,9 @@ class J3DTab(BunfoeEditor):
   
   def add_inf1_chunk_to_tree(self, inf1: INF1, chunk_item: QStandardItem):
     root_node = inf1.flat_hierarchy[0]
-    self.add_inf1_node_to_tree_recursive(root_node, chunk_item)
+    self.add_inf1_node_to_tree_recursive(root_node, inf1, chunk_item)
   
-  def add_inf1_node_to_tree_recursive(self, inf1_node: INF1Node, parent_item: QStandardItem):
+  def add_inf1_node_to_tree_recursive(self, inf1_node: INF1Node, inf1: INF1, parent_item: QStandardItem):
     type_name = None
     names_list = None
     if inf1_node.type == INF1NodeType.JOINT:
@@ -420,8 +420,9 @@ class J3DTab(BunfoeEditor):
     
     node_item = self.make_tree_model_item(inf1_node, parent_item, [node_name, node_name, ""], expanded=True)
     
-    for child_node in inf1_node.children:
-      self.add_inf1_node_to_tree_recursive(child_node, node_item)
+    for child_index in inf1_node.child_indexes:
+      child_node = inf1.flat_hierarchy[child_index]
+      self.add_inf1_node_to_tree_recursive(child_node, inf1, node_item)
   
   def add_vtx1_chunk_to_tree(self, vtx1: VTX1, chunk_item: QStandardItem):
     for vtx_fmt in vtx1.vertex_formats:
@@ -864,6 +865,7 @@ class J3DTab(BunfoeEditor):
     texture_index = self.j3d.tex1.textures.index(texture)
     texture_name = self.j3d.tex1.texture_names[texture_index]
     self.gcft_window.ui.statusbar.showMessage("Replaced %s." % texture_name, 3000)
+  
   
   def try_show_model_preview(self, *, reload_same_model: bool):
     assert self.j3d is not None
