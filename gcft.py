@@ -18,17 +18,22 @@ def signal_handler(sig, frame):
 import signal
 signal.signal(signal.SIGINT, signal_handler)
 
-try:
-  from sys import _MEIPASS # pyright: ignore [reportAttributeAccessIssue]
-except ImportError:
+def is_windows() -> bool:
+  return sys.platform == "win32"
+
+def try_fix_taskbar_icon():
+  from gcft_paths import IS_RUNNING_FROM_SOURCE
+  if not IS_RUNNING_FROM_SOURCE:
+    return
+  if not is_windows():
+    return
+  
   # Setting the app user model ID is necessary for Windows to display a custom taskbar icon when running from source.
   import ctypes
   app_id = "LagoLunatic.GameCubeFileTools"
-  try:
+  # This function can technically be null because versions of Windows before Windows 7 don't support it.
+  if hasattr(ctypes.windll.shell32, "SetCurrentProcessExplicitAppUserModelID"):
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
-  except AttributeError:
-    # Versions of Windows before Windows 7 don't support SetCurrentProcessExplicitAppUserModelID, so just swallow the error.
-    pass
 
 def get_dark_mode_palette(app: QApplication):
   from qtpy.QtGui import QPalette, QColor
@@ -63,6 +68,8 @@ def get_dark_mode_palette(app: QApplication):
   return pal
 
 if __name__ == "__main__":
+  try_fix_taskbar_icon()
+  
   qApp = QApplication(sys.argv)
   
   # Use the Qt Fusion style on all platforms for consistency to avoid parts of the UI breaking on certain OSes.

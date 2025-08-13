@@ -4,7 +4,8 @@ import platform
 
 import appdirs
 
-try:
+import sys
+if getattr(sys, 'frozen', False) and hasattr(sys, "_MEIPASS"):
   from sys import _MEIPASS # pyright: ignore [reportAttributeAccessIssue]
   GCFT_ROOT_PATH = _MEIPASS
   IS_RUNNING_FROM_SOURCE = False
@@ -15,7 +16,7 @@ try:
     SETTINGS_PATH = os.path.join(userdata_path, "settings.txt")
   else:
     SETTINGS_PATH = os.path.join(".", "settings.txt")
-except ImportError:
+else:
   GCFT_ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
   IS_RUNNING_FROM_SOURCE = True
   SETTINGS_PATH = os.path.join(GCFT_ROOT_PATH, "settings.txt")
