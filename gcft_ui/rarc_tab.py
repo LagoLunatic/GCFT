@@ -335,6 +335,8 @@ class RARCTab(QWidget):
     
     parent_item.appendRow([name_item, node_type_item, file_index_item, file_id_item, QStandardItem(), compression_item, preload_item])
     
+    self.expand_item(name_item)
+    
     if dir_entry.name not in [".", ".."]:
       self.set_file_entry_for_model_index(name_item.index(), dir_entry)
       self.set_node_for_model_index(name_item.index(), dir_entry.node)
