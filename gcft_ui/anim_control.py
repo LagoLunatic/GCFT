@@ -31,6 +31,7 @@ class AnimControl(QGroupBox):
     self.ui.seek_slider.valueChanged.connect(self.update_anim_frame_by_type)
     self.ui.detach_button.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_TrashIcon))
     self.ui.detach_button.clicked.connect(self.detach_anim)
+    self.ui.frame_spinbox.valueChanged.connect(self.update_anim_frame_from_frame_spinbox)
     
     self.update_anim_pause_button_icon()
     
@@ -48,6 +49,11 @@ class AnimControl(QGroupBox):
     self.anim_type_slider_frame_changed.emit(self.property("anim_type"), frame)
     self.paused = True
     self.update_anim_pause_button_icon()
+    self.update_frame_display()
+  
+  def update_anim_frame_from_frame_spinbox(self, new_frame: int):
+    self.ui.seek_slider.setValue(new_frame)
+    self.update_anim_frame_by_type(new_frame)
   
   def detach_anim(self):
     if self.anim_loaded:
@@ -65,10 +71,18 @@ class AnimControl(QGroupBox):
     self.ui.seek_slider.blockSignals(True)
     self.ui.seek_slider.setValue(frame)
     self.ui.seek_slider.blockSignals(False)
+    self.update_frame_display()
     if frame >= self.duration:
       self.paused = True
       self.anim_type_paused_changed.emit(self.property("anim_type"), self.paused)
       self.update_anim_pause_button_icon()
+  
+  def update_frame_display(self):
+    frame = self.ui.seek_slider.value()
+    self.ui.frame_spinbox.blockSignals(True)
+    self.ui.frame_spinbox.setValue(frame)
+    self.ui.frame_spinbox.blockSignals(False)
+    self.ui.duration_label.setText("/ %d" % self.duration)
   
   def load_anim(self, duration: int, anim_format_name: str, anim_name: str):
     self.duration = duration

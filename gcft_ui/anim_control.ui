@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>44</height>
+    <height>51</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -41,6 +41,16 @@
     </widget>
    </item>
    <item>
+    <widget class="QSpinBox" name="frame_spinbox"/>
+   </item>
+   <item>
+    <widget class="QLabel" name="duration_label">
+     <property name="text">
+      <string>/ 0</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QPushButton" name="detach_button">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -54,11 +64,15 @@
        <height>16777215</height>
       </size>
      </property>
+     <property name="toolTip">
+      <string>Unload animation</string>
+     </property>
      <property name="text">
       <string/>
      </property>
      <property name="icon">
-      <iconset theme="accessories-calculator"/>
+      <iconset theme="accessories-calculator">
+       <normaloff>.</normaloff>.</iconset>
      </property>
     </widget>
    </item>
