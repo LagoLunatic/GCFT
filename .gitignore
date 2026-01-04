@@ -8,3 +8,5 @@ settings.txt
 profileresults*.txt
 profileresults*.prof
 .coverage
+GCFT.sh
+todo.txt

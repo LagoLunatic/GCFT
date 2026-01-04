@@ -19,4 +19,6 @@
   "files.associations": {
     "*.spec": "python",
   },
+  "editor.tabSize": 2,
+  "editor.detectIndentation": false,
 }
