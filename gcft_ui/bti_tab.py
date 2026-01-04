@@ -92,6 +92,20 @@ class BTITab(QWidget):
       value_str = ""
       line_edit_widget.setText(value_str)
       line_edit_widget.editingFinished.connect(self.bti_header_field_changed)
+      
+      # Fix the widths of each line edit field
+      min_value = 0
+      max_value = (2**(byte_size*8)) - 1
+      # TODO: don't hardcode this stringify_number logic here
+      min_hex_chars = 2*byte_size
+      format_string = "0x%%0%dX" % min_hex_chars
+      min_value_str = format_string % min_value
+      max_value_str = format_string % max_value
+      fm = QFontMetrics(QFont())
+      min_val_width = fm.horizontalAdvance(min_value_str)
+      max_val_width = fm.horizontalAdvance(max_value_str)
+      max_width = max(min_val_width, max_val_width)
+      line_edit_widget.setMinimumWidth(max_width+15)
   
   
   def import_bti(self):
@@ -403,7 +417,7 @@ class BTITab(QWidget):
         max_value = self.bti.get_max_valid_mipmap_count()
       else:
         min_value = 0
-        max_value = max_value = (2**(byte_size*8)) - 1
+        max_value = (2**(byte_size*8)) - 1
       
       if new_value < min_value:
         QMessageBox.warning(self, "Invalid value", f"Value is too small (minimum value: 0x{min_value:X})")
