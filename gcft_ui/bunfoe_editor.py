@@ -1,4 +1,5 @@
 import typing
+from types import GenericAlias
 from enum import Enum
 import colorsys
 from qtpy.QtGui import *
@@ -44,6 +45,7 @@ class BunfoeEditor(QWidget):
   def set_layout_disabled_recursive(self, layout: QLayout, disabled=True):
     for i in range(layout.count()):
       item = layout.itemAt(i)
+      assert item is not None
       widget = item.widget()
       if widget:
         widget.setDisabled(disabled)
@@ -92,11 +94,13 @@ class BunfoeEditor(QWidget):
   
   def set_field_values_for_bunfoe_instance(self, instance, bunfoe_widget: BunfoeWidget, disabled=None):
     layout = bunfoe_widget.layout()
+    assert layout is not None
     self.set_field_values_for_bunfoe_instance_recursive(instance, layout, disabled=disabled)
   
   def set_field_values_for_bunfoe_instance_recursive(self, instance, layout: QLayout, disabled=None):
     for i in range(layout.count()):
       item = layout.itemAt(i)
+      assert item is not None
       widget = item.widget()
       if widget:
         field_type = widget.property('field_type')
@@ -294,7 +298,8 @@ class BunfoeEditor(QWidget):
     return box_layout
   
   def index_combobox_value_changed(self, new_index: int):
-    combobox: QComboBox = self.sender()
+    combobox = self.sender()
+    assert isinstance(combobox, QComboBox)
     indexed_widget: QWidget = combobox.property('indexed_widget')
     field_type = indexed_widget.property('field_type')
     access_path = indexed_widget.property('access_path')
@@ -307,12 +312,13 @@ class BunfoeEditor(QWidget):
       # No need to show these.
       return None
     
-    if isinstance(field.type, typing.GenericAlias) and field.type.__origin__ == list:
+    if isinstance(field.type, GenericAlias) and field.type.__origin__ == list:
       return self.add_all_sequence_elements_to_new_layout(field)
     else:
+      assert field.type is not None
       return self.make_widget_for_type(field.type, [('attr', field.name)])
   
-  def make_widget_for_type(self, field_type: typing.Type, access_path: list[tuple]):
+  def make_widget_for_type(self, field_type: typing.Type, access_path: list[tuple]) -> QWidget:
     if issubclass(field_type, int) and field_type in fs.PRIMITIVE_TYPE_TO_BYTE_SIZE:
       widget = self.make_spinbox_for_int(field_type)
     elif issubclass(field_type, float):
@@ -321,7 +327,7 @@ class BunfoeEditor(QWidget):
       widget = self.make_checkbox_for_bool(field_type)
     elif issubclass(field_type, fs.u16Rot):
       widget = self.make_spinbox_for_rotation(field_type)
-    elif isinstance(field_type, typing.GenericAlias) and field_type.__origin__ in [fs.FixedStr, fs.MagicStr]:
+    elif isinstance(field_type, GenericAlias) and field_type.__origin__ in [fs.FixedStr, fs.MagicStr]:
       widget = self.make_line_edit_for_str(field_type)
     elif issubclass(field_type, Enum):
       widget = self.make_combobox_for_enum(field_type)
@@ -334,9 +340,11 @@ class BunfoeEditor(QWidget):
     
     widget.setProperty('field_type', field_type)
     widget.setProperty('access_path', access_path)
-    if isinstance(widget, QWidget):
-      # Prevent widgets from expanding to take up the full width of the scroll area.
-      widget.setSizePolicy(QSizePolicy.Policy.Maximum, widget.sizePolicy().verticalPolicy())
+    
+    assert isinstance(widget, QWidget)
+    # Prevent widgets from expanding to take up the full width of the scroll area.
+    widget.setSizePolicy(QSizePolicy.Policy.Maximum, widget.sizePolicy().verticalPolicy())
+    
     return widget
   
   def set_widget_value(self, widget: QWidget, value, field_type: typing.Type, instance, disabled=None):
@@ -374,6 +382,7 @@ class BunfoeEditor(QWidget):
       assert issubclass(field_type, RGBA)
       self.set_background_for_color_button(widget, value)
     elif issubclass(field_type, BUNFOE):
+      assert isinstance(widget, BunfoeWidget)
       self.set_field_values_for_bunfoe_instance(value, widget, disabled=disabled)
     else:
       raise NotImplementedError(f"Field type not implemented: {field_type}")
@@ -433,13 +442,14 @@ class BunfoeEditor(QWidget):
     return checkbox
   
   def checkbox_state_changed(self, state: int):
-    checkbox: QCheckBox = self.sender()
+    checkbox = self.sender()
+    assert isinstance(checkbox, QCheckBox)
     field_owner: object = checkbox.property('field_owner')
     access_path = checkbox.property('access_path')
     self.set_instance_value(field_owner, access_path, checkbox.isChecked())
     self.field_value_changed.emit()
   
-  def make_combobox_for_enum(self, field_type: typing.Type):
+  def make_combobox_for_enum(self, field_type: typing.Type[Enum]):
     combobox = QComboBox()
     for i, enum_value in enumerate(field_type):
       pretty_name = self.prettify_name(enum_value.name, title=False)
@@ -451,7 +461,8 @@ class BunfoeEditor(QWidget):
     return combobox
   
   def combobox_value_changed(self, new_index: int):
-    combobox: QComboBox = self.sender()
+    combobox = self.sender()
+    assert isinstance(combobox, QComboBox)
     enum_value = combobox.currentData()
     field_owner: object = combobox.property('field_owner')
     access_path = combobox.property('access_path')
@@ -495,7 +506,8 @@ class BunfoeEditor(QWidget):
     return self.make_spinbox_for_int(fs.u16)
   
   def spinbox_value_changed(self, new_value):
-    spinbox: QSpinBox = self.sender()
+    spinbox = self.sender()
+    assert isinstance(spinbox, QAbstractSpinBox)
     field_owner: object = spinbox.property('field_owner')
     access_path = spinbox.property('access_path')
     self.set_instance_value(field_owner, access_path, new_value)
@@ -509,7 +521,8 @@ class BunfoeEditor(QWidget):
     return line_edit
   
   def line_edit_value_changed(self):
-    line_edit: QLineEdit = self.sender()
+    line_edit = self.sender()
+    assert isinstance(line_edit, QLineEdit)
     field_owner: object = line_edit.property('field_owner')
     access_path = line_edit.property('access_path')
     new_value = line_edit.text()
@@ -551,7 +564,8 @@ class BunfoeEditor(QWidget):
     button.setText("#%02X%02X%02X%02X" % color.rgba)
   
   def open_color_chooser(self):
-    button: QPushButton = self.sender()
+    button = self.sender()
+    assert isinstance(button, QPushButton)
     field_owner: object = button.property('field_owner')
     field_type = button.property('field_type')
     access_path = button.property('access_path')
@@ -578,7 +592,7 @@ class BunfoeEditor(QWidget):
     initial_color = QColor(r, g, b, a)
     color_dialog_options = QColorDialog.ColorDialogOption(0)
     if has_alpha:
-      color_dialog_options |= QColorDialog.ShowAlphaChannel
+      color_dialog_options |= QColorDialog.ColorDialogOption.ShowAlphaChannel
     qcolor = QColorDialog.getColor(initial_color, self, "Select color", options=color_dialog_options)
     if not qcolor.isValid():
       return
@@ -609,4 +623,6 @@ class BunfoeDialog(QDialog):
   def set_bunfoe_instance(self, bunfoe_inst: BUNFOE, title: str):
     self.setWindowTitle(title)
     bunfoe_editor_widget = self.bunfoe_editor.setup_editor_widget_for_bunfoe_instance(bunfoe_inst)
-    self.layout().addWidget(bunfoe_editor_widget)
+    layout = self.layout()
+    assert layout is not None
+    layout.addWidget(bunfoe_editor_widget)

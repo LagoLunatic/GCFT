@@ -513,7 +513,7 @@ class RARCTab(QWidget):
     
     self.gcft_window.start_texture_dumper_thread(asset_dumper, dumper_generator, max_val)
   
-  def export_rarc_to_c_header_by_path(self, header_path):
+  def export_rarc_to_c_header_by_path(self, header_path: str):
     assert self.rarc is not None
     
     out_str = ""
