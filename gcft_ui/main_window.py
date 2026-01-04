@@ -237,11 +237,14 @@ class GCFTWindow(QMainWindow):
       self.settings[last_used_output_folder_key_name] = os.path.dirname(out_selected_path)
     self.save_settings()
   
-  def confirm_delete(self, file_name, is_folder=False):
+  def confirm_delete(self, file_name, is_folder=False, extra_message=None):
     message = "Are you sure you want to delete \"%s\"" % file_name
     if is_folder:
       message += " and all of its children"
     message += "?"
+    if extra_message is not None:
+      message += "\n\n"
+      message += extra_message
     
     response = QMessageBox.question(self, 
       "Confirm delete",

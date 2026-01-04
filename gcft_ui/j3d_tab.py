@@ -116,8 +116,6 @@ class J3DTab(BunfoeEditor):
     # This is just the max size, doesn't need to be exact.
     self.ui.toggle_visibility.setIconSize(QSize(32, 8))
     
-    # Make the splitter start out evenly split between all three widgets.
-    # TODO: the J3D preview column should be collapsed whenever the preview is not visible
     self.ui.splitter.setSizes([250, 500, 500])
     
     self.anim_controls = [
@@ -803,7 +801,7 @@ class J3DTab(BunfoeEditor):
       
       menu.addAction(self.ui.actionReplaceJ3DImage)
       self.ui.actionReplaceJ3DImage.setData(texture)
-      if self.bti_tab.bti is None:
+      if self.gcft_window.bti_tab.bti is None:
         self.ui.actionReplaceJ3DImage.setDisabled(True)
       else:
         self.ui.actionReplaceJ3DImage.setDisabled(False)
@@ -834,7 +832,7 @@ class J3DTab(BunfoeEditor):
     texture_index = self.j3d.tex1.textures.index(texture)
     bti_name = self.j3d.tex1.texture_names[texture_index]
     
-    self.bti_tab.import_bti_by_data(data, bti_name)
+    self.gcft_window.bti_tab.import_bti_by_data(data, bti_name)
     
     self.gcft_window.set_tab_by_name("BTI Images")
   
@@ -843,17 +841,17 @@ class J3DTab(BunfoeEditor):
     
     texture: BTI = self.ui.actionReplaceJ3DImage.data()
     
-    self.bti_tab.bti.save_changes()
+    self.gcft_window.bti_tab.bti.save_changes()
     
     # Need to make a fake BTI header for it to read from.
     data = BytesIO()
-    bti_header_bytes = fs.read_bytes(self.bti_tab.bti.data, self.bti_tab.bti.header_offset, 0x20)
+    bti_header_bytes = fs.read_bytes(self.gcft_window.bti_tab.bti.data, self.gcft_window.bti_tab.bti.header_offset, 0x20)
     fs.write_bytes(data, 0x00, bti_header_bytes)
     
     texture.read_header(data)
     
-    texture.image_data = fs.make_copy_data(self.bti_tab.bti.image_data)
-    texture.palette_data = fs.make_copy_data(self.bti_tab.bti.palette_data)
+    texture.image_data = fs.make_copy_data(self.gcft_window.bti_tab.bti.image_data)
+    texture.palette_data = fs.make_copy_data(self.gcft_window.bti_tab.bti.palette_data)
     
     texture.save_header_changes()
     
