@@ -111,18 +111,18 @@ class BunfoeEditor(QWidget):
             # Dynamic widget indexing.
             combobox = final_access_arg
             list_value = self.get_instance_value(instance, access_path[:-1])
-            combobox.blockSignals(True)
-            combobox.clear()
-            for i in range(len(list_value)):
-              index_str = self.gcft_window.stringify_number(i, min_hex_chars=1)
-              combobox.addItem(f"Selected: {index_str}")
-            combobox.blockSignals(False)
+            self.populate_combobox_from_list(combobox, list_value)
             if len(list_value) > 0:
               value = self.get_instance_value(instance, access_path)
               self.set_widget_value(widget, value, field_type, instance, disabled=disabled)
+              # Select the first item and update the new/delete buttons to be initially disabled or not.
+              combobox.setCurrentIndex(0)
             else:
               self.set_widget_value(widget, None, field_type, instance, disabled=disabled)
+              # Update the new/delete buttons to be initially disabled or not.
+              combobox.currentIndexChanged.emit(combobox.currentIndex())
           else:
+            # Static list layout.
             value = self.get_instance_value(instance, access_path)
             self.set_widget_value(widget, value, field_type, instance, disabled=disabled)
         
@@ -142,6 +142,15 @@ class BunfoeEditor(QWidget):
           value = self.get_instance_value(instance, access_path)
           assert value is not None
         self.set_field_values_for_bunfoe_instance_recursive(instance, sublayout, disabled=disabled)
+  
+  def populate_combobox_from_list(self, combobox: QComboBox, list_value: list):
+    combobox.blockSignals(True)
+    combobox.clear()
+    for i in range(len(list_value)):
+      index_str = self.gcft_window.stringify_number(i, min_hex_chars=1)
+      combobox.addItem(index_str)
+    combobox.setCurrentIndex(-1)
+    combobox.blockSignals(False)
   
   def make_bunfoe_editor_widget_for_vector_type(self, bunfoe_type: typing.Type) -> BunfoeWidget:
     box_layout = QHBoxLayout()
@@ -209,9 +218,18 @@ class BunfoeEditor(QWidget):
     # plus a combobox to allow switching which one is currently selected and actively being edited.
     
     if isinstance(field.length, int) and field.length > 0:
+      # Fixed-length list.
       initial_length = field.length
+      if 'indexed_by' in field.metadata:
+        # MAT3 list that can have None in it. Allow adding and removing elements.
+        allow_add_remove = True
+      else:
+        # Normal fixed-length list, cannot have None. Do not allow adding or removing elements.
+        allow_add_remove = False
     else:
+      # Dynamic-length list. Allow adding and removing elements from the list.
       initial_length = 0
+      allow_add_remove = True
     
     type_args = typing.get_args(field.type)
     assert len(type_args) == 1
@@ -228,15 +246,16 @@ class BunfoeEditor(QWidget):
     #   use_static_layout = False
     
     if use_static_layout:
-      return self.add_all_sequence_elements_to_static_layout(arg_type, initial_length, [('attr', field.name)])
+      return self.add_all_sequence_elements_to_static_layout(arg_type, initial_length, [('attr', field.name)], allow_add_remove=allow_add_remove)
     else:
-      return self.add_all_sequence_elements_to_dynamic_layout(arg_type, initial_length, [('attr', field.name)])
+      return self.add_all_sequence_elements_to_dynamic_layout(arg_type, initial_length, [('attr', field.name)], allow_add_remove=allow_add_remove)
   
-  def add_all_sequence_elements_to_static_layout(self, arg_type, field_length, access_path, show_indexes=True) -> QLayout:
+  def add_all_sequence_elements_to_static_layout(self, arg_type, field_length, access_path, show_indexes=True, allow_add_remove=False) -> QLayout:
     # Creates a widget for each element of a sequence, arranged horizontally.
     
     box_layout = QHBoxLayout()
     
+    prev_arg_widget = None
     for i in range(field_length):
       arg_widget = self.make_widget_for_type(arg_type, access_path + [('item', i)])
       
@@ -255,29 +274,160 @@ class BunfoeEditor(QWidget):
       
       if isinstance(arg_widget, QWidget):
         column_layout.addWidget(arg_widget)
-      elif isinstance(arg_widget, QLayout):
-        column_layout.addLayout(arg_widget)
       else:
         raise NotImplementedError
       
+      arg_widget.setProperty('fixed_list_length', field_length)
+      arg_widget.setProperty('prev_arg_widget', prev_arg_widget)
+      arg_widget.setProperty('next_arg_widget', None)
+      
+      if allow_add_remove:
+        new_button = QPushButton("+")
+        new_button.setMaximumWidth(20)
+        column_layout.addWidget(new_button)
+        new_button.hide()
+        
+        delete_button = QPushButton("-")
+        delete_button.setMaximumWidth(20)
+        column_layout.addWidget(delete_button)
+        delete_button.hide()
+        
+        new_button.setProperty('arg_widget', arg_widget)
+        new_button.clicked.connect(self.add_new_to_static_layout_sequence_button_clicked)
+        delete_button.setProperty('arg_widget', arg_widget)
+        delete_button.clicked.connect(self.delete_from_static_layout_sequence_button_clicked)
+        
+        arg_widget.setProperty('static_seq_new_button', new_button)
+        arg_widget.setProperty('static_seq_delete_button', delete_button)
+        if prev_arg_widget is not None:
+          prev_arg_widget.setProperty('next_arg_widget', arg_widget)
+    
       column_layout.addStretch(1)
+      
+      prev_arg_widget = arg_widget
     
     box_layout.addStretch(1)
     
     return box_layout
   
-  def add_all_sequence_elements_to_dynamic_layout(self, arg_type, field_length, access_path) -> QLayout:
+  def add_new_to_static_layout_sequence_button_clicked(self, checked: bool):
+    new_button = self.sender()
+    assert isinstance(new_button, QPushButton)
+    arg_widget: QWidget = new_button.property('arg_widget')
+    prev_arg_widget: QWidget = arg_widget.property('prev_arg_widget')
+    next_arg_widget: QWidget = arg_widget.property('next_arg_widget')
+    field_type = arg_widget.property('field_type')
+    access_path = arg_widget.property('access_path')
+    instance = arg_widget.property('field_owner')
+    fixed_list_length = arg_widget.property('fixed_list_length')
+    
+    curr_value = self.get_instance_value(instance, access_path)
+    list_access_path = access_path[:-1]
+    final_access_type, final_access_arg = access_path[-1]
+    assert final_access_type == 'item'
+    clicked_index: int = final_access_arg
+    list_value: list = self.get_instance_value(instance, list_access_path)
+    assert fixed_list_length > 0 # Fixed-length list.
+    assert curr_value is None
+    assert clicked_index < fixed_list_length
+    new_element = field_type()
+    list_value[clicked_index] = new_element
+    
+    # Update the GUI.
+    self.set_widget_value(arg_widget, new_element, field_type, instance)
+    prev_index = clicked_index - 1
+    if prev_index >= 0:
+      assert list_value[prev_index] is not None
+      assert prev_arg_widget is not None
+      
+      # Update the GUI for the previous widget (to hide the delete button for that one).
+      prev_access_path = prev_arg_widget.property('access_path')
+      prev_instance = prev_arg_widget.property('field_owner')
+      prev_value = self.get_instance_value(prev_instance, prev_access_path)
+      self.set_widget_value(prev_arg_widget, prev_value, field_type, instance)
+    next_index = clicked_index + 1
+    if next_index < fixed_list_length:
+      assert list_value[next_index] is None
+      assert next_arg_widget is not None
+      
+      # Update the GUI for the next widget (to show the new button for that one).
+      next_access_path = next_arg_widget.property('access_path')
+      next_instance = next_arg_widget.property('field_owner')
+      next_value = self.get_instance_value(next_instance, next_access_path)
+      self.set_widget_value(next_arg_widget, next_value, field_type, instance)
+  
+  def delete_from_static_layout_sequence_button_clicked(self, checked: bool):
+    delete_button = self.sender()
+    assert isinstance(delete_button, QPushButton)
+    arg_widget: QWidget = delete_button.property('arg_widget')
+    prev_arg_widget: QWidget = arg_widget.property('prev_arg_widget')
+    next_arg_widget: QWidget = arg_widget.property('next_arg_widget')
+    field_type = arg_widget.property('field_type')
+    access_path = arg_widget.property('access_path')
+    instance = arg_widget.property('field_owner')
+    fixed_list_length = arg_widget.property('fixed_list_length')
+    
+    curr_value = self.get_instance_value(instance, access_path)
+    list_access_path = access_path[:-1]
+    final_access_type, final_access_arg = access_path[-1]
+    assert final_access_type == 'item'
+    clicked_index: int = final_access_arg
+    list_value: list = self.get_instance_value(instance, list_access_path)
+    assert fixed_list_length > 0 # Fixed-length list.
+    assert curr_value is not None
+    assert clicked_index < fixed_list_length
+    list_value[clicked_index] = None
+    
+    # Update the GUI.
+    self.set_widget_value(arg_widget, None, field_type, instance)
+    prev_index = clicked_index - 1
+    if prev_index >= 0:
+      assert list_value[prev_index] is not None
+      assert prev_arg_widget is not None
+      
+      # Update the GUI for the previous widget (to show the delete button for that one).
+      prev_access_path = prev_arg_widget.property('access_path')
+      prev_instance = prev_arg_widget.property('field_owner')
+      prev_value = self.get_instance_value(prev_instance, prev_access_path)
+      self.set_widget_value(prev_arg_widget, prev_value, field_type, instance)
+    next_index = clicked_index + 1
+    if next_index < fixed_list_length:
+      assert list_value[next_index] is None
+      assert next_arg_widget is not None
+      
+      # Update the GUI for the next widget (to hide the new button for that one).
+      next_access_path = next_arg_widget.property('access_path')
+      next_instance = next_arg_widget.property('field_owner')
+      next_value = self.get_instance_value(next_instance, next_access_path)
+      self.set_widget_value(next_arg_widget, next_value, field_type, instance)
+  
+  def add_all_sequence_elements_to_dynamic_layout(self, arg_type, field_length, access_path, allow_add_remove=False) -> QLayout:
     # Creates one widget to be shared by all elements of a sequence, plus a combobox that allows
     # for switching which one is actively being edited.
     
     box_layout = QVBoxLayout()
     
+    top_row_layout = QHBoxLayout()
+    box_layout.addLayout(top_row_layout)
+    
     combobox = QComboBox()
     combobox.setSizePolicy(QSizePolicy.Policy.Maximum, combobox.sizePolicy().verticalPolicy())
     for i in range(field_length):
       index_str = self.gcft_window.stringify_number(i, min_hex_chars=1)
-      combobox.addItem(f"Selected: {index_str}")
-    box_layout.addWidget(combobox)
+      combobox.addItem(index_str)
+    top_row_layout.addWidget(combobox)
+    
+    if allow_add_remove:
+      new_button = QPushButton("+")
+      new_button.setMaximumWidth(20)
+      top_row_layout.addWidget(new_button)
+      
+      delete_button = QPushButton("-")
+      delete_button.setMaximumWidth(20)
+      top_row_layout.addWidget(delete_button)
+    
+    spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+    top_row_layout.addItem(spacer)
     
     # Use the combobox itself as the 'index' into this sequence.
     arg_widget = self.make_widget_for_type(arg_type, access_path + [('item', combobox)])
@@ -291,21 +441,110 @@ class BunfoeEditor(QWidget):
     box_layout.addWidget(arg_widget)
     
     combobox.setProperty('indexed_widget', arg_widget)
-    combobox.currentIndexChanged.connect(self.index_combobox_value_changed)
+    combobox.setProperty('fixed_list_length', field_length)
+    combobox.currentIndexChanged.connect(self.dynamic_layout_sequence_index_combobox_value_changed)
+    
+    if allow_add_remove:
+      new_button.setProperty('index_combobox', combobox)
+      combobox.setProperty('dynamic_seq_new_button', new_button)
+      new_button.clicked.connect(self.add_new_to_dynamic_layout_sequence_button_clicked)
+      
+      delete_button.setProperty('index_combobox', combobox)
+      combobox.setProperty('dynamic_seq_delete_button', delete_button)
+      delete_button.clicked.connect(self.delete_from_dynamic_layout_sequence_button_clicked)
     
     box_layout.addStretch(1)
     
     return box_layout
   
-  def index_combobox_value_changed(self, new_index: int):
+  def dynamic_layout_sequence_index_combobox_value_changed(self, new_index: int):
     combobox = self.sender()
     assert isinstance(combobox, QComboBox)
     indexed_widget: QWidget = combobox.property('indexed_widget')
     field_type = indexed_widget.property('field_type')
     access_path = indexed_widget.property('access_path')
     instance = indexed_widget.property('field_owner')
+    fixed_list_length = combobox.property('fixed_list_length')
     value = self.get_instance_value(instance, access_path)
     self.set_widget_value(indexed_widget, value, field_type, instance)
+    
+    new_button = combobox.property('dynamic_seq_new_button')
+    delete_button = combobox.property('dynamic_seq_delete_button')
+    if new_button is not None:
+      assert isinstance(new_button, QPushButton)
+      assert isinstance(delete_button, QPushButton)
+      if fixed_list_length > 0:
+        # For fixed-length lists:
+        # Grey out the add button if the current slot is already filled.
+        # Grey out the remove button if the current slot is already empty.
+        new_button.setDisabled(value is not None)
+        delete_button.setDisabled(value is None)
+      else:
+        # For dynamic-length lists:
+        # Grey out the remove button if the list is empty.
+        # Never grey out the add button. (Limit dynamic-length lists to a maximum size is not currently supported.)
+        delete_button.setDisabled(value is None)
+  
+  def add_new_to_dynamic_layout_sequence_button_clicked(self, checked: bool):
+    new_button = self.sender()
+    assert isinstance(new_button, QPushButton)
+    combobox: QComboBox = new_button.property('index_combobox')
+    indexed_widget: QWidget = combobox.property('indexed_widget')
+    field_type = indexed_widget.property('field_type')
+    access_path = indexed_widget.property('access_path')
+    instance = indexed_widget.property('field_owner')
+    fixed_list_length = combobox.property('fixed_list_length')
+    
+    curr_value = self.get_instance_value(instance, access_path)
+    list_access_path = access_path[:-1]
+    list_value: list = self.get_instance_value(instance, list_access_path)
+    curr_index = combobox.currentIndex()
+    if fixed_list_length > 0:
+      # Fixed-length list. Cannot actually add/delete elements, instead 'empty' slots are filled with None.
+      assert curr_value is None
+      new_element = field_type()
+      list_value[curr_index] = new_element
+      combobox.currentIndexChanged.emit(curr_index) # Update the widget
+    else:
+      # Dynamic-length list.
+      new_element = field_type()
+      new_element_index = combobox.currentIndex() + 1 # Insert the new element after the currently selected one
+      list_value.insert(new_element_index, new_element)
+      self.populate_combobox_from_list(combobox, list_value)
+      combobox.setCurrentIndex(new_element_index)
+      # If new_element_index was -1 we would need to emit the signal, but that should be impossible here so we just assert instead.
+      # combobox.currentIndexChanged.emit(new_element_index)
+      assert new_element_index >= 0
+  
+  def delete_from_dynamic_layout_sequence_button_clicked(self, checked: bool):
+    delete_button = self.sender()
+    assert isinstance(delete_button, QPushButton)
+    combobox: QComboBox = delete_button.property('index_combobox')
+    indexed_widget: QWidget = combobox.property('indexed_widget')
+    field_type = indexed_widget.property('field_type')
+    access_path = indexed_widget.property('access_path')
+    instance = indexed_widget.property('field_owner')
+    fixed_list_length = combobox.property('fixed_list_length')
+    
+    curr_value = self.get_instance_value(instance, access_path)
+    list_access_path = access_path[:-1]
+    list_value: list = self.get_instance_value(instance, list_access_path)
+    curr_index = combobox.currentIndex()
+    if fixed_list_length > 0:
+      # Fixed-length list. Cannot actually add/delete elements, instead 'empty' slots are filled with None.
+      assert curr_value is not None
+      list_value[curr_index] = None
+      combobox.currentIndexChanged.emit(curr_index) # Update the widget
+    else:
+      # Dynamic-length list.
+      del list_value[curr_index]
+      self.populate_combobox_from_list(combobox, list_value)
+      if curr_index >= len(list_value):
+        curr_index = len(list_value) - 1
+      combobox.setCurrentIndex(curr_index)
+      if curr_index == -1:
+        # Empty list, force the combobox to emit its signal since called setCurrentIndex(-1) won't do it.
+        combobox.currentIndexChanged.emit(curr_index)
   
   def make_widget_for_field(self, field: Field):
     if field.name.startswith('_padding') or field.assert_default or field.bitfield:
@@ -350,10 +589,45 @@ class BunfoeEditor(QWidget):
   def set_widget_value(self, widget: QWidget, value, field_type: typing.Type, instance, disabled=None):
     widget.setProperty('field_owner', instance)
     
+    new_button: QPushButton = widget.property('static_seq_new_button')
+    delete_button: QPushButton = widget.property('static_seq_delete_button')
+    is_static_seq_item = False
+    is_first_empty_static_seq_item = False
+    is_last_nonempty_static_seq_item = False
+    if new_button:
+      is_static_seq_item = True
+      access_path = widget.property('access_path')
+      list_value: list = self.get_instance_value(instance, access_path[:-1])
+      final_access_type, final_access_arg = access_path[-1]
+      assert final_access_type == 'item'
+      index_of_first_empty_item = list_value.index(None) if None in list_value else len(list_value)
+      if final_access_arg == index_of_first_empty_item:
+        is_first_empty_static_seq_item = True
+      elif final_access_arg == index_of_first_empty_item - 1:
+        is_last_nonempty_static_seq_item = True
+    
     if value is None:
-      # TODO: for blank entries in a list, put a placeholder button in place of the widget
+      # For blank entries in a list, put the add button as a placeholder where the widget would go.
       widget.hide()
+      if is_static_seq_item:
+        # Make this slot in a static sequence be a blank element.
+        if is_first_empty_static_seq_item:
+          # Only display the new button for the first None in the list.
+          # We don't want to allow the user to create gaps by adding values later on, after the first None.
+          # Note: Not sure if this restriction is really necessary or not, just adding it to be safe.
+          new_button.show()
+        else:
+          new_button.hide()
+        delete_button.hide()
       return
+    
+    if is_static_seq_item:
+      if is_last_nonempty_static_seq_item:
+        delete_button.show()
+      else:
+        delete_button.hide()
+      new_button.hide()
+    
     widget.show()
     
     widget.blockSignals(True)
@@ -428,6 +702,8 @@ class BunfoeEditor(QWidget):
     if isinstance(index, QComboBox):
       # Dynamic widget indexing.
       index = index.currentIndex()
+    if index == -1:
+      return None
     return instance[index]
   
   def set_instance_item(self, instance, index, value):
