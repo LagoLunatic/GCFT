@@ -39,8 +39,6 @@ if TYPE_CHECKING:
   from gcft_ui.main_window import GCFTWindow
 
 class J3DViewer(QOpenGLWidget):
-  gcft_window: 'GCFTWindow'
-  
   error_showing_preview = Signal(str)
   
   joint_anim_frame_changed = Signal(float)
@@ -963,3 +961,11 @@ class J3DViewer(QOpenGLWidget):
       return
     
     ultra.cleanup()
+  
+  @property
+  def gcft_window(self) -> 'GCFTWindow':
+    gcft_window = self.window()
+    assert type(gcft_window).__name__ == "GCFTWindow"
+    if TYPE_CHECKING:
+      assert isinstance(gcft_window, 'GCFTWindow')
+    return gcft_window
