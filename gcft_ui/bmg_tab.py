@@ -1,4 +1,5 @@
 import os
+import re
 from io import BytesIO
 from qtpy.QtGui import *
 from qtpy.QtCore import *
@@ -208,7 +209,10 @@ class BMGTab(QWidget):
       return
     
     max_line_length = TEXT_BOX_TYPE_TO_MAX_LINE_LENGTH[message.text_box_type]
-    message_image = self.preview_bfn.render_string(message.string, max_line_length)
+    string_to_render = message.string
+    # TODO: need a better system to decide how to render control codes depending on the code
+    string_to_render = re.sub(r"\\{[^}]+}", "", string_to_render)
+    message_image = self.preview_bfn.render_string(string_to_render, max_line_length)
     image_bytes = message_image.tobytes('raw', 'BGRA')
     qimage = QImage(image_bytes, message_image.width, message_image.height, QImage.Format.Format_ARGB32)
     pixmap = QPixmap.fromImage(qimage)
