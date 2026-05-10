@@ -33,8 +33,9 @@ class BMGTab(QWidget):
     self.preview_bfn: BFN | None = None
     
     self.column_names = [
-      "Message No",
-      "Message Index",
+      "Msg No",
+      "Msg Index",
+      "Next Msg",
       "Text",
     ]
     
@@ -111,20 +112,25 @@ class BMGTab(QWidget):
         msg_no_item = QStandardItem(msg_no_str)
         msg_index_str = self.gcft_window.stringify_number(msg_index, min_hex_chars=4)
         msg_index_item = QStandardItem(msg_index_str)
+        if message.next_message_id == 0:
+          next_msg_str = ""
+        else:
+          next_msg_str = self.gcft_window.stringify_number(message.next_message_id, min_hex_chars=4)
+        next_msg_item = QStandardItem(next_msg_str)
         truncated_string = self.truncate_message_string(message.string)
         msg_text_item = QStandardItem(truncated_string)
-        self.model.appendRow([msg_no_item, msg_index_item, msg_text_item])
+        self.model.appendRow([msg_no_item, msg_index_item, next_msg_item, msg_text_item])
         self.set_object_for_model_index(msg_no_item.index(), message)
     
     self.filter_messages()
   
   def set_object_for_model_index(self, index: QModelIndex, obj: Message):
-    chunk_type_index = index.siblingAtColumn(self.column_names.index("Message No"))
+    chunk_type_index = index.siblingAtColumn(self.column_names.index("Msg No"))
     item = self.model.itemFromIndex(chunk_type_index)
     item.setData(obj)
   
   def get_object_for_model_index(self, index: QModelIndex) -> Message:
-    chunk_type_index = index.siblingAtColumn(self.column_names.index("Message No"))
+    chunk_type_index = index.siblingAtColumn(self.column_names.index("Msg No"))
     item = self.model.itemFromIndex(chunk_type_index)
     obj = item.data()
     assert obj is not None
