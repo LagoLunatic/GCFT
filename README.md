@@ -8,6 +8,7 @@ GameCube File Tools (GCFT) is a GUI multitool for editing the following common f
 * Most J3D formats (BMD/BDL models and their animations)
 * JPC (JPA particle effect archives) (versions 1-00 and 2-10)
 * Yaz0 and Yay0 (compression)
+* BMG Messages (currently only for The Legend of Zelda: The Wind Waker)
 
 Features:
 * Open and view GCMs, RARCs, BTIs, and JPCs
@@ -24,6 +25,7 @@ Features:
 * Edit various attributes in BMD/BDL models (such as MAT3 material properties)
 * Visual previews of BMD/BDL 3D models that update in real time as the model's materials are edited
 * Import a folder of particle files onto an existing JPC, adding/overwriting all the particles from the folder to the JPC
+* Editing most properties of JPC particles
 * Viewing DOL executable sections, and converting between offsets within the DOL file and RAM addresses in the game's memory
 * Compress and decompress Yaz0 and Yay0 files
 
