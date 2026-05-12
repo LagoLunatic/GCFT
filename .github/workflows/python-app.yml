@@ -98,8 +98,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y qt6-base-dev
-          sudo apt-get install -y qt6-wayland
+          sudo apt-get install -y qt6-wayland-dev
           sudo apt-get install -y libxcb-cursor0
+          sudo apt-get install -y libxcb-cursor-dev
+          sudo apt-get install -y libgl-dev
+          sudo apt-get install -y libxkbcommon-dev
       - name: Set variables
         id: vars
         run: |
