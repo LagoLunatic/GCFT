@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+import os
+for var in ["DISPLAY", "WAYLAND_DISPLAY", "QT_QPA_PLATFORM", "PYOPENGL_PLATFORM"]:
+  print(f"{var}={os.environ.get(var)}")
+
 import sys
 import traceback
 
