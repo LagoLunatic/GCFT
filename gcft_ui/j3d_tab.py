@@ -45,7 +45,10 @@ class J3DTab(BunfoeEditor):
   def __init__(self):
     super().__init__()
     self.ui = Ui_J3DTab()
+    print(1)
     self.ui.setupUi(self)
+    self.ui.j3d_viewer.hide()
+    print(2)
     
     self.j3d: J3D | None = None
     self.j3d_name = None
@@ -129,6 +132,7 @@ class J3DTab(BunfoeEditor):
       anim_control.anim_type_paused_changed.connect(self.ui.j3d_viewer.set_anim_type_paused)
       anim_control.anim_type_slider_frame_changed.connect(self.ui.j3d_viewer.set_anim_frame_by_type)
       anim_control.anim_type_detached.connect(self.ui.j3d_viewer.detach_anim_type)
+    print(3)
   
   def import_j3d(self):
     filters = [
