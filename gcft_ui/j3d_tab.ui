@@ -211,7 +211,7 @@
             <x>0</x>
             <y>0</y>
             <width>298</width>
-            <height>648</height>
+            <height>68</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -238,6 +238,25 @@
          </widget>
         </widget>
        </item>
+       <item>
+        <widget class="J3DViewer" name="j3d_viewer">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>5</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>300</width>
+           <height>300</height>
+          </size>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::ClickFocus</enum>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </widget>
@@ -255,6 +274,11 @@
   </action>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>J3DViewer</class>
+   <extends>QOpenGLWidget</extends>
+   <header>gcft_ui.j3d_viewer</header>
+  </customwidget>
   <customwidget>
    <class>AnimControl</class>
    <extends>QWidget</extends>

@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'j3d_tab.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.11.0
+## Created by: Qt User Interface Compiler version 6.8.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QLabel,
     QSplitter, QTreeView, QVBoxLayout, QWidget)
 
 from gcft_ui.anim_control import AnimControl
+from gcft_ui.j3d_viewer import J3DViewer
 
 class Ui_J3DTab(object):
     def setupUi(self, J3DTab):
@@ -170,7 +171,7 @@ class Ui_J3DTab(object):
         self.j3dultra_error_area.setWidgetResizable(True)
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 298, 648))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 298, 68))
         self.verticalLayout_4 = QVBoxLayout(self.scrollAreaWidgetContents_2)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.verticalLayout_4.setContentsMargins(-1, 0, -1, 0)
@@ -184,6 +185,18 @@ class Ui_J3DTab(object):
         self.j3dultra_error_area.setWidget(self.scrollAreaWidgetContents_2)
 
         self.verticalLayout_5.addWidget(self.j3dultra_error_area)
+
+        self.j3d_viewer = J3DViewer(self.verticalLayoutWidget)
+        self.j3d_viewer.setObjectName(u"j3d_viewer")
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(5)
+        sizePolicy4.setHeightForWidth(self.j3d_viewer.sizePolicy().hasHeightForWidth())
+        self.j3d_viewer.setSizePolicy(sizePolicy4)
+        self.j3d_viewer.setMinimumSize(QSize(300, 300))
+        self.j3d_viewer.setFocusPolicy(Qt.ClickFocus)
+
+        self.verticalLayout_5.addWidget(self.j3d_viewer)
 
         self.splitter.addWidget(self.verticalLayoutWidget)
 
