@@ -96,14 +96,6 @@ class J3DTab(BunfoeEditor):
     self.ui.actionOpenJ3DImage.triggered.connect(self.open_image_in_j3d)
     self.ui.actionReplaceJ3DImage.triggered.connect(self.replace_image_in_j3d)
     
-    self.ui.j3d_viewer.joint_anim_frame_changed.connect(self.ui.joint_anim_control.update_slider_from_anim_frame)
-    self.ui.j3d_viewer.reg_anim_frame_changed.connect(self.ui.reg_anim_control.update_slider_from_anim_frame)
-    self.ui.j3d_viewer.texidx_anim_frame_changed.connect(self.ui.texidx_anim_control.update_slider_from_anim_frame)
-    self.ui.j3d_viewer.texmtx_anim_frame_changed.connect(self.ui.texmtx_anim_control.update_slider_from_anim_frame)
-    self.ui.j3d_viewer.vis_anim_frame_changed.connect(self.ui.vis_anim_control.update_slider_from_anim_frame)
-    
-    self.ui.j3d_viewer.error_showing_preview.connect(self.display_j3d_preview_error)
-    self.ui.j3d_viewer.hide()
     self.ui.j3dultra_error_area.hide()
     
     self.field_value_changed.connect(self.update_j3d_preview)
@@ -125,10 +117,6 @@ class J3DTab(BunfoeEditor):
       self.ui.texmtx_anim_control,
       self.ui.vis_anim_control,
     ]
-    for anim_control in self.anim_controls:
-      anim_control.anim_type_paused_changed.connect(self.ui.j3d_viewer.set_anim_type_paused)
-      anim_control.anim_type_slider_frame_changed.connect(self.ui.j3d_viewer.set_anim_frame_by_type)
-      anim_control.anim_type_detached.connect(self.ui.j3d_viewer.detach_anim_type)
   
   def import_j3d(self):
     filters = [
@@ -211,33 +199,21 @@ class J3DTab(BunfoeEditor):
     if j3d.file_type[:3] == "bck":
       bck = j3d
       duration = bck.ank1.duration
-      if self.ui.j3d_viewer.load_bck(bck):
-        self.ui.joint_anim_control.load_anim(duration, "BCK (Keyframed Joint Animation)", anim_name)
     elif j3d.file_type[:3] == "brk":
       brk = j3d
       duration = brk.trk1.duration
-      if self.ui.j3d_viewer.load_brk(brk):
-        self.ui.reg_anim_control.load_anim(duration, "BRK (Register Color Animation)", anim_name)
     elif j3d.file_type[:3] == "btk":
       btk = j3d
       duration = btk.ttk1.duration
-      if self.ui.j3d_viewer.load_btk(btk):
-        self.ui.texmtx_anim_control.load_anim(duration, "BTK (Texture Matrix Animation)", anim_name)
     elif j3d.file_type[:3] == "btp":
       btp = j3d
       duration = btp.tpt1.duration
-      if self.ui.j3d_viewer.load_btp(btp):
-        self.ui.texidx_anim_control.load_anim(duration, "BTP (Texture Swap Animation)", anim_name)
     elif j3d.file_type[:3] == "bca":
       bca = j3d
       duration = bca.anf1.duration
-      if self.ui.j3d_viewer.load_bca(bca):
-        self.ui.joint_anim_control.load_anim(duration, "BCA (Full Joint Animation)", anim_name)
     elif j3d.file_type[:3] == "bva":
       bva = j3d
       duration = bva.vaf1.duration
-      if self.ui.j3d_viewer.load_bva(bva):
-        self.ui.vis_anim_control.load_anim(duration, "BVA (Visibility Animation)", anim_name)
     else:
       QMessageBox.warning(self, "Unsupported animation type", f"Previewing animations of type {j3d.file_type!r} is not currently supported.")
   
@@ -869,7 +845,6 @@ class J3DTab(BunfoeEditor):
     assert self.j3d is not None
     
     self.ui.j3dultra_error_area.hide()
-    self.ui.j3d_viewer.load_model(self.j3d, reload_same_model, self.get_hidden_material_indexes())
   
   def update_j3d_preview(self):
     if self.j3d is None:
@@ -885,7 +860,6 @@ class J3DTab(BunfoeEditor):
   def display_j3d_preview_error(self, error: str):
     self.ui.j3dultra_error_area.show()
     self.ui.j3dultra_error_label.setText(error)
-    self.ui.j3d_viewer.hide()
   
   def toggle_isolated_visibility(self, checked=None, update_preview=True):
     self.isolated_visibility = not self.isolated_visibility
