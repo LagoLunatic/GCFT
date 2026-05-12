@@ -4,6 +4,7 @@ import re
 from PIL import Image
 
 from gclib.gcm import GCM
+from gclib.jpc import JPC
 from gclib.rarc import RARC
 from gclib.j3d import J3D
 from gclib.j3d_chunks.tex1 import TEX1
@@ -59,6 +60,10 @@ class AssetDumper:
           j3d_file = J3D(gcm.get_changed_file_data(file_path))
           if j3d_file.tex1 is not None:
             self.dump_all_textures_in_tex1(j3d_file.tex1, out_path)
+        elif file_ext == ".jpc":
+          out_path = os.path.join(out_dir, rel_dir, base_name + file_ext)
+          jpc_file = JPC(gcm.get_changed_file_data(file_path))
+          self.dump_all_textures_in_jpc(jpc_file, out_path)
       except Exception as e:
         display_path = file_path
         self.failed_file_paths.append(display_path)
@@ -133,6 +138,15 @@ class AssetDumper:
         out_path = os.path.join(out_dir, dupe_tex_name)
         
         self.dump_texture(texture, out_path)
+  
+  def dump_all_textures_in_jpc(self, jpc_file: JPC, out_dir):
+    if not os.path.isdir(out_dir):
+      os.makedirs(out_dir)
+    
+    for texture_name, tex1 in jpc_file.textures_by_filename.items():
+      out_path = os.path.join(out_dir, texture_name)
+      assert not os.path.isfile(out_path)
+      self.dump_texture(tex1.bti, out_path)
   
   def dump_texture(self, bti: BTI, out_path):
     out_dir = os.path.dirname(out_path)
