@@ -46,7 +46,7 @@ class AssetDumper:
       base_name, file_ext = os.path.splitext(os.path.basename(file_path))
       
       try:
-        if file_ext == ".arc":
+        if gcm.check_file_is_rarc(file_path):
           out_path = os.path.join(out_dir, rel_dir, base_name)
           rarc = RARC(gcm.get_changed_file_data(file_path))
           for _ in self.dump_all_textures_in_rarc(rarc, out_path, display_path_prefix=file_path):
@@ -97,7 +97,7 @@ class AssetDumper:
           j3d_file = rarc.get_file(file_entry.name, J3D)
           if j3d_file.tex1 is not None:
             self.dump_all_textures_in_tex1(j3d_file.tex1, out_path)
-        elif file_ext == ".arc":
+        elif file_entry.check_is_nested_rarc():
           out_path = os.path.join(out_dir, rel_dir, base_name + file_ext)
           inner_rarc = rarc.get_file(file_entry.name, RARC)
           for _ in self.dump_all_textures_in_rarc(inner_rarc, out_path, display_path_prefix=full_display_path):
