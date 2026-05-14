@@ -38,7 +38,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
   from gcft_ui.main_window import GCFTWindow
 
-class J3DViewer(QWidget):
+class J3DViewer(QOpenGLWidget):
   error_showing_preview = Signal(str)
   
   joint_anim_frame_changed = Signal(float)
@@ -79,7 +79,6 @@ class J3DViewer(QWidget):
     # Start off assuming J3DUltra isn't supported.
     # Once OpenGL has been initialized we can check if it's actually supported or not.
     self.enable_j3dultra = False
-    self.opengl_widget: J3DOpenGLWidget | None = None
     
     self.j3d = None
     self.load_model_is_queued = False
@@ -258,13 +257,11 @@ class J3DViewer(QWidget):
     # Display the preview widget.
     self.show()
     
-    if self.opengl_widget is None or self.opengl_widget.context() is None:
+    if self.context() is None:
       # OpenGL has not yet been initialized.
       # It will be initialized whenever the widget actually gets shown on the user's screen, so just
       # queue the model to load whenever initializeGL gets called.
       self.load_model_is_queued = True
-      self.opengl_widget = J3DOpenGLWidget(self)
-      self.layout().addWidget(self.opengl_widget)
     else:
       # OpenGL is already initialized, so we can immediately load the model.
       self.load_queued_model()
@@ -275,7 +272,7 @@ class J3DViewer(QWidget):
     if self.j3d is None:
       return
     
-    if self.opengl_widget is None or self.opengl_widget.context() is None:
+    if self.context() is None:
       error_msg = "OpenGL context was not properly initialized. Cannot show J3D model preview."
       self.error_showing_preview.emit(error_msg)
       self.hide()
@@ -832,7 +829,7 @@ class J3DViewer(QWidget):
       self.camera.view_matrix.ravel().tolist()
     )
     
-    self.opengl_widget.update()
+    super().update()
   
   def process_frame(self):
     current_time = time.monotonic()
@@ -840,7 +837,7 @@ class J3DViewer(QWidget):
     self.total_time_elapsed += delta_time
     self.last_render_time = current_time
     
-    if self.opengl_widget is None or self.opengl_widget.context() is None:
+    if self.context() is None:
       # Not yet initialized.
       return
     
@@ -972,19 +969,3 @@ class J3DViewer(QWidget):
     if TYPE_CHECKING:
       assert isinstance(gcft_window, 'GCFTWindow')
     return gcft_window
-
-class J3DOpenGLWidget(QOpenGLWidget):
-  def __init__(self, parent: J3DViewer):
-    super().__init__(parent)
-    
-    self.j3d_viewer: J3DViewer = parent
-  
-  def initializeGL(self):
-    self.j3d_viewer.initializeGL()
-  
-  def resizeGL(self, width: int, height: int):
-    self.j3d_viewer.resizeGL(width, height)
-  
-  def paintGL(self):
-    self.j3d_viewer.paintGL()
-  

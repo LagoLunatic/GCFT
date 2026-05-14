@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'j3d_tab.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.11.0
+## Created by: Qt User Interface Compiler version 6.8.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -195,8 +195,6 @@ class Ui_J3DTab(object):
         self.j3d_viewer.setSizePolicy(sizePolicy4)
         self.j3d_viewer.setMinimumSize(QSize(300, 300))
         self.j3d_viewer.setFocusPolicy(Qt.ClickFocus)
-        self.verticalLayout_7 = QVBoxLayout(self.j3d_viewer)
-        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
 
         self.verticalLayout_5.addWidget(self.j3d_viewer)
 
