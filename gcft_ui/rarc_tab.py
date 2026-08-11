@@ -280,6 +280,10 @@ class RARCTab(QWidget):
     self.set_node_for_model_index(root_name_item.index(), root_node)
     
     for file_entry in self.rarc.file_entries:
+      if file_entry.parent_node is None:
+        # Special "." directories in TPHD are not considered to be part of the node they correspond to anymore and have no parent.
+        assert file_entry.name == "."
+        continue
       self.add_new_tree_row_for_file_or_dir_entry(file_entry)
     
     self.ui.sync_file_ids_and_indexes.setChecked(self.rarc.keep_file_ids_synced_with_indexes != 0)
@@ -393,6 +397,7 @@ class RARCTab(QWidget):
     return self.model.itemFromIndex(matched_indexes[0])
   
   def find_item_by_node(self, node: RARCNode):
+    assert node is not None
     matched_indexes = self.model.match(
       self.model.index(0, 0),
       self.NODE_ROLE,
@@ -400,7 +405,7 @@ class RARCTab(QWidget):
       1,
       Qt.MatchFlag.MatchRecursive
     )
-    assert len(matched_indexes) == 1
+    assert len(matched_indexes) == 1, f"Failed to find UI item for RARC node: {node.type}"
     return self.model.itemFromIndex(matched_indexes[0])
   
   def set_file_entry_for_model_index(self, index: QModelIndex, file_entry: RARCFileEntry):
