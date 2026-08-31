@@ -128,6 +128,8 @@ class GCFTWindow(QMainWindow):
       return (self.gcm_tab.import_gcm_by_path, "GCM ISOs")
     elif self.rarc_tab.check_file_path_is_rarc(file_path):
       return (self.rarc_tab.import_rarc_by_path, "RARC Archives")
+    elif os.path.isdir(file_path):
+      return (self.rarc_tab.import_all_rarcs_from_folder, "RARC Archives")
     elif file_ext in BTI_FILE_EXTS:
       return (self.bti_tab.import_bti_by_path, "BTI Images")
     elif file_ext in [".png"]:
