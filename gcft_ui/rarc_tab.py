@@ -169,6 +169,101 @@ class RARCTab(QWidget):
       file_type="RARC"
     )
   
+
+  def import_all_rarcs_from_folder(
+      self, 
+      folder_of_rarcs_path, 
+      recursive=True, 
+      base_path="", 
+      debug=True, rtn_counter=False, 
+      swallow_assertion_errors=True # Prevents invalid or non-RARC files from stopping the program
+      ):
+
+    NO_RECURSION_DIRECTORIES = ["GCFTUnpacked"] # Does not recurse in it's own created "unpacked" directory
+    item_counter = 0 # Number of files unpacked.
+    total_item_counter = 0 # Total number of files attempted.
+
+    #if base_path != "":
+    #  # This is a recursion
+    #  #if debug:
+    #  #  print("| "*recursion_guess+f"Base path is still {base_path}")    
+    if base_path == "":
+      base_path = folder_of_rarcs_path
+    
+    if not os.path.isdir(base_path+"\\GCFTUnpacked"):
+      os.mkdir(base_path+"\\GCFTUnpacked")
+
+    subfolder_path = folder_of_rarcs_path.replace(base_path,"")
+    recursion_guess = subfolder_path.count("\\") + 1
+    #print('subfolder path: '+str(subfolder_path))
+
+    if debug:
+      print("| "*recursion_guess+"Importing all rarcs from a folder.")
+      print("| "*recursion_guess+f"Path: {folder_of_rarcs_path}")
+    
+
+    for object in os.listdir(folder_of_rarcs_path):
+      object_path = folder_of_rarcs_path+"\\"+object
+      
+
+      if debug:
+        print("| "*recursion_guess+"  - Object "+subfolder_path+"\\"+object, end='')
+
+      # Path is a valid folder and can recurse
+      if os.path.isdir(object_path) and recursive and not (object in NO_RECURSION_DIRECTORIES):
+        if debug:
+          print(" Folder found. Making directory and recursing...")
+        
+        os.mkdir(base_path+"\\GCFTUnpacked"+subfolder_path+"\\"+object) # Make copy directory in the unpacked section
+        
+        add_item_counter, add_total_item_counter = self.import_all_rarcs_from_folder(
+          object_path, base_path=base_path, 
+          debug=debug, rtn_counter=True, swallow_assertion_errors=swallow_assertion_errors
+          )
+        item_counter += add_item_counter
+        total_item_counter += add_total_item_counter
+        
+      # Path is not a folder
+      elif (not os.path.isdir(object_path)):
+        total_item_counter += 1
+
+        if debug:
+          print("  Potential RARC found. Importing. ",end='')
+        # Extract and export
+        try:
+          self.import_rarc_by_path(object_path)
+
+          if debug:
+            print("Extracting. ")
+
+          export_path = base_path+"\\GCFTUnpacked"+subfolder_path+"\\"+object
+          #print("export path: "+str(export_path))
+          self.rarc.extract_all_files_to_disk(export_path)
+          #input(base_path+"\\GCFTUnpacked\\"+object)
+          
+          item_counter += 1
+        
+        except (AssertionError, UnicodeDecodeError) as e:
+          print(" !! Invalid RARC file, skipping. !! ")
+          if not swallow_assertion_errors:
+            raise e
+
+        #node = self.ui.actionExtractAllFilesFromRARCFolder.data()
+        #self.extract_all_files_from_rarc_folder_by_path(base_path+"\\GCFTUnpacked\\"+object)
+      
+      elif debug:
+        print()
+  
+    # If this is the "main" thread - not inside of a recursion
+    if base_path == folder_of_rarcs_path and debug:
+      print(f" -- Successfully de-RARC'd {item_counter} archives out of {total_item_counter} total files. --")
+    
+    if rtn_counter:
+      return item_counter, total_item_counter
+
+    
+
+
   def dump_all_rarc_textures(self):
     self.gcft_window.generic_do_gui_file_operation(
       op_callback=self.dump_all_rarc_textures_by_path,
