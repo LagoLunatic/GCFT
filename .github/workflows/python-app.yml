@@ -29,7 +29,7 @@ jobs:
           #   upload_path_suffix: '.zip'
           #   reqs_file: requirements_full.txt
           - name: Linux
-            os: ubuntu-latest
+            os: ubuntu-24.04
             artifact: linux
             upload_path_suffix: '/*'
             reqs_file: requirements_full.txt
@@ -99,7 +99,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y qtbase5-dev
           sudo apt-get install -y libxcb-cursor0
-          sudo apt-get install -y libc6
       - name: Set variables
         id: vars
         run: |
